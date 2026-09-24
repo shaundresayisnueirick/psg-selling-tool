@@ -287,10 +287,21 @@ async function main() {
 
     /* Tema gelap */
     await open(pg, 'PRODUK');
-    await pg.click('#btnThemeSwitch'); await pg.waitForTimeout(200);
+    /* Jalur yang terlihat pengguna: menu shell (HP) bila ada, atau tombol tema di header. */
+    const gantiTema = async () => {
+      const menu = await pg.$('.psg-tab[data-psg-nav="menu"]');
+      if (menu && await menu.isVisible()) {
+        await menu.click(); await pg.waitForTimeout(250);
+        await pg.click('#psgSheet [data-psg-nav="tema"]');
+      } else {
+        await pg.click('#btnThemeSwitch');
+      }
+      await pg.waitForTimeout(200);
+    };
+    await gantiTema();
     const th = await pg.evaluate(() => [document.documentElement.dataset.theme, document.body.dataset.theme, localStorage.getItem('insuranceHub.theme.v3')]);
     ok(th.every((t) => t === 'dark'), 'Tema gelap tidak aktif: ' + th);
-    await pg.click('#btnThemeSwitch'); await pg.waitForTimeout(150);
+    await gantiTema();
 
     /* overflow setelah terisi hasil */
     for (const k of ['LF', 'LF_RINGKAS', 'GSPA', 'GSPA_TIME', 'BSL_TIME', 'CRIS_ILUS', 'GHP_ILUS', 'COMBO', 'KPR', 'DP', 'RAYA', 'PROFILE']) {
