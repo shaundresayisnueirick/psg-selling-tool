@@ -6,12 +6,13 @@
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#A60101">
 <link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/ikon-192.png" type="image/png">
 <link rel="apple-touch-icon" href="icons/ikon-apple-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="robots" content="noindex, nofollow">
 <meta name="description" content="Alat kerja internal agen.">
-<title>PSG Selling Tools</title>
+<title>PSG Selling Tools — Insurance Hub</title>
 <link rel="stylesheet" href="src/styles.css">
 <script src="src/access-gate.js"></script>
 <script>/* Tema dipasang sebelum CSS dilukis supaya tidak ada kedipan terang saat
@@ -21,7 +22,52 @@ if(t!=='dark'&&t!=='original')t='original';
 document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
   <link rel="stylesheet" href="src/cetak-besar.css">
 </head>
-<body>
+<body class="psg-app">
+<!-- Shell navigasi (src/app-shell.js). Hanya memanggil window.bukaLayar()
+     atau tombol yang sudah ada; tidak mengubah mekanisme navigasi. -->
+<aside class="psg-nav psg-side tanpa-cetak" id="psgSide" aria-label="Navigasi utama">
+  <div class="psg-side-brand">
+    <img class="psg-side-logo-img" src="assets/logo-psg-terang.png" alt="PSG — Patriot Shining Generation">
+    <div class="psg-side-name"><b>PSG Selling Tools</b><small>Insurance Hub</small></div>
+  </div>
+  <div class="psg-side-group">
+    <div class="psg-side-label">Utama</div>
+    <button type="button" class="psg-link" data-psg-nav="beranda"><span class="psg-nav-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg></span><span>Beranda</span></button><button type="button" class="psg-link" data-psg-nav="produk"><span class="psg-nav-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.6"/><rect x="14" y="3" width="7" height="7" rx="1.6"/><rect x="3" y="14" width="7" height="7" rx="1.6"/><rect x="14" y="14" width="7" height="7" rx="1.6"/></svg></span><span>Produk</span></button>
+  </div>
+  <div class="psg-side-group">
+    <div class="psg-side-label">Nasabah</div>
+    <button type="button" class="psg-link" data-psg-nav="nasabah"><span class="psg-nav-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.4"/><path d="M2.8 20a6.2 6.2 0 0 1 12.4 0"/><path d="M16 4.7a3.4 3.4 0 0 1 0 6.6M21.2 20a6.2 6.2 0 0 0-3.7-5.7"/></svg></span><span>Profil Nasabah</span></button><button type="button" class="psg-link" data-psg-nav="analisis"><span class="psg-nav-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.2"/></svg></span><span>Analisis</span></button><button type="button" class="psg-link" data-psg-nav="bandingkan"><span class="psg-nav-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21h18"/><rect x="5" y="10" width="3.2" height="8" rx="1"/><rect x="10.4" y="5" width="3.2" height="13" rx="1"/><rect x="15.8" y="13" width="3.2" height="5" rx="1"/></svg></span><span>Bandingkan</span></button><button type="button" class="psg-link" data-psg-nav="planning"><span class="psg-nav-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 21V4"/><path d="M5 4h11.5l-2.2 4 2.2 4H5"/></svg></span><span>Planning</span></button><button type="button" class="psg-link" data-psg-nav="kalkulator"><span class="psg-nav-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2.5"/><path d="M8.5 7.5h7"/><path d="M8.5 12h.01M12 12h.01M15.5 12h.01M8.5 15.5h.01M12 15.5h.01M15.5 15.5h.01M8.5 18.6h.01M12 18.6h.01"/></svg></span><span>Kalkulator</span></button>
+  </div>
+  <div class="psg-side-group">
+    <div class="psg-side-label">Penjualan</div>
+    <button type="button" class="psg-link" data-psg-nav="salesidea"><span class="psg-nav-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M12 16v4M8 20h8"/><path d="m7 12 3-3 2 2 4-4"/></svg></span><span>Sales Idea</span></button><button type="button" class="psg-link" data-psg-nav="aktivitas"><span class="psg-nav-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V2.8h6V4"/><path d="m9 13 2 2 4-4"/></svg></span><span>Aktivitas</span></button><button type="button" class="psg-link" data-psg-nav="library"><span class="psg-nav-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H19v15H6.5A1.5 1.5 0 0 0 5 19.5z"/><path d="M5 19.5A1.5 1.5 0 0 0 6.5 21H19v-3"/><path d="M9 7h6"/></svg></span><span>Library</span></button><button type="button" class="psg-link" data-psg-nav="identitas"><span class="psg-nav-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2.2"/><path d="M5.8 16a3.4 3.4 0 0 1 6.4 0M14.5 10h4M14.5 13.5h3"/></svg></span><span>Identitas</span></button>
+  </div>
+  <div class="psg-side-foot">
+    <div class="psg-side-agen" id="psgSideAgen"></div>
+    <button type="button" class="psg-link" data-psg-nav="tema"><span class="psg-nav-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5 8.5 8.5 0 1 0 20.5 14.2z"/></svg></span><span>Tema</span></button><button type="button" class="psg-link" data-psg-nav="keluar"><span class="psg-nav-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3"/><path d="m10 17-5-5 5-5M5 12h11"/></svg></span><span>Logout</span></button>
+  </div>
+</aside>
+<nav class="psg-nav psg-tabbar tanpa-cetak" id="psgTabbar" aria-label="Navigasi">
+  <button type="button" class="psg-tab" data-psg-nav="beranda"><span class="psg-nav-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg></span><span>Beranda</span></button>
+  <button type="button" class="psg-tab" data-psg-nav="produk"><span class="psg-nav-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.6"/><rect x="14" y="3" width="7" height="7" rx="1.6"/><rect x="3" y="14" width="7" height="7" rx="1.6"/><rect x="14" y="14" width="7" height="7" rx="1.6"/></svg></span><span>Produk</span></button>
+  <button type="button" class="psg-tab" data-psg-nav="nasabah"><span class="psg-nav-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.4"/><path d="M2.8 20a6.2 6.2 0 0 1 12.4 0"/><path d="M16 4.7a3.4 3.4 0 0 1 0 6.6M21.2 20a6.2 6.2 0 0 0-3.7-5.7"/></svg></span><span>Nasabah</span></button>
+  <button type="button" class="psg-tab" data-psg-nav="library"><span class="psg-nav-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H19v15H6.5A1.5 1.5 0 0 0 5 19.5z"/><path d="M5 19.5A1.5 1.5 0 0 0 6.5 21H19v-3"/><path d="M9 7h6"/></svg></span><span>Library</span></button>
+  <button type="button" class="psg-tab" data-psg-nav="menu" aria-haspopup="dialog" aria-controls="psgSheet"><span class="psg-nav-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10"/></svg></span><span>Menu</span></button>
+</nav>
+<div class="psg-sheet tanpa-cetak" id="psgSheet" role="dialog" aria-modal="true" aria-label="Menu">
+  <div class="psg-sheet-latar" data-psg-tutup></div>
+  <div class="psg-sheet-panel">
+    <div class="psg-sheet-grip"></div>
+    <div class="psg-sheet-judul">Semua menu</div>
+    <div class="psg-sheet-grid">
+      <button type="button" class="psg-sheet-item" data-psg-nav="beranda"><span class="psg-nav-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg></span><span>Beranda</span></button><button type="button" class="psg-sheet-item" data-psg-nav="produk"><span class="psg-nav-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.6"/><rect x="14" y="3" width="7" height="7" rx="1.6"/><rect x="3" y="14" width="7" height="7" rx="1.6"/><rect x="14" y="14" width="7" height="7" rx="1.6"/></svg></span><span>Produk</span></button><button type="button" class="psg-sheet-item" data-psg-nav="nasabah"><span class="psg-nav-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.4"/><path d="M2.8 20a6.2 6.2 0 0 1 12.4 0"/><path d="M16 4.7a3.4 3.4 0 0 1 0 6.6M21.2 20a6.2 6.2 0 0 0-3.7-5.7"/></svg></span><span>Profil Nasabah</span></button><button type="button" class="psg-sheet-item" data-psg-nav="analisis"><span class="psg-nav-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.2"/></svg></span><span>Analisis Kebutuhan</span></button><button type="button" class="psg-sheet-item" data-psg-nav="bandingkan"><span class="psg-nav-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21h18"/><rect x="5" y="10" width="3.2" height="8" rx="1"/><rect x="10.4" y="5" width="3.2" height="13" rx="1"/><rect x="15.8" y="13" width="3.2" height="5" rx="1"/></svg></span><span>Bandingkan Solusi</span></button><button type="button" class="psg-sheet-item" data-psg-nav="planning"><span class="psg-nav-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 21V4"/><path d="M5 4h11.5l-2.2 4 2.2 4H5"/></svg></span><span>Financial Planning</span></button><button type="button" class="psg-sheet-item" data-psg-nav="kalkulator"><span class="psg-nav-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2.5"/><path d="M8.5 7.5h7"/><path d="M8.5 12h.01M12 12h.01M15.5 12h.01M8.5 15.5h.01M12 15.5h.01M15.5 15.5h.01M8.5 18.6h.01M12 18.6h.01"/></svg></span><span>Kalkulator Finansial</span></button><button type="button" class="psg-sheet-item" data-psg-nav="salesidea"><span class="psg-nav-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M12 16v4M8 20h8"/><path d="m7 12 3-3 2 2 4-4"/></svg></span><span>Sales Idea</span></button><button type="button" class="psg-sheet-item" data-psg-nav="aktivitas"><span class="psg-nav-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V2.8h6V4"/><path d="m9 13 2 2 4-4"/></svg></span><span>Aktivitas &amp; Poin</span></button><button type="button" class="psg-sheet-item" data-psg-nav="library"><span class="psg-nav-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H19v15H6.5A1.5 1.5 0 0 0 5 19.5z"/><path d="M5 19.5A1.5 1.5 0 0 0 6.5 21H19v-3"/><path d="M9 7h6"/></svg></span><span>Library</span></button><button type="button" class="psg-sheet-item" data-psg-nav="identitas"><span class="psg-nav-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2.2"/><path d="M5.8 16a3.4 3.4 0 0 1 6.4 0M14.5 10h4M14.5 13.5h3"/></svg></span><span>Identitas Konsultan</span></button>
+    </div>
+    <div class="psg-sheet-baris">
+      <button type="button" data-psg-nav="tema"><span class="psg-nav-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5 8.5 8.5 0 1 0 20.5 14.2z"/></svg></span><span>Ganti tema</span></button>
+      <button type="button" class="psg-keluar" data-psg-nav="keluar"><span class="psg-nav-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3"/><path d="m10 17-5-5 5-5M5 12h11"/></svg></span><span>Logout</span></button>
+    </div>
+  </div>
+</div>
 
 <header id="bilah">
   <button class="kiri" id="tblKiri" aria-label="Kembali">&#8249;</button>
@@ -52,43 +98,43 @@ document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
       <!-- Memakai <details> agar sama persis dengan model lipat Quick Calculator
            (lihat .quick-group di core.js), bukan tombol Tampilkan/Sembunyikan. -->
       <details class="quick-group" id="lipatCaraKerja" open>
-        <summary><span class="quick-group-icon">🧭</span><span class="quick-group-copy"><b>Pilih cara kerja</b><small>Tidak ada urutan wajib. Pilih langsung sesuai gaya kerja kamu.</small></span></summary>
+        <summary><span class="quick-group-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/></svg></span><span class="quick-group-copy"><b>Pilih cara kerja</b><small>Tidak ada urutan wajib. Pilih langsung sesuai gaya kerja kamu.</small></span></summary>
       <div id="isiCaraKerja">
       <div class="mode-grid">
         <button class="mode-kartu" id="btnQuick" type="button">
-          <span class="mode-icon">⚡</span><span class="mode-title">Hitung Produk</span>
+          <span class="mode-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg></span><span class="mode-title">Hitung Produk</span>
           <span class="mode-desc">Langsung masuk ke kalkulator produk tanpa harus membuat analisis.</span>
         </button>
         <button class="mode-kartu" id="btnNeeds" type="button">
-          <span class="mode-icon">🎯</span><span class="mode-title">Analisis Kebutuhan</span>
+          <span class="mode-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.2"/></svg></span><span class="mode-title">Analisis Kebutuhan</span>
           <span class="mode-desc">Hitung kebutuhan proteksi jiwa dan critical illness. Pendidikan dan pensiun ada di kotaknya sendiri.</span>
         </button>
         <button class="mode-kartu" id="btnCompare" type="button">
-          <span class="mode-icon">📊</span><span class="mode-title">Bandingkan Solusi</span>
+          <span class="mode-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21h18"/><rect x="5" y="10" width="3.2" height="8" rx="1"/><rect x="10.4" y="5" width="3.2" height="13" rx="1"/><rect x="15.8" y="13" width="3.2" height="5" rx="1"/></svg></span><span class="mode-title">Bandingkan Solusi</span>
           <span class="mode-desc">Lanjutkan dari analisis yang sudah ada atau mulai analisis baru.</span>
         </button>
         <button class="mode-kartu" id="btnPlanning" type="button">
-          <span class="mode-icon">🧭</span><span class="mode-title">Financial Planning</span>
+          <span class="mode-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 21V4"/><path d="M5 4h11.5l-2.2 4 2.2 4H5"/></svg></span><span class="mode-title">Financial Planning</span>
           <span class="mode-desc">Rencanakan proteksi, pendidikan, pensiun, dan tujuan finansial.</span>
         </button>
         <button class="mode-kartu" id="btnFinancialCalc" type="button">
-          <span class="mode-icon">🧮</span><span class="mode-title">Kalkulator Finansial</span>
+          <span class="mode-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2.5"/><path d="M8.5 7.5h7"/><path d="M8.5 12h.01M12 12h.01M15.5 12h.01M8.5 15.5h.01M12 15.5h.01M15.5 15.5h.01M8.5 18.6h.01M12 18.6h.01"/></svg></span><span class="mode-title">Kalkulator Finansial</span>
           <span class="mode-desc">Kumpulan kalkulator keuangan untuk membantu simulasi dan pembahasan dengan prospek.</span>
         </button>
         <button class="mode-kartu" id="btnSalesIdea" type="button">
-          <span class="mode-icon">🖐️</span><span class="mode-title">Sales Idea</span>
+          <span class="mode-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M12 16v4M8 20h8"/><path d="m7 12 3-3 2 2 4-4"/></svg></span><span class="mode-title">Sales Idea</span>
           <span class="mode-desc">Pilihan Sales Idea untuk presentasi visual: 10 Jari, Keranjang Kehidupan, dan Education Planning.</span>
         </button>
         <button class="mode-kartu" id="btnAktivitas" type="button">
-          <span class="mode-icon">📋</span><span class="mode-title">Aktivitas &amp; Poin</span>
+          <span class="mode-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V2.8h6V4"/><path d="m9 13 2 2 4-4"/></svg></span><span class="mode-title">Aktivitas &amp; Poin</span>
           <span class="mode-desc">Catat janji temu, presentasi, dan closing. Poin dihitung otomatis.</span>
         </button>
         <button class="mode-kartu" id="btnKartuKonsultan" type="button">
-          <span class="mode-icon">👤</span><span class="mode-title">Identitas Konsultan</span>
+          <span class="mode-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2.2"/><path d="M5.8 16a3.4 3.4 0 0 1 6.4 0M14.5 10h4M14.5 13.5h3"/></svg></span><span class="mode-title">Identitas Konsultan</span>
           <span class="mode-desc">Atur identitas, foto, kontak, dan media sosial yang akan ditampilkan pada materi untuk nasabah.</span>
         </button>
         <button class="mode-kartu" id="btnLibraryIlustrasi" type="button">
-          <span class="mode-icon">📚</span><span class="mode-title">Library Ilustrasi</span>
+          <span class="mode-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H19v15H6.5A1.5 1.5 0 0 0 5 19.5z"/><path d="M5 19.5A1.5 1.5 0 0 0 6.5 21H19v-3"/><path d="M9 7h6"/></svg></span><span class="mode-title">Library Ilustrasi</span>
           <span class="mode-desc">Simpan, cari, dan kelompokkan ilustrasi berdasarkan nasabah dan produk.</span>
         </button>
       </div>
@@ -1613,19 +1659,19 @@ document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
       <p class="catatan">Kalkulator akan ditambahkan bertahap. Pilih yang sudah aktif di bawah ini.</p>
       <div class="mode-grid financial-calc-grid">
         <button class="mode-kartu financial-calc-item" id="btnFinancialSegitiga" type="button">
-          <span class="mode-icon">📐</span><span class="mode-title">Segitiga Financial</span>
+          <span class="mode-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2.5 20h19z"/><path d="M7.4 14.5h9.2M9.9 10h4.2"/></svg></span><span class="mode-title">Segitiga Financial</span>
           <span class="mode-desc">Bangun kebutuhan bersama prospek: kesehatan, sakit kritis, jiwa, dan dana pensiun.</span>
         </button>
         <button class="mode-kartu financial-calc-item" id="btnFinancialKPR" type="button">
-          <span class="mode-icon">🏠</span><span class="mode-title">Simulasi Cicilan Rumah (KPR)</span>
+          <span class="mode-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg></span><span class="mode-title">Simulasi Cicilan Rumah (KPR)</span>
           <span class="mode-desc">Hitung DP, cicilan bulanan, total bunga, dan total uang keluar sampai rumah lunas.</span>
         </button>
         <button class="mode-kartu financial-calc-item" id="btnFinancialR2" type="button">
-          <span class="mode-icon">🏡</span><span class="mode-title">Rumah Kedua: KPR vs Gen Aman</span>
+          <span class="mode-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/><path d="M12 11v6M9 14h6"/></svg></span><span class="mode-title">Rumah Kedua: KPR vs Gen Aman</span>
           <span class="mode-desc">Bandingkan beban KPR dengan alternatif solusi untuk rumah kedua.</span>
         </button>
         <div class="mode-kartu financial-calc-item nonaktif">
-          <span class="mode-icon">＋</span><span class="mode-title">Kalkulator berikutnya</span>
+          <span class="mode-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></span><span class="mode-title">Kalkulator berikutnya</span>
           <span class="mode-desc">Ruang untuk kalkulator finansial lain yang akan ditambahkan kemudian.</span>
         </div>
       </div>
@@ -2255,5 +2301,6 @@ document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
 <section id="layarSolusiHitung" class="layar"></section>
 <section id="layarSolusiBanding" class="layar"></section>
 <script src="src/theme-switcher.js"></script>
+<script src="src/app-shell.js"></script>
 </body>
 </html>
