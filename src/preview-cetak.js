@@ -117,14 +117,37 @@
      Sebelumnya mekanisme ini HANYA ada di halaman ringkasan terpisah, tidak
      di dalam aplikasi — karena itu cetakan dari layar program rusak sementara
      cetakan dari halaman ringkasan baik-baik saja. */
+/* Sel dipilih menurut POSISI KOLOM, bukan urutan DOM. Baris seperti "Total"
+   memakai colspan (mis. colspan=4 untuk Slot–UP). Kalau sel diambil menurut
+   urutan DOM, baris itu mendapat lebih banyak kolom daripada judulnya: kolom
+   tambahan tidak punya lebar di tabel fixed sehingga angkanya tergencet dan
+   bertumpuk, dan pada bagian berikutnya angka Total bergeser ke kolom yang
+   salah. Sel yang menutupi beberapa kolom terpilih yang bersebelahan
+   digabung kembali dengan colspan yang sesuai. */
+function selPadaKolom(tr,kolom){
+  const peta=[];
+  let pos=0;
+  [...tr.children].forEach(c=>{const n=Math.max(1,c.colSpan||1);for(let k=0;k<n;k++)peta[pos+k]=c;pos+=n;});
+  const hasil=[];
+  kolom.forEach(i=>{
+    const c=peta[i];
+    const akhir=hasil[hasil.length-1];
+    if(c&&akhir&&akhir.src===c){akhir.span++;return;}
+    hasil.push({src:c,span:1});
+  });
+  return hasil.map(h=>{
+    const sel=h.src?h.src.cloneNode(true):document.createElement('td');
+    if(h.span>1)sel.colSpan=h.span;else sel.removeAttribute('colspan');
+    return sel;
+  });
+}
 function makePrintSplit(table){
   const existing=table.parentElement.querySelector(':scope > .print-split');
   if(existing)existing.remove();
   const headRow=table.querySelector('thead tr:first-child');
   const bodyRows=[...table.querySelectorAll('tbody tr')];
   if(!headRow)return false;
-  const head=[...headRow.children];
-  const n=head.length;
+  const n=[...headRow.children].reduce((a,c)=>a+Math.max(1,c.colSpan||1),0);
   // Timeline COMBO bisa mempunyai banyak kolom benefit. Untuk PDF, jangan
   // mengecilkan semuanya sampai overlap: pecah horizontal menjadi beberapa
   // tabel yang masing-masing tetap selebar halaman, dengan kolom identitas
@@ -178,17 +201,14 @@ function makePrintSplit(table){
 
     const thead=document.createElement('thead');
     const hr=document.createElement('tr');
-    [...anchor,...indices].forEach(i=>hr.appendChild(head[i].cloneNode(true)));
+    selPadaKolom(headRow,[...anchor,...indices]).forEach(c=>hr.appendChild(c));
     thead.appendChild(hr);
     nt.appendChild(thead);
 
     const tbody=document.createElement('tbody');
     bodyRows.forEach(tr=>{
       const nr=document.createElement('tr');
-      const cells=[...tr.children];
-      [...anchor,...indices].forEach(i=>{
-        if(cells[i])nr.appendChild(cells[i].cloneNode(true));
-      });
+      selPadaKolom(tr,[...anchor,...indices]).forEach(c=>nr.appendChild(c));
       tbody.appendChild(nr);
     });
     nt.appendChild(tbody);
