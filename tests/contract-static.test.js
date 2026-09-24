@@ -30,6 +30,16 @@ let checks = 0;
 const ok = (cond, msg) => { checks++; if (!cond) fails.push(msg); };
 const isSubseq = (sub, arr) => { let i = 0; for (const x of arr) if (x === sub[i]) i++; return i === sub.length; };
 
+/* Perubahan skrip inline yang disetujui. Setiap entri harus menyebut hash lama,
+   hash baru, dan alasannya; selain entri ini skrip inline wajib identik. */
+const INLINE_DIIZINKAN = {
+  'program-summary.html': [{
+    dari: 'a677e3718adabddb70d89776b699908b108cd7c3cccc030d915ac7e539819893',
+    ke: 'dea75439026141f77a65c889ba7caab346a6f731707aa734c9963b76d1bc8666',
+    alasan: 'Tabel Manfaat Gabungan dibungkus <table> bila isinya hanya <thead>/<tbody>/<tr> (sebelumnya tampil sebagai teks menyambung). Tidak menyentuh angka.',
+  }],
+};
+
 /* 1. Berkas JS dilindungi */
 for (const [f, h] of Object.entries(base.protectedFiles)) {
   ok(cur.protectedFiles[f] !== undefined, 'Berkas JS hilang: ' + f);
@@ -46,7 +56,10 @@ for (const [name, b] of Object.entries(base.pages)) {
   const c = cur.pages[name];
   ok(!!c, 'Halaman hilang: ' + name);
   if (!c) continue;
-  ok(isSubseq(b.inlineScripts, c.inlineScripts), name + ': skrip inline berubah/urutannya berubah');
+  const izin = INLINE_DIIZINKAN[name] || [];
+  const inlineBase = b.inlineScripts.map((h) => { const z = izin.find((x) => x.dari === h); return z ? z.ke : h; });
+  izin.forEach((z) => notes.push(name + ': skrip inline diubah dengan izin — ' + z.alasan));
+  ok(isSubseq(inlineBase, c.inlineScripts), name + ': skrip inline berubah/urutannya berubah');
   const extFiltered = c.externalScripts.filter((s) => b.externalScripts.includes(s));
   ok(JSON.stringify(extFiltered) === JSON.stringify(b.externalScripts), name + ': urutan classic script berubah');
   if (name === 'index.html') {

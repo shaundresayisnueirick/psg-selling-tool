@@ -527,6 +527,7 @@ main{
 .pengantar{font-size:var(--fs-md);color:var(--text-2);margin:0 0 var(--s-4)}
 .catatan{margin:var(--s-3) 0 0;font-size:var(--fs-sm);line-height:var(--lh-loose);color:var(--text-3)}
 .catatan:first-child{margin-top:0}
+.catatan:not(:last-child){margin-bottom:var(--s-3)}
 .catatan.tegas{color:var(--warning);font-weight:650}
 .catatan b{color:var(--text-2)}
 .kaki{margin-top:var(--s-4);padding-top:var(--s-3);border-top:1px solid var(--divider);font-size:var(--fs-sm);color:var(--text-2)}
@@ -636,7 +637,7 @@ input[type="file"]{min-height:0;padding:0;border:0;background:none}
 
 /* tombol turunan modul */
 .psg-preview-btn{margin-top:var(--s-2)}
-.aksi-row .psg-preview-btn,.raya-actions .psg-preview-btn,.akt-aksi .psg-preview-btn{margin-top:0}
+.aksi-row .psg-preview-btn,.raya-actions .psg-preview-btn,.akt-aksi .psg-preview-btn,.library-actions .psg-preview-btn,.header-actions .psg-preview-btn{margin-top:0}
 .btn-simpan-library{background:var(--surface)!important;color:var(--text)!important;border:1px solid var(--border-strong)!important;box-shadow:var(--shadow-xs)}
 .btn-simpan-library:hover{background:var(--surface-2)!important}
 .prompt-flyer{background:var(--accent-soft);border-color:var(--accent-line);color:var(--accent);font-weight:700}
@@ -766,8 +767,8 @@ main table{max-width:100%}
 table.tahunan{width:100%;border-collapse:separate;border-spacing:0;font-size:var(--fs-sm)}
 table.tahunan th{
   position:sticky;top:0;z-index:1;
-  padding:10px 12px;text-align:left;white-space:nowrap;
-  font-size:var(--fs-2xs);font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);
+  padding:9px 11px;text-align:left;white-space:nowrap;
+  font-size:var(--fs-2xs);font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--text-3);
   background:var(--surface-2);border-bottom:1px solid var(--border);
 }
 table.tahunan td{padding:10px 12px;white-space:nowrap;border-bottom:1px solid var(--divider);color:var(--text)}
@@ -871,6 +872,8 @@ html.insurance-auth-locked body > *:not(#insuranceAccessGate){visibility:hidden!
 .insurance-sapaan-teks{font-size:var(--fs-md);color:var(--text-2)}
 .insurance-sapaan-teks b{color:var(--text)}
 .theme-gate-switch{position:fixed;top:max(14px,env(safe-area-inset-top));right:14px;z-index:1;background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.18);color:#fff}
+/* HP: sisakan ruang di atas kartu supaya tombol tema tidak menumpuk. */
+@media screen and (max-width:560px){#insuranceAccessGate{padding-top:max(66px,calc(env(safe-area-inset-top) + 52px))}}
 
 /* ---- sambutan setelah login ---- */
 #insuranceWelcome{
@@ -1442,6 +1445,40 @@ details.quick-group > summary{
 .raya-actions button{min-height:44px}
 .raya-band-actions{margin-top:12px}
 .raya-band-actions .aksi{min-width:190px}
+
+/* ---- halaman ringkasan mandiri (comparison-summary.html, program-summary.html) ----
+   Kepala halaman tampil sebagai banner hanya di layar. Selektor sengaja
+   mengikat main.summary-shell / main.shell supaya salinan halaman di
+   Library dan hasil cetak tetap polos. */
+@media screen{
+  main.summary-shell > .top,main.shell > .head{
+    position:relative;overflow:hidden;align-items:flex-end;
+    padding:var(--s-6) var(--s-7);border-radius:var(--r-xl);
+    background:var(--hero-glow),var(--hero-bg);color:var(--hero-text);box-shadow:var(--shadow-md);
+    --hero-cta-bg:#FFFFFF;--hero-cta-fg:#0B1B32;
+  }
+  [data-theme="dark"] main.summary-shell > .top,[data-theme="dark"] main.shell > .head{--hero-cta-bg:var(--primary);--hero-cta-fg:var(--on-primary)}
+  main.summary-shell > .top::after,main.shell > .head::after{
+    content:"";position:absolute;right:-70px;top:-70px;width:240px;height:240px;border-radius:50%;pointer-events:none;
+    border:1px solid rgba(255,255,255,.08);box-shadow:0 0 0 28px rgba(255,255,255,.025),0 0 0 56px rgba(255,255,255,.015);
+  }
+  main.summary-shell > .top > *,main.shell > .head > *{position:relative;z-index:1;min-width:0}
+  main.summary-shell > .top .title,main.shell > .head .title,main.shell > .head .name{color:var(--hero-text)}
+  main.summary-shell > .top .sub,main.shell > .head .sub{color:var(--hero-muted)}
+  main.summary-shell > .top .aksi,main.shell > .head .aksi{background:var(--hero-cta-bg);color:var(--hero-cta-fg);border-color:transparent;box-shadow:none}
+  main.summary-shell > .top .aksi:hover,main.shell > .head .aksi:hover{filter:brightness(.94)}
+  main.summary-shell > .top :is(.sakelar,.logout-btn,.theme-page-switch,.theme-switcher),
+  main.shell > .head :is(.sakelar,.logout-btn,.theme-page-switch,.theme-switcher){background:rgba(255,255,255,.08);border-color:var(--hero-line);color:var(--hero-text)}
+  main.summary-shell > .top :is(.sakelar,.logout-btn,.theme-page-switch,.theme-switcher):hover,
+  main.shell > .head :is(.sakelar,.logout-btn,.theme-page-switch,.theme-switcher):hover{background:rgba(255,255,255,.16);color:var(--hero-text);border-color:rgba(255,255,255,.28)}
+  /* program-summary punya <header class="head">, sehingga theme-switcher.js
+     menaruh tombol tema di ujung header; posisikan di pojok kanan atas. */
+  main.shell > .head > .theme-switcher{position:absolute;top:var(--s-4);right:var(--s-4);z-index:2}
+  main.shell > .head > div:first-child{padding-right:52px}
+}
+@media screen and (max-width:700px){
+  main.summary-shell > .top,main.shell > .head{padding:var(--s-5);border-radius:var(--r-lg)}
+}
 
 
 /* =====================================================================
@@ -2253,6 +2290,8 @@ html:has(#layarSalesIdea.aktif){overflow:hidden}
   .kartu-konsultan-preview{flex-direction:column;align-items:flex-start;text-align:left}
 }
 @media screen and (max-width:560px){
+  /* HP: satu kolom seperti versi produksi — input nominal dan segmen butuh lebar penuh. */
+  .baris{grid-template-columns:1fr}
   .sgs-profile-switch{flex-direction:column;align-items:stretch}
   .sgs-profile-select{width:100%;min-width:0}
 }
@@ -2274,6 +2313,7 @@ html:has(#layarSalesIdea.aktif){overflow:hidden}
   .sgt-lapis-wrap .sgt-nomor,.sgt-nomor-atap{left:6px;width:19px;height:19px;min-width:19px}
   .sgt-lapis-wrap .sgt-lapis,.sgt-lapis-wrap .sgt-landasan{padding-left:30px}
   .aksi-row .aksi,.akt-aksi .aksi{flex-basis:100%}
+  .aksi-row > .sakelar,.akt-aksi > .sakelar{flex:1 1 auto}
   .raya-actions .aksi{flex-basis:100%}
 }
 @media screen and (max-width:480px){

@@ -1,8 +1,49 @@
 <!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Program Perlindungan Nasabah — Insurance Hub v30</title>
 <link rel="stylesheet" href="src/styles.css">
 <script src="src/access-gate.js"></script><style>
-body{background:#f6f7f9}.shell{max-width:1500px;margin:auto;padding:24px}.brand-top{display:flex;justify-content:flex-start;margin-bottom:10px}.brand-top img{width:92px;height:auto;object-fit:contain}.head{display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap;align-items:flex-start}.title{font-size:32px;font-weight:900;line-height:1.1}.name{font-size:24px;font-weight:900;margin-top:7px}.sub{opacity:.7;margin-top:3px}.actions{display:flex;gap:8px}.section{margin-top:18px}.box{background:#fff;border:1px solid #e5e5e5;border-radius:16px;padding:16px}.targets{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.target{padding:12px 14px;border:1px solid #e5e5e5;border-radius:14px}.k{font-size:12px;opacity:.65}.num{font-size:22px;font-weight:900}.combo-output .blok{background:#fff;border:1px solid #e5e5e5;border-radius:16px;padding:16px;margin-top:14px}.combo-output h2{margin-top:0}.gulir{overflow:auto}.tahunan{width:100%;min-width:1000px;border-collapse:collapse}.tahunan th,.tahunan td{padding:10px;border:1px solid #eee;vertical-align:top}.tahunan th{background:#fafafa;font-size:12px}.identitas{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.identitas>div{padding:10px;border:1px solid #e5e5e5;border-radius:12px}.identitas b{display:block;font-size:16px;margin-top:3px}.catatan{line-height:1.5}.kartu{background:#fff}.tanpa-cetak{margin-bottom:30px}.targets-title{margin:0 0 10px}.empty{padding:24px;background:#fff;border:1px solid #e5e5e5;border-radius:16px}.selected-products{font-weight:800}.selected-products span{display:inline-block;margin:4px 6px 0 0;padding:6px 9px;border-radius:999px;background:#f0f2f5}
-@media(max-width:900px){.shell{padding:14px}.title{font-size:25px}.name{font-size:21px}.targets,.identitas{grid-template-columns:1fr}.actions{width:100%}.actions button{flex:1}}
+/* Program Perlindungan Nasabah — warna, jarak, dan radius memakai token dari
+   src/styles.css sehingga tema Original dan Dark ikut dengan sendirinya.
+   Blok @media print di bawah dipertahankan dari versi produksi. */
+.shell{max-width:1320px;margin:0 auto;padding:var(--s-6) var(--gutter) var(--s-8)}
+.brand-top{display:flex;justify-content:flex-start;margin-bottom:var(--s-3)}
+.brand-top img{width:84px;height:auto;object-fit:contain}
+.head{display:flex;justify-content:space-between;gap:var(--s-4) var(--s-6);flex-wrap:wrap;align-items:flex-start}
+.title{font-size:var(--fs-3xl);font-weight:750;line-height:1.1;letter-spacing:-.025em;color:var(--text)}
+.name{margin-top:8px;font-size:var(--fs-2xl);font-weight:700;letter-spacing:-.015em;color:var(--text)}
+.sub{margin-top:4px;font-size:var(--fs-sm);color:var(--text-3)}
+/* header.head ikut terkena aturan "header .sub" milik header aplikasi; kembalikan. */
+.head .sub{display:block;margin-top:4px;font-size:var(--fs-sm);white-space:normal;overflow:visible;text-overflow:clip;text-transform:none;letter-spacing:0;font-weight:500}
+.actions{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s-2)}
+.actions .aksi{width:auto;min-height:42px;margin:0;padding:9px 18px;font-size:var(--fs-md)}
+.actions .psg-preview-btn{margin-top:0}
+.actions .sakelar,.actions .logout-btn,.actions .theme-page-switch{min-height:42px}
+.actions > .aksi,.actions > .sakelar,.actions > button{margin:0}
+.section{margin-top:var(--s-5)}
+.box{padding:var(--s-5);border:1px solid var(--border);border-radius:var(--r-lg);background:var(--surface);box-shadow:var(--shadow-xs)}
+.targets{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s-3)}
+.target{padding:var(--s-4) var(--s-5);border:1px solid var(--border);border-radius:var(--r-md);background:var(--surface-2)}
+.k{font-size:var(--fs-xs);font-weight:600;letter-spacing:.01em;color:var(--text-3)}
+.num{margin-top:4px;font-size:var(--fs-xl);font-weight:750;letter-spacing:-.015em;color:var(--figure);font-variant-numeric:tabular-nums}
+.combo-output .blok{margin-top:var(--s-4);margin-bottom:0}
+.combo-output h2{margin-top:0}
+.gulir{overflow:auto}
+.tahunan{width:100%;min-width:1000px}
+.tahunan th,.tahunan td{vertical-align:top}
+.program-benefits-summary .tahunan{min-width:560px}
+.combo-output .tahunan th{white-space:normal;overflow-wrap:normal;word-break:normal;vertical-align:bottom;min-width:84px}
+.program-benefits-summary .tahunan td:last-child{white-space:normal;min-width:220px;color:var(--text-2)}
+.identitas{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--s-3)}
+.identitas > div{padding:10px 12px;border:1px solid var(--border);border-radius:var(--r-md);background:var(--surface-2)}
+.identitas b{display:block;margin-top:3px;font-size:var(--fs-base)}
+.tanpa-cetak{margin-bottom:30px}
+.targets-title{margin:0 0 var(--s-3)}
+.empty{padding:var(--s-6)}
+.selected-products{font-weight:650}
+.selected-products span{display:inline-block;margin:4px 6px 0 0;padding:6px 10px;border-radius:var(--r-pill);background:var(--surface-3);color:var(--text-2)}
+.program-hidden-detail{margin-top:10px}
+.program-hidden-detail summary{cursor:pointer;font-weight:700}
+@media(max-width:900px){.shell{padding:var(--s-4) var(--gutter) var(--s-7)}.title{font-size:var(--fs-2xl)}.name{font-size:var(--fs-xl)}.targets,.identitas{grid-template-columns:1fr}.actions{width:100%}.actions button{flex:1 1 auto}}
+@media(max-width:560px){.actions .aksi{flex:1 1 100%}.box{padding:var(--s-4)}}
 @media print{
   /* PDF khusus halaman Program Perlindungan: gunakan A4 landscape agar
      Timeline Program tidak dipaksa menyempit menjadi kolom-kolom kecil.
@@ -94,16 +135,16 @@ body{background:#f6f7f9}.shell{max-width:1500px;margin:auto;padding:24px}.brand-
 /* Prompt tetap bisa disalin, tetapi isi prompt panjang tidak memenuhi layar. */
 .prompt-box textarea#flyerPrompt{display:none!important}
 
-.print-logo{display:none}.prompt-box{margin-top:12px}.prompt-box textarea{width:100%;min-height:360px;box-sizing:border-box;resize:vertical;font:12px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;padding:11px;border:1px solid #D9E0E7;border-radius:10px;background:#fff;color:#26384B}.prompt-box button{margin-top:8px}.prompt-theme{margin:8px 0 10px;padding:10px 12px;border-radius:10px;background:#F4EFE4;border:1px solid #E4D6B7;color:#5A4A28;font-weight:800;line-height:1.4}
+.print-logo{display:none}
+.prompt-box{margin-top:var(--s-5)}
+.prompt-box textarea{width:100%;min-height:360px;box-sizing:border-box;resize:vertical;font:12px/1.5 var(--font-mono);padding:11px;border:1px solid var(--border);border-radius:var(--r-md);background:var(--surface);color:var(--text)}
+.prompt-box button{margin-top:var(--s-2)}
+.prompt-theme{margin:8px 0 10px;padding:10px 12px;border-radius:var(--r-md);background:var(--accent-soft);border:1px solid var(--accent-line);color:var(--accent);font-weight:700;line-height:1.4}
 @media print{
   .print-logo{display:block;width:22mm;height:auto;object-fit:contain;margin:0 0 5mm auto}
 }
-.program-benefit-line{padding:11px 0;border-bottom:1px solid #eee}.program-benefit-line b{display:block;font-size:14px}.program-benefit-line span{display:block;font-size:20px;font-weight:900;margin-top:2px}.program-benefit-line small{display:block;font-size:11px;opacity:.72;line-height:1.45;margin-top:3px}.program-duration-line{padding:8px 10px;border-left:3px solid #10253e;background:#fafafa;margin:7px 0;border-radius:6px;font-size:13px;line-height:1.5}
-
-<style>
-.program-phase{padding:12px 14px;border:1px solid #e6e8eb;border-radius:12px;background:#fbfbfc;margin:8px 0}.program-phase b{font-size:14px}.program-phase .phase-total{font-size:21px;font-weight:900;margin-top:3px}.program-phase small{display:block;opacity:.72;line-height:1.45;margin-top:4px}.program-health-warning{margin-top:12px;padding:11px 13px;border-radius:12px;background:#fff7e8;border:1px solid #efd59a;line-height:1.55}.program-hidden-detail{margin-top:10px}.program-hidden-detail summary{cursor:pointer;font-weight:800}.program-benefit-line{padding:12px 0;border-bottom:1px solid #eee}.program-benefit-line:last-child{border-bottom:0}.program-benefit-line b{display:block;font-size:14px}.program-benefit-line span{display:block;font-size:20px;font-weight:900;margin-top:2px}.program-benefit-line small{display:block;font-size:11px;opacity:.72;line-height:1.45;margin-top:4px}.program-duration-line{padding:9px 11px;border-left:3px solid #10253e;background:#fafafa;margin:7px 0;border-radius:7px;font-size:13px;line-height:1.5}</style>
-
-<style>
+/* Garis tabel versi produksi tetap dipakai saat cetak. */
+@media print{.tahunan{border-collapse:collapse}.tahunan th,.tahunan td{border:1px solid #eee}.tahunan th{background:#fafafa}}
 </style><script>/* Tema dipasang sebelum CSS dilukis supaya tidak ada kedipan terang saat
    agen memakai tema Dark. Sengaja inline dan sesingkat mungkin. */
 (function(){try{var t=localStorage.getItem('insuranceHub.theme.v3');
@@ -137,7 +178,12 @@ const out=document.getElementById('comboOutput');
 out.innerHTML=''
   +'<section class="blok"><h2>Ringkasan Program</h2>'+h.ringkasan+'</section>'
   +'<details class="blok program-hidden-detail"><summary>Detail komponen pembentuk program</summary><div style="margin-top:10px"><div class="gulir"><table class="tahunan polis-table">'+h.polis+'</table></div><p class="catatan">'+esc(h.catatanSlot)+'</p></div></details>'
-  +'<section class="blok"><h2>Manfaat Gabungan Program</h2><p class="catatan">Nilai di bawah merupakan gabungan manfaat sejenis dari komponen yang dipilih, dengan masa berlaku mengikuti masing-masing komponen.</p><div class="program-benefits-summary">'+(h.manfaat||'<div class="notice">Belum ada manfaat.</div>')+'</div><p class="catatan">'+esc(h.catatanManfaat)+'</p></section>'
+  +'<section class="blok"><h2>Manfaat Gabungan Program</h2><p class="catatan">Nilai di bawah merupakan gabungan manfaat sejenis dari komponen yang dipilih, dengan masa berlaku mengikuti masing-masing komponen.</p><div class="program-benefits-summary">'+(h.manfaat
+     /* Alur Analisa Kebutuhan dan Segitiga lama mengirim isi tabel saja
+        (<thead>/<tbody>/<tr>). Tanpa pembungkus <table>, browser membuang
+        tag tabelnya dan barisnya tampil sebagai teks menyambung. */
+     ? (/^\s*<(thead|tbody|tr)\b/i.test(h.manfaat) ? '<div class="gulir"><table class="tahunan">'+h.manfaat+'</table></div>' : h.manfaat)
+     : '<div class="notice">Belum ada manfaat.</div>')+'</div><p class="catatan">'+esc(h.catatanManfaat)+'</p></section>'
   +(h.durasi?'<section class="blok"><h2>Masa Perlindungan</h2><div class="program-duration-summary">'+h.durasi+'</div></section>':'')
   /* Tabel timeline dikembalikan. Datanya selalu disiapkan tetapi tidak
      pernah ditampilkan, sehingga ringkasan kehilangan bagian yang paling
@@ -404,27 +450,9 @@ if(programLogout)programLogout.addEventListener('click',()=>{
 </script><div class="sangkalan-cetak" id="sangkalanCetak"><b>Ilustrasi tidak resmi.</b> Dokumen ini dibuat dengan alat bantu internal PSG Agency sebagai gambaran untuk mempermudah penjelasan. Seluruh angka premi, manfaat, dan masa berlaku tetap merujuk pada <b>ilustrasi resmi dan Ketentuan Polis PT Asuransi Jiwa Generali Indonesia</b> serta hasil underwriting. Bila terdapat perbedaan, yang berlaku adalah ilustrasi resmi Generali.</div>
 
 <style id="dark-gold-v11-program-summary">
-@media screen {
-  body[data-theme="dark"] .program-duration-line,
-  body[data-theme="dark"] .program-benefit-line,
-  body[data-theme="dark"] .program-phase {
-    background:#10151B!important;
-    background-image:none!important;
-    color:#DDD9CF!important;
-    border-color:#2B333D!important;
-  }
-  body[data-theme="dark"] .program-duration-line { border-left-color:#D8B45F!important; }
-  body[data-theme="dark"] .program-duration-line b,
-  body[data-theme="dark"] .program-benefit-line b,
-  body[data-theme="dark"] .program-phase b { color:#F1D58A!important; }
-  body[data-theme="dark"] .program-health-warning {
-    background:#10151B!important;
-    background-image:none!important;
-    color:#DDD9CF!important;
-    border-color:#6F5928!important;
-  }
-  body[data-theme="dark"] .program-health-warning b { color:#F1D58A!important; }
-}
+/* Skin Dark Gold v11 lama dipensiunkan: tema Dark kini ditangani token
+   [data-theme="dark"] di src/styles.css. Elemen dipertahankan karena ID-nya
+   termasuk kontrak halaman. */
 </style>
 <script src="src/preview-cetak.js"></script>
 <script src="src/theme-switcher.js"></script>
