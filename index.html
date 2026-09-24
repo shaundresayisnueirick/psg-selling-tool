@@ -1,0 +1,2259 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#A60101">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/ikon-apple-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="robots" content="noindex, nofollow">
+<meta name="description" content="Alat kerja internal agen.">
+<title>PSG Selling Tools</title>
+<link rel="stylesheet" href="src/styles.css">
+<script src="src/access-gate.js"></script>
+<script>/* Tema dipasang sebelum CSS dilukis supaya tidak ada kedipan terang saat
+   agen memakai tema Dark. Sengaja inline dan sesingkat mungkin. */
+(function(){try{var t=localStorage.getItem('insuranceHub.theme.v3');
+if(t!=='dark'&&t!=='original')t='original';
+document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+  <link rel="stylesheet" href="src/cetak-besar.css">
+</head>
+<body>
+
+<header id="bilah">
+  <button class="kiri" id="tblKiri" aria-label="Kembali">&#8249;</button>
+  <div class="brand-app">
+    <img class="logo-psg-app" src="assets/logo-psg-terang.png" alt="PSG — Patriot Shining Generation">
+    <div class="teks">
+      <p class="sub" id="subJudul">Alat hitung agen</p>
+      <h1 id="judul">Insurance Hub</h1>
+    </div>
+  </div>
+  <div class="header-actions"><button class="kanan" id="tblKanan">Ringkasan</button><button class="logout-btn" type="button" id="btnLogout">Logout</button></div>
+</header>
+
+<img class="logo-cetak" src="assets/logo-psg.png" alt="PSG — Patriot Shining Generation">
+<main>
+  <section class="layar aktif" id="layarProduk">
+    <p class="pengantar">Pilih produk untuk mulai menghitung. Semua perhitungan berjalan di HP, tanpa koneksi internet.</p>
+    <div class="blok profil-entry tanpa-cetak">
+      <div class="baris satu">
+        <div>
+          <h2 style="margin-bottom:6px">Profil nasabah</h2>
+          <p class="catatan" id="profilAktifBar">Belum ada profil nasabah aktif di perangkat ini.</p>
+        </div>
+      </div>
+      <button class="aksi" id="btnProfil">Buka / kelola profil nasabah</button>
+    </div>
+    <div class="blok tanpa-cetak" id="blokCaraKerja">
+      <!-- Memakai <details> agar sama persis dengan model lipat Quick Calculator
+           (lihat .quick-group di core.js), bukan tombol Tampilkan/Sembunyikan. -->
+      <details class="quick-group" id="lipatCaraKerja" open>
+        <summary><span class="quick-group-icon">🧭</span><span class="quick-group-copy"><b>Pilih cara kerja</b><small>Tidak ada urutan wajib. Pilih langsung sesuai gaya kerja kamu.</small></span></summary>
+      <div id="isiCaraKerja">
+      <div class="mode-grid">
+        <button class="mode-kartu" id="btnQuick" type="button">
+          <span class="mode-icon">⚡</span><span class="mode-title">Hitung Produk</span>
+          <span class="mode-desc">Langsung masuk ke kalkulator produk tanpa harus membuat analisis.</span>
+        </button>
+        <button class="mode-kartu" id="btnNeeds" type="button">
+          <span class="mode-icon">🎯</span><span class="mode-title">Analisis Kebutuhan</span>
+          <span class="mode-desc">Hitung kebutuhan proteksi jiwa dan critical illness. Pendidikan dan pensiun ada di kotaknya sendiri.</span>
+        </button>
+        <button class="mode-kartu" id="btnCompare" type="button">
+          <span class="mode-icon">📊</span><span class="mode-title">Bandingkan Solusi</span>
+          <span class="mode-desc">Lanjutkan dari analisis yang sudah ada atau mulai analisis baru.</span>
+        </button>
+        <button class="mode-kartu" id="btnPlanning" type="button">
+          <span class="mode-icon">🧭</span><span class="mode-title">Financial Planning</span>
+          <span class="mode-desc">Rencanakan proteksi, pendidikan, pensiun, dan tujuan finansial.</span>
+        </button>
+        <button class="mode-kartu" id="btnFinancialCalc" type="button">
+          <span class="mode-icon">🧮</span><span class="mode-title">Kalkulator Finansial</span>
+          <span class="mode-desc">Kumpulan kalkulator keuangan untuk membantu simulasi dan pembahasan dengan prospek.</span>
+        </button>
+        <button class="mode-kartu" id="btnSalesIdea" type="button">
+          <span class="mode-icon">🖐️</span><span class="mode-title">Sales Idea</span>
+          <span class="mode-desc">Pilihan Sales Idea untuk presentasi visual: 10 Jari, Keranjang Kehidupan, dan Education Planning.</span>
+        </button>
+        <button class="mode-kartu" id="btnAktivitas" type="button">
+          <span class="mode-icon">📋</span><span class="mode-title">Aktivitas &amp; Poin</span>
+          <span class="mode-desc">Catat janji temu, presentasi, dan closing. Poin dihitung otomatis.</span>
+        </button>
+        <button class="mode-kartu" id="btnKartuKonsultan" type="button">
+          <span class="mode-icon">👤</span><span class="mode-title">Identitas Konsultan</span>
+          <span class="mode-desc">Atur identitas, foto, kontak, dan media sosial yang akan ditampilkan pada materi untuk nasabah.</span>
+        </button>
+        <button class="mode-kartu" id="btnLibraryIlustrasi" type="button">
+          <span class="mode-icon">📚</span><span class="mode-title">Library Ilustrasi</span>
+          <span class="mode-desc">Simpan, cari, dan kelompokkan ilustrasi berdasarkan nasabah dan produk.</span>
+        </button>
+      </div>
+      </div>
+      </details>
+    </div>
+    <div class="blok tanpa-cetak" id="quickCalculator">
+      <h2>Quick Calculator</h2>
+      <p class="catatan">Pilih produk langsung. Profil nasabah bersifat opsional.</p>
+    </div>
+    <div id="daftarProduk"></div>
+    <p class="catatan">&copy; 2026 PSG Selling Tools • Internal Use Only • <span id="psgVersiApp"></span></p>
+  </section>
+
+  <section class="layar" id="layarProfile">
+    <div class="kop">
+      <h2>Profil Nasabah</h2>
+      <p>Isi sekali, lalu gunakan di seluruh kalkulator Insurance Hub.</p>
+    </div>
+    <div class="blok">
+      <h2>Data utama</h2>
+      <div class="baris satu">
+        <div><label for="cpNama">Nama lengkap</label><input id="cpNama" type="text" placeholder="Nama nasabah" autocomplete="off"></div>
+      </div>
+      <div class="baris">
+        <div><label for="cpTgl">Tanggal lahir</label><input id="cpTgl" type="date"><div class="usia-live" id="cpUsia">Usia —</div></div>
+        <div><label>Jenis kelamin</label>
+          <div class="segmen" id="cpJK">
+            <button type="button" data-nilai="PRIA" aria-pressed="true">Pria</button>
+            <button type="button" data-nilai="WANITA" aria-pressed="false">Wanita</button>
+          </div>
+        </div>
+      </div>
+      <div class="baris">
+        <div><label for="cpStatus">Status keluarga</label>
+          <select id="cpStatus"><option>Belum menikah</option><option>Menikah</option><option>Cerai</option></select>
+        </div>
+        <div><label for="cpPekerjaan">Pekerjaan</label><input id="cpPekerjaan" type="text" placeholder="Pekerjaan / usaha"></div>
+      </div>
+      <div class="baris">
+        <div><label for="cpPenghasilan">Penghasilan bulanan</label><input id="cpPenghasilan" type="text" inputmode="numeric" placeholder="Rp 0"></div>
+        <div><label for="cpHP">Nomor HP</label><input id="cpHP" type="tel" placeholder="08xxxxxxxxxx"></div>
+      </div>
+      <div class="baris">
+        <div><label for="cpPasangan">Nama pasangan</label><input id="cpPasangan" type="text" placeholder="Opsional"></div>
+        <div><label for="cpAnak">Jumlah anak</label><input id="cpAnak" type="number" min="0" max="20" value="0"></div>
+      </div>
+      <div class="baris satu">
+        <div><label for="cpCatatan">Catatan internal</label><textarea id="cpCatatan" rows="3" placeholder="Catatan singkat untuk kebutuhan planning"></textarea></div>
+      </div>
+    </div>
+    <div class="blok">
+      <h2>Financial snapshot</h2>
+      <p class="catatan">Opsional. Ini adalah kondisi finansial saat ini dan dapat berubah. Jika diisi, modul Analisis Kebutuhan akan menggunakannya otomatis.</p>
+      <div class="baris">
+        <div><label for="cpPengeluaran">Pengeluaran bulanan</label><input id="cpPengeluaran" type="text" inputmode="numeric" placeholder="Rp 0"></div>
+        <div><label for="cpAset">Total aset / investasi</label><input id="cpAset" type="text" inputmode="numeric" placeholder="Rp 0"></div>
+      </div>
+      <div class="baris">
+        <div><label for="cpUtang">Total utang / kewajiban</label><input id="cpUtang" type="text" inputmode="numeric" placeholder="Rp 0"></div>
+        <div><label for="cpKPR">Sisa KPR</label><input id="cpKPR" type="text" inputmode="numeric" placeholder="Rp 0"></div>
+      </div>
+      <div class="baris">
+        <div><label for="cpDanaDarurat">Dana darurat</label><input id="cpDanaDarurat" type="text" inputmode="numeric" placeholder="Rp 0"></div>
+        <div><label for="cpUPJiwa">UP jiwa yang sudah dimiliki</label><input id="cpUPJiwa" type="text" inputmode="numeric" placeholder="Rp 0"></div>
+      </div>
+      <div class="baris">
+        <div><label for="cpUPCI">UP critical illness yang sudah dimiliki</label><input id="cpUPCI" type="text" inputmode="numeric" placeholder="Rp 0"></div>
+        <div><label for="cpHealth">Proteksi kesehatan existing</label><select id="cpHealth"><option value="BELUM">Belum ada / tidak diketahui</option><option value="ADA">Ada</option></select></div>
+      </div>
+    </div>
+    <div class="blok">
+      <h2>Kebutuhan gaya hidup saat pensiun</h2>
+      <p class="catatan">Opsional. Jika diisi di profil, kalkulator Kebutuhan Dana Pensiun akan mengisinya otomatis. Jika kosong, agen tetap bisa mengisi manual di kalkulator.</p>
+      <div class="baris">
+        <div><label for="cpDPRutin">Biaya hidup rutin / bulan</label><input id="cpDPRutin" type="text" inputmode="numeric" placeholder="Rp 0"></div>
+        <div><label for="cpDPLiburan">Jalan-jalan / liburan / bulan</label><input id="cpDPLiburan" type="text" inputmode="numeric" placeholder="Rp 0"></div>
+      </div>
+      <div class="baris">
+        <div><label for="cpDPHobi">Hobi &amp; aktivitas / bulan</label><input id="cpDPHobi" type="text" inputmode="numeric" placeholder="Rp 0"></div>
+        <div><label for="cpDPKeluarga">Membantu keluarga / bulan</label><input id="cpDPKeluarga" type="text" inputmode="numeric" placeholder="Rp 0"></div>
+      </div>
+      <div class="baris">
+        <div><label for="cpDPSehat">Kesehatan / bulan</label><input id="cpDPSehat" type="text" inputmode="numeric" placeholder="Rp 0"></div>
+        <div><label for="cpDPLain">Kebutuhan lain / bulan</label><input id="cpDPLain" type="text" inputmode="numeric" placeholder="Rp 0"></div>
+      </div>
+    </div>
+    <div class="blok">
+      <h2>Keluarga &amp; relasi</h2>
+      <p class="catatan">Profile ini tetap menjadi pusat keluarga. Data di bawah menjadi anggota keluarga yang nantinya dapat dipilih sebagai tertanggung ilustrasi.</p>
+      <div class="baris">
+        <div><label for="cpPasanganRelasi">Nama pasangan</label><input id="cpPasanganRelasi" type="text" placeholder="Opsional"></div>
+        <div><label for="cpPasanganDob">Tanggal lahir pasangan</label><input id="cpPasanganDob" type="date"></div>
+      </div>
+      <div class="baris">
+        <div><label for="cpAyah">Nama ayah</label><input id="cpAyah" type="text" placeholder="Opsional"></div>
+        <div><label for="cpAyahDob">Tanggal lahir ayah</label><input id="cpAyahDob" type="date"></div>
+      </div>
+      <div class="baris">
+        <div><label for="cpIbu">Nama ibu</label><input id="cpIbu" type="text" placeholder="Opsional"></div>
+        <div><label for="cpIbuDob">Tanggal lahir ibu</label><input id="cpIbuDob" type="date"></div>
+      </div>
+      <p class="catatan">Anak tetap diisi pada bagian Data anak di bawah. Untuk kasus lain—misalnya cucu yang dibelikan polis oleh kakek/nenek—tambahkan pada Relasi lain. Data keluarga bersifat opsional dan bisa ditambahkan kapan saja.</p>
+      <div id="cpRelasiLainList"></div>
+      <button class="sakelar" id="cpTambahRelasi" type="button">+ Tambah relasi lain</button>
+    </div>
+    <div class="blok">
+      <h2>Data anak</h2>
+      <p class="catatan">Tambahkan tanggal lahir anak bila ingin analisis pendidikan dihitung per anak. Jumlah anak di atas akan mengikuti daftar ini bila daftar diisi.</p>
+      <div id="cpAnakList"></div>
+      <button class="sakelar" id="cpTambahAnak" type="button">+ Tambah anak</button>
+    </div>
+    <div class="blok">
+      <div class="baris">
+        <button class="aksi" id="cpSimpan" type="button">Simpan profil</button>
+        <button class="sakelar" id="cpReset" type="button">Kosongkan form</button>
+      </div>
+      <p class="catatan" id="cpStatusBar">Data profil disimpan hanya di perangkat ini dan dapat digunakan tanpa internet.</p>
+    </div>
+    <div class="blok">
+      <h2>Profil tersimpan di perangkat ini</h2>
+      <div id="cpDaftar"></div>
+      <p class="catatan">Versi ini menyimpan profil secara lokal sebagai fondasi offline-first. Belum ada sinkronisasi cloud atau login pada tahap ini.</p>
+    </div>
+  </section>
+
+  <section class="layar" id="layarKartuKonsultan">
+    <div class="kop">
+      <h2>Identitas Konsultan</h2>
+      <p>Identitas ini dipakai otomatis pada materi dan dokumen yang akan diberikan kepada nasabah.</p>
+    </div>
+    <div class="blok">
+      <div id="kartuKonsultanPreview"></div>
+    </div>
+    <div class="blok">
+      <h2>Identitas yang tampil di dokumen nasabah</h2>
+      <div class="baris">
+        <div><label for="kkNama">Nama konsultan</label><input id="kkNama" type="text" placeholder="Nama agen"></div>
+        <div><label for="kkJabatan">Jabatan</label><input id="kkJabatan" type="text" placeholder="Financial Consultant"></div>
+      </div>
+      <div class="baris">
+        <div><label for="kkWhatsApp">Nomor WhatsApp</label><input id="kkWhatsApp" type="tel" placeholder="08xxxxxxxxxx"></div>
+        <div><label for="kkEmail">Email</label><input id="kkEmail" type="email" placeholder="Opsional"></div>
+      </div>
+      <div class="baris">
+        <div><label for="kkInstagram">Instagram</label><input id="kkInstagram" type="url" placeholder="https://instagram.com/..." inputmode="url"></div>
+        <div><label for="kkTikTok">TikTok</label><input id="kkTikTok" type="url" placeholder="https://tiktok.com/@..." inputmode="url"></div>
+      </div>
+      <div class="baris">
+        <div><label for="kkFacebook">Facebook</label><input id="kkFacebook" type="url" placeholder="Opsional" inputmode="url"></div>
+        <div><label for="kkLinkedIn">LinkedIn</label><input id="kkLinkedIn" type="url" placeholder="Opsional" inputmode="url"></div>
+      </div>
+      <div class="baris">
+        <div><label for="kkYouTube">YouTube</label><input id="kkYouTube" type="url" placeholder="Opsional" inputmode="url"></div>
+        <div><label for="kkQr">QR WhatsApp di dokumen</label><select id="kkQr"><option value="TIDAK">Tidak ditampilkan</option><option value="YA">Tampilkan bila ada WhatsApp</option></select></div>
+      </div>
+      <p class="catatan">Identitas ini akan ditempel pada materi client-facing saat dicetak/PDF. Foto otomatis memakai foto profile agen yang sudah tersimpan; tidak perlu upload foto kedua.</p>
+      <div class="aksi-row">
+        <button class="aksi" id="kkSimpan" type="button">Simpan identitas dokumen</button>
+        <button class="sakelar" id="kkReset" type="button">Pulihkan identitas saya</button>
+      </div>
+      <p class="catatan" id="kkStatus"></p>
+
+      <div class="blok" id="kkAtasNamaBlok" style="margin-top:14px">
+        <h3>Dibuat untuk agen lain</h3>
+        <p class="catatan">Untuk ilustrasi yang kamu bantu buatkan. Hanya mengubah identitas yang <b>tercetak di dokumen</b>. Poin, presentasi, closing, profil nasabah, dan Library tetap tercatat atas namamu.</p>
+        <div class="baris">
+          <div><label>Identitas pada dokumen</label>
+            <div class="segmen" id="kkAnMode">
+              <button type="button" data-nilai="Tidak" aria-pressed="true">Nama saya</button>
+              <button type="button" data-nilai="Ya" aria-pressed="false">Atas nama agen lain</button>
+            </div>
+          </div>
+          <div><label for="kkAnPilih">Tim tersimpan</label><select id="kkAnPilih"></select></div>
+        </div>
+        <div class="baris">
+          <div><label for="kkAnNama">Nama agen</label><input id="kkAnNama" type="text" placeholder="Nama tenaga pemasar"></div>
+          <div><label for="kkAnKode">Kode agen</label><input id="kkAnKode" type="text" placeholder="Kode keagenan"></div>
+        </div>
+        <div class="baris">
+          <div><label for="kkAnJabatan">Jabatan</label><input id="kkAnJabatan" type="text" placeholder="Financial Consultant"></div>
+          <div><label for="kkAnWa">WhatsApp</label><input id="kkAnWa" type="tel" placeholder="Opsional" inputmode="tel"></div>
+        </div>
+        <div class="baris">
+          <div><label for="kkAnEmail">Email</label><input id="kkAnEmail" type="email" placeholder="Opsional" inputmode="email"></div>
+          <div><label for="kkAnQr">QR WhatsApp di dokumen</label><select id="kkAnQr"><option value="TIDAK">Tidak ditampilkan</option><option value="YA">Tampilkan bila ada WhatsApp</option></select></div>
+        </div>
+        <div class="baris">
+          <div><label for="kkAnInstagram">Instagram</label><input id="kkAnInstagram" type="url" placeholder="Opsional" inputmode="url"></div>
+          <div><label for="kkAnTikTok">TikTok</label><input id="kkAnTikTok" type="url" placeholder="Opsional" inputmode="url"></div>
+        </div>
+        <div class="baris">
+          <div><label for="kkAnFacebook">Facebook</label><input id="kkAnFacebook" type="url" placeholder="Opsional" inputmode="url"></div>
+          <div><label for="kkAnLinkedIn">LinkedIn</label><input id="kkAnLinkedIn" type="url" placeholder="Opsional" inputmode="url"></div>
+        </div>
+        <div class="baris">
+          <div><label for="kkAnYouTube">YouTube</label><input id="kkAnYouTube" type="url" placeholder="Opsional" inputmode="url"></div>
+          <div><label>Foto agen</label>
+            <div class="aksi-row">
+              <label class="sakelar" style="cursor:pointer">Unggah foto<input id="kkAnFoto" type="file" accept="image/*" hidden></label>
+              <button class="sakelar" id="kkAnFotoHapus" type="button">Hapus foto</button>
+            </div>
+          </div>
+        </div>
+        <div id="kkAnFotoPratinjau" class="catatan"></div>
+        <div class="aksi-row">
+          <button class="aksi" id="kkAnSimpan" type="button">Simpan ke tim</button>
+          <button class="sakelar" id="kkAnHapus" type="button">Hapus dari tim</button>
+        </div>
+        <p class="catatan" id="kkAnStatus"></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="layar" id="layarLibraryIlustrasi">
+    <div class="kop">
+      <h2>Library Nasabah</h2>
+      <p>Simpan dan temukan kembali ilustrasi, perbandingan, dan hasil planning berdasarkan nasabah dan keluarganya.</p>
+    </div>
+    <div class="blok tanpa-cetak">
+      <div class="baris">
+        <div><label for="libCari">Cari nasabah / ilustrasi</label><input id="libCari" type="search" placeholder="Nama nasabah, produk, atau judul..." autocomplete="off"></div>
+        <div><label for="libFilterProduk">Filter produk</label><select id="libFilterProduk"><option value="">Semua produk</option></select></div>
+        <div><label for="libFilterKategori">Jenis hasil</label><select id="libFilterKategori"><option value="">Semua jenis</option><option value="Ilustrasi">Ilustrasi</option><option value="Perbandingan">Perbandingan</option><option value="Analisis">Analisis</option><option value="Financial Planning">Financial Planning</option></select></div><div><label for="libFilterSort">Urutkan</label><select id="libFilterSort"><option value="newest">Terbaru</option><option value="oldest">Terlama</option><option value="name">Nama A–Z</option><option value="favorite">Favorit</option></select></div>
+      </div>
+      <div class="aksi-row">
+        <button class="sakelar" id="libRefresh" type="button">↻ Muat ulang</button>
+        <button class="aksi" id="libBatchMeeting" type="button">👨‍👩‍👧‍👦 Buat Paket Meeting</button>
+        <button class="aksi" id="libOnePageSummary" type="button">📄 Ringkasan 1 Halaman</button>
+        <button class="sakelar" id="libHapusSemua" type="button">Hapus semua library</button>
+      </div>
+      <p class="catatan" id="libBatchHint">Pilih beberapa hasil di Library untuk menyusun satu paket meeting. Tidak perlu menghitung ulang.</p>
+    </div>
+    <div class="blok"><div id="libraryIlustrasiList"></div></div>
+  </section>
+
+  <section class="layar" id="layarPlanning">
+    <div class="kop">
+      <h2>Financial Planning</h2>
+      <p>Modul ini akan menjadi ruang perencanaan yang lebih lengkap. Untuk saat ini, gunakan Analisis Kebutuhan atau kalkulator planning yang sudah tersedia.</p>
+    </div>
+    <div class="blok">
+      <h2>Alat perencanaan</h2>
+      <div class="aksi-row">
+        <button class="aksi" id="planningPension" type="button">Kebutuhan Dana Pensiun</button>
+        <button class="aksi" id="planningEducation" type="button">Kebutuhan Dana Pendidikan</button>
+      </div>
+      <p class="catatan" style="margin-top:12px">Kedua alat ini menghitung berapa dana yang perlu disiapkan, sebelum bicara premi. Untuk kebutuhan proteksi jiwa dan critical illness, gunakan kotak Analisis Kebutuhan di halaman utama.</p>
+    </div>
+  </section>
+
+  <section class="layar" id="layarNeeds">
+    <div class="kop">
+      <h2>Analisis Kebutuhan</h2>
+      <p>Modul ini khusus untuk menghitung kebutuhan <b>proteksi jiwa dan critical illness</b> sebagai dasar diskusi sebelum memilih produk.</p>
+    </div>
+    <div class="blok">
+      <h2>Data dasar</h2>
+      <p class="catatan" id="naProfilInfo">Belum ada profil aktif. Kamu tetap bisa mengisi analisis secara manual.</p>
+      <div class="baris">
+        <div><label for="naPenghasilan">Penghasilan bulanan</label><input id="naPenghasilan" type="text" inputmode="numeric" placeholder="Rp 0"></div>
+        <div><label for="naUsia">Usia saat ini</label><input id="naUsia" type="number" min="0" max="100" placeholder="35"></div>
+      </div>
+      <div class="baris">
+        <div><label for="naAnak">Jumlah anak</label><input id="naAnak" type="number" min="0" max="20" value="0"></div>
+      </div>
+      <div class="baris">
+        <div><label for="naMasaPengganti">Masa pengganti penghasilan (tahun)</label><input id="naMasaPengganti" type="number" min="1" max="30" value="10"></div>
+        <div><label for="naUtang">Total utang/kewajiban</label><input id="naUtang" type="text" inputmode="numeric" placeholder="Rp 0"></div>
+      </div>
+      <div class="baris">
+        <div><label for="naCoverage">UP jiwa yang sudah dimiliki</label><input id="naCoverage" type="text" inputmode="numeric" placeholder="Rp 0"></div>
+        <div><label for="naCI">UP critical illness yang sudah dimiliki</label><input id="naCI" type="text" inputmode="numeric" placeholder="Rp 0"></div>
+        <div><label for="naCIMonths">Periode pengganti penghasilan saat sakit kritis (bulan)</label><input id="naCIMonths" type="number" min="1" max="120" value="36"><small class="catatan">Default 36 bulan, tetapi bisa diubah sesuai kebutuhan nasabah.</small></div>
+      </div>
+      <button class="aksi" id="naHitung" type="button">Hitung kebutuhan</button>
+    </div>
+    <div class="blok" id="naHasil">
+      <p class="catatan">Isi data lalu tekan “Hitung kebutuhan”. Hasil ini adalah estimasi kebutuhan awal untuk diskusi, bukan rekomendasi underwriting atau ilustrasi resmi polis.</p>
+    </div>
+  </section>
+
+  <section class="layar" id="layarCompare">
+    <div class="kop">
+      <h2>Perbandingan Solusi</h2>
+      <p>Gunakan hasil analisis kebutuhan untuk melihat produk mana yang relevan dibahas lebih dulu.</p>
+    </div>
+    <div class="blok" id="cmpSummary"><p class="catatan">Belum ada analisis kebutuhan aktif. Kamu tetap bisa menggunakan perbandingan ini setelah membuat analisis.</p></div>
+    <div class="blok tanpa-cetak" id="cmpActions">
+      <div class="aksi-row">
+        <button class="aksi" id="cmpMulaiNeeds" type="button">Mulai Analisis Kebutuhan</button>
+        <button class="sakelar" id="cmpProfile" type="button">Kelola Profil Nasabah</button>
+        <button class="sakelar" id="cmpTblCetak" type="button">Cetak / simpan PDF</button>
+      </div>
+    </div>
+    <div class="blok" id="cmpCards"><p class="catatan">Belum ada hasil analisis untuk dibandingkan.</p></div>
+  </section>
+
+  <section class="layar" id="layarLF">
+    <div class="blok">
+      <h2>Data nasabah</h2>
+      <div class="baris satu">
+        <div><label for="fNama">Nama nasabah</label><input id="fNama" type="text" placeholder="Tulis nama" autocomplete="off"></div>
+      </div>
+      <div class="baris">
+        <div><label for="fTgl">Tanggal lahir</label><input id="fTgl" type="date"></div>
+        <div><label>Jenis kelamin</label>
+          <div class="segmen" id="fJK">
+            <button type="button" data-nilai="PRIA" aria-pressed="true">Pria</button>
+            <button type="button" data-nilai="WANITA" aria-pressed="false">Wanita</button>
+          </div>
+        </div>
+      </div>
+      <div class="baris satu">
+        <div><label for="fAgen">Status agen</label>
+          <select id="fAgen"><option>Reguler Agen</option><option>Previllage Agen</option></select>
+        </div>
+      </div>
+      <p class="catatan" id="infoUsia">Isi tanggal lahir untuk menghitung usia.</p>
+    </div>
+
+    <div class="blok">
+      <h2>Rencana pensiun</h2>
+      <div class="baris">
+        <div><label>Cara setor</label>
+          <div class="segmen" id="fSetoran">
+            <button type="button" data-nilai="Bulanan" aria-pressed="false">Bulanan</button>
+            <button type="button" data-nilai="Tahunan" aria-pressed="true">Tahunan</button>
+          </div>
+        </div>
+        <div><label for="fMPP">Masa bayar (MPP)</label><select id="fMPP"></select></div>
+      </div>
+      <div class="baris satu">
+        <div><label for="fUP">Target dana pensiun</label><select id="fUP"></select><p class="catatan" id="fCatatanLanjutan" hidden></p></div>
+      </div>
+    </div>
+
+    <div class="blok">
+      <h2>Batas tanpa pemeriksaan medis</h2>
+      <div class="batas">
+        <div class="kotak"><div class="k">Batas NM di usia ini</div><div class="v angka" id="nmBiasa">&mdash;</div></div>
+        <div class="kotak sorot"><div class="k">Batas NM jika berstatus HNW</div><div class="v angka" id="nmHNW">&mdash;</div></div>
+      </div>
+      <p class="catatan" id="nmKet"></p>
+    </div>
+
+    <div class="blok">
+      <h2>Setoran per usia pensiun</h2>
+      <div class="rel" id="relUsia"></div>
+    </div>
+
+    <div class="blok">
+      <h2>Aturan yang dipakai</h2>
+      <div id="aturan"></div>
+    </div>
+
+    <div class="blok">
+      <h2>Identitas penyaji</h2>
+      <div class="baris">
+        <div><label for="fAgenNama">Nama agen</label><input id="fAgenNama" type="text" placeholder="Nama penyaji" autocomplete="off"></div>
+        <div><label for="fAgenHP">Kontak</label><input id="fAgenHP" type="tel" placeholder="08xxxxxxxxxx" autocomplete="off"></div>
+      </div>
+      <button class="aksi" id="tblRingkasan">Buka ringkasan untuk nasabah</button>
+    </div>
+  </section>
+
+  <section class="layar" id="layarRingkasan">
+    <div class="kop">
+      <h2>Ilustrasi Dana Pensiun &amp; Proteksi Jiwa</h2>
+      <p>Proteksi seumur hidup dan dana pensiun bertahap</p>
+      <div class="identitas" id="identitas"></div>
+    </div>
+
+    <div class="blok tanpa-cetak">
+      <h2>Usia pensiun yang ditawarkan</h2>
+      <div class="cip" id="cipUsia"></div>
+      <p class="catatan">Matikan usia yang tidak diminati nasabah. Seluruh ringkasan dan totalnya
+        langsung menyesuaikan, tanpa perlu kembali ke kalkulator.</p>
+    </div>
+
+    <div class="blok">
+      <h2>Dana pensiun yang disiapkan</h2>
+      <div class="rel" id="relRingkas"></div>
+    </div>
+
+    <div class="blok">
+      <h2>Total</h2>
+      <div class="ikhtisar" id="ikhtisar"></div>
+    </div>
+
+    <div class="blok">
+      <h2>Diagram manfaat — jika hidup sampai usia pensiun</h2>
+      <div class="lf-chart-wrap" id="grafikPensiun" aria-label="Diagram batang vertikal nilai dana pensiun per usia"></div>
+      <p class="catatan">Mengikuti pilihan usia pensiun yang aktif. Setiap titik menunjukkan dana yang cair pada usia tersebut dan setoran yang diperlukan untuk titik itu.</p>
+    </div>
+
+    <div class="blok">
+      <h2>Diagram manfaat — jika meninggal pada suatu periode</h2>
+      <div class="lf-chart-wrap lf-chart-wrap-jiwa" id="grafikJiwa" aria-label="Diagram batang vertikal santunan meninggal per periode"></div>
+      <p class="catatan">Nilai tiap titik mengikuti perhitungan sisa santunan jiwa pada periode tersebut. Tidak menambahkan manfaat di luar hasil mesin Lite Future.</p>
+    </div>
+
+    <div class="blok">
+      <p class="catatan" id="sangkalan"></p>
+      <div class="kaki" id="kakiAgen"></div>
+    </div>
+
+    <!-- Tabel pembebasan premi waiver Lite Future. Diletakkan paling bawah,
+         sesudah seluruh ringkasan dan grafik, sesuai permintaan. -->
+    <div id="lfWaiverBlok"></div>
+
+    <div class="blok tanpa-cetak">
+      <button class="aksi" id="tblCetak">Cetak atau simpan sebagai PDF</button>
+      <p class="catatan">Pilih "Simpan sebagai PDF" di layar cetak, lalu kirim berkasnya ke nasabah
+        lewat WhatsApp atau email. Tombol dan kotak pilihan tidak ikut tercetak.</p>
+    </div>
+  </section>
+
+  <!-- ===== BeSMART Lite - 100 + rider Lite UP + GHP ===== -->
+  <section class="layar" id="layarBSL">
+    <div class="blok">
+      <h2>Data nasabah</h2>
+      <div class="baris satu">
+        <div><label for="bNama">Nama nasabah</label>
+          <input id="bNama" type="text" placeholder="Tulis nama" autocomplete="off"></div>
+      </div>
+      <div class="baris">
+        <div><label for="bTgl">Tanggal lahir</label><input id="bTgl" type="date"></div>
+        <div><label>Jenis kelamin</label>
+          <div class="segmen" id="bJK">
+            <button type="button" data-nilai="PRIA" aria-pressed="true">Pria</button>
+            <button type="button" data-nilai="WANITA" aria-pressed="false">Wanita</button>
+          </div>
+        </div>
+      </div>
+      <p class="catatan" id="bInfoUsia">Isi tanggal lahir untuk menghitung usia masuk.</p>
+    </div>
+
+    <div class="blok">
+      <h2>Rencana polis</h2>
+      <div class="baris">
+        <div><label>Masa bayar</label>
+          <div class="segmen" id="bMPP">
+            <button type="button" data-nilai="3" aria-pressed="false">3 th</button>
+            <button type="button" data-nilai="5" aria-pressed="true">5 th</button>
+            <button type="button" data-nilai="10" aria-pressed="false">10 th</button>
+            <button type="button" data-nilai="15" aria-pressed="false">15 th</button>
+            <button type="button" data-nilai="20" aria-pressed="false">20 th</button>
+          </div>
+        </div>
+        <div><label>Metode bayar</label>
+          <div class="segmen" id="bMetode">
+            <button type="button" data-nilai="Bulanan" aria-pressed="true">Bulanan</button>
+            <button type="button" data-nilai="Tahunan" aria-pressed="false">Tahunan</button>
+          </div>
+        </div>
+      </div>
+      <div class="baris">
+        <div><label for="bUP">UP Dasar</label>
+          <input id="bUP" type="text" inputmode="numeric" autocomplete="off" value="50.000.000">
+          <p class="catatan">Minimum Rp50.000.000.</p></div>
+        <div><label>Rider Lite UP 400%</label>
+          <div class="segmen" id="bLiteUp">
+            <button type="button" data-nilai="Ya" aria-pressed="false">Ambil</button>
+            <button type="button" data-nilai="Tidak" aria-pressed="true">Tidak</button>
+          </div>
+          <p class="catatan">Menambah 400% dari UP Dasar.</p></div>
+      </div>
+      <p class="catatan" id="bInfoUP"></p>
+
+      <div class="baris">
+        <div><label>Ambil rider kesehatan GHP</label>
+          <div class="segmen" id="bRider">
+            <button type="button" data-nilai="Tidak" aria-pressed="true">Tidak</button>
+            <button type="button" data-nilai="Ya" aria-pressed="false">Ya</button>
+          </div>
+        </div>
+        <div><label for="bPlanGhp">Plan kesehatan</label>
+          <select id="bPlanGhp"></select></div>
+      </div>
+      <p class="catatan" id="bCatatanGhp"></p>
+      <div id="bTabelSemuaGhp" class="tanpa-cetak" style="margin-top:10px"></div>
+      <div id="bBandingGhp" class="blok tanpa-cetak" style="margin:12px 0"></div>
+      <p class="catatan">Perlindungan berjalan sampai usia 100 tahun.</p>
+    </div>
+
+    <div class="blok">
+      <h2>Hasil</h2>
+      <div id="bHasil"></div>
+    </div>
+
+    <div class="blok">
+      <h2>Manfaat</h2>
+      <div class="fase" id="bFase"></div>
+    </div>
+
+    <div class="blok">
+      <h2>Aturan yang dipakai</h2>
+      <div id="bAturan"></div>
+    </div>
+
+    <div class="blok">
+      <h2>Identitas penyaji</h2>
+      <div class="baris">
+        <div><label for="bAgenNama">Nama agen</label>
+          <input id="bAgenNama" type="text" placeholder="Nama penyaji" autocomplete="off"></div>
+        <div><label for="bAgenHP">Kontak</label>
+          <input id="bAgenHP" type="tel" placeholder="08xxxxxxxxxx" autocomplete="off"></div>
+      </div>
+      <div id="bandingKotak_BSL" class="blok tanpa-cetak" style="margin:14px 0"></div>
+      <button class="aksi" id="bTblTimeline">Buka timeline untuk nasabah</button>
+    </div>
+  </section>
+
+  <!-- ===== Timeline BSL ===== -->
+  <section class="layar" id="layarBSLTime">
+    <div class="kop">
+      <h2>Proteksi Jiwa Seumur Hidup</h2>
+      <p>BeSMART Lite - 100 + rider Lite UP + GHP &mdash; proteksi jiwa sampai 100 tahun, bayar 3/5/10/15/20 tahun</p>
+      <div class="identitas" id="bIdentitas"></div>
+    </div>
+
+    <div class="blok" id="bKotakRingkas"></div>
+
+    <div class="blok">
+      <h2>Perjalanan polis</h2>
+      <div class="fase" id="bFaseTime"></div>
+    </div>
+
+    <div class="blok">
+      <h2>Tahun per tahun</h2>
+      <div class="gulir"><table class="tahunan" id="bTabel"></table></div>
+      <p class="catatan" id="bCatatanTabel"></p>
+    </div>
+
+    <div class="blok">
+      <p class="catatan" id="bSangkalan"></p>
+      <div class="kaki" id="bKakiAgen"></div>
+    </div>
+
+    <div class="blok tanpa-cetak">
+      <button class="aksi" id="bTblCetak">Cetak atau simpan sebagai PDF</button>
+      <p class="catatan">Pilih "Simpan sebagai PDF" di layar cetak, lalu kirim berkasnya ke nasabah.</p>
+    </div>
+  </section>
+
+  <!-- ===== Cristal Prime ===== -->
+  <section class="layar" id="layarCRIS">
+    <div class="blok">
+      <h2>Data nasabah</h2>
+      <div class="baris satu">
+        <div><label for="cNama">Nama nasabah</label>
+          <input id="cNama" type="text" placeholder="Tulis nama" autocomplete="off"></div>
+      </div>
+      <div class="baris">
+        <div><label for="cTgl">Tanggal lahir</label><input id="cTgl" type="date"></div>
+        <div><label>Jenis kelamin</label>
+          <div class="segmen" id="cJK">
+            <button type="button" data-nilai="PRIA" aria-pressed="true">Pria</button>
+            <button type="button" data-nilai="WANITA" aria-pressed="false">Wanita</button>
+          </div>
+        </div>
+      </div>
+      <p class="catatan" id="cInfoUsia">Isi tanggal lahir untuk menghitung usia.</p>
+    </div>
+
+    <div class="blok">
+      <h2>Rencana polis</h2>
+      <div class="baris">
+        <div><label>Lama bayar</label>
+          <div class="segmen" id="cBayar">
+            <button type="button" data-nilai="3" aria-pressed="false">3 thn</button>
+            <button type="button" data-nilai="5" aria-pressed="false">5 thn</button>
+            <button type="button" data-nilai="10" aria-pressed="true">10 thn</button>
+          </div>
+        </div>
+        <div><label>Lama perlindungan</label>
+          <div class="segmen" id="cLindung">
+            <button type="button" data-nilai="15" aria-pressed="false">15 thn</button>
+            <button type="button" data-nilai="20" aria-pressed="false">20 thn</button>
+            <button type="button" data-nilai="25" aria-pressed="true">25 thn</button>
+          </div>
+        </div>
+      </div>
+      <div class="baris">
+        <div><label for="cUP">Uang pertanggungan sakit kritis</label>
+          <input id="cUP" type="text" inputmode="numeric" autocomplete="off" value="1.000.000.000"></div>
+        <div><label>Metode bayar</label>
+          <div class="segmen" id="cMetode">
+            <button type="button" data-nilai="Bulanan" aria-pressed="false">Bulanan</button>
+            <button type="button" data-nilai="Tahunan" aria-pressed="true">Tahunan</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="blok">
+      <h2>Hasil</h2>
+      <div id="cHasil"></div>
+    </div>
+
+    <div class="blok">
+      <h2>Manfaat</h2>
+      <div class="fase" id="cFase"></div>
+    </div>
+
+    <div class="blok">
+      <h2>Aturan yang dipakai</h2>
+      <div id="cAturan"></div>
+    </div>
+
+    <div class="blok">
+      <h2>Identitas penyaji</h2>
+      <div class="baris">
+        <div><label for="cAgenNama">Nama agen</label>
+          <input id="cAgenNama" type="text" placeholder="Nama penyaji" autocomplete="off"></div>
+        <div><label for="cAgenHP">Kontak</label>
+          <input id="cAgenHP" type="tel" placeholder="08xxxxxxxxxx" autocomplete="off"></div>
+      </div>
+      <div id="bandingKotak_CRIS" class="blok tanpa-cetak" style="margin:14px 0"></div>
+      <button class="aksi" id="cTblIlustrasi">Buka ilustrasi untuk nasabah</button>
+    </div>
+  </section>
+
+  <!-- ===== Ilustrasi Cristal Prime ===== -->
+  <section class="layar" id="layarCRISIlus">
+    <div class="kop">
+      <h2>Perlindungan Sakit Kritis</h2>
+      <p>Cristal Prime &mdash; 66 kondisi kritis, dana kembali jika tetap sehat</p>
+      <div class="identitas" id="cIdentitas"></div>
+    </div>
+
+    <div class="blok" id="cKotakRingkas"></div>
+
+    <div class="blok">
+      <h2>Yang didapat nasabah</h2>
+      <div class="fase" id="cFaseIlus"></div>
+    </div>
+
+    <div class="blok">
+      <h2>Tahun per tahun</h2>
+      <div class="gulir"><table class="tahunan" id="cTabel"></table></div>
+      <p class="catatan" id="cCatatanTabel"></p>
+    </div>
+
+    <div class="blok">
+      <p class="catatan" id="cSangkalan"></p>
+      <div class="kaki" id="cKakiAgen"></div>
+    </div>
+
+    <div class="blok tanpa-cetak">
+      <button class="aksi" id="cTblCetak">Cetak atau simpan sebagai PDF</button>
+      <p class="catatan">Pilih "Simpan sebagai PDF" di layar cetak, lalu kirim berkasnya ke nasabah.</p>
+    </div>
+  </section>
+
+  <!-- ===== New Cemerlang Prime ===== -->
+  <section class="layar" id="layarCEM">
+    <div class="blok">
+      <h2>Data nasabah</h2>
+      <div class="baris satu">
+        <div><label for="mNama">Nama nasabah</label>
+          <input id="mNama" type="text" placeholder="Tulis nama" autocomplete="off"></div>
+      </div>
+      <div class="baris">
+        <div><label for="mTgl">Tanggal lahir</label><input id="mTgl" type="date"></div>
+        <div><label>Jenis kelamin</label>
+          <div class="segmen" id="mJK">
+            <button type="button" data-nilai="PRIA" aria-pressed="true">Pria</button>
+            <button type="button" data-nilai="WANITA" aria-pressed="false">Wanita</button>
+          </div>
+        </div>
+      </div>
+      <p class="catatan" id="mInfoUsia">Isi tanggal lahir untuk menghitung usia.</p>
+    </div>
+
+    <div class="blok">
+      <h2>Rencana polis</h2>
+      <div class="baris">
+        <div><label>Lama bayar</label>
+          <div class="segmen" id="mBayar">
+            <button type="button" data-nilai="3" aria-pressed="false">3 thn</button>
+            <button type="button" data-nilai="5" aria-pressed="false">5 thn</button>
+            <button type="button" data-nilai="10" aria-pressed="true">10 thn</button>
+          </div>
+        </div>
+        <div><label>Lama perlindungan</label>
+          <div class="segmen" id="mLindung">
+            <button type="button" data-nilai="15" aria-pressed="false">15 thn</button>
+            <button type="button" data-nilai="20" aria-pressed="false">20 thn</button>
+            <button type="button" data-nilai="25" aria-pressed="true">25 thn</button>
+          </div>
+        </div>
+      </div>
+      <div class="baris">
+        <div><label for="mUP">Uang pertanggungan jiwa</label>
+          <input id="mUP" type="text" inputmode="numeric" autocomplete="off" value="1.000.000.000"></div>
+        <div><label>Metode bayar</label>
+          <div class="segmen" id="mMetode">
+            <button type="button" data-nilai="Bulanan" aria-pressed="false">Bulanan</button>
+            <button type="button" data-nilai="Tahunan" aria-pressed="true">Tahunan</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="blok">
+      <h2>Hasil</h2>
+      <div id="mHasil"></div>
+    </div>
+
+    <div class="blok">
+      <h2>Manfaat</h2>
+      <div class="fase" id="mFase"></div>
+    </div>
+
+    <div class="blok">
+      <h2>Aturan yang dipakai</h2>
+      <div id="mAturan"></div>
+    </div>
+
+    <div class="blok">
+      <h2>Identitas penyaji</h2>
+      <div class="baris">
+        <div><label for="mAgenNama">Nama agen</label>
+          <input id="mAgenNama" type="text" placeholder="Nama penyaji" autocomplete="off"></div>
+        <div><label for="mAgenHP">Kontak</label>
+          <input id="mAgenHP" type="tel" placeholder="08xxxxxxxxxx" autocomplete="off"></div>
+      </div>
+      <div id="bandingKotak_CEM" class="blok tanpa-cetak" style="margin:14px 0"></div>
+      <button class="aksi" id="mTblIlustrasi">Buka ilustrasi untuk nasabah</button>
+    </div>
+  </section>
+
+  <!-- ===== Ilustrasi Cemerlang Prime ===== -->
+  <section class="layar" id="layarCEMIlus">
+    <div class="kop">
+      <h2>Proteksi Jiwa &amp; Pengembalian Premi</h2>
+      <p>New Cemerlang Prime &mdash; terlindungi, dan premi kembali di akhir kontrak</p>
+      <div class="identitas" id="mIdentitas"></div>
+    </div>
+
+    <div class="blok" id="mKotakRingkas"></div>
+
+    <div class="blok">
+      <h2>Yang didapat nasabah</h2>
+      <div class="fase" id="mFaseIlus"></div>
+    </div>
+
+    <div class="blok">
+      <h2>Tahun per tahun</h2>
+      <div class="gulir"><table class="tahunan" id="mTabel"></table></div>
+      <p class="catatan" id="mCatatanTabel"></p>
+    </div>
+
+    <div class="blok">
+      <p class="catatan" id="mSangkalan"></p>
+      <div class="kaki" id="mKakiAgen"></div>
+    </div>
+
+    <div class="blok tanpa-cetak">
+      <button class="aksi" id="mTblCetak">Cetak atau simpan sebagai PDF</button>
+      <p class="catatan">Pilih "Simpan sebagai PDF" di layar cetak, lalu kirim berkasnya ke nasabah.</p>
+    </div>
+  </section>
+
+  <!-- ===== Kombinasi GSPA + Lite Future ===== -->
+  <section class="layar" id="layarKMB">
+    <div class="blok">
+      <h2>Data nasabah</h2>
+      <div class="baris satu">
+        <div><label for="kNama">Nama nasabah</label>
+          <input id="kNama" type="text" placeholder="Tulis nama" autocomplete="off"></div>
+      </div>
+      <div class="baris">
+        <div><label for="kTgl">Tanggal lahir</label><input id="kTgl" type="date"></div>
+        <div><label>Jenis kelamin</label>
+          <div class="segmen" id="kJK">
+            <button type="button" data-nilai="PRIA" aria-pressed="true">Pria</button>
+            <button type="button" data-nilai="WANITA" aria-pressed="false">Wanita</button>
+          </div>
+        </div>
+      </div>
+      <p class="catatan" id="kInfoUsia">Isi tanggal lahir untuk menghitung usia.</p>
+    </div>
+
+    <div class="blok">
+      <h2>Gen Aman (GSPA)</h2>
+      <div class="baris">
+        <div><label>Masa bayar GSPA</label>
+          <div class="segmen" id="kMppG">
+            <button type="button" data-nilai="5" aria-pressed="true">5 thn</button>
+            <button type="button" data-nilai="10" aria-pressed="false">10 thn</button>
+            <button type="button" data-nilai="15" aria-pressed="false">15 thn</button>
+          </div>
+        </div>
+        <div><label>Metode bayar GSPA</label>
+          <div class="segmen" id="kMetG">
+            <button type="button" data-nilai="Bulanan" aria-pressed="false">Bulanan</button>
+            <button type="button" data-nilai="Tahunan" aria-pressed="true">Tahunan</button>
+          </div>
+        </div>
+      </div>
+      <div class="baris">
+        <div><label>Rider Waiver Gen Aman</label>
+          <div class="segmen" id="kWaiverG">
+            <button type="button" data-nilai="Ya" aria-pressed="true">Ambil</button>
+            <button type="button" data-nilai="Tidak" aria-pressed="false">Tidak</button>
+          </div>
+          <p class="catatan">Membebaskan kontribusi dasar bila peserta terdiagnosa penyakit kritis sesuai ketentuan polis.</p>
+        </div>
+        <div></div>
+      </div>
+      <div class="baris satu">
+        <div><label for="kUpG">UP GSPA</label>
+          <input id="kUpG" type="text" inputmode="numeric" autocomplete="off" value="1.000.000.000"></div>
+      </div>
+    </div>
+
+    <div class="blok">
+      <h2>Lite Future</h2>
+      <div class="baris">
+        <div><label for="kPensiun">Usia pensiun</label><select id="kPensiun"></select></div>
+        <div><label for="kMppL">Masa bayar Lite Future</label><select id="kMppL"></select></div>
+      </div>
+      <div class="baris">
+        <div><label for="kUpL">UP Lite Future</label><select id="kUpL"></select></div>
+        <div><label>Metode bayar Lite Future</label>
+          <div class="segmen" id="kMetL">
+            <button type="button" data-nilai="Bulanan" aria-pressed="false">Bulanan</button>
+            <button type="button" data-nilai="Tahunan" aria-pressed="true">Tahunan</button>
+          </div>
+        </div>
+      </div>
+      <div class="sorotan" id="kBooster"></div>
+    </div>
+
+    <div class="blok">
+      <h2>Hasil</h2>
+      <div id="kHasil"></div>
+    </div>
+
+    <div class="blok">
+      <h2>Aturan yang dipakai</h2>
+      <div id="kAturan"></div>
+    </div>
+
+    <div class="blok">
+      <h2>Identitas penyaji</h2>
+      <div class="baris">
+        <div><label for="kAgenNama">Nama agen</label>
+          <input id="kAgenNama" type="text" placeholder="Nama penyaji" autocomplete="off"></div>
+        <div><label for="kAgenHP">Kontak</label>
+          <input id="kAgenHP" type="tel" placeholder="08xxxxxxxxxx" autocomplete="off"></div>
+      </div>
+      <button class="aksi" id="kTblRingkas">Buka ringkasan untuk nasabah</button>
+    </div>
+  </section>
+
+  <!-- ===== Ringkasan Kombinasi ===== -->
+  <section class="layar" id="layarKMBRingkas">
+    <div class="kop">
+      <h2>Perlindungan Jiwa &amp; Dana Pensiun</h2>
+      <p>Gen Aman dipadukan dengan BeSMART Lite Future dalam satu rencana</p>
+      <div class="identitas" id="kIdentitas"></div>
+    </div>
+
+    <div class="blok" id="kKotakRingkas"></div>
+
+    <div class="blok">
+      <h2>Satu program, dua tujuan</h2>
+      <div class="fase" id="kFase"></div>
+    </div>
+
+    <div class="blok">
+      <h2>Rincian kontribusi</h2>
+      <div class="gulir"><table class="tahunan" id="kTabel"></table></div>
+    </div>
+
+    <div class="blok" id="kBlokManfaat">
+      <h2>Manfaat dalam satu program</h2>
+      <div id="kManfaatGabungan"></div>
+    </div>
+
+    <div class="blok">
+      <p class="catatan" id="kSangkalan"></p>
+      <div class="kaki" id="kKakiAgen"></div>
+    </div>
+
+    <div class="blok tanpa-cetak">
+      <button class="aksi" id="kTblCetak">Cetak atau simpan sebagai PDF</button>
+      <p class="catatan">Pilih "Simpan sebagai PDF" di layar cetak, lalu kirim berkasnya ke nasabah.</p>
+    </div>
+  </section>
+
+  <!-- ===== Gen Aman (GSPA) ===== -->
+  <section class="layar" id="layarGSPA">
+    <div class="blok">
+      <h2>Data nasabah</h2>
+      <div class="baris satu">
+        <div><label for="gNama">Nama nasabah</label>
+          <input id="gNama" type="text" placeholder="Tulis nama" autocomplete="off"></div>
+      </div>
+      <div class="baris">
+        <div><label for="gTgl">Tanggal lahir</label><input id="gTgl" type="date"></div>
+        <div><label>Jenis kelamin</label>
+          <div class="segmen" id="gJK">
+            <button type="button" data-nilai="Pria" aria-pressed="true">Pria</button>
+            <button type="button" data-nilai="Wanita" aria-pressed="false">Wanita</button>
+          </div>
+        </div>
+      </div>
+      <div class="baris">
+        <div><label>Masa bayar</label>
+          <div class="segmen" id="gMpp">
+            <button type="button" data-nilai="5" aria-pressed="true">5 thn</button>
+            <button type="button" data-nilai="10" aria-pressed="false">10 thn</button>
+            <button type="button" data-nilai="15" aria-pressed="false">15 thn</button>
+          </div>
+        </div>
+        <div><label>Metode bayar</label>
+          <div class="segmen" id="gMetode">
+            <button type="button" data-nilai="Bulanan" aria-pressed="false">Bulanan</button>
+            <button type="button" data-nilai="Tahunan" aria-pressed="true">Tahunan</button>
+          </div>
+        </div>
+      </div>
+      <p class="catatan" id="gInfoUsia">Isi tanggal lahir untuk menghitung usia.</p>
+    </div>
+
+    <div class="blok">
+      <h2>Cara menentukan UP</h2>
+      <div class="baris satu">
+        <div><label>Pendekatan</label>
+          <div class="segmen" id="gMode">
+            <button type="button" data-nilai="By UP" aria-pressed="true">Dari UP</button>
+            <button type="button" data-nilai="By Premi Net" aria-pressed="false">Dari premi</button>
+          </div>
+        </div>
+      </div>
+      <div class="baris satu" id="gBarisUP">
+        <div><label for="gUpDasar">UP Dasar</label>
+          <input id="gUpDasar" type="text" inputmode="numeric" autocomplete="off" value="1.000.000.000"></div>
+      </div>
+      <div class="baris satu" id="gBarisPremi" style="display:none">
+        <div><label for="gPremiNet">Premi net UP Dasar</label>
+          <input id="gPremiNet" type="text" inputmode="numeric" autocomplete="off" value="10.000.000"></div>
+      </div>
+      <p class="catatan" id="gPetunjuk"></p>
+    </div>
+
+    <div class="blok">
+      <h2>Wakaf</h2>
+      <div class="baris satu">
+        <div><label>Mode</label>
+          <div class="segmen" id="gWakaf">
+            <button type="button" data-nilai="Non Wakaf" aria-pressed="true">Non Wakaf</button>
+            <button type="button" data-nilai="Wakaf" aria-pressed="false">Wakaf</button>
+          </div>
+        </div>
+      </div>
+      <div id="gBarisWakaf" style="display:none">
+        <div class="baris">
+          <div><label for="gNilaiWakaf">Nilai yang diwakafkan</label>
+            <input id="gNilaiWakaf" type="text" inputmode="numeric" autocomplete="off" value="100.000.000"></div>
+          <div><label for="gPersenWakaf">Persentase wakaf</label><select id="gPersenWakaf"></select></div>
+        </div>
+        <p class="catatan">UP Dasar tidak dapat diwakafkan. Term Life dihitung otomatis
+          dari nilai wakaf dibagi persentasenya, dan preminya tidak mendapat diskon.</p>
+      </div>
+    </div>
+
+    <div class="blok">
+      <h2>Rider pembebasan kontribusi (Waiver)</h2>
+      <div class="baris satu">
+        <div><label>Ambil rider Waiver</label>
+          <div class="segmen" id="gWaiverRider">
+            <button type="button" data-nilai="Tidak" aria-pressed="true">Tidak</button>
+            <button type="button" data-nilai="Ya" aria-pressed="false">Ya</button>
+          </div>
+        </div>
+      </div>
+      <p class="catatan" id="gCatatanWaiver">Waiver membebaskan kontribusi santunan dasar
+        bila peserta terdiagnosa salah satu dari 66 penyakit kritis sesuai ketentuan polis.</p>
+    </div>
+
+    <div class="blok">
+      <h2>Rider kesehatan GHPS</h2>
+      <div class="baris satu">
+        <div><label>Ambil rider GHPS</label>
+          <div class="segmen" id="gRider">
+            <button type="button" data-nilai="Tidak" aria-pressed="true">Tidak</button>
+            <button type="button" data-nilai="Ya" aria-pressed="false">Ya</button>
+          </div>
+        </div>
+      </div>
+      <div id="gBlokGhps" style="display:none">
+        <div class="baris satu">
+          <div><label for="gPlanGhps">Plan GHPS</label><select id="gPlanGhps"></select></div>
+        </div>
+        <div id="gTabelSemuaGhp" class="tanpa-cetak" style="margin-top:10px"></div>
+        <div id="gBandingGhp" class="blok tanpa-cetak" style="margin:12px 0"></div>
+        <div id="gTabelPlanKotak">
+          <div class="gulir"><table class="tahunan" id="gTabelPlan"></table></div>
+          <p class="catatan">Satu peserta hanya boleh mengambil satu plan. Ketuk plan yang
+            diinginkan di daftar pilihan di atas.</p>
+        </div>
+      </div>
+      <p class="catatan tegas" id="gWajibRider"></p>
+      <p class="catatan" id="gCatatanRider">Rider ini menambah premi. Kalau tidak diambil,
+        seluruh angka di bawah hanya menghitung santunan dasar.</p>
+    </div>
+
+    <div class="blok">
+      <h2>Hasil</h2>
+      <div id="gHasil"></div>
+    </div>
+
+    <div class="blok">
+      <h2>Manfaat</h2>
+      <div class="fase" id="gFase"></div>
+    </div>
+
+    <div class="blok">
+      <h2>Aturan yang dipakai</h2>
+      <div id="gAturan"></div>
+    </div>
+
+    <div class="blok">
+      <h2>Identitas penyaji</h2>
+      <div class="baris">
+        <div><label for="gAgenNama">Nama agen</label>
+          <input id="gAgenNama" type="text" placeholder="Nama penyaji" autocomplete="off"></div>
+        <div><label for="gAgenHP">Kontak</label>
+          <input id="gAgenHP" type="tel" placeholder="08xxxxxxxxxx" autocomplete="off"></div>
+      </div>
+      <div id="bandingKotak_GSPA" class="blok tanpa-cetak" style="margin:14px 0"></div>
+      <button class="aksi" id="gTblTimeline">Buka timeline untuk nasabah</button>
+    </div>
+  </section>
+
+  <!-- ===== Timeline GSPA ===== -->
+  <section class="layar" id="layarGSPATime">
+    <div class="kop">
+      <h2>Perlindungan Jiwa Gen Aman</h2>
+      <p id="gSubKop">Santunan yang tumbuh 7,5% setiap 5 tahun, sampai usia 100</p>
+      <div class="identitas" id="gIdentitas"></div>
+    </div>
+
+    <div class="blok" id="gKotakRingkas"></div>
+
+    <div class="blok">
+      <h2>Perjalanan polis</h2>
+      <div class="fase" id="gFaseTime"></div>
+    </div>
+
+    <div class="blok">
+      <h2>Perjalanan santunan</h2>
+      <div class="gulir"><table class="tahunan" id="gTabel"></table></div>
+      <p class="catatan" id="gCatatanTabel"></p>
+    </div>
+
+    <div class="blok" id="gBlokWaiverRingkas">
+      <h2>Rider pembebasan kontribusi (Waiver)</h2>
+      <div class="gulir"><table class="tahunan" id="gTabelWaiver"></table></div>
+      <p class="catatan" id="gCatatanWaiverRingkas"></p>
+    </div>
+
+    <div class="blok" id="gBlokRiderRingkas">
+      <h2>Rider kesehatan GHPS</h2>
+      <div class="gulir"><table class="tahunan" id="gTabelRider"></table></div>
+      <h2 style="margin-top:18px">Manfaat plan yang dipilih</h2>
+      <div class="gulir"><table class="tahunan" id="gTabelPlanGhps"></table></div>
+      <h2 style="margin-top:18px">Reward tanpa klaim</h2>
+      <div class="gulir"><table class="tahunan" id="gTabelNcbGhps"></table></div>
+      <div class="gulir" style="margin-top:12px">
+        <table class="tahunan" id="gTabelNcdGhps"></table></div>
+      <p class="catatan" id="gCatatanRiderRingkas"></p>
+      <div id="gTungguGhps"></div>
+      <div id="gTunggu12"></div>
+    </div>
+
+    <div class="blok">
+      <h2>Manfaat tambahan yang selalu melekat</h2>
+      <div class="gulir"><table class="tahunan" id="gTabelTambahan"></table></div>
+      <p class="catatan" id="gCatatanTambahan"></p>
+    </div>
+
+    <div class="blok">
+      <h2>Nilai kenaikan 7,5% yang tidak dipungut biaya</h2>
+      <p class="catatan" id="gPengantarBooster"></p>
+      <div class="gulir"><table class="tahunan" id="gTabelBooster"></table></div>
+      <p class="catatan" id="gCatatanBooster"></p>
+    </div>
+
+    <div class="blok">
+      <p class="catatan" id="gSangkalan"></p>
+      <div class="kaki" id="gKakiAgen"></div>
+    </div>
+
+    <div class="blok tanpa-cetak">
+      <button class="aksi" id="gTblCetak">Cetak atau simpan sebagai PDF</button>
+      <p class="catatan">Pilih "Simpan sebagai PDF" di layar cetak, lalu kirim berkasnya ke nasabah.</p>
+    </div>
+  </section>
+
+  <!-- ===== iFLEXYGUARD 5 ===== -->
+  <section class="layar" id="layarFLEX">
+    <div class="blok">
+      <h2>Data nasabah</h2>
+      <div class="baris satu">
+        <div><label for="xNama">Nama nasabah</label>
+          <input id="xNama" type="text" placeholder="Tulis nama" autocomplete="off"></div>
+      </div>
+      <div class="baris">
+        <div><label for="xTgl">Tanggal lahir</label><input id="xTgl" type="date"></div>
+        <div><label>Masa bayar</label>
+          <div class="segmen" id="xMpp">
+            <button type="button" data-nilai="5" aria-pressed="true">5 thn</button>
+            <button type="button" data-nilai="10" aria-pressed="false">10 thn</button>
+          </div>
+        </div>
+      </div>
+      <div class="baris">
+        <div><label for="xUP">UP Dasar</label>
+          <input id="xUP" type="text" inputmode="numeric" autocomplete="off" value="1.000.000.000"></div>
+        <div><label>Metode bayar</label>
+          <div class="segmen" id="xMetode">
+            <button type="button" data-nilai="Bulanan" aria-pressed="false">Bulanan</button>
+            <button type="button" data-nilai="Tahunan" aria-pressed="true">Tahunan</button>
+          </div>
+        </div>
+      </div>
+      <p class="catatan" id="xInfoUsia">Isi tanggal lahir untuk menghitung usia masuk.</p>
+    </div>
+
+    <div class="blok">
+      <h2>Hasil</h2>
+      <div id="xHasil"></div>
+    </div>
+
+    <div class="blok">
+      <h2>Manfaat</h2>
+      <div class="fase" id="xFase"></div>
+    </div>
+
+    <div class="blok">
+      <h2>Aturan yang dipakai</h2>
+      <div id="xAturan"></div>
+    </div>
+
+    <div class="blok">
+      <h2>Identitas penyaji</h2>
+      <div class="baris">
+        <div><label for="xAgenNama">Nama agen</label>
+          <input id="xAgenNama" type="text" placeholder="Nama penyaji" autocomplete="off"></div>
+        <div><label for="xAgenHP">Kontak</label>
+          <input id="xAgenHP" type="tel" placeholder="08xxxxxxxxxx" autocomplete="off"></div>
+      </div>
+      <div id="bandingKotak_FLEX" class="blok tanpa-cetak" style="margin:14px 0"></div>
+      <button class="aksi" id="xTblIlustrasi">Buka ilustrasi untuk nasabah</button>
+    </div>
+  </section>
+
+  <!-- ===== Ilustrasi iFLEXYGUARD ===== -->
+  <section class="layar" id="layarFLEXIlus">
+    <div class="kop">
+      <h2>Proteksi Jiwa yang Naik Sendiri</h2>
+      <p>iFLEXYGUARD 5 &mdash; manfaat meninggal naik bertahap, ada Bonus 75</p>
+      <div class="identitas" id="xIdentitas"></div>
+    </div>
+
+    <div class="blok" id="xKotakRingkas"></div>
+
+    <div class="blok">
+      <h2>Yang didapat nasabah</h2>
+      <div class="fase" id="xFaseIlus"></div>
+    </div>
+
+    <div class="blok">
+      <h2>Tangga manfaat</h2>
+      <div class="gulir"><table class="tahunan" id="xTabelManfaat"></table></div>
+      <p class="catatan" id="xCatatanManfaat"></p>
+    </div>
+
+    <div class="blok">
+      <h2>Tahun per tahun</h2>
+      <div class="gulir"><table class="tahunan" id="xTabel"></table></div>
+      <p class="catatan" id="xCatatanTabel"></p>
+    </div>
+
+    <div class="blok">
+      <p class="catatan" id="xSangkalan"></p>
+      <div class="kaki" id="xKakiAgen"></div>
+    </div>
+
+    <div class="blok tanpa-cetak">
+      <button class="aksi" id="xTblCetak">Cetak atau simpan sebagai PDF</button>
+      <p class="catatan">Pilih "Simpan sebagai PDF" di layar cetak, lalu kirim berkasnya ke nasabah.</p>
+    </div>
+  </section>
+
+  <!-- ===== GHP GenPro ===== -->
+  <section class="layar" id="layarGHP">
+    <div class="blok">
+      <h2>Siapa yang dihitung</h2>
+      <div class="segmen" id="hMode">
+        <button type="button" data-nilai="Individu" aria-pressed="true">Individu</button>
+        <button type="button" data-nilai="Keluarga" aria-pressed="false">Keluarga</button>
+      </div>
+      <p class="catatan">Pada mode keluarga, skema jiwa dan metode bayar mengikuti
+        tertanggung pertama; plan kesehatan dan UP jiwa bebas per orang.</p>
+    </div>
+
+    <div class="blok" id="hBlokIndv">
+      <h2>Data nasabah</h2>
+      <div class="baris satu">
+        <div><label for="hNama">Nama nasabah</label>
+          <input id="hNama" type="text" placeholder="Tulis nama" autocomplete="off"></div>
+      </div>
+      <div class="baris">
+        <div><label for="hTgl">Tanggal lahir</label><input id="hTgl" type="date"></div>
+        <div><label>Jenis kelamin</label>
+          <div class="segmen" id="hJK">
+            <button type="button" data-nilai="Pria" aria-pressed="true">Pria</button>
+            <button type="button" data-nilai="Wanita" aria-pressed="false">Wanita</button>
+          </div>
+        </div>
+      </div>
+      <div class="baris">
+        <div><label>Skema jiwa</label>
+          <div class="segmen" id="hSkema">
+            <button type="button" data-nilai="10-90" aria-pressed="true">10-90</button>
+            <button type="button" data-nilai="90-90" aria-pressed="false">90-90</button>
+          </div>
+        </div>
+        <div><label>Metode bayar</label>
+          <div class="segmen" id="hMetode">
+            <button type="button" data-nilai="Bulanan" aria-pressed="true">Bulanan</button>
+            <button type="button" data-nilai="Tahunan" aria-pressed="false">Tahunan</button>
+          </div>
+        </div>
+      </div>
+      <div class="baris satu">
+        <div><label for="hUP">UP jiwa dasar</label>
+          <input id="hUP" type="text" inputmode="numeric" autocomplete="off" value="10.000.000"></div>
+      </div>
+      <div class="baris satu">
+        <div><label>Ambil rider kesehatan GHP</label>
+          <div class="segmen" id="hRider">
+            <button type="button" data-nilai="Ya" aria-pressed="true">Ya</button>
+            <button type="button" data-nilai="Tidak" aria-pressed="false">Tidak</button>
+          </div>
+        </div>
+      </div>
+      <div class="baris satu" id="hBarisPlan">
+        <div><label for="hPlan">Plan kesehatan</label><select id="hPlan"></select></div>
+      </div>
+      <p class="catatan" id="hInfoUsia">Isi tanggal lahir untuk menghitung usia.</p>
+    </div>
+
+    <div class="blok" id="hBlokFam" style="display:none">
+      <h2>Anggota keluarga</h2>
+      <div id="hDaftar"></div>
+      <button class="aksi" id="hTambah" style="margin-top:10px">+ Tambah anggota</button>
+      <p class="catatan">Bisa menghitung maksimal untuk 12 orang: suami, istri, anak, orang tua (suami atau istri), dan kakak atau adik (suami atau istri).</p>
+    </div>
+
+    <div class="blok">
+      <h2>Hasil</h2>
+      <div id="hHasil"></div>
+    </div>
+
+    <div class="blok">
+      <h2>Aturan yang dipakai</h2>
+      <div id="hAturan"></div>
+    </div>
+
+    <div class="blok">
+      <h2>Identitas penyaji</h2>
+      <div class="baris">
+        <div><label for="hAgenNama">Nama agen</label>
+          <input id="hAgenNama" type="text" placeholder="Nama penyaji" autocomplete="off"></div>
+        <div><label for="hAgenHP">Kontak</label>
+          <input id="hAgenHP" type="tel" placeholder="08xxxxxxxxxx" autocomplete="off"></div>
+      </div>
+      <div id="hTabelSemuaGhp" class="tanpa-cetak" style="margin:12px 0"></div>
+      <div id="bandingKotak_GHP" class="blok tanpa-cetak" style="margin:12px 0"></div>
+      <div id="hPilihBanding" class="blok tanpa-cetak" style="margin:14px 0"></div>
+      <button class="aksi" id="hTblIlustrasi">Buka ilustrasi untuk nasabah</button>
+    </div>
+  </section>
+
+  <!-- ===== Ilustrasi GHP ===== -->
+  <section class="layar" id="layarGHPIlus">
+    <div class="kop">
+      <h2>Perlindungan Kesehatan Sesuai Tagihan</h2>
+      <p>GHP GenPro &mdash; rawat inap dibayar sesuai tagihan, plus proteksi jiwa</p>
+      <div class="identitas" id="hIdentitas"></div>
+    </div>
+
+    <div class="blok" id="hKotakRingkas"></div>
+
+    <div class="blok">
+      <h2>Rincian premi</h2>
+      <div class="gulir"><table class="tahunan" id="hTabelPremi"></table></div>
+      <p class="catatan" id="hCatatanPremi"></p>
+    </div>
+
+    <div class="blok">
+      <h2>Manfaat plan</h2>
+      <div class="gulir"><table class="tahunan" id="hTabelManfaat"></table></div>
+    </div>
+
+    <div class="blok">
+      <h2>Reward tanpa klaim</h2>
+      <div class="gulir"><table class="tahunan" id="hTabelNCB"></table></div>
+      <div class="gulir" style="margin-top:12px"><table class="tahunan" id="hTabelNCD"></table></div>
+      <p class="catatan" id="hCatatanNC"></p>
+    </div>
+
+    <div class="blok">
+      <h2>Masa tunggu</h2>
+      <div class="gulir"><table class="tahunan" id="hTabelTunggu"></table></div>
+      <div id="hTunggu12"></div>
+    </div>
+
+    <div class="blok">
+      <p class="catatan" id="hSangkalan"></p>
+      <div class="kaki" id="hKakiAgen"></div>
+    </div>
+
+    <div class="blok tanpa-cetak">
+      <button class="aksi" id="hTblCetak">Cetak atau simpan sebagai PDF</button>
+      <p class="catatan">Pilih "Simpan sebagai PDF" di layar cetak, lalu kirim berkasnya ke nasabah.</p>
+    </div>
+  </section>
+
+  <!-- ===== Kebutuhan Dana Pensiun ===== -->
+  <section class="layar" id="layarDP">
+    <div class="blok">
+      <h2>Data prospek</h2>
+      <div class="baris satu">
+        <div><label for="dNama">Nama prospek</label>
+          <input id="dNama" type="text" placeholder="Tulis nama" autocomplete="off"></div>
+      </div>
+      <div class="baris">
+        <div><label for="dTgl">Tanggal lahir</label><input id="dTgl" type="date"></div>
+        <div><label for="dPensiun">Ingin pensiun di usia</label><select id="dPensiun"></select></div>
+      </div>
+      <div class="baris">
+        <div><label for="dLama">Lama siapkan dana</label><select id="dLama"></select></div>
+        <div><label for="dAkhir">Dana dipakai sampai usia</label><select id="dAkhir"></select></div>
+      </div>
+      <div class="baris satu">
+        <div><label for="dDanaAwal">Dana pensiun yang sudah tersedia</label>
+          <input id="dDanaAwal" type="text" inputmode="numeric" autocomplete="off" value="0"></div>
+      </div>
+      <p class="catatan" id="dInfoUsia">Isi tanggal lahir untuk menghitung usia.</p>
+    </div>
+
+    <div class="blok">
+      <h2>Gaya hidup saat pensiun (per bulan, harga hari ini)</h2>
+      <div id="dKomponen"></div>
+      <div class="sorotan" id="dTotalHariIni"></div>
+    </div>
+
+    <div class="blok">
+      <h2>Asumsi</h2>
+      <div class="baris">
+        <div><label for="dInflasi">Inflasi biaya hidup / tahun</label><select id="dInflasi"></select></div>
+        <div><label for="dTumbuh">Pertumbuhan dana / tahun</label><select id="dTumbuh"></select></div>
+      </div>
+      <p class="catatan">Asumsi pertumbuhan dipakai untuk dua hal: mengembangkan dana yang
+        sudah tersedia, dan menghitung setoran. Bukan janji imbal hasil, dan tidak merujuk
+        pada instrumen tertentu.</p>
+    </div>
+
+    <div class="blok">
+      <h2>Kebutuhan dan kekurangan</h2>
+      <div id="dHasil"></div>
+    </div>
+
+    <div class="blok">
+      <h2>Kalau asumsi inflasinya berbeda</h2>
+      <div class="gulir"><table class="tahunan" id="dTabelSensitif"></table></div>
+      <p class="catatan">Asumsi inflasi adalah input yang paling menentukan hasil.
+        Tunjukkan rentangnya, bukan satu angka tunggal.</p>
+    </div>
+
+    <div class="blok">
+      <h2>Cara menyiapkan</h2>
+      <div id="dSimulasi"></div>
+    </div>
+
+    <div class="blok">
+      <h2>Aturan yang dipakai</h2>
+      <div id="dAturan"></div>
+    </div>
+
+    <div class="blok">
+      <h2>Identitas penyaji</h2>
+      <div class="baris">
+        <div><label for="dAgenNama">Nama penyaji</label>
+          <input id="dAgenNama" type="text" placeholder="Nama penyaji" autocomplete="off"></div>
+        <div><label for="dAgenHP">WhatsApp / kontak</label>
+          <input id="dAgenHP" type="tel" placeholder="08xxxxxxxxxx" autocomplete="off"></div>
+      </div>
+      <p class="catatan">Jika Identitas Konsultan sudah diisi, nama dan kontak akan terisi otomatis. Keduanya tetap bisa diubah khusus untuk ringkasan ini.</p>
+      <button class="aksi" id="dTblRingkas">Buka ringkasan untuk prospek</button>
+      
+    </div>
+  </section>
+
+  <!-- ===== Ringkasan Kebutuhan Dana Pensiun ===== -->
+  <section class="layar" id="layarDPRingkas">
+    <div class="kop">
+      <h2>Gambaran Kebutuhan Dana Pensiun</h2>
+      <p>Berapa yang perlu tersedia saat pensiun, dan berapa kekurangannya</p>
+      <div class="identitas" id="dIdentitas"></div>
+    </div>
+
+    <div class="blok" id="dKotakRingkas"></div>
+
+    <div class="blok">
+      <h2>Kebutuhan bulanan</h2>
+      <div class="gulir"><table class="tahunan" id="dTabelKomponen"></table></div>
+      <p class="catatan" id="dCatatanKomponen"></p>
+    </div>
+
+    <div class="blok">
+      <h2>Kalau asumsi inflasinya berbeda</h2>
+      <div class="gulir"><table class="tahunan" id="dTabelSensitif2"></table></div>
+    </div>
+
+    <div class="blok">
+      <h2>Cara menyiapkan</h2>
+      <div class="gulir"><table class="tahunan" id="dTabelSiap"></table></div>
+      <p class="catatan" id="dCatatanSiap"></p>
+    </div>
+
+    <div class="blok">
+      <h2>Efek menunda</h2>
+      <div class="gulir"><table class="tahunan" id="dTabelTunda"></table></div>
+      <p class="catatan">Kekurangan dananya sama di ketiga skenario. Yang berubah hanya
+        sisa waktu untuk mengumpulkannya.</p>
+    </div>
+
+    <div class="blok">
+      <p class="catatan" id="dSangkalan"></p>
+      <div class="kaki" id="dKakiAgen"></div>
+    </div>
+
+    <div class="blok tanpa-cetak">
+      <button class="aksi" id="dTblCetak">Cetak atau simpan sebagai PDF</button>
+      <p class="catatan">Pilih "Simpan sebagai PDF" di layar cetak, lalu kirim berkasnya ke prospek.</p>
+    </div>
+  </section>
+
+  <!-- ===== Hub Kalkulator Finansial ===== -->
+
+  <!-- ===== RAYA Pro Maxima ===== -->
+  <section class="layar" id="layarRAYA">
+    <div class="kop"><h2>RAYA Pro Maxima</h2><p>Contribution driven · Proteksi dasar + ADB Syariah wajib</p></div>
+    <div class="blok">
+      <h2>Data Nasabah</h2>
+      <div class="baris satu">
+        <div><label for="rayaNama">Nama nasabah</label>
+          <input id="rayaNama" type="text" placeholder="Tulis nama nasabah" autocomplete="off"></div>
+      </div>
+      <div class="baris">
+        <div><label for="rayaTglLahir">Tanggal lahir</label><input id="rayaTglLahir" type="date"></div>
+        <div><label>Jenis kelamin</label>
+          <div class="raya-profile-readonly" id="rayaGenderInfo">Mengikuti Profil Nasabah aktif bila tersedia.</div>
+        </div>
+      </div>
+      <p class="catatan" id="rayaProfileHint"></p>
+    </div>
+    <div class="blok">
+      <h2>Data RAYA Pro Maxima</h2>
+      <div class="baris satu">
+        <div><label for="rayaPlan">Masa asuransi</label><select id="rayaPlan">
+          <option value="TJA1">5 tahun bayar · 15 tahun asuransi</option>
+          <option value="TJA2">5 tahun bayar · 20 tahun asuransi</option>
+        </select></div>
+      </div>
+      <div class="baris">
+        <div><label for="rayaFreq">Frekuensi pembayaran</label><select id="rayaFreq">
+          <option value="Tahunan">Tahunan</option><option value="Semesteran">Semesteran</option>
+          <option value="Kuartalan">Kuartalan</option><option value="Bulanan">Bulanan</option>
+        </select></div>
+        <div><label for="rayaKontribusi">Kontribusi dasar per pembayaran</label><input id="rayaKontribusi" type="text" inputmode="numeric" placeholder="Rp 0"></div>
+      </div>
+      <div class="raya-actions">
+        <button class="aksi" id="rayaHitung" type="button">Hitung RAYA Pro Maxima</button>
+      </div>
+    </div>
+    <div class="blok" id="rayaHasil"><p class="catatan">Isi data nasabah dan kontribusi dasar.</p></div>
+    <div class="blok tanpa-cetak">
+      <div class="raya-actions">
+        <button class="aksi sekunder" id="rayaBandingBuka" type="button">⚖ Bandingkan</button>
+        <button class="aksi sekunder psg-preview-btn" id="rayaPreview" data-preview-attached="1" type="button">👁 Preview</button>
+        <button class="aksi sekunder" id="rayaCetak" data-preview-attached="1" type="button">🖨 Cetak</button>
+        <button class="aksi sekunder btn-simpan-library" id="rayaSaveLibrary" type="button">📚 Simpan ke Library</button>
+      </div>
+      <p class="catatan">Preview menampilkan hasil client-facing. Cetak mengikuti mekanisme PDF universal dan Library menyimpan snapshot hasil.</p>
+    </div>
+    <div class="blok"><p class="catatan">Baseline mengikuti materi training RAYA Pro Maxima dan External Memo No. 033/GNR-PD/09/2026. Hasil ini bukan ilustrasi resmi iPropose dan tetap tunduk pada underwriting serta ketentuan produk yang berlaku.</p></div>
+  </section>
+
+  <section class="layar" id="layarRAYABanding">
+    <div class="blok"><p class="catatan">Memuat perbandingan RAYA Pro Maxima…</p></div>
+  </section>
+
+  <section class="layar" id="layarFinancialCalc">
+    <div class="kop">
+      <h2>Kalkulator Finansial</h2>
+      <p>Kumpulan kalkulator untuk membantu menghitung dan menjelaskan keputusan finansial.</p>
+    </div>
+    <div class="blok">
+      <h2>Pilih kalkulator</h2>
+      <p class="catatan">Kalkulator akan ditambahkan bertahap. Pilih yang sudah aktif di bawah ini.</p>
+      <div class="mode-grid financial-calc-grid">
+        <button class="mode-kartu financial-calc-item" id="btnFinancialSegitiga" type="button">
+          <span class="mode-icon">📐</span><span class="mode-title">Segitiga Financial</span>
+          <span class="mode-desc">Bangun kebutuhan bersama prospek: kesehatan, sakit kritis, jiwa, dan dana pensiun.</span>
+        </button>
+        <button class="mode-kartu financial-calc-item" id="btnFinancialKPR" type="button">
+          <span class="mode-icon">🏠</span><span class="mode-title">Simulasi Cicilan Rumah (KPR)</span>
+          <span class="mode-desc">Hitung DP, cicilan bulanan, total bunga, dan total uang keluar sampai rumah lunas.</span>
+        </button>
+        <button class="mode-kartu financial-calc-item" id="btnFinancialR2" type="button">
+          <span class="mode-icon">🏡</span><span class="mode-title">Rumah Kedua: KPR vs Gen Aman</span>
+          <span class="mode-desc">Bandingkan beban KPR dengan alternatif solusi untuk rumah kedua.</span>
+        </button>
+        <div class="mode-kartu financial-calc-item nonaktif">
+          <span class="mode-icon">＋</span><span class="mode-title">Kalkulator berikutnya</span>
+          <span class="mode-desc">Ruang untuk kalkulator finansial lain yang akan ditambahkan kemudian.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Kalkulator Cicilan Rumah / KPR ===== -->
+  <section class="layar" id="layarKPR">
+    <div class="blok">
+      <h2>Rumah yang diincar</h2>
+      <div class="baris satu">
+        <div><label for="pNama">Nama / profil pembeli</label>
+          <input id="pNama" type="text" placeholder="Tulis nama" autocomplete="off"></div>
+      </div>
+      <div class="baris satu">
+        <div><label for="pHarga">Harga rumah</label>
+          <input id="pHarga" type="text" inputmode="numeric" autocomplete="off" value="2.000.000.000"></div>
+      </div>
+      <div class="baris">
+        <div><label for="pDP">Uang muka (DP)</label><select id="pDP"></select></div>
+        <div><label for="pTenor">Lama KPR</label><select id="pTenor"></select></div>
+      </div>
+      <div class="baris satu">
+        <div><label for="pRate">Bunga KPR per tahun</label>
+          <input id="pRate" type="number" min="0" max="30" step="0.25" value="7"></div>
+      </div>
+    </div>
+
+    <div class="blok">
+      <h2>Hasil simulasi</h2>
+      <div id="pHasil"></div>
+    </div>
+
+    <div class="blok">
+      <h2>Sisa utang tiap tahun</h2>
+      <div class="gulir"><table class="tahunan" id="pTabelJadwal"></table></div>
+      <p class="catatan" id="pCatatanJadwal"></p>
+    </div>
+
+    <div class="blok">
+      <h2>Aturan yang dipakai</h2>
+      <div id="pAturan"></div>
+    </div>
+
+    <div class="blok">
+      <h2>Identitas penyaji</h2>
+      <div class="baris">
+        <div><label for="pAgenNama">Nama agen</label>
+          <input id="pAgenNama" type="text" placeholder="Nama penyaji" autocomplete="off"></div>
+        <div><label for="pAgenHP">Kontak</label>
+          <input id="pAgenHP" type="tel" placeholder="08xxxxxxxxxx" autocomplete="off"></div>
+      </div>
+      <button class="aksi" id="pTblRingkas">Ringkasan ilustrasi Cicilan Rumah</button>
+    </div>
+  </section>
+
+  <!-- ===== Ringkasan KPR ===== -->
+  <section class="layar" id="layarKPRRingkas">
+    <div class="kop">
+      <h2>Simulasi Cicilan Rumah</h2>
+      <p>Berapa yang benar-benar keluar sampai rumah itu lunas</p>
+      <div class="identitas" id="pIdentitas"></div>
+    </div>
+
+    <div class="blok" id="pKotakRingkas"></div>
+
+    <div class="blok">
+      <h2>Rincian kontribusi</h2>
+      <div class="gulir"><table class="tahunan" id="pTabelRinci"></table></div>
+    </div>
+
+    <div class="blok">
+      <h2>Sisa utang tiap tahun</h2>
+      <div class="gulir"><table class="tahunan" id="pTabelJadwal2"></table></div>
+      <p class="catatan" id="pCatatanJadwal2"></p>
+    </div>
+
+    <div class="blok">
+      <p class="catatan" id="pSangkalan"></p>
+      <div class="kaki" id="pKakiAgen"></div>
+    </div>
+
+    <div class="blok tanpa-cetak">
+      <button class="aksi" id="pTblCetak">Cetak atau simpan sebagai PDF</button>
+      <p class="catatan">Pilih "Simpan sebagai PDF" di layar cetak, lalu kirim berkasnya ke prospek.</p>
+    </div>
+  </section>
+
+  <!-- ===== Rumah Kedua: KPR vs Gen Aman ===== -->
+  <section class="layar" id="layarR2">
+    <div class="blok">
+      <h2>Nilai yang dibandingkan</h2>
+      <div class="baris satu">
+        <div><label for="rNama">Nama prospek</label>
+          <input id="rNama" type="text" placeholder="Tulis nama" autocomplete="off"></div>
+      </div>
+      <div class="baris satu">
+        <div><label for="rNilai">Nilai aset yang diincar</label>
+          <input id="rNilai" type="text" inputmode="numeric" autocomplete="off" value="5.000.000.000"></div>
+      </div>
+      <p class="catatan">Angka yang sama dipakai untuk dua-duanya: harga rumah kedua,
+        dan uang pertanggungan Gen Aman.</p>
+    </div>
+
+    <div class="blok">
+      <h2>Jalur rumah kedua lewat KPR</h2>
+      <div class="baris">
+        <div><label for="rDP">Uang muka (DP)</label><select id="rDP"></select></div>
+        <div><label for="rTenor">Lama KPR</label><select id="rTenor"></select></div>
+      </div>
+      <div class="baris satu">
+        <div><label for="rRate">Bunga KPR per tahun</label>
+          <input id="rRate" type="number" min="0" max="30" step="0.25" value="7"></div>
+      </div>
+    </div>
+
+    <div class="blok">
+      <h2>Jalur Gen Aman</h2>
+      <div class="baris">
+        <div><label for="rTgl">Tanggal lahir</label><input id="rTgl" type="date"></div>
+        <div><label>Jenis kelamin</label>
+          <div class="segmen" id="rJK">
+            <button type="button" data-nilai="Pria" aria-pressed="true">Pria</button>
+            <button type="button" data-nilai="Wanita" aria-pressed="false">Wanita</button>
+          </div>
+        </div>
+      </div>
+      <div class="baris">
+        <div><label for="rMpp">Masa bayar</label><select id="rMpp"></select></div>
+        <div><label>Metode bayar</label>
+          <div class="segmen" id="rMetode">
+            <button type="button" data-nilai="Bulanan" aria-pressed="true">Bulanan</button>
+            <button type="button" data-nilai="Tahunan" aria-pressed="false">Tahunan</button>
+          </div>
+        </div>
+      </div>
+      <div class="baris">
+        <div><label>Rider Waiver Gen Aman</label>
+          <div class="segmen" id="rWaiver">
+            <button type="button" data-nilai="Ya" aria-pressed="true">Ambil</button>
+            <button type="button" data-nilai="Tidak" aria-pressed="false">Tidak</button>
+          </div>
+          <p class="catatan">Inti pembandingnya: cicilan KPR tetap harus dibayar walau debitur terdiagnosa penyakit kritis, sedangkan kontribusi Gen Aman dibebaskan.</p>
+        </div>
+        <div></div>
+      </div>
+      <p class="catatan" id="rInfoUsia">Isi tanggal lahir untuk menghitung usia.</p>
+    </div>
+
+    <div class="blok">
+      <h2>Hasil perbandingan</h2>
+      <div id="rHasil"></div>
+    </div>
+
+    <div class="blok">
+      <h2>Aturan yang dipakai</h2>
+      <div id="rAturan"></div>
+    </div>
+
+    <div class="blok">
+      <h2>Identitas penyaji</h2>
+      <div class="baris">
+        <div><label for="rAgenNama">Nama agen</label>
+          <input id="rAgenNama" type="text" placeholder="Nama penyaji" autocomplete="off"></div>
+        <div><label for="rAgenHP">Kontak</label>
+          <input id="rAgenHP" type="tel" placeholder="08xxxxxxxxxx" autocomplete="off"></div>
+      </div>
+      <button class="aksi" id="rTblRingkas">Buka ringkasan untuk prospek</button>
+    </div>
+  </section>
+
+  <!-- ===== Ringkasan Rumah Kedua ===== -->
+  <section class="layar" id="layarR2Ringkas">
+    <div class="kop">
+      <h2>Rumah Kedua untuk Keluarga</h2>
+      <p>Dua jalur menyiapkan aset senilai sama — bandingkan bebannya</p>
+      <div class="identitas" id="rIdentitas"></div>
+    </div>
+
+    <div class="blok" id="rKotakRingkas"></div>
+
+    <div class="blok">
+      <h2>Perbandingan berdampingan</h2>
+      <div class="gulir"><table class="tahunan" id="rTabelBanding"></table></div>
+      <p class="catatan" id="rCatatanBanding"></p>
+    </div>
+
+    <div class="blok">
+      <h2>Yang didapat dari masing-masing</h2>
+      <div class="gulir"><table class="tahunan" id="rTabelDapat"></table></div>
+    </div>
+
+    <div class="blok">
+      <p class="catatan" id="rSangkalan"></p>
+      <div class="kaki" id="rKakiAgen"></div>
+    </div>
+
+    <div class="blok tanpa-cetak">
+      <button class="aksi" id="rTblCetak">Cetak atau simpan sebagai PDF</button>
+      <p class="catatan">Pilih "Simpan sebagai PDF" di layar cetak, lalu kirim berkasnya ke prospek.</p>
+    </div>
+  </section>
+
+  <!-- ===== Kebutuhan Dana Pendidikan ===== -->
+  <section class="layar" id="layarPDK">
+    <div class="blok">
+      <h2>Profil prospek</h2>
+      <div class="baris satu">
+        <div><label for="nNama">Nama prospek</label>
+          <input id="nNama" type="text" placeholder="Tulis nama" autocomplete="off"></div>
+      </div>
+      <div class="baris">
+        <div><label for="nUsiaOrtu">Usia orang tua sekarang</label>
+          <input id="nUsiaOrtu" type="number" min="0" max="100" value="42"></div>
+        <div><label for="nInflasi">Inflasi pendidikan / tahun</label><select id="nInflasi"></select></div>
+      </div>
+      <div class="baris satu">
+        <div><label for="nDanaBersama">Dana pendidikan bersama</label>
+          <input id="nDanaBersama" type="text" inputmode="numeric" autocomplete="off" value="0"></div>
+      </div>
+      <p class="catatan">Dana bersama adalah tabungan pendidikan yang belum dialokasikan ke
+        anak tertentu. Dana yang sudah jelas untuk satu anak diisi di baris anak itu.</p>
+    </div>
+
+    <div class="blok">
+      <h2>Rencana pendidikan anak</h2>
+      <div id="nDaftar"></div>
+      <button class="aksi" id="nTambah" style="margin-top:10px">+ Tambah anak</button>
+      <p class="catatan">Maksimal 5 anak, sama seperti file Excel.</p>
+    </div>
+
+    <div class="blok">
+      <h2>Kebutuhan dan kekurangan</h2>
+      <div id="nHasil"></div>
+    </div>
+
+    <div class="blok">
+      <h2>Aturan yang dipakai</h2>
+      <div id="nAturan"></div>
+    </div>
+
+    <div class="blok">
+      <h2>Identitas penyaji</h2>
+      <div class="baris">
+        <div><label for="nAgenNama">Nama penyaji</label>
+          <input id="nAgenNama" type="text" placeholder="Nama penyaji" autocomplete="off"></div>
+        <div><label for="nAgenHP">WhatsApp / kontak</label>
+          <input id="nAgenHP" type="tel" placeholder="08xxxxxxxxxx" autocomplete="off"></div>
+      </div>
+      <p class="catatan">Jika Identitas Konsultan sudah diisi, nama dan kontak akan terisi otomatis. Keduanya tetap bisa diubah khusus untuk ringkasan ini.</p>
+      <button class="aksi" id="nTblRingkas">Ringkasan kebutuhan dana pendidikan anak</button>
+    </div>
+  </section>
+
+  <!-- ===== Ringkasan Dana Pendidikan ===== -->
+  <section class="layar" id="layarPDKRingkas">
+    <div class="kop">
+      <h2>Gambaran Kebutuhan Dana Pendidikan</h2>
+      <p>Berapa biaya kuliah anak nanti, dan berapa yang masih kurang</p>
+      <div class="identitas" id="nIdentitas"></div>
+    </div>
+
+    <div class="blok" id="nKotakRingkas"></div>
+
+    <div class="blok">
+      <h2>Rincian per anak</h2>
+      <div class="gulir"><table class="tahunan" id="nTabelAnak"></table></div>
+      <p class="catatan" id="nCatatanAnak"></p>
+    </div>
+
+    <div class="blok">
+      <h2>Urutan kapan dana dibutuhkan</h2>
+      <div class="gulir"><table class="tahunan" id="nTabelUrutan"></table></div>
+      <p class="catatan" id="nCatatanUrutan"></p>
+    </div>
+
+
+    <div class="blok">
+      <p class="catatan" id="nSangkalan"></p>
+      <div class="kaki" id="nKakiAgen"></div>
+    </div>
+
+    <div class="blok tanpa-cetak">
+      <button class="aksi" id="nTblCetak">Cetak atau simpan sebagai PDF</button>
+      <p class="catatan">Pilih "Simpan sebagai PDF" di layar cetak, lalu kirim berkasnya ke prospek.</p>
+    </div>
+  </section>
+
+  <!-- ===== Kombinasi Produk (NCP + Cristal + BSL + Gen Aman + iFLEXYGUARD) ===== -->
+  <section class="layar" id="layarCOMBO">
+    <div class="blok">
+      <h2>Data nasabah</h2>
+      <div class="baris satu">
+        <div><label for="oNama">Nama nasabah</label>
+          <input id="oNama" type="text" placeholder="Tulis nama" autocomplete="off"></div>
+      </div>
+      <div class="baris">
+        <div><label for="oTgl">Tanggal lahir</label><input id="oTgl" type="date"></div>
+        <div><label>Jenis kelamin</label>
+          <div class="segmen" id="oJK">
+            <button type="button" data-nilai="PRIA" aria-pressed="true">Pria</button>
+            <button type="button" data-nilai="WANITA" aria-pressed="false">Wanita</button>
+          </div>
+        </div>
+      </div>
+      <div class="baris satu">
+        <div><label>Metode bayar (berlaku untuk semua polis)</label>
+          <div class="segmen" id="oMetode">
+            <button type="button" data-nilai="Bulanan" aria-pressed="true">Bulanan</button>
+            <button type="button" data-nilai="Tahunan" aria-pressed="false">Tahunan</button>
+          </div>
+        </div>
+      </div>
+      <p class="catatan" id="oInfoUsia">Isi tanggal lahir untuk menghitung usia.</p>
+    </div>
+
+    <div class="blok">
+      <h2>Polis yang dikombinasikan</h2>
+      <div id="oDaftar"></div>
+      <button class="aksi" id="oTambah" style="margin-top:10px">+ Tambah polis</button>
+      <p class="catatan">Maksimal 9 polis. New Cemerlang Prime, Cristal Prime, dan BSL
+        boleh diulang; GSPA dan iFLEXYGUARD masing-masing hanya satu. BSL, GSPA, dan
+        iFLEXYGUARD berlindung sampai sekitar usia 100, jadi pilihan lama lindungnya dikunci.</p>
+    </div>
+
+    <div class="blok">
+      <h2>Hasil gabungan</h2>
+      <div id="oHasil"></div>
+    </div>
+
+    <div class="blok">
+      <h2>Aturan yang dipakai</h2>
+      <div id="oAturan"></div>
+    </div>
+
+    <div class="blok">
+      <h2>Identitas penyaji</h2>
+      <div class="baris">
+        <div><label for="oAgenNama">Nama agen</label>
+          <input id="oAgenNama" type="text" placeholder="Nama penyaji" autocomplete="off"></div>
+        <div><label for="oAgenHP">Kontak</label>
+          <input id="oAgenHP" type="tel" placeholder="08xxxxxxxxxx" autocomplete="off"></div>
+      </div>
+      <button class="aksi" id="oTblRingkas">Buka ringkasan untuk nasabah</button>
+    </div>
+  </section>
+
+  <!-- ===== Ringkasan Kombinasi Produk ===== -->
+  <section class="layar" id="layarCOMBORingkas">
+    <div class="kop">
+      <h2>Rencana Perlindungan Gabungan</h2>
+      <p>Beberapa polis disusun jadi satu rencana</p>
+      <div class="identitas" id="oIdentitas"></div>
+    </div>
+
+    <div class="blok" id="oKotakRingkas"></div>
+
+    <div class="blok">
+      <h2>Polis yang disusun</h2>
+      <div class="gulir"><table class="tahunan" id="oTabelSlot"></table></div>
+      <p class="catatan" id="oCatatanSlot"></p>
+    </div>
+
+    <div class="blok">
+      <h2>Summary Manfaat Gabungan</h2>
+      <div class="gulir"><table class="tahunan" id="oTabelManfaat"></table></div>
+      <p class="catatan" id="oCatatanManfaat"></p>
+    </div>
+
+    <div class="blok">
+      <h2>Timeline Program Gabungan</h2>
+      <div class="gulir"><table class="tahunan" id="oTabelTimeline"></table></div>
+      <p class="catatan" id="oCatatanTimeline"></p>
+    </div>
+
+    <div class="blok">
+      <h2>Skenario tambahan GSPA</h2>
+      <div class="gulir"><table class="tahunan" id="oTabelSkenario"></table></div>
+      <p class="catatan" id="oCatatanSkenario"></p>
+    </div>
+
+    <!-- Tabel pembebasan premi Waiver Gen Aman untuk layar Kombinasi.
+         Diletakkan di bagian paling bawah agar tidak mengubah susunan
+         ringkasan yang sudah ada. -->
+    <div id="oWaiverBlok"></div>
+
+    <div class="blok">
+      <p class="catatan" id="oSangkalan"></p>
+      <div class="kaki" id="oKakiAgen"></div>
+    </div>
+
+    <div class="blok tanpa-cetak">
+      <button class="aksi" id="oTblCetak">Cetak atau simpan sebagai PDF</button>
+      <p class="catatan">Pilih "Simpan sebagai PDF" di layar cetak, lalu kirim berkasnya ke nasabah.</p>
+    </div>
+  </section>
+
+  <!-- ===== Gen Pro (berdiri sendiri) ===== -->
+  <section class="layar" id="layarGPRO">
+    <div class="blok">
+      <h2>Data nasabah</h2>
+      <div class="baris satu">
+        <div><label for="qNama">Nama nasabah</label>
+          <input id="qNama" type="text" placeholder="Tulis nama" autocomplete="off"></div>
+      </div>
+      <div class="baris">
+        <div><label for="qTgl">Tanggal lahir</label><input id="qTgl" type="date"></div>
+        <div><label>Jenis kelamin</label>
+          <div class="segmen" id="qJK">
+            <button type="button" data-nilai="PRIA" aria-pressed="true">Pria</button>
+            <button type="button" data-nilai="WANITA" aria-pressed="false">Wanita</button>
+          </div>
+        </div>
+      </div>
+      <div class="baris satu">
+        <div><label for="qPaket">Paket Gen Pro</label><select id="qPaket"></select></div>
+      </div>
+      <div class="baris">
+        <div><label for="qUP">Uang pertanggungan</label><select id="qUP"></select></div>
+        <div><label>Metode bayar</label>
+          <div class="segmen" id="qMetode">
+            <button type="button" data-nilai="Bulanan" aria-pressed="true">Bulanan</button>
+            <button type="button" data-nilai="Tahunan" aria-pressed="false">Tahunan</button>
+          </div>
+        </div>
+      </div>
+      <p class="catatan" id="qInfoUsia">Isi tanggal lahir untuk menghitung usia.</p>
+    </div>
+
+    <div class="blok">
+      <h2>Hasil</h2>
+      <div id="qHasil"></div>
+    </div>
+
+    <div class="blok">
+      <h2>Pilihan UP pada usia ini</h2>
+      <div class="gulir"><table class="tahunan" id="qTabelUP"></table></div>
+      <p class="catatan" id="qCatatanUP"></p>
+    </div>
+
+    <div class="blok">
+      <h2>Aturan yang dipakai</h2>
+      <div id="qAturan"></div>
+    </div>
+
+    <div class="blok">
+      <h2>Identitas penyaji</h2>
+      <div class="baris">
+        <div><label for="qAgenNama">Nama agen</label>
+          <input id="qAgenNama" type="text" placeholder="Nama penyaji" autocomplete="off"></div>
+        <div><label for="qAgenHP">Kontak</label>
+          <input id="qAgenHP" type="tel" placeholder="08xxxxxxxxxx" autocomplete="off"></div>
+      </div>
+      <div class="aksi-row gpro-actions">
+        <button class="aksi" id="qTblRingkas">Buka ringkasan untuk nasabah</button>
+        <button class="aksi sekunder" id="qTblBanding">Bandingkan Pilihan</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Ringkasan Gen Pro ===== -->
+  <section class="layar" id="layarGPRORingkas">
+    <div class="kop">
+      <h2>Gen Pro &mdash; Proteksi Jiwa</h2>
+      <p id="qSubKop">Empat manfaat bawaan, termasuk pembebasan premi</p>
+      <div class="identitas" id="qIdentitas"></div>
+    </div>
+
+    <div class="blok" id="qKotakRingkas"></div>
+
+    <div class="blok">
+      <h2>Manfaat</h2>
+      <div class="gulir"><table class="tahunan" id="qTabelManfaat"></table></div>
+      <p class="catatan" id="qCatatanManfaat"></p>
+    </div>
+
+    <div class="blok">
+      <h2>Pembebasan premi bila terdiagnosa kondisi kritis</h2>
+      <div class="gulir"><table class="tahunan" id="qTabelWaiver"></table></div>
+      <p class="catatan" id="qCatatanWaiver"></p>
+    </div>
+
+    <div class="blok">
+      <h2>Perjalanan polis</h2>
+      <div class="gulir"><table class="tahunan" id="qTabelTimeline"></table></div>
+      <p class="catatan" id="qCatatanTimeline"></p>
+    </div>
+
+    <div class="blok">
+      <p class="catatan" id="qSangkalan"></p>
+      <div class="kaki" id="qKakiAgen"></div>
+    </div>
+
+    <div class="blok tanpa-cetak">
+      <button class="aksi" id="qTblCetak">Cetak atau simpan sebagai PDF</button>
+      <p class="catatan">Pilih "Simpan sebagai PDF" di layar cetak, lalu kirim berkasnya ke nasabah.</p>
+    </div>
+  </section>
+
+  <!-- ===== Banding Gen Pro (jalur terpisah dari mode single) ===== -->
+  <section class="layar" id="layarGPROBanding"></section>
+  <section class="layar" id="layarGPROBandingRingkas"></section>
+  <section class="layar" id="layarSolusiPdk"></section>
+  <section class="layar" id="layarGhpBanding"></section>
+  <section class="layar" id="layarBandingProduk"></section>
+  <section class="layar" id="layarSlipKomisi"></section>
+  <section class="layar" id="layarGhpPlanBanding"></section>
+  <section class="layar" id="layarDpSolusi"></section>
+  <section class="layar" id="layarDpSolusiRingkas"></section>
+  <section class="layar" id="layarDpBandingManual"></section>
+  <section class="layar" id="layarSegitiga"></section>
+  <section class="layar" id="layarSegitigaRingkas"></section>
+  <section class="layar" id="layarSegitigaSolusi"></section>
+  <section class="layar" id="layarGenWealth"></section>
+  <section class="layar" id="layarGenWealthRingkas"></section>
+  <section class="layar" id="layarGenWealthDeposito"></section>
+  <section class="layar" id="layarGenWealthBanding"></section>
+  <section class="layar" id="layarRizqia"></section>
+  <section class="layar" id="layarRizqiaRingkas"></section>
+  <section class="layar" id="layarSalesIdea">
+    <div class="si-shell">
+      <div class="si-hero">
+        <div class="si-hero-brand">
+          <div class="si-hero-mark">🖐️</div>
+          <div><h2>Sales Idea</h2><p>Sales Idea 10 Jari & Keranjang Kehidupan — panduan role play interaktif untuk membangun kebutuhan.</p></div>
+          <button class="si-reset" id="siReset" type="button">↺ Mulai dari awal</button>
+        </div>
+      </div>
+      <div class="si-content" id="salesIdeaContent"></div>
+      <div class="si-footer">
+        <button class="si-prev" id="siPrev" type="button">← Mulai</button>
+        <span class="si-stepcount" id="siStepCount">Langkah 1 dari 13</span>
+        <button class="si-next" id="siNext" type="button">Berikutnya →</button>
+      </div>
+    </div>
+  </section>
+  <section class="layar" id="layarAktivitas"></section>
+  <section class="layar" id="layarAktRekap"></section>
+
+</main>
+
+<!-- Muncul hanya saat dicetak, pada layar mana pun. -->
+<div class="sangkalan-cetak" id="sangkalanCetak">
+  <b>Ilustrasi tidak resmi.</b> Dokumen ini dibuat dengan alat bantu internal PSG Agency
+  sebagai gambaran untuk mempermudah penjelasan. Seluruh angka premi, manfaat, dan masa
+  berlaku tetap merujuk pada <b>ilustrasi resmi dan Ketentuan Polis PT Asuransi Jiwa
+  Generali Indonesia</b> serta hasil underwriting. Bila terdapat perbedaan, yang berlaku
+  adalah ilustrasi resmi Generali.
+</div>
+
+<script src="src/app-version.js"></script>
+<script src="src/data/catalog.js"></script>
+<script src="src/engines/usia.js"></script>
+<script src="src/engines/rayaProMaxima.js"></script>
+<script src="src/engine/productRegistry.js"></script>
+<script src="src/engines/liteFuture.js"></script>
+<script src="src/engines/cristalPrime.js"></script>
+<script src="src/engines/newCemerlangPrime.js"></script>
+<script src="src/engines/gspa.js"></script>
+<script src="src/engines/iflexyguard.js"></script>
+<script src="src/engines/ghp.js"></script>
+<script src="src/engine/debugPanel.js"></script>
+<script src="src/core.js"></script>
+<script src="src/raya-pro-maxima.js"></script>
+<script src="src/tunggu-12-ghp.js"></script>
+<script src="src/app.js"></script>
+<script src="src/data/bsl-lengkap.js"></script>
+<script src="src/engines/besmartLiteLengkap.js"></script>
+<script src="src/bsl-ui.js"></script>
+<script src="src/data/rizqia.js"></script>
+<script src="src/rizqia.js"></script>
+<script src="src/gen-wealth.js"></script>
+<script src="src/banding-genwealth.js"></script>
+<script src="src/segitiga.js"></script>
+<script src="src/dp-solusi.js"></script>
+<script src="src/program-financial-engine.js"></script>
+<script src="src/program-financial-normalizer.js"></script>
+<script src="src/segitiga-solusi.js"></script>
+<script src="src/solusi-pendidikan.js"></script>
+<script src="src/ghp-aturan.js"></script>
+<script src="src/ghp-sambung.js"></script>
+<script src="src/banding-ghp.js"></script>
+<script src="src/banding-gpro.js"></script>
+<script src="src/banding-produk.js"></script>
+<script src="src/banding-cetak.js"></script>
+<script src="src/slip-komisi.js"></script>
+<script src="src/kartu-konsultan.js"></script>
+<script src="src/library-ilustrasi.js"></script>
+<script src="src/preview-cetak.js"></script>
+<script src="src/umum.js"></script>
+<script src="src/isian-terakhir.js"></script>
+<script src="src/catatan-ghp.js"></script>
+<script src="src/prompt-flyer.js"></script>
+<script src="src/aktivitas.js"></script>
+<script src="src/aktivitas-ui.js"></script>
+<script src="src/sales-idea.js"></script>
+
+<script>
+(function(){
+  try{
+    const q=new URLSearchParams(location.search);
+    const target=q.get('returnScreen');
+    if(!target) return;
+    const run=()=>{
+      if(window.bukaLayar){
+        window.bukaLayar(target);
+        try{history.replaceState({},document.title,location.pathname+location.hash)}catch(e){}
+      }else{
+        setTimeout(run,40);
+      }
+    };
+    setTimeout(run,0);
+  }catch(e){}
+})();
+</script>
+
+<script>
+(function(){
+  const b=document.getElementById('btnLogout');
+  if(b) b.addEventListener('click',function(){
+    if(confirm('Logout dari Insurance Hub?\nSesi berakhir. Semua data kerja kamu tetap tersimpan di perangkat ini.')){
+      if(window.insuranceHubLogout) window.insuranceHubLogout();
+    }
+  });
+})();
+</script>
+<section id="layarSolusiHitung" class="layar"></section>
+<section id="layarSolusiBanding" class="layar"></section>
+<script src="src/theme-switcher.js"></script>
+</body>
+</html>

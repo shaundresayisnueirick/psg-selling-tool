@@ -1,0 +1,308 @@
+<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Ringkasan Perbandingan — Insurance Hub</title>
+<link rel="stylesheet" href="src/styles.css">
+<script src="src/access-gate.js"></script><style>
+body{background:#f6f7f9}.summary-shell{max-width:1500px;margin:auto;padding:24px}.top{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}.title{font-size:28px;font-weight:900}.sub{opacity:.7}.actions{display:flex;gap:8px;flex-wrap:wrap}.targets,.benefit-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.card{background:#fff;border:1px solid #e5e5e5;border-radius:16px;padding:15px}.k{font-size:12px;opacity:.65}.v{font-size:21px;font-weight:900}.section{margin-top:18px}.section h2{margin-bottom:10px}.type-title{font-size:20px;font-weight:900;margin:18px 0 10px}.table-wrap{overflow:auto;background:#fff;border:1px solid #e5e5e5;border-radius:16px}.tbl{width:100%;min-width:900px;border-collapse:collapse}.tbl th,.tbl td{padding:12px;border-bottom:1px solid #eee;vertical-align:top}.tbl th{font-size:12px;background:#fafafa}.pick{font-size:20px}.status-ok{font-weight:800}.status-warn{font-weight:800}.status-over{font-weight:800}.notice{background:#fff;border:1px solid #e5e5e5;border-radius:16px;padding:15px;line-height:1.6}.benefit{border:1px solid #e5e5e5;border-radius:14px;padding:13px;background:#fff}.benefit strong{display:block;font-size:16px;line-height:1.25;overflow-wrap:anywhere}.source{font-size:12px;opacity:.7;margin-top:6px}.selected-bar{position:sticky;bottom:10px;background:#fff;border:1px solid #ddd;border-radius:16px;padding:12px;display:flex;justify-content:space-between;align-items:center;gap:10px;box-shadow:0 6px 25px #0001;z-index:3}.small{font-size:12px;opacity:.7}@media(max-width:900px){.targets{grid-template-columns:repeat(2,1fr)}.summary-shell{padding:14px}.title{font-size:23px}}
+@media print{.actions,.selected-bar{display:none}body{background:#fff}.summary-shell{max-width:none;padding:0}}
+
+.switch{position:relative;display:inline-block;width:46px;height:26px}
+.switch input{opacity:0;width:0;height:0;position:absolute}
+.switch .slider{position:absolute;inset:0;cursor:pointer;background:#d9dee5;border-radius:999px;transition:.18s}
+.switch .slider:before{content:"";position:absolute;width:20px;height:20px;left:3px;top:3px;background:#fff;border-radius:50%;box-shadow:0 1px 3px #0002;transition:.18s}
+.switch input:checked + .slider{background:#10253e}
+.switch input:checked + .slider:before{transform:translateX(20px)}
+
+.print-logo{display:none}
+@media print{
+  .print-logo{display:block;width:22mm;height:auto;object-fit:contain;margin:0 0 5mm auto}
+}
+.waiver-block{margin:10px 0 16px}
+.waiver-head{font-size:12px;margin:0 0 6px;opacity:.85}
+.waiver-block .blok{padding:0;border:0;background:transparent;margin:0}
+.waiver-block table{width:100%;border-collapse:collapse;font-size:12px}
+.waiver-block th,.waiver-block td{padding:6px 8px;border-bottom:1px solid rgba(128,128,128,.25)}
+.waiver-block th{text-align:left;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase}
+.waiver-block td.kanan,.waiver-block th.kanan{text-align:right;white-space:nowrap}
+@media print{.waiver-block{break-inside:auto}.waiver-block tr{break-inside:avoid}}
+</style><script>/* Tema dipasang sebelum CSS dilukis supaya tidak ada kedipan terang saat
+   agen memakai tema Dark. Sengaja inline dan sesingkat mungkin. */
+(function(){try{var t=localStorage.getItem('insuranceHub.theme.v3');
+if(t!=='dark'&&t!=='original')t='original';
+document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+  <link rel="stylesheet" href="src/cetak-besar.css">
+</head><body><main class="summary-shell"><img class="print-logo" src="assets/logo-psg.png" alt="PSG — Patriot Shining Generation">
+<div class="top"><div><div class="title">Ringkasan Perbandingan</div><div class="sub" id="customer"></div></div><div class="actions"><button class="aksi" onclick="window.print()">🖨 Cetak / PDF</button><button class="sakelar" type="button" id="cmpHome">⌂ Home</button><button class="sakelar" type="button" id="cmpBack">← Kembali</button><button class="logout-btn" type="button" id="cmpLogout">Logout</button></div></div>
+<div class="targets section" id="targets"></div>
+<div class="section"><h2>Alternatif Proteksi Jiwa</h2><div id="life"></div></div>
+<div class="section"><h2>Alternatif Critical Illness</h2><div id="ci"></div></div>
+<div class="section"><h2>Summary Benefit per Jenis Perlindungan</h2><div id="benefits"></div></div>
+<div class="selected-bar"><div><b id="selectedCount">0 alternatif dipilih</b><div class="small">Centang alternatif yang akhirnya dipilih nasabah.</div></div><button class="aksi" id="generate">Buat Ringkasan Gabungan Pilihan Nasabah</button></div>
+<script>
+(function(){
+function money(v){return Number(v||0).toLocaleString('id-ID')}
+function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+function dateID(v){
+  if(!v)return '';
+  const s=String(v).slice(0,10);
+  const p=s.split('-');
+  return p.length===3 ? p[2]+'-'+p[1]+'-'+p[0] : String(v);
+}
+function state(){
+  try{
+    return JSON.parse(
+      sessionStorage.getItem('insuranceHub.comparisonSummary') ||
+      localStorage.getItem('insuranceHub.comparison.v6') || 'null'
+    );
+  }catch(e){return null}
+}
+const s=state();
+if(!s){
+  document.body.innerHTML='<div style="padding:30px">Belum ada perbandingan.</div>';
+  return;
+}
+
+document.getElementById('customer').textContent=
+  (s.customerName||'Nasabah')+
+  (s.customerTgl?' · '+dateID(s.customerTgl):'');
+
+const t=s.targets||{};
+
+/* Review fix:
+   - Periode CI removed from this page; it remains an input in Needs Analysis.
+   - Total alternatif is a count, never currency.
+*/
+document.getElementById('targets').innerHTML=[
+  ['Proteksi Jiwa',t.life],
+  ['Critical Illness',t.ci],
+  ['Total alternatif',(s.scenarios||[]).length]
+].map(x=>'<div class="card"><div class="k">'+x[0]+'</div><div class="v">'+
+  (x[0]==='Total alternatif' ? String(Number(x[1]||0)) :
+   'Rp'+money(x[1]))+
+  '</div></div>').join('');
+
+/* Every toggle starts OFF on this comparison page. */
+(s.scenarios||[]).forEach(x=>x.selected=false);
+
+function totalPaidFor(x){
+  const direct=Number(x.totalPaid||0);
+  if(direct)return direct;
+  const engine=Number(x.result?.totalDibayar||0);
+  if(engine)return engine;
+  /* Gen Aman baseline engine exposes annual premium; this fallback is
+     only used when totalDibayar is not exposed by that engine. */
+  if(x.productKey==='GSPA'){
+    return Number(x.premium||0)*Number(x.paymentTerm||0);
+  }
+  return 0;
+}
+
+function renderType(type,hostId){
+  const arr=(s.scenarios||[]).filter(x=>x.needType===type);
+  const host=document.getElementById(hostId);
+  if(!arr.length){
+    host.innerHTML='<div class="notice">Belum ada alternatif.</div>';
+    return;
+  }
+  host.innerHTML=
+    '<div class="table-wrap"><table class="tbl"><thead><tr>'+
+    '<th>Pilih</th><th>Produk</th><th>UP</th><th>Premi/Tahun</th>'+
+    '<th>Total Bayar</th><th>Masa Bayar</th><th>Perlindungan</th>'+
+    '</tr></thead><tbody>'+
+    arr.map(x=>
+      '<tr>'+
+      '<td><label class="switch"><input type="checkbox" class="pick" data-id="'+esc(x.id)+'"><span class="slider"></span></label></td>'+
+      '<td><b>'+esc(x.productName)+'</b></td>'+
+      '<td>Rp'+money(x.up)+'</td>'+
+      '<td>Rp'+money(x.premium)+'</td>'+
+      '<td>Rp'+money(totalPaidFor(x))+'</td>'+
+      '<td>'+esc(x.paymentTerm)+' tahun</td>'+
+      '<td>'+
+        (x.productKey==='FLEX' ? 'sampai usia 99' :
+         x.productKey==='BSL' ? 'sampai usia 100' :
+         x.protectionTerm ? esc(x.protectionTerm)+' tahun' :
+         x.productKey==='GSPA' ? 'sampai usia 100' : 'sesuai ilustrasi')
+        +'</td>'+
+      '</tr>'
+    ).join('')+
+    '</tbody></table></div>';
+}
+
+/* Benefit grouping:
+   - Only selected/on alternatives contribute.
+   - Same benefit key is aggregated.
+   - Different benefit keys remain separate.
+   - Life and CI are rendered in separate sections so their mechanisms
+     are not visually mixed.
+*/
+function benefitItems(arr,type){
+  const groups={};
+  function add(key,label,value,product){
+    const n=Number(value||0);
+    if(!n)return;
+    if(!groups[key])groups[key]=[];
+    groups[key].push({label,value:n,product});
+  }
+
+  arr.forEach(x=>{
+    const r=x.result||{};
+    if(type==='life' && x.needType!=='life')return;
+    if(type==='ci' && x.needType!=='ci')return;
+
+    if(x.productKey==='GSPA'){
+      add('death','Meninggal Dunia',r.santunanNet||r.upDasar,x.productName);
+      add('transport','Tambahan Manfaat Transportasi',r.tambahanTransportasi,x.productName);
+      add('overseas','Tambahan Manfaat Luar Negeri',r.tambahanLuarNegeri,x.productName);
+      add('hajj','Tambahan Manfaat Haji',r.tambahanHaji,x.productName);
+    }
+
+    if(x.productKey==='NCP'){
+      add('death','Meninggal Dunia karena sebab apa pun',r.meninggal??x.up,x.productName);
+      add('accdeath','Meninggal Dunia Akibat Kecelakaan',r.meninggalKecelakaan,x.productName);
+      add('rop','Pengembalian Premi / ROP Akhir Kontrak',r.akhirKontrak,x.productName);
+    }
+
+    if(x.productKey==='CRIS'){
+      add('ci','Critical Illness',r.totalKritis,x.productName);
+      add('angio','Angioplasty',r.angioplasty,x.productName);
+      add('death','Meninggal Dunia',r.manfaatMeninggal,x.productName);
+      add('rop','Pengembalian Premi / ROP Akhir Kontrak',r.akhirKontrak,x.productName);
+    }
+
+    if(x.productKey==='BSL'){
+      add('death','Meninggal Dunia',r.manfaatMeninggal,x.productName);
+      add('maturity','Manfaat Hidup Usia 100 Tahun',r.manfaatHidup,x.productName);
+    }
+
+    if(x.productKey==='FLEX'){
+      // Ringkasan alternatif menampilkan UP dasar yang dibeli. Kenaikan 150%/200%
+      // tetap dijelaskan di timeline, bukan mengganti angka UP dasar di kartu alternatif.
+      add('death','Meninggal Dunia',x.up,x.productName);
+      add('accdeath','Tambahan Meninggal Akibat Kecelakaan',r.tambahanKecelakaan,x.productName);
+      add('bonus75','Bonus Usia 75 Tahun',r.bonus75,x.productName);
+      add('maturity','Manfaat Akhir Masa Asuransi Usia 99 Tahun',r.akhirMasa,x.productName);
+    }
+  });
+
+  const entries=Object.entries(groups);
+  if(!entries.length){
+    return '<div class="notice">Belum ada alternatif yang dipilih. Nyalakan minimal satu toggle di atas untuk melihat summary benefit.</div>';
+  }
+
+  return '<div class="benefit-grid">'+entries.map(([key,items])=>{
+    const total=items.reduce((a,b)=>a+Number(b.value),0);
+    const merged=items.length>1;
+    return '<div class="benefit">'+
+      '<strong>'+esc(items[0].label)+'</strong>'+
+      '<div class="v">Rp'+money(total)+'</div>'+
+      '<div class="source">'+
+      (merged?'Digabung dari: ':'Sumber: ')+
+      items.map(i=>esc(i.product)+' Rp'+money(i.value)).join(' · ')+
+      '</div></div>';
+  }).join('')+'</div>';
+}
+
+renderType('life','life');
+renderType('ci','ci');
+
+/* Tabel pembebasan premi oleh Waiver Gen Aman.
+   Dibuat di aplikasi (app.js -> cmpTabelWaiverGSPA) dan ikut tersimpan di
+   tiap skenario sebagai waiverHtml. Halaman ini sebelumnya hanya merender
+   tabel ringkas, sehingga tabel waiver yang sudah terlihat saat menghitung
+   hilang begitu alternatifnya disimpan lalu dibuka di ringkasan dan cetak. */
+function waiverSections(arr){
+  const punya=arr.filter(x=>x && x.waiverHtml);
+  if(!punya.length) return '';
+  return '<div class="type-title">Pembebasan Premi (Waiver Gen Aman)</div>'+
+    punya.map(function(x){
+      return '<div class="waiver-block">'+
+        '<div class="waiver-head"><b>'+esc(x.productName||'Gen Aman')+'</b>'+
+        ' — UP Rp'+money(x.up)+' · Bayar '+esc(x.paymentTerm)+' tahun</div>'+
+        x.waiverHtml+'</div>';
+    }).join('');
+}
+
+function renderBenefits(){
+  const selected=(s.scenarios||[]).filter(x=>x.selected===true);
+  document.getElementById('benefits').innerHTML=
+    '<div class="type-title" style="margin-top:0">Proteksi Jiwa</div>'+
+    benefitItems(selected,'life')+
+    '<div class="type-title">Critical Illness</div>'+
+    benefitItems(selected,'ci')+
+    waiverSections(selected);
+}
+
+/* Selection is the source of truth for the bottom count and benefits. */
+function sync(){
+  const ids=[...document.querySelectorAll('[data-id]:checked')].map(x=>x.dataset.id);
+  (s.scenarios||[]).forEach(x=>x.selected=ids.includes(x.id));
+  sessionStorage.setItem('insuranceHub.comparisonSummary',JSON.stringify(s));
+  const n=ids.length;
+  document.getElementById('selectedCount').textContent=n+' alternatif dipilih';
+  renderBenefits();
+}
+
+document.addEventListener('change',e=>{
+  if(e.target && e.target.dataset && e.target.dataset.id)sync();
+});
+
+renderBenefits();
+document.getElementById('selectedCount').textContent='0 alternatif dipilih';
+
+document.getElementById('generate').addEventListener('click',()=>{
+  const selected=(s.scenarios||[]).filter(x=>x.selected===true);
+  if(!selected.length){
+    alert('Pilih minimal satu alternatif dengan menyalakan toggle terlebih dahulu.');
+    return;
+  }
+  // Hand off ONLY the selected alternatives to the existing Dashboard
+  // Combination Products engine. The final summary is generated there.
+  const payload={...s,scenarios:selected,agentName:'',agentHP:''};
+  sessionStorage.setItem('insuranceHub.comboImport',JSON.stringify(payload));
+   sessionStorage.setItem('insuranceHub.externalReturn.v1',JSON.stringify({
+     type:'program-summary',
+     returnPage:'comparison-summary.html'
+   }));
+  location.href='index.html#needs-combo-import';
+});
+})();
+
+const cmpHome=document.getElementById('cmpHome');
+if(cmpHome) cmpHome.addEventListener('click',()=>{ location.href='index.html'; });
+
+const cmpBack=document.getElementById('cmpBack');
+if(cmpBack){
+  cmpBack.addEventListener('click',()=>{
+    /*
+       Halaman ini selalu dibuka dari layar PERBANDINGAN SOLUSI (COMPARE).
+       Jangan gunakan history.back() atau returnScreen dari session secara
+       generik, karena session marker dapat tertinggal dari alur sebelumnya
+       dan membuat tombol Kembali mendarat di NEEDS / dashboard.
+       Tombol Home tetap khusus untuk dashboard.
+    */
+    try{sessionStorage.removeItem('insuranceHub.externalReturn.v1');}catch(e){}
+    location.href='index.html?returnScreen=COMPARE';
+  });
+}
+
+const cmpLogout=document.getElementById('cmpLogout');
+if(cmpLogout)cmpLogout.addEventListener('click',()=>{
+  if(confirm('Logout dari Insurance Hub?\nSesi berakhir. Semua data kerja kamu tetap tersimpan di perangkat ini.')){
+    if(window.insuranceHubLogout){ window.insuranceHubLogout(); }
+    else {
+      /* Cadangan bila access-gate.js belum sempat dimuat. Aturannya sama:
+         logout tidak menghapus data kerja agen, hanya data sesi. */
+      try{
+        /* Mencabut otorisasi perangkat — ini yang membuat layar masuk muncul
+           lagi. Tanpa baris ini tombol logout tidak menghasilkan apa pun. */
+        localStorage.removeItem('insuranceHub.access.remember.v3');
+        ['insuranceHub.isianTerakhir.v1','insuranceHub.segitiga.globalContext.v1']
+          .forEach(k=>localStorage.removeItem(k));
+        sessionStorage.clear();
+      }catch(e){}
+      location.href='index.html';
+    }
+  }
+});
+</script></main><div class="sangkalan-cetak" id="sangkalanCetak"><b>Ilustrasi tidak resmi.</b> Dokumen ini dibuat dengan alat bantu internal PSG Agency sebagai gambaran untuk mempermudah penjelasan. Seluruh angka premi, manfaat, dan masa berlaku tetap merujuk pada <b>ilustrasi resmi dan Ketentuan Polis PT Asuransi Jiwa Generali Indonesia</b> serta hasil underwriting. Bila terdapat perbedaan, yang berlaku adalah ilustrasi resmi Generali.</div>
+<script src="src/preview-cetak.js"></script>
+<script src="src/theme-switcher.js"></script>
+</body></html>

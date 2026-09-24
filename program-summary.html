@@ -1,0 +1,514 @@
+<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Program Perlindungan Nasabah — Insurance Hub v30</title>
+<link rel="stylesheet" href="src/styles.css">
+<script src="src/access-gate.js"></script><style>
+body{background:#f6f7f9}.shell{max-width:1500px;margin:auto;padding:24px}.brand-top{display:flex;justify-content:flex-start;margin-bottom:10px}.brand-top img{width:92px;height:auto;object-fit:contain}.head{display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap;align-items:flex-start}.title{font-size:32px;font-weight:900;line-height:1.1}.name{font-size:24px;font-weight:900;margin-top:7px}.sub{opacity:.7;margin-top:3px}.actions{display:flex;gap:8px}.section{margin-top:18px}.box{background:#fff;border:1px solid #e5e5e5;border-radius:16px;padding:16px}.targets{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.target{padding:12px 14px;border:1px solid #e5e5e5;border-radius:14px}.k{font-size:12px;opacity:.65}.num{font-size:22px;font-weight:900}.combo-output .blok{background:#fff;border:1px solid #e5e5e5;border-radius:16px;padding:16px;margin-top:14px}.combo-output h2{margin-top:0}.gulir{overflow:auto}.tahunan{width:100%;min-width:1000px;border-collapse:collapse}.tahunan th,.tahunan td{padding:10px;border:1px solid #eee;vertical-align:top}.tahunan th{background:#fafafa;font-size:12px}.identitas{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.identitas>div{padding:10px;border:1px solid #e5e5e5;border-radius:12px}.identitas b{display:block;font-size:16px;margin-top:3px}.catatan{line-height:1.5}.kartu{background:#fff}.tanpa-cetak{margin-bottom:30px}.targets-title{margin:0 0 10px}.empty{padding:24px;background:#fff;border:1px solid #e5e5e5;border-radius:16px}.selected-products{font-weight:800}.selected-products span{display:inline-block;margin:4px 6px 0 0;padding:6px 9px;border-radius:999px;background:#f0f2f5}
+@media(max-width:900px){.shell{padding:14px}.title{font-size:25px}.name{font-size:21px}.targets,.identitas{grid-template-columns:1fr}.actions{width:100%}.actions button{flex:1}}
+@media print{
+  /* PDF khusus halaman Program Perlindungan: gunakan A4 landscape agar
+     Timeline Program tidak dipaksa menyempit menjadi kolom-kolom kecil.
+     Tidak mengubah tampilan layar maupun halaman lain. */
+  @page{size:A4 landscape;margin:8mm}
+  @page wide-program{size:A4 landscape;margin:8mm}
+  body{background:#fff;font-size:9.2pt}
+  .shell{max-width:none;padding:0}
+  .actions,.tanpa-cetak{display:none!important}
+  .brand-top{display:none}
+  .combo-output .blok,.box{break-inside:auto;page-break-inside:auto;margin-bottom:5mm}
+  .combo-output .table-block{break-inside:auto;page-break-inside:auto;max-width:100%!important;overflow:visible!important}
+  .combo-output .gulir{overflow:visible!important;max-width:100%!important}
+  .tahunan{width:100%!important;min-width:0!important;max-width:100%!important;table-layout:auto!important;font-size:7.5pt;line-height:1.22}
+  .tahunan thead{display:table-header-group}
+  .tahunan tr{break-inside:avoid;page-break-inside:avoid}
+  .tahunan th,.tahunan td{padding:3px 3px;white-space:normal!important;overflow-wrap:break-word;word-break:normal;vertical-align:top}
+  .tahunan th.kanan,.tahunan td.kanan,.tahunan td.angka,.tahunan th.angka{white-space:nowrap!important;word-break:normal!important;overflow-wrap:normal!important}
+  .polis-table{font-size:7pt}
+  .polis-table th,.polis-table td{padding:2.5px 2px}
+  /* Timeline: beri ruang lebih lega pada kolom deskriptif dan angka. */
+  .timeline-block{break-before:auto;page-break-before:auto}
+  .timeline-table{
+    width:100%!important;min-width:0!important;max-width:100%!important;
+    table-layout:fixed!important;font-size:7.2pt;line-height:1.18;
+  }
+  .timeline-table th,.timeline-table td{padding:3px 4px}
+  .timeline-table th{font-size:6.9pt;line-height:1.15}
+  .timeline-table td.angka{white-space:nowrap!important;word-break:normal!important;overflow-wrap:normal!important}
+  .timeline-table th:nth-child(1),.timeline-table td:nth-child(1){width:6%}
+  .timeline-table th:nth-child(2),.timeline-table td:nth-child(2){width:7%}
+  .timeline-table th:nth-child(3),.timeline-table td:nth-child(3){width:22%}
+  .timeline-table th:nth-child(4),.timeline-table td:nth-child(4){width:20%}
+  .timeline-table th:nth-child(5),.timeline-table td:nth-child(5){width:23%}
+  .timeline-table th:nth-child(6),.timeline-table td:nth-child(6){width:22%}
+  .timeline-table th,.timeline-table td{vertical-align:middle}
+  /* Extremely wide combination tables: split horizontally only for print, with repeated anchor columns. */
+  .print-split{display:none}
+  .print-split{display:block!important;width:100%!important;overflow:visible!important}
+    .print-split .split-part{width:100%!important;max-width:100%!important;overflow:visible!important;break-inside:auto;page-break-inside:auto;margin:0 0 5mm}
+    .print-split .split-label{font-size:7pt;font-weight:800;margin:0 0 2mm}
+    .print-split table{width:100%!important;max-width:100%!important;min-width:0!important;table-layout:auto!important;border-collapse:collapse}
+    .print-split thead{display:table-header-group}
+    .print-split tr{break-inside:avoid;page-break-inside:avoid}
+    .print-split th,.print-split td{padding:2.5px 2.5px;border:1px solid #eee;vertical-align:top;white-space:normal;overflow-wrap:break-word;word-break:normal}
+    .print-split th.kanan,.print-split td.angka{white-space:nowrap!important;overflow-wrap:normal!important;word-break:normal!important}
+  .print-split table.timeline-table{
+    width:100%!important;min-width:0!important;max-width:100%!important;
+    table-layout:fixed!important;border-collapse:collapse!important;font-size:7pt!important;
+  }
+  .print-split table.timeline-table th,.print-split table.timeline-table td{
+    width:auto!important;min-width:0!important;max-width:none!important;
+    white-space:normal!important;overflow-wrap:anywhere!important;word-break:break-word!important;
+    hyphens:none!important;
+    padding:2.5px 2.5px!important;vertical-align:middle!important;
+    box-sizing:border-box!important;
+  }
+  .print-split table.timeline-table th{
+    font-size:5.8pt!important;line-height:1.05!important;
+    text-align:center!important;
+    overflow:hidden!important;
+  }
+  .print-split table.timeline-table td{
+    font-size:6.5pt!important;line-height:1.12!important;
+    overflow:hidden!important;
+  }
+  .print-split table.timeline-table td.angka{
+    white-space:nowrap!important;
+    overflow:hidden!important;
+    text-overflow:clip!important;
+  }
+  .print-split table.timeline-table th:nth-child(1),.print-split table.timeline-table td:nth-child(1){width:7%!important}
+  .print-split table.timeline-table th:nth-child(2),.print-split table.timeline-table td:nth-child(2){width:7%!important}
+  .print-split table.timeline-table th:nth-child(3),.print-split table.timeline-table td:nth-child(3){width:18%!important}
+  .print-split .split-part{break-inside:auto;page-break-inside:auto}
+  .print-split .split-part + .split-part{break-before:page;page-break-before:always}
+  body.print-landscape .print-split table{font-size:7pt}
+  .combo-output .table-block h2{break-after:avoid;page-break-after:avoid}
+  .combo-output .catatan{font-size:7.5pt;line-height:1.3}
+  .timeline-block .catatan{margin-top:3mm}
+  .timeline-block .gulir{overflow:visible!important}
+  html,body{overflow:visible!important}
+  body.print-landscape{page:wide-program}
+  body.print-landscape .combo-output .tahunan{font-size:7.2pt}
+  body.print-landscape .combo-output .tahunan th,body.print-landscape .combo-output .tahunan td{padding:2.5px 2.5px}
+  body.print-landscape .combo-output .tahunan th:not(.kanan),body.print-landscape .combo-output .tahunan td:not(.angka){overflow-wrap:anywhere;word-break:normal}
+}
+
+/* Prompt tetap bisa disalin, tetapi isi prompt panjang tidak memenuhi layar. */
+.prompt-box textarea#flyerPrompt{display:none!important}
+
+.print-logo{display:none}.prompt-box{margin-top:12px}.prompt-box textarea{width:100%;min-height:360px;box-sizing:border-box;resize:vertical;font:12px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;padding:11px;border:1px solid #D9E0E7;border-radius:10px;background:#fff;color:#26384B}.prompt-box button{margin-top:8px}.prompt-theme{margin:8px 0 10px;padding:10px 12px;border-radius:10px;background:#F4EFE4;border:1px solid #E4D6B7;color:#5A4A28;font-weight:800;line-height:1.4}
+@media print{
+  .print-logo{display:block;width:22mm;height:auto;object-fit:contain;margin:0 0 5mm auto}
+}
+.program-benefit-line{padding:11px 0;border-bottom:1px solid #eee}.program-benefit-line b{display:block;font-size:14px}.program-benefit-line span{display:block;font-size:20px;font-weight:900;margin-top:2px}.program-benefit-line small{display:block;font-size:11px;opacity:.72;line-height:1.45;margin-top:3px}.program-duration-line{padding:8px 10px;border-left:3px solid #10253e;background:#fafafa;margin:7px 0;border-radius:6px;font-size:13px;line-height:1.5}
+
+<style>
+.program-phase{padding:12px 14px;border:1px solid #e6e8eb;border-radius:12px;background:#fbfbfc;margin:8px 0}.program-phase b{font-size:14px}.program-phase .phase-total{font-size:21px;font-weight:900;margin-top:3px}.program-phase small{display:block;opacity:.72;line-height:1.45;margin-top:4px}.program-health-warning{margin-top:12px;padding:11px 13px;border-radius:12px;background:#fff7e8;border:1px solid #efd59a;line-height:1.55}.program-hidden-detail{margin-top:10px}.program-hidden-detail summary{cursor:pointer;font-weight:800}.program-benefit-line{padding:12px 0;border-bottom:1px solid #eee}.program-benefit-line:last-child{border-bottom:0}.program-benefit-line b{display:block;font-size:14px}.program-benefit-line span{display:block;font-size:20px;font-weight:900;margin-top:2px}.program-benefit-line small{display:block;font-size:11px;opacity:.72;line-height:1.45;margin-top:4px}.program-duration-line{padding:9px 11px;border-left:3px solid #10253e;background:#fafafa;margin:7px 0;border-radius:7px;font-size:13px;line-height:1.5}</style>
+
+<style>
+</style><script>/* Tema dipasang sebelum CSS dilukis supaya tidak ada kedipan terang saat
+   agen memakai tema Dark. Sengaja inline dan sesingkat mungkin. */
+(function(){try{var t=localStorage.getItem('insuranceHub.theme.v3');
+if(t!=='dark'&&t!=='original')t='original';
+document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+  <link rel="stylesheet" href="src/cetak-besar.css">
+</head><body><main class="shell"><div class="brand-top"><img src="assets/logo-psg.png" alt="PSG"></div><img class="print-logo" src="assets/logo-psg.png" alt="PSG — Patriot Shining Generation">
+<header class="head"><div><div class="title">Program Perlindungan Nasabah</div><div class="name" id="whoName">Nasabah</div><div class="sub" id="whoMeta"></div></div><div class="actions"><button class="aksi" type="button" onclick="window.print()">🖨 Cetak / PDF</button><button class="aksi" type="button" id="programSimpanLibrary">📚 Simpan ke Library</button><button class="sakelar" type="button" id="programHome">⌂ Home</button><button class="sakelar" type="button" id="programBack">← Kembali</button><button class="logout-btn" type="button" id="programLogout">Logout</button></div></header>
+<section class="section box"><h2 class="targets-title">Tujuan Perlindungan</h2><div class="targets" id="targets"></div><div class="selected-products" id="selectedProducts" style="margin-top:12px"></div></section>
+<div class="combo-output" id="comboOutput"></div>
+</main>
+  </section>
+</div>
+<script>
+(function(){
+function money(v){return Number(v||0).toLocaleString('id-ID')}
+function dateID(v){if(!v)return '';const p=String(v).slice(0,10).split('-');return p.length===3?p[2]+'-'+p[1]+'-'+p[0]:String(v)}
+function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+let d=null;try{d=JSON.parse(sessionStorage.getItem('insuranceHub.comboGeneratedSummary')||'null')}catch(e){d=null}
+if(!d){document.getElementById('comboOutput').innerHTML='<div class="empty">Belum ada ringkasan gabungan. Kembali ke Ringkasan Perbandingan, pilih alternatif, lalu klik <b>Buat Ringkasan Gabungan Pilihan Nasabah</b>.</div>';return}
+window.__programSummaryData=d;
+
+document.getElementById('whoName').textContent=d.customerName||'Nasabah';
+document.getElementById('whoMeta').textContent='Tanggal lahir: '+dateID(d.customerTgl)+(d.customerJk?' · '+d.customerJk:'')+(d.customerTgl?' · Usia '+(typeof d.customerAge==='number'?d.customerAge:'')+' tahun':'');
+const selectedNames=((d.selected||[]).map(x=>x.productName||x.productKey).filter(Boolean).join(', '))||'—';
+const t=d.targets||{};
+document.getElementById('targets').innerHTML='<div class="target"><div class="k">Kebutuhan Jiwa</div><div class="num">Rp'+money(t.life)+'</div></div><div class="target"><div class="k">Kebutuhan Critical Illness</div><div class="num">Rp'+money(t.ci)+'</div></div>';
+document.getElementById('selectedProducts').innerHTML='<div class="catatan">Ringkasan utama disajikan berdasarkan manfaat dan komitmen program.</div>';
+const h=d.html||{};
+const out=document.getElementById('comboOutput');
+out.innerHTML=''
+  +'<section class="blok"><h2>Ringkasan Program</h2>'+h.ringkasan+'</section>'
+  +'<details class="blok program-hidden-detail"><summary>Detail komponen pembentuk program</summary><div style="margin-top:10px"><div class="gulir"><table class="tahunan polis-table">'+h.polis+'</table></div><p class="catatan">'+esc(h.catatanSlot)+'</p></div></details>'
+  +'<section class="blok"><h2>Manfaat Gabungan Program</h2><p class="catatan">Nilai di bawah merupakan gabungan manfaat sejenis dari komponen yang dipilih, dengan masa berlaku mengikuti masing-masing komponen.</p><div class="program-benefits-summary">'+(h.manfaat||'<div class="notice">Belum ada manfaat.</div>')+'</div><p class="catatan">'+esc(h.catatanManfaat)+'</p></section>'
+  +(h.durasi?'<section class="blok"><h2>Masa Perlindungan</h2><div class="program-duration-summary">'+h.durasi+'</div></section>':'')
+  /* Tabel timeline dikembalikan. Datanya selalu disiapkan tetapi tidak
+     pernah ditampilkan, sehingga ringkasan kehilangan bagian yang paling
+     menjelaskan: nilai manfaat pada tiap tahun polis. */
+  /* Isi h.timeline dari alur Analisa Kebutuhan hanyalah <thead> dan <tbody>,
+     hasil menyalin isi tabel aslinya — jadi harus dibungkus <table> supaya
+     tampil sebagai tabel. Alur Segitiga mengirim tabel utuh, karena itu
+     dibungkus hanya bila belum berupa tabel. */
+  +((h.timeline&&h.timeline.trim())?'<section class="blok table-block timeline-block"><h2>Timeline Program</h2>'
+     +'<div class="gulir">'
+     +(/^\s*<table/i.test(h.timeline)
+        ? h.timeline
+        : '<table class="tahunan timeline-table">'+h.timeline+'</table>')
+     +'</div>'
+     +((h.catatanTimeline&&h.catatanTimeline.trim())?'<p class="catatan">'+h.catatanTimeline+'</p>':'')
+     +'</section>':'')
+  /* Tabel pembebasan premi waiver sengaja dirender SESUDAH timeline program,
+     sesuai permintaan: ringkasan dan timeline dibaca lebih dulu, penjelasan
+     waiver menutup halaman. */
+  +((h.waiver&&h.waiver.trim())?h.waiver:'')
+  +((h.skenario&&h.skenario.trim())?'<section class="blok table-block skenario-block"><h2>Skenario Tambahan Gen Aman</h2><div class="gulir"><table class="tahunan skenario-table">'+h.skenario+'</table></div><p class="catatan">'+esc(h.catatanSkenario)+'</p></section>':'')
+  +'<section class="blok"><p class="catatan">'+esc(h.sangkalan)+'</p><div class="catatan" style="margin-top:10px">'+h.kakiAgen+'</div></section>'
+  +'<section class="blok tanpa-cetak"><button class="aksi" type="button" onclick="window.print()">Cetak atau Simpan sebagai PDF</button>'
+  +'<div class="prompt-box"><h3>Prompt Flyer AI</h3><p class="catatan">Prompt tampil langsung dan mengikuti hasil ringkasan program yang sedang terlihat. Tidak dibuat dari tebakan produk.</p><div class="prompt-theme" id="promptTheme"></div><textarea id="flyerPrompt" readonly></textarea><button class="sakelar" type="button" id="copyPrompt">Salin prompt flyer</button></div></section>';
+
+  function themeTitle(){
+    const all=((d.html?.ringkasan||'')+' '+(d.html?.manfaat||'')+' '+(d.html?.timeline||'')).toLowerCase();
+    if(all.includes('penyakit kritis') || all.includes('critical illness') || all.includes('ghp')) return 'Perlindungan Menyeluruh untuk Menjaga Rencana Keuangan';
+    if(all.includes('dana kembali') || all.includes('akhir kontrak')) return 'Perlindungan Hari Ini, Nilai untuk Rencana Masa Depan';
+    return 'Menjaga Keluarga Tetap Aman Saat Risiko Datang';
+  }
+  function cleanText(v){return String(v||'').replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();}
+  const theme=themeTitle();
+  const summarySource=[
+    'Tujuan perlindungan: kebutuhan jiwa Rp'+money(t.life)+'; kebutuhan critical illness Rp'+money(t.ci)+'.',
+    'Produk yang dipilih nasabah: '+selectedNames+'.',
+    'Ringkasan program: '+cleanText(h.ringkasan),
+    'Polis yang disusun: '+cleanText(h.polis),
+    'Manfaat gabungan: '+cleanText(h.manfaat),
+    'Masa perlindungan: '+cleanText(h.durasi),
+    h.catatanSlot||'', h.catatanManfaat||'', h.catatanTimeline||''
+  ].filter(Boolean).join('\n');
+  const promptFlyer=[
+    'Kamu adalah desainer grafis profesional yang membuat materi penjelasan asuransi untuk calon nasabah di Indonesia.',
+    '',
+    'BUAT SATU FLYER:',
+    'Buat satu flyer vertikal rasio 4:5, siap dikirim lewat WhatsApp, yang merupakan versi visual dari hasil ringkasan di bawah.',
+    'Jangan membuat konsep atau manfaat baru. Jangan mengubah angka. Jangan mengisi kekosongan data dengan asumsi.',
+    '',
+    'JUDUL TEMA:',
+    theme,
+    'Judul tema wajib menggambarkan tujuan/manfaat perlindungan dan TIDAK boleh menggunakan nama produk sebagai judul utama.',
+    '',
+    'NASABAH:',
+    (d.customerName||'Nasabah')+(d.customerTgl?' · tanggal lahir '+dateID(d.customerTgl):'')+(d.customerTgl && typeof d.customerAge==='number'?' · usia '+d.customerAge+' tahun':'')+(d.customerJk?' · '+d.customerJk:''),
+    '',
+    'HASIL RINGKASAN — INI SATU-SATUNYA SUMBER DATA:',
+    summarySource,
+    '',
+    'ATURAN MUTLAK:',
+    '1. Gunakan hanya angka, manfaat, premi, masa bayar, masa perlindungan, plan, limit, usia, dan istilah yang benar-benar ada pada hasil ringkasan.',
+    '2. Jangan mengarang, menebak, membulatkan, atau mengganti angka.',
+    '3. Jangan menambahkan manfaat, jaminan, klaim keunggulan, janji hasil, atau perbandingan yang tidak ada pada ringkasan.',
+    '4. Jangan menampilkan manfaat yang tidak dipilih nasabah.',
+    '5. Premi/setoran wajib terlihat bila tersedia pada ringkasan.',
+    '6. Jika informasi terlalu banyak, prioritaskan kebutuhan/tujuan → solusi → manfaat utama → premi → detail pendukung, tanpa menghilangkan angka penting.',
+    '7. Jika suatu data tidak tersedia, jangan menebak.',
+    '',
+    'ARAH DESAIN:',
+    '- Modern, premium, bersih, simple tetapi lengkap dan menarik.',
+    '- Mudah dibaca di layar HP dan WhatsApp.',
+    '- Gunakan hierarki visual yang jelas dan ruang putih yang cukup.',
+    '- Gunakan logo PSG (Patriot Shining Generation) sebagai identitas visual utama.',
+    '- Jangan menambahkan logo perusahaan lain kecuali memang ada pada sumber.',
+    '- Semua teks panjang wajib wrapping dan tidak boleh keluar dari kotak.',
+    '- Gunakan ikon/ilustrasi relevan seperlunya, jangan terlalu ramai.',
+    '',
+    'HASIL AKHIR:',
+    'Satu flyer 4:5 yang menarik untuk dijelaskan di depan nasabah, konsisten dengan ringkasan hasil, akurat, dan mudah dipahami.',
+    '',
+    'DISCLAIMER KECIL:',
+    'Ilustrasi tidak resmi. Seluruh angka merujuk pada ilustrasi resmi, Ketentuan Polis PT Asuransi Jiwa Generali Indonesia, dan hasil underwriting.'
+  ].join('\n');
+  const fp=document.getElementById('flyerPrompt'); if(fp) fp.value=promptFlyer;
+  const ft=document.getElementById('promptTheme'); if(ft) ft.textContent='Tema: '+theme;
+  const cp=document.getElementById('copyPrompt'); if(cp) cp.addEventListener('click',()=>{navigator.clipboard?.writeText(promptFlyer).then(()=>{cp.textContent='Prompt tersalin';setTimeout(()=>cp.textContent='Salin prompt flyer',1800)}).catch(()=>{fp.select();document.execCommand('copy');cp.textContent='Prompt tersalin';});});
+})();
+
+
+
+const programHomeBtn=document.getElementById('programHome');
+if(programHomeBtn)programHomeBtn.addEventListener('click',()=>{location.href='index.html';});
+
+const programBack=document.getElementById('programBack');
+if(programBack){
+  programBack.addEventListener('click',()=>{
+    /* Kembali harus deterministik berdasarkan asal ringkasan.
+       Jangan memakai history.back(): alur ringkasan melewati handoff ke
+       index.html sehingga browser history tidak selalu sama dengan alur kerja agen. */
+    let marker=null;
+    try{ marker=JSON.parse(sessionStorage.getItem('insuranceHub.externalReturn.v1')||'null'); }catch(e){ marker=null; }
+
+    // 1) Jika ada marker yang lengkap, gunakan tujuan persis yang disimpan.
+    if(marker && marker.type==='program-summary' && marker.returnPage){
+      const target=new URL(marker.returnPage,location.href);
+      if(marker.returnScreen) target.searchParams.set('returnScreen',marker.returnScreen);
+      try{ sessionStorage.setItem('insuranceHub.returnContext.v1',JSON.stringify({screen:marker.returnScreen||null,page:marker.returnPage})); }catch(e){}
+      location.href=target.href;
+      return;
+    }
+
+    // 2) Fallback berdasarkan jenis ringkasan yang sedang ditampilkan.
+    //    Segitiga -> kembali ke input Solusi Segitiga.
+    //    Combination Engine -> kembali ke Analisis Kebutuhan.
+    let targetScreen='SOLUSI_SEGITIGA';
+    try{
+      if(d && /^combo-engine-handoff-/.test(String(d.version||''))) targetScreen='NEEDS';
+      else if(d && /^segitiga-program-/.test(String(d.version||''))) targetScreen='SOLUSI_SEGITIGA';
+    }catch(e){}
+    const target=new URL('index.html',location.href);
+    target.searchParams.set('returnScreen',targetScreen);
+    try{ sessionStorage.setItem('insuranceHub.returnContext.v1',JSON.stringify({screen:targetScreen,page:'index.html'})); }catch(e){}
+    location.href=target.href;
+  });
+}
+
+function estimateTableWidth(table){
+  const rows=[...table.querySelectorAll('tr')];
+  if(!rows.length)return 0;
+  const cols=rows[0].children.length;
+  const widths=new Array(cols).fill(0);
+  rows.slice(0,Math.min(rows.length,18)).forEach(tr=>{
+    [...tr.children].forEach((cell,i)=>{
+      const txt=(cell.textContent||'').replace(/\s+/g,' ').trim();
+      const longest=txt.split(/\s+/).reduce((m,w)=>Math.max(m,w.length),0);
+      widths[i]=Math.max(widths[i],Math.min(34,Math.max(longest,txt.length>0?Math.min(18,txt.length):1)));
+    });
+  });
+  return widths.reduce((a,b)=>a+b,0)*5.1;
+}
+function makePrintSplit(table){
+  const existing=table.parentElement.querySelector(':scope > .print-split');
+  if(existing)existing.remove();
+  const headRow=table.querySelector('thead tr:first-child');
+  const bodyRows=[...table.querySelectorAll('tbody tr')];
+  if(!headRow)return false;
+  const head=[...headRow.children];
+  const n=head.length;
+  // Timeline COMBO bisa mempunyai banyak kolom benefit. Untuk PDF, jangan
+  // mengecilkan semuanya sampai overlap: pecah horizontal menjadi beberapa
+  // tabel yang masing-masing tetap selebar halaman, dengan kolom identitas
+  // (tahun/usia/premi) diulang agar pembaca tetap tahu baris yang sama.
+  if(n<=6)return false;
+
+  const anchor=[0,1,2].filter(i=>i<n);
+  const remaining=[...Array(n).keys()].filter(i=>!anchor.includes(i));
+  const groups=[];
+  // Untuk layout PDF yang rapi: 4 kolom benefit awal, lalu CI+Angioplasty,
+  // lalu Pencairan+UP Aktif+Keterangan. Ini menjaga kolom panjang tidak
+  // dipaksa berhimpitan. Jika struktur benefit berbeda, fallback tetap 4 kolom/grup.
+  if(remaining.length===9){
+    groups.push(remaining.slice(0,4));
+    groups.push(remaining.slice(4,6));
+    groups.push(remaining.slice(6));
+  }else{
+    const MAX_DATA_COLS=4;
+    for(let i=0;i<remaining.length;i+=MAX_DATA_COLS){
+      groups.push(remaining.slice(i,i+MAX_DATA_COLS));
+    }
+  }
+  if(groups.length<2)return false;
+
+  const wrap=document.createElement('div');
+  wrap.className='print-split';
+
+  function makeTable(indices,label){
+    const part=document.createElement('div');
+    part.className='split-part';
+    const lab=document.createElement('div');
+    lab.className='split-label';
+    lab.textContent=label;
+    part.appendChild(lab);
+
+    const nt=document.createElement('table');
+    nt.className=table.className;
+    nt.setAttribute('data-print-timeline-part','1');
+
+    const col=document.createElement('colgroup');
+    const count=anchor.length+indices.length;
+    for(let i=0;i<count;i++){
+      const c=document.createElement('col');
+      if(i===0)c.style.width='7%';
+      else if(i===1)c.style.width='7%';
+      else if(i===2)c.style.width='18%';
+      else c.style.width=((100-7-7-18)/(count-3)).toFixed(2)+'%';
+      col.appendChild(c);
+    }
+    nt.appendChild(col);
+
+    const thead=document.createElement('thead');
+    const hr=document.createElement('tr');
+    [...anchor,...indices].forEach(i=>hr.appendChild(head[i].cloneNode(true)));
+    thead.appendChild(hr);
+    nt.appendChild(thead);
+
+    const tbody=document.createElement('tbody');
+    bodyRows.forEach(tr=>{
+      const nr=document.createElement('tr');
+      const cells=[...tr.children];
+      [...anchor,...indices].forEach(i=>{
+        if(cells[i])nr.appendChild(cells[i].cloneNode(true));
+      });
+      tbody.appendChild(nr);
+    });
+    nt.appendChild(tbody);
+    part.appendChild(nt);
+    return part;
+  }
+
+  groups.forEach((g,idx)=>{
+    const label='Timeline Program — bagian '+(idx+1)+'/'+groups.length;
+    wrap.appendChild(makeTable(g,label));
+  });
+
+  table.style.display='none';
+  table.parentElement.appendChild(wrap);
+  table.dataset.printSplit='1';
+  return true;
+}
+function clearPrintSplits(){
+  document.querySelectorAll('.print-split').forEach(x=>x.remove());
+  document.querySelectorAll('table[data-print-split="1"]').forEach(t=>{t.style.display='';delete t.dataset.printSplit;});
+}
+function assessPrintWidth(){
+  clearPrintSplits();
+  const tables=[...document.querySelectorAll('.combo-output table')];
+  const wide=tables.some(t=>estimateTableWidth(t)>900);
+  document.body.classList.toggle('print-landscape', wide);
+  const timeline=document.querySelector('.combo-output .timeline-table');
+  if(timeline)makePrintSplit(timeline);
+}
+window.addEventListener('beforeprint', assessPrintWidth);
+window.addEventListener('afterprint', clearPrintSplits);
+
+const programLogout=document.getElementById('programLogout');
+if(programLogout)programLogout.addEventListener('click',()=>{
+  if(confirm('Logout dari Insurance Hub?\nSesi berakhir. Semua data kerja kamu tetap tersimpan di perangkat ini.')){
+    if(window.insuranceHubLogout){ window.insuranceHubLogout(); }
+    else {
+      /* Cadangan bila access-gate.js belum sempat dimuat. Aturannya sama:
+         logout tidak menghapus data kerja agen, hanya data sesi. */
+      try{
+        /* Mencabut otorisasi perangkat — ini yang membuat layar masuk muncul
+           lagi. Tanpa baris ini tombol logout tidak menghasilkan apa pun. */
+        localStorage.removeItem('insuranceHub.access.remember.v3');
+        ['insuranceHub.isianTerakhir.v1','insuranceHub.segitiga.globalContext.v1']
+          .forEach(k=>localStorage.removeItem(k));
+        sessionStorage.clear();
+      }catch(e){}
+      location.href='index.html';
+    }
+  }
+});
+</script><div class="sangkalan-cetak" id="sangkalanCetak"><b>Ilustrasi tidak resmi.</b> Dokumen ini dibuat dengan alat bantu internal PSG Agency sebagai gambaran untuk mempermudah penjelasan. Seluruh angka premi, manfaat, dan masa berlaku tetap merujuk pada <b>ilustrasi resmi dan Ketentuan Polis PT Asuransi Jiwa Generali Indonesia</b> serta hasil underwriting. Bila terdapat perbedaan, yang berlaku adalah ilustrasi resmi Generali.</div>
+
+<style id="dark-gold-v11-program-summary">
+@media screen {
+  body[data-theme="dark"] .program-duration-line,
+  body[data-theme="dark"] .program-benefit-line,
+  body[data-theme="dark"] .program-phase {
+    background:#10151B!important;
+    background-image:none!important;
+    color:#DDD9CF!important;
+    border-color:#2B333D!important;
+  }
+  body[data-theme="dark"] .program-duration-line { border-left-color:#D8B45F!important; }
+  body[data-theme="dark"] .program-duration-line b,
+  body[data-theme="dark"] .program-benefit-line b,
+  body[data-theme="dark"] .program-phase b { color:#F1D58A!important; }
+  body[data-theme="dark"] .program-health-warning {
+    background:#10151B!important;
+    background-image:none!important;
+    color:#DDD9CF!important;
+    border-color:#6F5928!important;
+  }
+  body[data-theme="dark"] .program-health-warning b { color:#F1D58A!important; }
+}
+</style>
+<script src="src/preview-cetak.js"></script>
+<script src="src/theme-switcher.js"></script>
+
+<script>
+/* Simpan ke Library dari halaman Program Perlindungan Nasabah.
+   Halaman ini berkas HTML terpisah, jadi library-ilustrasi.js tidak dimuat di
+   sini dan tombolnya tidak pernah muncul. Formatnya dibuat sama persis dengan
+   yang dipakai di dalam aplikasi supaya hasilnya bisa dibuka, dicari, dan
+   dicetak seperti ilustrasi lain. */
+(function(){
+  'use strict';
+  var LIB='insuranceHub.libraryIlustrasi.v1';
+  var tombol=document.getElementById('programSimpanLibrary');
+  if(!tombol) return;
+
+  function bacaLib(){
+    try{ var x=JSON.parse(localStorage.getItem(LIB)||'[]'); return Array.isArray(x)?x:[]; }
+    catch(_){ return []; }
+  }
+  function ambil(k,b){ try{ return JSON.parse(localStorage.getItem(k)||'null')||b; }catch(_){ return b; } }
+
+  /* Identitas konsultan ikut dipotret, termasuk mode "dibuat untuk agen lain",
+     supaya dokumen yang sudah jadi tidak berubah identitas di kemudian hari. */
+  function potretKonsultan(){
+    var k=ambil('insuranceHub.konsultan.v1',{})||{};
+    var a=ambil('insuranceHub.agen.v1',{})||{};
+    var l=ambil('insuranceHub.level.v1',{})||{};
+    var an=ambil('insuranceHub.konsultan.atasNama.v1',{})||{};
+    var foto='';
+    try{ foto=localStorage.getItem('insuranceHub.agen.foto.v1')||''; }catch(_){}
+    if(an.aktif && an.nama){
+      return {nama:an.nama,jabatan:an.jabatan||'Financial Consultant',whatsapp:an.whatsapp||'',
+        email:an.email||'',instagram:an.instagram||'',tiktok:an.tiktok||'',facebook:an.facebook||'',
+        linkedin:an.linkedin||'',youtube:an.youtube||'',qr:an.qr||'TIDAK',foto:an.foto||'',
+        _atasNama:an.nama,_atasNamaKode:an.kode||''};
+    }
+    return {nama:k.nama||a.nama||l.namaAgen||'',jabatan:k.jabatan||l.nama||'Financial Consultant',
+      whatsapp:k.whatsapp||a.hp||'',email:k.email||'',instagram:k.instagram||'',tiktok:k.tiktok||'',
+      facebook:k.facebook||'',linkedin:k.linkedin||'',youtube:k.youtube||'',qr:k.qr||'TIDAK',foto:foto};
+  }
+
+  tombol.addEventListener('click',function(){
+    var isi=document.querySelector('main.shell');
+    if(!isi){ alert('Halaman belum selesai dimuat.'); return; }
+    var nama=(document.getElementById('whoName')||{}).textContent||'Nasabah';
+    var salin=isi.cloneNode(true);
+    /* Tombol dan elemen layar dibuang supaya yang tersimpan hanya dokumennya. */
+    Array.prototype.forEach.call(
+      salin.querySelectorAll('button,.actions,.tanpa-cetak,.brand-top,.print-logo,img[src*="logo-psg"]'),
+      function(n){ n.remove(); });
+
+    var k=potretKonsultan();
+    var sekarang=new Date();
+    var item={
+      id:'IL-'+sekarang.getTime()+'-'+Math.random().toString(36).slice(2,7),
+      title:'Program Perlindungan - '+nama,
+      product:'Program Perlindungan Nasabah',
+      productCode:'PROGRAM',
+      screenKey:'PROGRAM_SUMMARY',
+      customerName:nama,
+      profileId:(function(){try{return localStorage.getItem('insuranceHub.customerProfile.active.v1')||null}catch(_){return null}})(),
+      relationship:'Diri Sendiri',
+      insuredPersonId:'self',
+      category:'Ilustrasi',
+      familyName:nama,
+      createdAt:sekarang.toISOString(),
+      konsultan:k,
+      html:salin.innerHTML.slice(0,250000)
+    };
+    if(k._atasNama){ item.atasNamaAgen=k._atasNama; item.atasNamaKode=k._atasNamaKode||''; }
+
+    var daftar=bacaLib();
+    daftar.unshift(item);
+    try{
+      localStorage.setItem(LIB,JSON.stringify(daftar.slice(0,200)));
+    }catch(err){
+      alert('Penyimpanan perangkat penuh. Ilustrasi tidak tersimpan.\n\nHapus beberapa item lama di Library Nasabah, lalu coba lagi.');
+      return;
+    }
+    var asli=tombol.textContent;
+    tombol.textContent='✓ Tersimpan di Library';
+    setTimeout(function(){ tombol.textContent=asli; },2200);
+  });
+})();
+</script>
+</body></html>
