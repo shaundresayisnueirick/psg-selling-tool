@@ -1,0 +1,6043 @@
+{
+ "generatedFrom": "origin/main 489be36 (Restore complete production source), jam uji 2026-09-24 10:00 WIB",
+ "static": {
+  "protectedFiles": {
+   "src/access-gate.js": "04535f79ce4ace7869df177ce7b1e3b989765f90a8b612839ca2ee7c545ef921",
+   "src/aktivitas-ui.js": "f79804459cb8b93f3ebbfa4380299a2f4bca485155cf79c844aa703d31aba0cf",
+   "src/aktivitas.js": "3e12609402263a20ecac19bc7cc91eeac20f0f3c0224cb20ffc177f7920193f1",
+   "src/app-version.js": "f1cb8c2a2a673cb4a3719bb6deee684426995715f5c77637138f0aad6c9f2c80",
+   "src/app.js": "34593519c233710ed358d93f3392c048f3b6614be086daef8f0f50dffcf69164",
+   "src/banding-cetak.js": "f6bbcd3178efbbb0564d5e0c7c0b87dcc3da542f91ae23b54d57c65e33be2b80",
+   "src/banding-genwealth.js": "5e56bcad83cd97a786c2bdb5200c78f3bed6bc8c9dbe3691e201247844ab0959",
+   "src/banding-ghp.js": "3d54f33677b450ad4cecb50ec706200154fb31ac183b4fc6002f1f688ae7b2f8",
+   "src/banding-gpro.js": "cfbe1cb66c951ccf04aa8b0ec43054087ad3987744b5e97c376144516a430d6c",
+   "src/banding-produk.js": "e2b44ffa3aa2afb762ae5c75944ffa877853fd9d09df4fabfabd04eb49c2defe",
+   "src/bsl-ui.js": "0e5f07e1839d893324fe478afba7c07fb6af514a3419f1ce392ffa0944004200",
+   "src/catatan-ghp.js": "c5f03108322b814cea86aa18063103cfc01a775f1c0e6020284fe394ec3a844a",
+   "src/core.js": "385c5f77851f6b5b5c94b6e3bf6d65d3df77faef9b21a1c9cd4aa137c1833c7c",
+   "src/data/bsl-lengkap.js": "cfecb5544747974a9969beaaebc72f0cb330c15b1fc59888e60faa916e34cef5",
+   "src/data/catalog.js": "839a5f1c134759643c80626d9633e091840206462b987e4afbc5e624e2ae76a1",
+   "src/data/rizqia.js": "bc87700dfe3de75d554e33bc1949c81e2919d11d2122e75e335c3ff6da25a353",
+   "src/dp-solusi.js": "0449c1d9d59e9fd0d86addd24b9987055eada95e43136adfcac08f499314a396",
+   "src/engine/debugPanel.js": "27131a876577d66a829f79dbb7c5233466da971c29c05376a0920d07ca1bb5c7",
+   "src/engine/productRegistry.js": "f2660eb842b74899f04c712a96bba18f1dda5e05b6b3484fdde516ccc11b0ec6",
+   "src/engines/besmartLiteLengkap.js": "cad839c1c71d5af536d77011aa3941afe6f238fefaf42fe6bf2271efa5ff94a2",
+   "src/engines/cristalPrime.js": "d9c41009bbb04721cabe88c64313ec1950cf3c7bb32121a0b77d304eb77ff0c4",
+   "src/engines/ghp.js": "dc414afab1ef3e2084baf0f2c4129c38797404b54ccb8338262f25c3bd41aeb1",
+   "src/engines/gspa.js": "568b3fd40ff506ad6afcb1a61d864a04da60e31cfee9532ef1c76898fd7c7b22",
+   "src/engines/iflexyguard.js": "fed14e763027c672e6232b10f5d84bb5cff989e3d8762a38477e0e60e8e59413",
+   "src/engines/liteFuture.js": "7dec561d45c19ef8f912fb319e951da313accf4fc426851021aee47debbb3959",
+   "src/engines/newCemerlangPrime.js": "d5376e8f3de7b44aba1f690f1459a335521adb7b524bfe9bcaaab971cbe56510",
+   "src/engines/rayaProMaxima.js": "44cf71674dd15792991fd81f7163c35678f8d40ccfafff6483f3845a83b7b1ef",
+   "src/engines/usia.js": "b1e4fbfbce8d2b9b6e070b7dc976fb45fb9dad947bef20147a1b5bf8ca7a7a9a",
+   "src/gen-wealth.js": "dbcaef5b3783c9eabf406ddde2e1a3af18f789d42260b25fbf8c8f87a5d454b4",
+   "src/ghp-aturan.js": "ce452a0b88e2f80fa952d42728ab47002473014e35e1e6869d7ace50ddc6f88c",
+   "src/ghp-sambung.js": "ba0769cb275731d4ccb217fba975fbb05a1a34e9fb40fc3da390ff9b91f5b741",
+   "src/isian-terakhir.js": "0091c062b54d853c3a40a4da86173ca10eb263c8fbc405f62e01b64ffd3150b4",
+   "src/kartu-konsultan.js": "7a153b1aabe40da2fe28beebda2cb80c9f783cd05a0113790d9bfe4249a3bcbf",
+   "src/library-ilustrasi.js": "57a58e17a4e9c117431f3d52c24e40bc11c3c26fec0be12b18a2b5d885ebc4d7",
+   "src/preview-cetak.js": "abe686a05ed724852a36ff89e964940514f9f719686b4e0fcd09e21fc3c92d29",
+   "src/program-financial-engine.js": "afb9d28a03b6a52f904712e5d28e9a5183d5f56256a9082dac11ddb53724af95",
+   "src/program-financial-normalizer.js": "e95a0db569aaa5de9f97eb2041333ac32af214e4a23433f5dd4019d9ce4bd25f",
+   "src/prompt-flyer.js": "bee563b26ffb511321678361366e3497c04d60acdaa7e6eb751a6211b3f740fb",
+   "src/raya-pro-maxima.js": "571b7d538692311dd984aec255a7bb76ba34dbb0aa430576999aecc05930808b",
+   "src/rizqia.js": "43c24ff9881e816650895a3be7051c0ccb2d26e9fc66861d012f45176b5cb2b1",
+   "src/sales-idea.js": "dfd143970d9e79bc8ec46687724748da98147b9ae78985619a71c83c7a0c747f",
+   "src/segitiga-solusi.js": "5b966b2719a2edf471e097e56cca6058a03e08aeca6d895a9bcd370b6c4a6af7",
+   "src/segitiga.js": "4391f3d4d282245e34ccb988c4a1b82c812c40e4c7ea1b9cea9984fd835eaa38",
+   "src/slip-komisi.js": "5cab32891a1e598776d37786361596e5e5d049f271dbfcacc0aac542fc48782e",
+   "src/solusi-pendidikan.js": "3806922fbe51506744d65b7ac976e11f2bff3c26343ea8d4bf3f2c455bb154ee",
+   "src/theme-switcher.js": "77b232f3269fcc7ac7f9b5b668430b4014e0071a5909984de8d7871bd943d77e",
+   "src/tunggu-12-ghp.js": "cb72444302e021169af20b2dc43f1e3e97e2b036b7af0e5e62a424cfc0f0f0be",
+   "src/umum.js": "8b9f2031e17ec447660806c40c3a52e2ec0c0d2d9a07d582ac665f4e6c2b5b14"
+  },
+  "storageKeys": [
+   "insuranceHub.access.remember.v3",
+   "insuranceHub.access.v3",
+   "insuranceHub.agen.foto.v1",
+   "insuranceHub.agen.v1",
+   "insuranceHub.aktivitas.kejadian.v1",
+   "insuranceHub.aktivitas.klaim.v1",
+   "insuranceHub.comboGeneratedSummary",
+   "insuranceHub.comboImport",
+   "insuranceHub.comparison.v6",
+   "insuranceHub.comparisonSummary",
+   "insuranceHub.customerProfile.active.v1",
+   "insuranceHub.customerProfiles.v1",
+   "insuranceHub.externalReturn.v1",
+   "insuranceHub.isianTerakhir.v1",
+   "insuranceHub.konsultan.atasNama.v1",
+   "insuranceHub.konsultan.v1",
+   "insuranceHub.level.v1",
+   "insuranceHub.libraryIlustrasi.v1",
+   "insuranceHub.needsAnalysis.v2",
+   "insuranceHub.returnContext.v1",
+   "insuranceHub.segitiga.alternatives.v1",
+   "insuranceHub.segitiga.calculate.v1",
+   "insuranceHub.segitiga.compare.v1",
+   "insuranceHub.segitiga.globalContext.v1",
+   "insuranceHub.segitiga.lfTarget.v2",
+   "insuranceHub.segitiga.profiles.v2",
+   "insuranceHub.segitiga.programBuilder.v1",
+   "insuranceHub.segitiga.solusi.v2",
+   "insuranceHub.segitiga.solutionBridge.v1",
+   "insuranceHub.segitiga.v1",
+   "insuranceHub.selectedProgram",
+   "insuranceHub.theme.byAgent.v1",
+   "insuranceHub.theme.v3",
+   "insuranceHub.ui.caraKerjaTertutup.v1"
+  ],
+  "pages": {
+   "index.html": {
+    "inlineScripts": [
+     "02b137ac4722bb1c81844f1859cf52eb1d991943fde72442e7056e58a3fbd6d4",
+     "bfe91493de75ec2ab084c97c45699af853b630c0233ec4f4db3d42156611fd45",
+     "d670d693be5c1aac79d83ca9c6a608c04426af144653ac3855ce7f9509de0774"
+    ],
+    "externalScripts": [
+     "src/access-gate.js",
+     "src/app-version.js",
+     "src/data/catalog.js",
+     "src/engines/usia.js",
+     "src/engines/rayaProMaxima.js",
+     "src/engine/productRegistry.js",
+     "src/engines/liteFuture.js",
+     "src/engines/cristalPrime.js",
+     "src/engines/newCemerlangPrime.js",
+     "src/engines/gspa.js",
+     "src/engines/iflexyguard.js",
+     "src/engines/ghp.js",
+     "src/engine/debugPanel.js",
+     "src/core.js",
+     "src/raya-pro-maxima.js",
+     "src/tunggu-12-ghp.js",
+     "src/app.js",
+     "src/data/bsl-lengkap.js",
+     "src/engines/besmartLiteLengkap.js",
+     "src/bsl-ui.js",
+     "src/data/rizqia.js",
+     "src/rizqia.js",
+     "src/gen-wealth.js",
+     "src/banding-genwealth.js",
+     "src/segitiga.js",
+     "src/dp-solusi.js",
+     "src/program-financial-engine.js",
+     "src/program-financial-normalizer.js",
+     "src/segitiga-solusi.js",
+     "src/solusi-pendidikan.js",
+     "src/ghp-aturan.js",
+     "src/ghp-sambung.js",
+     "src/banding-ghp.js",
+     "src/banding-gpro.js",
+     "src/banding-produk.js",
+     "src/banding-cetak.js",
+     "src/slip-komisi.js",
+     "src/kartu-konsultan.js",
+     "src/library-ilustrasi.js",
+     "src/preview-cetak.js",
+     "src/umum.js",
+     "src/isian-terakhir.js",
+     "src/catatan-ghp.js",
+     "src/prompt-flyer.js",
+     "src/aktivitas.js",
+     "src/aktivitas-ui.js",
+     "src/sales-idea.js",
+     "src/theme-switcher.js"
+    ],
+    "stylesheets": [
+     "src/styles.css",
+     "src/cetak-besar.css"
+    ],
+    "ids": [
+     "aturan",
+     "bAgenHP",
+     "bAgenNama",
+     "bAturan",
+     "bBandingGhp",
+     "bCatatanGhp",
+     "bCatatanTabel",
+     "bFase",
+     "bFaseTime",
+     "bHasil",
+     "bIdentitas",
+     "bInfoUP",
+     "bInfoUsia",
+     "bJK",
+     "bKakiAgen",
+     "bKotakRingkas",
+     "bLiteUp",
+     "bMPP",
+     "bMetode",
+     "bNama",
+     "bPlanGhp",
+     "bRider",
+     "bSangkalan",
+     "bTabel",
+     "bTabelSemuaGhp",
+     "bTblCetak",
+     "bTblTimeline",
+     "bTgl",
+     "bUP",
+     "bandingKotak_BSL",
+     "bandingKotak_CEM",
+     "bandingKotak_CRIS",
+     "bandingKotak_FLEX",
+     "bandingKotak_GHP",
+     "bandingKotak_GSPA",
+     "bilah",
+     "blokCaraKerja",
+     "btnAktivitas",
+     "btnCompare",
+     "btnFinancialCalc",
+     "btnFinancialKPR",
+     "btnFinancialR2",
+     "btnFinancialSegitiga",
+     "btnKartuKonsultan",
+     "btnLibraryIlustrasi",
+     "btnLogout",
+     "btnNeeds",
+     "btnPlanning",
+     "btnProfil",
+     "btnQuick",
+     "btnSalesIdea",
+     "cAgenHP",
+     "cAgenNama",
+     "cAturan",
+     "cBayar",
+     "cCatatanTabel",
+     "cFase",
+     "cFaseIlus",
+     "cHasil",
+     "cIdentitas",
+     "cInfoUsia",
+     "cJK",
+     "cKakiAgen",
+     "cKotakRingkas",
+     "cLindung",
+     "cMetode",
+     "cNama",
+     "cSangkalan",
+     "cTabel",
+     "cTblCetak",
+     "cTblIlustrasi",
+     "cTgl",
+     "cUP",
+     "cipUsia",
+     "cmpActions",
+     "cmpCards",
+     "cmpMulaiNeeds",
+     "cmpProfile",
+     "cmpSummary",
+     "cmpTblCetak",
+     "cpAnak",
+     "cpAnakList",
+     "cpAset",
+     "cpAyah",
+     "cpAyahDob",
+     "cpCatatan",
+     "cpDPHobi",
+     "cpDPKeluarga",
+     "cpDPLain",
+     "cpDPLiburan",
+     "cpDPRutin",
+     "cpDPSehat",
+     "cpDaftar",
+     "cpDanaDarurat",
+     "cpHP",
+     "cpHealth",
+     "cpIbu",
+     "cpIbuDob",
+     "cpJK",
+     "cpKPR",
+     "cpNama",
+     "cpPasangan",
+     "cpPasanganDob",
+     "cpPasanganRelasi",
+     "cpPekerjaan",
+     "cpPengeluaran",
+     "cpPenghasilan",
+     "cpRelasiLainList",
+     "cpReset",
+     "cpSimpan",
+     "cpStatus",
+     "cpStatusBar",
+     "cpTambahAnak",
+     "cpTambahRelasi",
+     "cpTgl",
+     "cpUPCI",
+     "cpUPJiwa",
+     "cpUsia",
+     "cpUtang",
+     "dAgenHP",
+     "dAgenNama",
+     "dAkhir",
+     "dAturan",
+     "dCatatanKomponen",
+     "dCatatanSiap",
+     "dDanaAwal",
+     "dHasil",
+     "dIdentitas",
+     "dInflasi",
+     "dInfoUsia",
+     "dKakiAgen",
+     "dKomponen",
+     "dKotakRingkas",
+     "dLama",
+     "dNama",
+     "dPensiun",
+     "dSangkalan",
+     "dSimulasi",
+     "dTabelKomponen",
+     "dTabelSensitif",
+     "dTabelSensitif2",
+     "dTabelSiap",
+     "dTabelTunda",
+     "dTblCetak",
+     "dTblRingkas",
+     "dTgl",
+     "dTotalHariIni",
+     "dTumbuh",
+     "daftarProduk",
+     "fAgen",
+     "fAgenHP",
+     "fAgenNama",
+     "fCatatanLanjutan",
+     "fJK",
+     "fMPP",
+     "fNama",
+     "fSetoran",
+     "fTgl",
+     "fUP",
+     "gAgenHP",
+     "gAgenNama",
+     "gAturan",
+     "gBandingGhp",
+     "gBarisPremi",
+     "gBarisUP",
+     "gBarisWakaf",
+     "gBlokGhps",
+     "gBlokRiderRingkas",
+     "gBlokWaiverRingkas",
+     "gCatatanBooster",
+     "gCatatanRider",
+     "gCatatanRiderRingkas",
+     "gCatatanTabel",
+     "gCatatanTambahan",
+     "gCatatanWaiver",
+     "gCatatanWaiverRingkas",
+     "gFase",
+     "gFaseTime",
+     "gHasil",
+     "gIdentitas",
+     "gInfoUsia",
+     "gJK",
+     "gKakiAgen",
+     "gKotakRingkas",
+     "gMetode",
+     "gMode",
+     "gMpp",
+     "gNama",
+     "gNilaiWakaf",
+     "gPengantarBooster",
+     "gPersenWakaf",
+     "gPetunjuk",
+     "gPlanGhps",
+     "gPremiNet",
+     "gRider",
+     "gSangkalan",
+     "gSubKop",
+     "gTabel",
+     "gTabelBooster",
+     "gTabelNcbGhps",
+     "gTabelNcdGhps",
+     "gTabelPlan",
+     "gTabelPlanGhps",
+     "gTabelPlanKotak",
+     "gTabelRider",
+     "gTabelSemuaGhp",
+     "gTabelTambahan",
+     "gTabelWaiver",
+     "gTblCetak",
+     "gTblTimeline",
+     "gTgl",
+     "gTunggu12",
+     "gTungguGhps",
+     "gUpDasar",
+     "gWaiverRider",
+     "gWajibRider",
+     "gWakaf",
+     "grafikJiwa",
+     "grafikPensiun",
+     "hAgenHP",
+     "hAgenNama",
+     "hAturan",
+     "hBarisPlan",
+     "hBlokFam",
+     "hBlokIndv",
+     "hCatatanNC",
+     "hCatatanPremi",
+     "hDaftar",
+     "hHasil",
+     "hIdentitas",
+     "hInfoUsia",
+     "hJK",
+     "hKakiAgen",
+     "hKotakRingkas",
+     "hMetode",
+     "hMode",
+     "hNama",
+     "hPilihBanding",
+     "hPlan",
+     "hRider",
+     "hSangkalan",
+     "hSkema",
+     "hTabelManfaat",
+     "hTabelNCB",
+     "hTabelNCD",
+     "hTabelPremi",
+     "hTabelSemuaGhp",
+     "hTabelTunggu",
+     "hTambah",
+     "hTblCetak",
+     "hTblIlustrasi",
+     "hTgl",
+     "hTunggu12",
+     "hUP",
+     "identitas",
+     "ikhtisar",
+     "infoUsia",
+     "isiCaraKerja",
+     "judul",
+     "kAgenHP",
+     "kAgenNama",
+     "kAturan",
+     "kBlokManfaat",
+     "kBooster",
+     "kFase",
+     "kHasil",
+     "kIdentitas",
+     "kInfoUsia",
+     "kJK",
+     "kKakiAgen",
+     "kKotakRingkas",
+     "kManfaatGabungan",
+     "kMetG",
+     "kMetL",
+     "kMppG",
+     "kMppL",
+     "kNama",
+     "kPensiun",
+     "kSangkalan",
+     "kTabel",
+     "kTblCetak",
+     "kTblRingkas",
+     "kTgl",
+     "kUpG",
+     "kUpL",
+     "kWaiverG",
+     "kakiAgen",
+     "kartuKonsultanPreview",
+     "kkAnEmail",
+     "kkAnFacebook",
+     "kkAnFoto",
+     "kkAnFotoHapus",
+     "kkAnFotoPratinjau",
+     "kkAnHapus",
+     "kkAnInstagram",
+     "kkAnJabatan",
+     "kkAnKode",
+     "kkAnLinkedIn",
+     "kkAnMode",
+     "kkAnNama",
+     "kkAnPilih",
+     "kkAnQr",
+     "kkAnSimpan",
+     "kkAnStatus",
+     "kkAnTikTok",
+     "kkAnWa",
+     "kkAnYouTube",
+     "kkAtasNamaBlok",
+     "kkEmail",
+     "kkFacebook",
+     "kkInstagram",
+     "kkJabatan",
+     "kkLinkedIn",
+     "kkNama",
+     "kkQr",
+     "kkReset",
+     "kkSimpan",
+     "kkStatus",
+     "kkTikTok",
+     "kkWhatsApp",
+     "kkYouTube",
+     "layarAktRekap",
+     "layarAktivitas",
+     "layarBSL",
+     "layarBSLTime",
+     "layarBandingProduk",
+     "layarCEM",
+     "layarCEMIlus",
+     "layarCOMBO",
+     "layarCOMBORingkas",
+     "layarCRIS",
+     "layarCRISIlus",
+     "layarCompare",
+     "layarDP",
+     "layarDPRingkas",
+     "layarDpBandingManual",
+     "layarDpSolusi",
+     "layarDpSolusiRingkas",
+     "layarFLEX",
+     "layarFLEXIlus",
+     "layarFinancialCalc",
+     "layarGHP",
+     "layarGHPIlus",
+     "layarGPRO",
+     "layarGPROBanding",
+     "layarGPROBandingRingkas",
+     "layarGPRORingkas",
+     "layarGSPA",
+     "layarGSPATime",
+     "layarGenWealth",
+     "layarGenWealthBanding",
+     "layarGenWealthDeposito",
+     "layarGenWealthRingkas",
+     "layarGhpBanding",
+     "layarGhpPlanBanding",
+     "layarKMB",
+     "layarKMBRingkas",
+     "layarKPR",
+     "layarKPRRingkas",
+     "layarKartuKonsultan",
+     "layarLF",
+     "layarLibraryIlustrasi",
+     "layarNeeds",
+     "layarPDK",
+     "layarPDKRingkas",
+     "layarPlanning",
+     "layarProduk",
+     "layarProfile",
+     "layarR2",
+     "layarR2Ringkas",
+     "layarRAYA",
+     "layarRAYABanding",
+     "layarRingkasan",
+     "layarRizqia",
+     "layarRizqiaRingkas",
+     "layarSalesIdea",
+     "layarSegitiga",
+     "layarSegitigaRingkas",
+     "layarSegitigaSolusi",
+     "layarSlipKomisi",
+     "layarSolusiBanding",
+     "layarSolusiHitung",
+     "layarSolusiPdk",
+     "lfWaiverBlok",
+     "libBatchHint",
+     "libBatchMeeting",
+     "libCari",
+     "libFilterKategori",
+     "libFilterProduk",
+     "libFilterSort",
+     "libHapusSemua",
+     "libOnePageSummary",
+     "libRefresh",
+     "libraryIlustrasiList",
+     "lipatCaraKerja",
+     "mAgenHP",
+     "mAgenNama",
+     "mAturan",
+     "mBayar",
+     "mCatatanTabel",
+     "mFase",
+     "mFaseIlus",
+     "mHasil",
+     "mIdentitas",
+     "mInfoUsia",
+     "mJK",
+     "mKakiAgen",
+     "mKotakRingkas",
+     "mLindung",
+     "mMetode",
+     "mNama",
+     "mSangkalan",
+     "mTabel",
+     "mTblCetak",
+     "mTblIlustrasi",
+     "mTgl",
+     "mUP",
+     "nAgenHP",
+     "nAgenNama",
+     "nAturan",
+     "nCatatanAnak",
+     "nCatatanUrutan",
+     "nDaftar",
+     "nDanaBersama",
+     "nHasil",
+     "nIdentitas",
+     "nInflasi",
+     "nKakiAgen",
+     "nKotakRingkas",
+     "nNama",
+     "nSangkalan",
+     "nTabelAnak",
+     "nTabelUrutan",
+     "nTambah",
+     "nTblCetak",
+     "nTblRingkas",
+     "nUsiaOrtu",
+     "naAnak",
+     "naCI",
+     "naCIMonths",
+     "naCoverage",
+     "naHasil",
+     "naHitung",
+     "naMasaPengganti",
+     "naPenghasilan",
+     "naProfilInfo",
+     "naUsia",
+     "naUtang",
+     "nmBiasa",
+     "nmHNW",
+     "nmKet",
+     "oAgenHP",
+     "oAgenNama",
+     "oAturan",
+     "oCatatanManfaat",
+     "oCatatanSkenario",
+     "oCatatanSlot",
+     "oCatatanTimeline",
+     "oDaftar",
+     "oHasil",
+     "oIdentitas",
+     "oInfoUsia",
+     "oJK",
+     "oKakiAgen",
+     "oKotakRingkas",
+     "oMetode",
+     "oNama",
+     "oSangkalan",
+     "oTabelManfaat",
+     "oTabelSkenario",
+     "oTabelSlot",
+     "oTabelTimeline",
+     "oTambah",
+     "oTblCetak",
+     "oTblRingkas",
+     "oTgl",
+     "oWaiverBlok",
+     "pAgenHP",
+     "pAgenNama",
+     "pAturan",
+     "pCatatanJadwal",
+     "pCatatanJadwal2",
+     "pDP",
+     "pHarga",
+     "pHasil",
+     "pIdentitas",
+     "pKakiAgen",
+     "pKotakRingkas",
+     "pNama",
+     "pRate",
+     "pSangkalan",
+     "pTabelJadwal",
+     "pTabelJadwal2",
+     "pTabelRinci",
+     "pTblCetak",
+     "pTblRingkas",
+     "pTenor",
+     "planningEducation",
+     "planningPension",
+     "profilAktifBar",
+     "psgVersiApp",
+     "qAgenHP",
+     "qAgenNama",
+     "qAturan",
+     "qCatatanManfaat",
+     "qCatatanTimeline",
+     "qCatatanUP",
+     "qCatatanWaiver",
+     "qHasil",
+     "qIdentitas",
+     "qInfoUsia",
+     "qJK",
+     "qKakiAgen",
+     "qKotakRingkas",
+     "qMetode",
+     "qNama",
+     "qPaket",
+     "qSangkalan",
+     "qSubKop",
+     "qTabelManfaat",
+     "qTabelTimeline",
+     "qTabelUP",
+     "qTabelWaiver",
+     "qTblBanding",
+     "qTblCetak",
+     "qTblRingkas",
+     "qTgl",
+     "qUP",
+     "quickCalculator",
+     "rAgenHP",
+     "rAgenNama",
+     "rAturan",
+     "rCatatanBanding",
+     "rDP",
+     "rHasil",
+     "rIdentitas",
+     "rInfoUsia",
+     "rJK",
+     "rKakiAgen",
+     "rKotakRingkas",
+     "rMetode",
+     "rMpp",
+     "rNama",
+     "rNilai",
+     "rRate",
+     "rSangkalan",
+     "rTabelBanding",
+     "rTabelDapat",
+     "rTblCetak",
+     "rTblRingkas",
+     "rTenor",
+     "rTgl",
+     "rWaiver",
+     "rayaBandingBuka",
+     "rayaCetak",
+     "rayaFreq",
+     "rayaGenderInfo",
+     "rayaHasil",
+     "rayaHitung",
+     "rayaKontribusi",
+     "rayaNama",
+     "rayaPlan",
+     "rayaPreview",
+     "rayaProfileHint",
+     "rayaSaveLibrary",
+     "rayaTglLahir",
+     "relRingkas",
+     "relUsia",
+     "salesIdeaContent",
+     "sangkalan",
+     "sangkalanCetak",
+     "siNext",
+     "siPrev",
+     "siReset",
+     "siStepCount",
+     "subJudul",
+     "tblCetak",
+     "tblKanan",
+     "tblKiri",
+     "tblRingkasan",
+     "xAgenHP",
+     "xAgenNama",
+     "xAturan",
+     "xCatatanManfaat",
+     "xCatatanTabel",
+     "xFase",
+     "xFaseIlus",
+     "xHasil",
+     "xIdentitas",
+     "xInfoUsia",
+     "xKakiAgen",
+     "xKotakRingkas",
+     "xMetode",
+     "xMpp",
+     "xNama",
+     "xSangkalan",
+     "xTabel",
+     "xTabelManfaat",
+     "xTblCetak",
+     "xTblIlustrasi",
+     "xTgl",
+     "xUP"
+    ],
+    "duplicateIds": [],
+    "idAttrs": {
+     "bilah": {
+      "tag": "header",
+      "classes": [],
+      "attrs": {}
+     },
+     "tblKiri": {
+      "tag": "button",
+      "classes": [
+       "kiri"
+      ],
+      "attrs": {
+       "aria-label": "Kembali"
+      }
+     },
+     "subJudul": {
+      "tag": "p",
+      "classes": [
+       "sub"
+      ],
+      "attrs": {}
+     },
+     "judul": {
+      "tag": "h1",
+      "classes": [],
+      "attrs": {}
+     },
+     "tblKanan": {
+      "tag": "button",
+      "classes": [
+       "kanan"
+      ],
+      "attrs": {}
+     },
+     "btnLogout": {
+      "tag": "button",
+      "classes": [
+       "logout-btn"
+      ],
+      "attrs": {
+       "type": "button"
+      }
+     },
+     "layarProduk": {
+      "tag": "section",
+      "classes": [
+       "aktif",
+       "layar"
+      ],
+      "attrs": {}
+     },
+     "profilAktifBar": {
+      "tag": "p",
+      "classes": [
+       "catatan"
+      ],
+      "attrs": {}
+     },
+     "btnProfil": {
+      "tag": "button",
+      "classes": [
+       "aksi"
+      ],
+      "attrs": {}
+     },
+     "blokCaraKerja": {
+      "tag": "div",
+      "classes": [
+       "blok",
+       "tanpa-cetak"
+      ],
+      "attrs": {}
+     },
+     "lipatCaraKerja": {
+      "tag": "details",
+      "classes": [
+       "quick-group"
+      ],
+      "attrs": {}
+     },
+     "isiCaraKerja": {
+      "tag": "div",
+      "classes": [],
+      "attrs": {}
+     },
+     "btnQuick": {
+      "tag": "button",
+      "classes": [
+       "mode-kartu"
+      ],
+      "attrs": {
+       "type": "button"
+      }
+     },
+     "btnNeeds": {
+      "tag": "button",
+      "classes": [
+       "mode-kartu"
+      ],
+      "attrs": {
+       "type": "button"
+      }
+     },
+     "btnCompare": {
+      "tag": "button",
+      "classes": [
+       "mode-kartu"
+      ],
+      "attrs": {
+       "type": "button"
+      }
+     },
+     "btnPlanning": {
+      "tag": "button",
+      "classes": [
+       "mode-kartu"
+      ],
+      "attrs": {
+       "type": "button"
+      }
+     },
+     "btnFinancialCalc": {
+      "tag": "button",
+      "classes": [
+       "mode-kartu"
+      ],
+      "attrs": {
+       "type": "button"
+      }
+     },
+     "btnSalesIdea": {
+      "tag": "button",
+      "classes": [
+       "mode-kartu"
+      ],
+      "attrs": {
+       "type": "button"
+      }
+     },
+     "btnAktivitas": {
+      "tag": "button",
+      "classes": [
+       "mode-kartu"
+      ],
+      "attrs": {
+       "type": "button"
+      }
+     },
+     "btnKartuKonsultan": {
+      "tag": "button",
+      "classes": [
+       "mode-kartu"
+      ],
+      "attrs": {
+       "type": "button"
+      }
+     },
+     "btnLibraryIlustrasi": {
+      "tag": "button",
+      "classes": [
+       "mode-kartu"
+      ],
+      "attrs": {
+       "type": "button"
+      }
+     },
+     "quickCalculator": {
+      "tag": "div",
+      "classes": [
+       "blok",
+       "tanpa-cetak"
+      ],
+      "attrs": {}
+     },
+     "daftarProduk": {
+      "tag": "div",
+      "classes": [],
+      "attrs": {}
+     },
+     "psgVersiApp": {
+      "tag": "span",
+      "classes": [],
+      "attrs": {}
+     },
+     "layarProfile": {
+      "tag": "section",
+      "classes": [
+       "layar"
+      ],
+      "attrs": {}
+     },
+     "cpNama": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "text"
+      }
+     },
+     "cpTgl": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "date"
+      }
+     },
+     "cpUsia": {
+      "tag": "div",
+      "classes": [
+       "usia-live"
+      ],
+      "attrs": {}
+     },
+     "cpJK": {
+      "tag": "div",
+      "classes": [
+       "segmen"
+      ],
+      "attrs": {}
+     },
+     "cpStatus": {
+      "tag": "select",
+      "classes": [],
+      "attrs": {}
+     },
+     "cpPekerjaan": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "text"
+      }
+     },
+     "cpPenghasilan": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "text"
+      }
+     },
+     "cpHP": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "tel"
+      }
+     },
+     "cpPasangan": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "text"
+      }
+     },
+     "cpAnak": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "number"
+      }
+     },
+     "cpCatatan": {
+      "tag": "textarea",
+      "classes": [],
+      "attrs": {}
+     },
+     "cpPengeluaran": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "text"
+      }
+     },
+     "cpAset": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "text"
+      }
+     },
+     "cpUtang": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "text"
+      }
+     },
+     "cpKPR": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "text"
+      }
+     },
+     "cpDanaDarurat": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "text"
+      }
+     },
+     "cpUPJiwa": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "text"
+      }
+     },
+     "cpUPCI": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "text"
+      }
+     },
+     "cpHealth": {
+      "tag": "select",
+      "classes": [],
+      "attrs": {}
+     },
+     "cpDPRutin": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "text"
+      }
+     },
+     "cpDPLiburan": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "text"
+      }
+     },
+     "cpDPHobi": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "text"
+      }
+     },
+     "cpDPKeluarga": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "text"
+      }
+     },
+     "cpDPSehat": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "text"
+      }
+     },
+     "cpDPLain": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "text"
+      }
+     },
+     "cpPasanganRelasi": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "text"
+      }
+     },
+     "cpPasanganDob": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "date"
+      }
+     },
+     "cpAyah": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "text"
+      }
+     },
+     "cpAyahDob": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "date"
+      }
+     },
+     "cpIbu": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "text"
+      }
+     },
+     "cpIbuDob": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "date"
+      }
+     },
+     "cpRelasiLainList": {
+      "tag": "div",
+      "classes": [],
+      "attrs": {}
+     },
+     "cpTambahRelasi": {
+      "tag": "button",
+      "classes": [
+       "sakelar"
+      ],
+      "attrs": {
+       "type": "button"
+      }
+     },
+     "cpAnakList": {
+      "tag": "div",
+      "classes": [],
+      "attrs": {}
+     },
+     "cpTambahAnak": {
+      "tag": "button",
+      "classes": [
+       "sakelar"
+      ],
+      "attrs": {
+       "type": "button"
+      }
+     },
+     "cpSimpan": {
+      "tag": "button",
+      "classes": [
+       "aksi"
+      ],
+      "attrs": {
+       "type": "button"
+      }
+     },
+     "cpReset": {
+      "tag": "button",
+      "classes": [
+       "sakelar"
+      ],
+      "attrs": {
+       "type": "button"
+      }
+     },
+     "cpStatusBar": {
+      "tag": "p",
+      "classes": [
+       "catatan"
+      ],
+      "attrs": {}
+     },
+     "cpDaftar": {
+      "tag": "div",
+      "classes": [],
+      "attrs": {}
+     },
+     "layarKartuKonsultan": {
+      "tag": "section",
+      "classes": [
+       "layar"
+      ],
+      "attrs": {}
+     },
+     "kartuKonsultanPreview": {
+      "tag": "div",
+      "classes": [],
+      "attrs": {}
+     },
+     "kkNama": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "text"
+      }
+     },
+     "kkJabatan": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "text"
+      }
+     },
+     "kkWhatsApp": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "tel"
+      }
+     },
+     "kkEmail": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "email"
+      }
+     },
+     "kkInstagram": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "url"
+      }
+     },
+     "kkTikTok": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "url"
+      }
+     },
+     "kkFacebook": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "url"
+      }
+     },
+     "kkLinkedIn": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "url"
+      }
+     },
+     "kkYouTube": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "url"
+      }
+     },
+     "kkQr": {
+      "tag": "select",
+      "classes": [],
+      "attrs": {}
+     },
+     "kkSimpan": {
+      "tag": "button",
+      "classes": [
+       "aksi"
+      ],
+      "attrs": {
+       "type": "button"
+      }
+     },
+     "kkReset": {
+      "tag": "button",
+      "classes": [
+       "sakelar"
+      ],
+      "attrs": {
+       "type": "button"
+      }
+     },
+     "kkStatus": {
+      "tag": "p",
+      "classes": [
+       "catatan"
+      ],
+      "attrs": {}
+     },
+     "kkAtasNamaBlok": {
+      "tag": "div",
+      "classes": [
+       "blok"
+      ],
+      "attrs": {}
+     },
+     "kkAnMode": {
+      "tag": "div",
+      "classes": [
+       "segmen"
+      ],
+      "attrs": {}
+     },
+     "kkAnPilih": {
+      "tag": "select",
+      "classes": [],
+      "attrs": {}
+     },
+     "kkAnNama": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "text"
+      }
+     },
+     "kkAnKode": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "text"
+      }
+     },
+     "kkAnJabatan": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "text"
+      }
+     },
+     "kkAnWa": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "tel"
+      }
+     },
+     "kkAnEmail": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "email"
+      }
+     },
+     "kkAnQr": {
+      "tag": "select",
+      "classes": [],
+      "attrs": {}
+     },
+     "kkAnInstagram": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "url"
+      }
+     },
+     "kkAnTikTok": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "url"
+      }
+     },
+     "kkAnFacebook": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "url"
+      }
+     },
+     "kkAnLinkedIn": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "url"
+      }
+     },
+     "kkAnYouTube": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "url"
+      }
+     },
+     "kkAnFoto": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "file"
+      }
+     },
+     "kkAnFotoHapus": {
+      "tag": "button",
+      "classes": [
+       "sakelar"
+      ],
+      "attrs": {
+       "type": "button"
+      }
+     },
+     "kkAnFotoPratinjau": {
+      "tag": "div",
+      "classes": [
+       "catatan"
+      ],
+      "attrs": {}
+     },
+     "kkAnSimpan": {
+      "tag": "button",
+      "classes": [
+       "aksi"
+      ],
+      "attrs": {
+       "type": "button"
+      }
+     },
+     "kkAnHapus": {
+      "tag": "button",
+      "classes": [
+       "sakelar"
+      ],
+      "attrs": {
+       "type": "button"
+      }
+     },
+     "kkAnStatus": {
+      "tag": "p",
+      "classes": [
+       "catatan"
+      ],
+      "attrs": {}
+     },
+     "layarLibraryIlustrasi": {
+      "tag": "section",
+      "classes": [
+       "layar"
+      ],
+      "attrs": {}
+     },
+     "libCari": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "search"
+      }
+     },
+     "libFilterProduk": {
+      "tag": "select",
+      "classes": [],
+      "attrs": {}
+     },
+     "libFilterKategori": {
+      "tag": "select",
+      "classes": [],
+      "attrs": {}
+     },
+     "libFilterSort": {
+      "tag": "select",
+      "classes": [],
+      "attrs": {}
+     },
+     "libRefresh": {
+      "tag": "button",
+      "classes": [
+       "sakelar"
+      ],
+      "attrs": {
+       "type": "button"
+      }
+     },
+     "libBatchMeeting": {
+      "tag": "button",
+      "classes": [
+       "aksi"
+      ],
+      "attrs": {
+       "type": "button"
+      }
+     },
+     "libOnePageSummary": {
+      "tag": "button",
+      "classes": [
+       "aksi"
+      ],
+      "attrs": {
+       "type": "button"
+      }
+     },
+     "libHapusSemua": {
+      "tag": "button",
+      "classes": [
+       "sakelar"
+      ],
+      "attrs": {
+       "type": "button"
+      }
+     },
+     "libBatchHint": {
+      "tag": "p",
+      "classes": [
+       "catatan"
+      ],
+      "attrs": {}
+     },
+     "libraryIlustrasiList": {
+      "tag": "div",
+      "classes": [],
+      "attrs": {}
+     },
+     "layarPlanning": {
+      "tag": "section",
+      "classes": [
+       "layar"
+      ],
+      "attrs": {}
+     },
+     "planningPension": {
+      "tag": "button",
+      "classes": [
+       "aksi"
+      ],
+      "attrs": {
+       "type": "button"
+      }
+     },
+     "planningEducation": {
+      "tag": "button",
+      "classes": [
+       "aksi"
+      ],
+      "attrs": {
+       "type": "button"
+      }
+     },
+     "layarNeeds": {
+      "tag": "section",
+      "classes": [
+       "layar"
+      ],
+      "attrs": {}
+     },
+     "naProfilInfo": {
+      "tag": "p",
+      "classes": [
+       "catatan"
+      ],
+      "attrs": {}
+     },
+     "naPenghasilan": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "text"
+      }
+     },
+     "naUsia": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "number"
+      }
+     },
+     "naAnak": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "number"
+      }
+     },
+     "naMasaPengganti": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "number"
+      }
+     },
+     "naUtang": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "text"
+      }
+     },
+     "naCoverage": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "text"
+      }
+     },
+     "naCI": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "text"
+      }
+     },
+     "naCIMonths": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "number"
+      }
+     },
+     "naHitung": {
+      "tag": "button",
+      "classes": [
+       "aksi"
+      ],
+      "attrs": {
+       "type": "button"
+      }
+     },
+     "naHasil": {
+      "tag": "div",
+      "classes": [
+       "blok"
+      ],
+      "attrs": {}
+     },
+     "layarCompare": {
+      "tag": "section",
+      "classes": [
+       "layar"
+      ],
+      "attrs": {}
+     },
+     "cmpSummary": {
+      "tag": "div",
+      "classes": [
+       "blok"
+      ],
+      "attrs": {}
+     },
+     "cmpActions": {
+      "tag": "div",
+      "classes": [
+       "blok",
+       "tanpa-cetak"
+      ],
+      "attrs": {}
+     },
+     "cmpMulaiNeeds": {
+      "tag": "button",
+      "classes": [
+       "aksi"
+      ],
+      "attrs": {
+       "type": "button"
+      }
+     },
+     "cmpProfile": {
+      "tag": "button",
+      "classes": [
+       "sakelar"
+      ],
+      "attrs": {
+       "type": "button"
+      }
+     },
+     "cmpTblCetak": {
+      "tag": "button",
+      "classes": [
+       "sakelar"
+      ],
+      "attrs": {
+       "type": "button"
+      }
+     },
+     "cmpCards": {
+      "tag": "div",
+      "classes": [
+       "blok"
+      ],
+      "attrs": {}
+     },
+     "layarLF": {
+      "tag": "section",
+      "classes": [
+       "layar"
+      ],
+      "attrs": {}
+     },
+     "fNama": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "text"
+      }
+     },
+     "fTgl": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "date"
+      }
+     },
+     "fJK": {
+      "tag": "div",
+      "classes": [
+       "segmen"
+      ],
+      "attrs": {}
+     },
+     "fAgen": {
+      "tag": "select",
+      "classes": [],
+      "attrs": {}
+     },
+     "infoUsia": {
+      "tag": "p",
+      "classes": [
+       "catatan"
+      ],
+      "attrs": {}
+     },
+     "fSetoran": {
+      "tag": "div",
+      "classes": [
+       "segmen"
+      ],
+      "attrs": {}
+     },
+     "fMPP": {
+      "tag": "select",
+      "classes": [],
+      "attrs": {}
+     },
+     "fUP": {
+      "tag": "select",
+      "classes": [],
+      "attrs": {}
+     },
+     "fCatatanLanjutan": {
+      "tag": "p",
+      "classes": [
+       "catatan"
+      ],
+      "attrs": {}
+     },
+     "nmBiasa": {
+      "tag": "div",
+      "classes": [
+       "angka",
+       "v"
+      ],
+      "attrs": {}
+     },
+     "nmHNW": {
+      "tag": "div",
+      "classes": [
+       "angka",
+       "v"
+      ],
+      "attrs": {}
+     },
+     "nmKet": {
+      "tag": "p",
+      "classes": [
+       "catatan"
+      ],
+      "attrs": {}
+     },
+     "relUsia": {
+      "tag": "div",
+      "classes": [
+       "rel"
+      ],
+      "attrs": {}
+     },
+     "aturan": {
+      "tag": "div",
+      "classes": [],
+      "attrs": {}
+     },
+     "fAgenNama": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "text"
+      }
+     },
+     "fAgenHP": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "tel"
+      }
+     },
+     "tblRingkasan": {
+      "tag": "button",
+      "classes": [
+       "aksi"
+      ],
+      "attrs": {}
+     },
+     "layarRingkasan": {
+      "tag": "section",
+      "classes": [
+       "layar"
+      ],
+      "attrs": {}
+     },
+     "identitas": {
+      "tag": "div",
+      "classes": [
+       "identitas"
+      ],
+      "attrs": {}
+     },
+     "cipUsia": {
+      "tag": "div",
+      "classes": [
+       "cip"
+      ],
+      "attrs": {}
+     },
+     "relRingkas": {
+      "tag": "div",
+      "classes": [
+       "rel"
+      ],
+      "attrs": {}
+     },
+     "ikhtisar": {
+      "tag": "div",
+      "classes": [
+       "ikhtisar"
+      ],
+      "attrs": {}
+     },
+     "grafikPensiun": {
+      "tag": "div",
+      "classes": [
+       "lf-chart-wrap"
+      ],
+      "attrs": {
+       "aria-label": "Diagram batang vertikal nilai dana pensiun per usia"
+      }
+     },
+     "grafikJiwa": {
+      "tag": "div",
+      "classes": [
+       "lf-chart-wrap",
+       "lf-chart-wrap-jiwa"
+      ],
+      "attrs": {
+       "aria-label": "Diagram batang vertikal santunan meninggal per periode"
+      }
+     },
+     "sangkalan": {
+      "tag": "p",
+      "classes": [
+       "catatan"
+      ],
+      "attrs": {}
+     },
+     "kakiAgen": {
+      "tag": "div",
+      "classes": [
+       "kaki"
+      ],
+      "attrs": {}
+     },
+     "lfWaiverBlok": {
+      "tag": "div",
+      "classes": [],
+      "attrs": {}
+     },
+     "tblCetak": {
+      "tag": "button",
+      "classes": [
+       "aksi"
+      ],
+      "attrs": {}
+     },
+     "layarBSL": {
+      "tag": "section",
+      "classes": [
+       "layar"
+      ],
+      "attrs": {}
+     },
+     "bNama": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "text"
+      }
+     },
+     "bTgl": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "date"
+      }
+     },
+     "bJK": {
+      "tag": "div",
+      "classes": [
+       "segmen"
+      ],
+      "attrs": {}
+     },
+     "bInfoUsia": {
+      "tag": "p",
+      "classes": [
+       "catatan"
+      ],
+      "attrs": {}
+     },
+     "bMPP": {
+      "tag": "div",
+      "classes": [
+       "segmen"
+      ],
+      "attrs": {}
+     },
+     "bMetode": {
+      "tag": "div",
+      "classes": [
+       "segmen"
+      ],
+      "attrs": {}
+     },
+     "bUP": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "text"
+      }
+     },
+     "bLiteUp": {
+      "tag": "div",
+      "classes": [
+       "segmen"
+      ],
+      "attrs": {}
+     },
+     "bInfoUP": {
+      "tag": "p",
+      "classes": [
+       "catatan"
+      ],
+      "attrs": {}
+     },
+     "bRider": {
+      "tag": "div",
+      "classes": [
+       "segmen"
+      ],
+      "attrs": {}
+     },
+     "bPlanGhp": {
+      "tag": "select",
+      "classes": [],
+      "attrs": {}
+     },
+     "bCatatanGhp": {
+      "tag": "p",
+      "classes": [
+       "catatan"
+      ],
+      "attrs": {}
+     },
+     "bTabelSemuaGhp": {
+      "tag": "div",
+      "classes": [
+       "tanpa-cetak"
+      ],
+      "attrs": {}
+     },
+     "bBandingGhp": {
+      "tag": "div",
+      "classes": [
+       "blok",
+       "tanpa-cetak"
+      ],
+      "attrs": {}
+     },
+     "bHasil": {
+      "tag": "div",
+      "classes": [],
+      "attrs": {}
+     },
+     "bFase": {
+      "tag": "div",
+      "classes": [
+       "fase"
+      ],
+      "attrs": {}
+     },
+     "bAturan": {
+      "tag": "div",
+      "classes": [],
+      "attrs": {}
+     },
+     "bAgenNama": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "text"
+      }
+     },
+     "bAgenHP": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "tel"
+      }
+     },
+     "bandingKotak_BSL": {
+      "tag": "div",
+      "classes": [
+       "blok",
+       "tanpa-cetak"
+      ],
+      "attrs": {}
+     },
+     "bTblTimeline": {
+      "tag": "button",
+      "classes": [
+       "aksi"
+      ],
+      "attrs": {}
+     },
+     "layarBSLTime": {
+      "tag": "section",
+      "classes": [
+       "layar"
+      ],
+      "attrs": {}
+     },
+     "bIdentitas": {
+      "tag": "div",
+      "classes": [
+       "identitas"
+      ],
+      "attrs": {}
+     },
+     "bKotakRingkas": {
+      "tag": "div",
+      "classes": [
+       "blok"
+      ],
+      "attrs": {}
+     },
+     "bFaseTime": {
+      "tag": "div",
+      "classes": [
+       "fase"
+      ],
+      "attrs": {}
+     },
+     "bTabel": {
+      "tag": "table",
+      "classes": [
+       "tahunan"
+      ],
+      "attrs": {}
+     },
+     "bCatatanTabel": {
+      "tag": "p",
+      "classes": [
+       "catatan"
+      ],
+      "attrs": {}
+     },
+     "bSangkalan": {
+      "tag": "p",
+      "classes": [
+       "catatan"
+      ],
+      "attrs": {}
+     },
+     "bKakiAgen": {
+      "tag": "div",
+      "classes": [
+       "kaki"
+      ],
+      "attrs": {}
+     },
+     "bTblCetak": {
+      "tag": "button",
+      "classes": [
+       "aksi"
+      ],
+      "attrs": {}
+     },
+     "layarCRIS": {
+      "tag": "section",
+      "classes": [
+       "layar"
+      ],
+      "attrs": {}
+     },
+     "cNama": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "text"
+      }
+     },
+     "cTgl": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "date"
+      }
+     },
+     "cJK": {
+      "tag": "div",
+      "classes": [
+       "segmen"
+      ],
+      "attrs": {}
+     },
+     "cInfoUsia": {
+      "tag": "p",
+      "classes": [
+       "catatan"
+      ],
+      "attrs": {}
+     },
+     "cBayar": {
+      "tag": "div",
+      "classes": [
+       "segmen"
+      ],
+      "attrs": {}
+     },
+     "cLindung": {
+      "tag": "div",
+      "classes": [
+       "segmen"
+      ],
+      "attrs": {}
+     },
+     "cUP": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "text"
+      }
+     },
+     "cMetode": {
+      "tag": "div",
+      "classes": [
+       "segmen"
+      ],
+      "attrs": {}
+     },
+     "cHasil": {
+      "tag": "div",
+      "classes": [],
+      "attrs": {}
+     },
+     "cFase": {
+      "tag": "div",
+      "classes": [
+       "fase"
+      ],
+      "attrs": {}
+     },
+     "cAturan": {
+      "tag": "div",
+      "classes": [],
+      "attrs": {}
+     },
+     "cAgenNama": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "text"
+      }
+     },
+     "cAgenHP": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "tel"
+      }
+     },
+     "bandingKotak_CRIS": {
+      "tag": "div",
+      "classes": [
+       "blok",
+       "tanpa-cetak"
+      ],
+      "attrs": {}
+     },
+     "cTblIlustrasi": {
+      "tag": "button",
+      "classes": [
+       "aksi"
+      ],
+      "attrs": {}
+     },
+     "layarCRISIlus": {
+      "tag": "section",
+      "classes": [
+       "layar"
+      ],
+      "attrs": {}
+     },
+     "cIdentitas": {
+      "tag": "div",
+      "classes": [
+       "identitas"
+      ],
+      "attrs": {}
+     },
+     "cKotakRingkas": {
+      "tag": "div",
+      "classes": [
+       "blok"
+      ],
+      "attrs": {}
+     },
+     "cFaseIlus": {
+      "tag": "div",
+      "classes": [
+       "fase"
+      ],
+      "attrs": {}
+     },
+     "cTabel": {
+      "tag": "table",
+      "classes": [
+       "tahunan"
+      ],
+      "attrs": {}
+     },
+     "cCatatanTabel": {
+      "tag": "p",
+      "classes": [
+       "catatan"
+      ],
+      "attrs": {}
+     },
+     "cSangkalan": {
+      "tag": "p",
+      "classes": [
+       "catatan"
+      ],
+      "attrs": {}
+     },
+     "cKakiAgen": {
+      "tag": "div",
+      "classes": [
+       "kaki"
+      ],
+      "attrs": {}
+     },
+     "cTblCetak": {
+      "tag": "button",
+      "classes": [
+       "aksi"
+      ],
+      "attrs": {}
+     },
+     "layarCEM": {
+      "tag": "section",
+      "classes": [
+       "layar"
+      ],
+      "attrs": {}
+     },
+     "mNama": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "text"
+      }
+     },
+     "mTgl": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "date"
+      }
+     },
+     "mJK": {
+      "tag": "div",
+      "classes": [
+       "segmen"
+      ],
+      "attrs": {}
+     },
+     "mInfoUsia": {
+      "tag": "p",
+      "classes": [
+       "catatan"
+      ],
+      "attrs": {}
+     },
+     "mBayar": {
+      "tag": "div",
+      "classes": [
+       "segmen"
+      ],
+      "attrs": {}
+     },
+     "mLindung": {
+      "tag": "div",
+      "classes": [
+       "segmen"
+      ],
+      "attrs": {}
+     },
+     "mUP": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "text"
+      }
+     },
+     "mMetode": {
+      "tag": "div",
+      "classes": [
+       "segmen"
+      ],
+      "attrs": {}
+     },
+     "mHasil": {
+      "tag": "div",
+      "classes": [],
+      "attrs": {}
+     },
+     "mFase": {
+      "tag": "div",
+      "classes": [
+       "fase"
+      ],
+      "attrs": {}
+     },
+     "mAturan": {
+      "tag": "div",
+      "classes": [],
+      "attrs": {}
+     },
+     "mAgenNama": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "text"
+      }
+     },
+     "mAgenHP": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "tel"
+      }
+     },
+     "bandingKotak_CEM": {
+      "tag": "div",
+      "classes": [
+       "blok",
+       "tanpa-cetak"
+      ],
+      "attrs": {}
+     },
+     "mTblIlustrasi": {
+      "tag": "button",
+      "classes": [
+       "aksi"
+      ],
+      "attrs": {}
+     },
+     "layarCEMIlus": {
+      "tag": "section",
+      "classes": [
+       "layar"
+      ],
+      "attrs": {}
+     },
+     "mIdentitas": {
+      "tag": "div",
+      "classes": [
+       "identitas"
+      ],
+      "attrs": {}
+     },
+     "mKotakRingkas": {
+      "tag": "div",
+      "classes": [
+       "blok"
+      ],
+      "attrs": {}
+     },
+     "mFaseIlus": {
+      "tag": "div",
+      "classes": [
+       "fase"
+      ],
+      "attrs": {}
+     },
+     "mTabel": {
+      "tag": "table",
+      "classes": [
+       "tahunan"
+      ],
+      "attrs": {}
+     },
+     "mCatatanTabel": {
+      "tag": "p",
+      "classes": [
+       "catatan"
+      ],
+      "attrs": {}
+     },
+     "mSangkalan": {
+      "tag": "p",
+      "classes": [
+       "catatan"
+      ],
+      "attrs": {}
+     },
+     "mKakiAgen": {
+      "tag": "div",
+      "classes": [
+       "kaki"
+      ],
+      "attrs": {}
+     },
+     "mTblCetak": {
+      "tag": "button",
+      "classes": [
+       "aksi"
+      ],
+      "attrs": {}
+     },
+     "layarKMB": {
+      "tag": "section",
+      "classes": [
+       "layar"
+      ],
+      "attrs": {}
+     },
+     "kNama": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "text"
+      }
+     },
+     "kTgl": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "date"
+      }
+     },
+     "kJK": {
+      "tag": "div",
+      "classes": [
+       "segmen"
+      ],
+      "attrs": {}
+     },
+     "kInfoUsia": {
+      "tag": "p",
+      "classes": [
+       "catatan"
+      ],
+      "attrs": {}
+     },
+     "kMppG": {
+      "tag": "div",
+      "classes": [
+       "segmen"
+      ],
+      "attrs": {}
+     },
+     "kMetG": {
+      "tag": "div",
+      "classes": [
+       "segmen"
+      ],
+      "attrs": {}
+     },
+     "kWaiverG": {
+      "tag": "div",
+      "classes": [
+       "segmen"
+      ],
+      "attrs": {}
+     },
+     "kUpG": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "text"
+      }
+     },
+     "kPensiun": {
+      "tag": "select",
+      "classes": [],
+      "attrs": {}
+     },
+     "kMppL": {
+      "tag": "select",
+      "classes": [],
+      "attrs": {}
+     },
+     "kUpL": {
+      "tag": "select",
+      "classes": [],
+      "attrs": {}
+     },
+     "kMetL": {
+      "tag": "div",
+      "classes": [
+       "segmen"
+      ],
+      "attrs": {}
+     },
+     "kBooster": {
+      "tag": "div",
+      "classes": [
+       "sorotan"
+      ],
+      "attrs": {}
+     },
+     "kHasil": {
+      "tag": "div",
+      "classes": [],
+      "attrs": {}
+     },
+     "kAturan": {
+      "tag": "div",
+      "classes": [],
+      "attrs": {}
+     },
+     "kAgenNama": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "text"
+      }
+     },
+     "kAgenHP": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "tel"
+      }
+     },
+     "kTblRingkas": {
+      "tag": "button",
+      "classes": [
+       "aksi"
+      ],
+      "attrs": {}
+     },
+     "layarKMBRingkas": {
+      "tag": "section",
+      "classes": [
+       "layar"
+      ],
+      "attrs": {}
+     },
+     "kIdentitas": {
+      "tag": "div",
+      "classes": [
+       "identitas"
+      ],
+      "attrs": {}
+     },
+     "kKotakRingkas": {
+      "tag": "div",
+      "classes": [
+       "blok"
+      ],
+      "attrs": {}
+     },
+     "kFase": {
+      "tag": "div",
+      "classes": [
+       "fase"
+      ],
+      "attrs": {}
+     },
+     "kTabel": {
+      "tag": "table",
+      "classes": [
+       "tahunan"
+      ],
+      "attrs": {}
+     },
+     "kBlokManfaat": {
+      "tag": "div",
+      "classes": [
+       "blok"
+      ],
+      "attrs": {}
+     },
+     "kManfaatGabungan": {
+      "tag": "div",
+      "classes": [],
+      "attrs": {}
+     },
+     "kSangkalan": {
+      "tag": "p",
+      "classes": [
+       "catatan"
+      ],
+      "attrs": {}
+     },
+     "kKakiAgen": {
+      "tag": "div",
+      "classes": [
+       "kaki"
+      ],
+      "attrs": {}
+     },
+     "kTblCetak": {
+      "tag": "button",
+      "classes": [
+       "aksi"
+      ],
+      "attrs": {}
+     },
+     "layarGSPA": {
+      "tag": "section",
+      "classes": [
+       "layar"
+      ],
+      "attrs": {}
+     },
+     "gNama": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "text"
+      }
+     },
+     "gTgl": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "date"
+      }
+     },
+     "gJK": {
+      "tag": "div",
+      "classes": [
+       "segmen"
+      ],
+      "attrs": {}
+     },
+     "gMpp": {
+      "tag": "div",
+      "classes": [
+       "segmen"
+      ],
+      "attrs": {}
+     },
+     "gMetode": {
+      "tag": "div",
+      "classes": [
+       "segmen"
+      ],
+      "attrs": {}
+     },
+     "gInfoUsia": {
+      "tag": "p",
+      "classes": [
+       "catatan"
+      ],
+      "attrs": {}
+     },
+     "gMode": {
+      "tag": "div",
+      "classes": [
+       "segmen"
+      ],
+      "attrs": {}
+     },
+     "gBarisUP": {
+      "tag": "div",
+      "classes": [
+       "baris",
+       "satu"
+      ],
+      "attrs": {}
+     },
+     "gUpDasar": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "text"
+      }
+     },
+     "gBarisPremi": {
+      "tag": "div",
+      "classes": [
+       "baris",
+       "satu"
+      ],
+      "attrs": {}
+     },
+     "gPremiNet": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "text"
+      }
+     },
+     "gPetunjuk": {
+      "tag": "p",
+      "classes": [
+       "catatan"
+      ],
+      "attrs": {}
+     },
+     "gWakaf": {
+      "tag": "div",
+      "classes": [
+       "segmen"
+      ],
+      "attrs": {}
+     },
+     "gBarisWakaf": {
+      "tag": "div",
+      "classes": [],
+      "attrs": {}
+     },
+     "gNilaiWakaf": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "text"
+      }
+     },
+     "gPersenWakaf": {
+      "tag": "select",
+      "classes": [],
+      "attrs": {}
+     },
+     "gWaiverRider": {
+      "tag": "div",
+      "classes": [
+       "segmen"
+      ],
+      "attrs": {}
+     },
+     "gCatatanWaiver": {
+      "tag": "p",
+      "classes": [
+       "catatan"
+      ],
+      "attrs": {}
+     },
+     "gRider": {
+      "tag": "div",
+      "classes": [
+       "segmen"
+      ],
+      "attrs": {}
+     },
+     "gBlokGhps": {
+      "tag": "div",
+      "classes": [],
+      "attrs": {}
+     },
+     "gPlanGhps": {
+      "tag": "select",
+      "classes": [],
+      "attrs": {}
+     },
+     "gTabelSemuaGhp": {
+      "tag": "div",
+      "classes": [
+       "tanpa-cetak"
+      ],
+      "attrs": {}
+     },
+     "gBandingGhp": {
+      "tag": "div",
+      "classes": [
+       "blok",
+       "tanpa-cetak"
+      ],
+      "attrs": {}
+     },
+     "gTabelPlanKotak": {
+      "tag": "div",
+      "classes": [],
+      "attrs": {}
+     },
+     "gTabelPlan": {
+      "tag": "table",
+      "classes": [
+       "tahunan"
+      ],
+      "attrs": {}
+     },
+     "gWajibRider": {
+      "tag": "p",
+      "classes": [
+       "catatan",
+       "tegas"
+      ],
+      "attrs": {}
+     },
+     "gCatatanRider": {
+      "tag": "p",
+      "classes": [
+       "catatan"
+      ],
+      "attrs": {}
+     },
+     "gHasil": {
+      "tag": "div",
+      "classes": [],
+      "attrs": {}
+     },
+     "gFase": {
+      "tag": "div",
+      "classes": [
+       "fase"
+      ],
+      "attrs": {}
+     },
+     "gAturan": {
+      "tag": "div",
+      "classes": [],
+      "attrs": {}
+     },
+     "gAgenNama": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "text"
+      }
+     },
+     "gAgenHP": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "tel"
+      }
+     },
+     "bandingKotak_GSPA": {
+      "tag": "div",
+      "classes": [
+       "blok",
+       "tanpa-cetak"
+      ],
+      "attrs": {}
+     },
+     "gTblTimeline": {
+      "tag": "button",
+      "classes": [
+       "aksi"
+      ],
+      "attrs": {}
+     },
+     "layarGSPATime": {
+      "tag": "section",
+      "classes": [
+       "layar"
+      ],
+      "attrs": {}
+     },
+     "gSubKop": {
+      "tag": "p",
+      "classes": [],
+      "attrs": {}
+     },
+     "gIdentitas": {
+      "tag": "div",
+      "classes": [
+       "identitas"
+      ],
+      "attrs": {}
+     },
+     "gKotakRingkas": {
+      "tag": "div",
+      "classes": [
+       "blok"
+      ],
+      "attrs": {}
+     },
+     "gFaseTime": {
+      "tag": "div",
+      "classes": [
+       "fase"
+      ],
+      "attrs": {}
+     },
+     "gTabel": {
+      "tag": "table",
+      "classes": [
+       "tahunan"
+      ],
+      "attrs": {}
+     },
+     "gCatatanTabel": {
+      "tag": "p",
+      "classes": [
+       "catatan"
+      ],
+      "attrs": {}
+     },
+     "gBlokWaiverRingkas": {
+      "tag": "div",
+      "classes": [
+       "blok"
+      ],
+      "attrs": {}
+     },
+     "gTabelWaiver": {
+      "tag": "table",
+      "classes": [
+       "tahunan"
+      ],
+      "attrs": {}
+     },
+     "gCatatanWaiverRingkas": {
+      "tag": "p",
+      "classes": [
+       "catatan"
+      ],
+      "attrs": {}
+     },
+     "gBlokRiderRingkas": {
+      "tag": "div",
+      "classes": [
+       "blok"
+      ],
+      "attrs": {}
+     },
+     "gTabelRider": {
+      "tag": "table",
+      "classes": [
+       "tahunan"
+      ],
+      "attrs": {}
+     },
+     "gTabelPlanGhps": {
+      "tag": "table",
+      "classes": [
+       "tahunan"
+      ],
+      "attrs": {}
+     },
+     "gTabelNcbGhps": {
+      "tag": "table",
+      "classes": [
+       "tahunan"
+      ],
+      "attrs": {}
+     },
+     "gTabelNcdGhps": {
+      "tag": "table",
+      "classes": [
+       "tahunan"
+      ],
+      "attrs": {}
+     },
+     "gCatatanRiderRingkas": {
+      "tag": "p",
+      "classes": [
+       "catatan"
+      ],
+      "attrs": {}
+     },
+     "gTungguGhps": {
+      "tag": "div",
+      "classes": [],
+      "attrs": {}
+     },
+     "gTunggu12": {
+      "tag": "div",
+      "classes": [],
+      "attrs": {}
+     },
+     "gTabelTambahan": {
+      "tag": "table",
+      "classes": [
+       "tahunan"
+      ],
+      "attrs": {}
+     },
+     "gCatatanTambahan": {
+      "tag": "p",
+      "classes": [
+       "catatan"
+      ],
+      "attrs": {}
+     },
+     "gPengantarBooster": {
+      "tag": "p",
+      "classes": [
+       "catatan"
+      ],
+      "attrs": {}
+     },
+     "gTabelBooster": {
+      "tag": "table",
+      "classes": [
+       "tahunan"
+      ],
+      "attrs": {}
+     },
+     "gCatatanBooster": {
+      "tag": "p",
+      "classes": [
+       "catatan"
+      ],
+      "attrs": {}
+     },
+     "gSangkalan": {
+      "tag": "p",
+      "classes": [
+       "catatan"
+      ],
+      "attrs": {}
+     },
+     "gKakiAgen": {
+      "tag": "div",
+      "classes": [
+       "kaki"
+      ],
+      "attrs": {}
+     },
+     "gTblCetak": {
+      "tag": "button",
+      "classes": [
+       "aksi"
+      ],
+      "attrs": {}
+     },
+     "layarFLEX": {
+      "tag": "section",
+      "classes": [
+       "layar"
+      ],
+      "attrs": {}
+     },
+     "xNama": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "text"
+      }
+     },
+     "xTgl": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "date"
+      }
+     },
+     "xMpp": {
+      "tag": "div",
+      "classes": [
+       "segmen"
+      ],
+      "attrs": {}
+     },
+     "xUP": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "text"
+      }
+     },
+     "xMetode": {
+      "tag": "div",
+      "classes": [
+       "segmen"
+      ],
+      "attrs": {}
+     },
+     "xInfoUsia": {
+      "tag": "p",
+      "classes": [
+       "catatan"
+      ],
+      "attrs": {}
+     },
+     "xHasil": {
+      "tag": "div",
+      "classes": [],
+      "attrs": {}
+     },
+     "xFase": {
+      "tag": "div",
+      "classes": [
+       "fase"
+      ],
+      "attrs": {}
+     },
+     "xAturan": {
+      "tag": "div",
+      "classes": [],
+      "attrs": {}
+     },
+     "xAgenNama": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "text"
+      }
+     },
+     "xAgenHP": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "tel"
+      }
+     },
+     "bandingKotak_FLEX": {
+      "tag": "div",
+      "classes": [
+       "blok",
+       "tanpa-cetak"
+      ],
+      "attrs": {}
+     },
+     "xTblIlustrasi": {
+      "tag": "button",
+      "classes": [
+       "aksi"
+      ],
+      "attrs": {}
+     },
+     "layarFLEXIlus": {
+      "tag": "section",
+      "classes": [
+       "layar"
+      ],
+      "attrs": {}
+     },
+     "xIdentitas": {
+      "tag": "div",
+      "classes": [
+       "identitas"
+      ],
+      "attrs": {}
+     },
+     "xKotakRingkas": {
+      "tag": "div",
+      "classes": [
+       "blok"
+      ],
+      "attrs": {}
+     },
+     "xFaseIlus": {
+      "tag": "div",
+      "classes": [
+       "fase"
+      ],
+      "attrs": {}
+     },
+     "xTabelManfaat": {
+      "tag": "table",
+      "classes": [
+       "tahunan"
+      ],
+      "attrs": {}
+     },
+     "xCatatanManfaat": {
+      "tag": "p",
+      "classes": [
+       "catatan"
+      ],
+      "attrs": {}
+     },
+     "xTabel": {
+      "tag": "table",
+      "classes": [
+       "tahunan"
+      ],
+      "attrs": {}
+     },
+     "xCatatanTabel": {
+      "tag": "p",
+      "classes": [
+       "catatan"
+      ],
+      "attrs": {}
+     },
+     "xSangkalan": {
+      "tag": "p",
+      "classes": [
+       "catatan"
+      ],
+      "attrs": {}
+     },
+     "xKakiAgen": {
+      "tag": "div",
+      "classes": [
+       "kaki"
+      ],
+      "attrs": {}
+     },
+     "xTblCetak": {
+      "tag": "button",
+      "classes": [
+       "aksi"
+      ],
+      "attrs": {}
+     },
+     "layarGHP": {
+      "tag": "section",
+      "classes": [
+       "layar"
+      ],
+      "attrs": {}
+     },
+     "hMode": {
+      "tag": "div",
+      "classes": [
+       "segmen"
+      ],
+      "attrs": {}
+     },
+     "hBlokIndv": {
+      "tag": "div",
+      "classes": [
+       "blok"
+      ],
+      "attrs": {}
+     },
+     "hNama": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "text"
+      }
+     },
+     "hTgl": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "date"
+      }
+     },
+     "hJK": {
+      "tag": "div",
+      "classes": [
+       "segmen"
+      ],
+      "attrs": {}
+     },
+     "hSkema": {
+      "tag": "div",
+      "classes": [
+       "segmen"
+      ],
+      "attrs": {}
+     },
+     "hMetode": {
+      "tag": "div",
+      "classes": [
+       "segmen"
+      ],
+      "attrs": {}
+     },
+     "hUP": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "text"
+      }
+     },
+     "hRider": {
+      "tag": "div",
+      "classes": [
+       "segmen"
+      ],
+      "attrs": {}
+     },
+     "hBarisPlan": {
+      "tag": "div",
+      "classes": [
+       "baris",
+       "satu"
+      ],
+      "attrs": {}
+     },
+     "hPlan": {
+      "tag": "select",
+      "classes": [],
+      "attrs": {}
+     },
+     "hInfoUsia": {
+      "tag": "p",
+      "classes": [
+       "catatan"
+      ],
+      "attrs": {}
+     },
+     "hBlokFam": {
+      "tag": "div",
+      "classes": [
+       "blok"
+      ],
+      "attrs": {}
+     },
+     "hDaftar": {
+      "tag": "div",
+      "classes": [],
+      "attrs": {}
+     },
+     "hTambah": {
+      "tag": "button",
+      "classes": [
+       "aksi"
+      ],
+      "attrs": {}
+     },
+     "hHasil": {
+      "tag": "div",
+      "classes": [],
+      "attrs": {}
+     },
+     "hAturan": {
+      "tag": "div",
+      "classes": [],
+      "attrs": {}
+     },
+     "hAgenNama": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "text"
+      }
+     },
+     "hAgenHP": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "tel"
+      }
+     },
+     "hTabelSemuaGhp": {
+      "tag": "div",
+      "classes": [
+       "tanpa-cetak"
+      ],
+      "attrs": {}
+     },
+     "bandingKotak_GHP": {
+      "tag": "div",
+      "classes": [
+       "blok",
+       "tanpa-cetak"
+      ],
+      "attrs": {}
+     },
+     "hPilihBanding": {
+      "tag": "div",
+      "classes": [
+       "blok",
+       "tanpa-cetak"
+      ],
+      "attrs": {}
+     },
+     "hTblIlustrasi": {
+      "tag": "button",
+      "classes": [
+       "aksi"
+      ],
+      "attrs": {}
+     },
+     "layarGHPIlus": {
+      "tag": "section",
+      "classes": [
+       "layar"
+      ],
+      "attrs": {}
+     },
+     "hIdentitas": {
+      "tag": "div",
+      "classes": [
+       "identitas"
+      ],
+      "attrs": {}
+     },
+     "hKotakRingkas": {
+      "tag": "div",
+      "classes": [
+       "blok"
+      ],
+      "attrs": {}
+     },
+     "hTabelPremi": {
+      "tag": "table",
+      "classes": [
+       "tahunan"
+      ],
+      "attrs": {}
+     },
+     "hCatatanPremi": {
+      "tag": "p",
+      "classes": [
+       "catatan"
+      ],
+      "attrs": {}
+     },
+     "hTabelManfaat": {
+      "tag": "table",
+      "classes": [
+       "tahunan"
+      ],
+      "attrs": {}
+     },
+     "hTabelNCB": {
+      "tag": "table",
+      "classes": [
+       "tahunan"
+      ],
+      "attrs": {}
+     },
+     "hTabelNCD": {
+      "tag": "table",
+      "classes": [
+       "tahunan"
+      ],
+      "attrs": {}
+     },
+     "hCatatanNC": {
+      "tag": "p",
+      "classes": [
+       "catatan"
+      ],
+      "attrs": {}
+     },
+     "hTabelTunggu": {
+      "tag": "table",
+      "classes": [
+       "tahunan"
+      ],
+      "attrs": {}
+     },
+     "hTunggu12": {
+      "tag": "div",
+      "classes": [],
+      "attrs": {}
+     },
+     "hSangkalan": {
+      "tag": "p",
+      "classes": [
+       "catatan"
+      ],
+      "attrs": {}
+     },
+     "hKakiAgen": {
+      "tag": "div",
+      "classes": [
+       "kaki"
+      ],
+      "attrs": {}
+     },
+     "hTblCetak": {
+      "tag": "button",
+      "classes": [
+       "aksi"
+      ],
+      "attrs": {}
+     },
+     "layarDP": {
+      "tag": "section",
+      "classes": [
+       "layar"
+      ],
+      "attrs": {}
+     },
+     "dNama": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "text"
+      }
+     },
+     "dTgl": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "date"
+      }
+     },
+     "dPensiun": {
+      "tag": "select",
+      "classes": [],
+      "attrs": {}
+     },
+     "dLama": {
+      "tag": "select",
+      "classes": [],
+      "attrs": {}
+     },
+     "dAkhir": {
+      "tag": "select",
+      "classes": [],
+      "attrs": {}
+     },
+     "dDanaAwal": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "text"
+      }
+     },
+     "dInfoUsia": {
+      "tag": "p",
+      "classes": [
+       "catatan"
+      ],
+      "attrs": {}
+     },
+     "dKomponen": {
+      "tag": "div",
+      "classes": [],
+      "attrs": {}
+     },
+     "dTotalHariIni": {
+      "tag": "div",
+      "classes": [
+       "sorotan"
+      ],
+      "attrs": {}
+     },
+     "dInflasi": {
+      "tag": "select",
+      "classes": [],
+      "attrs": {}
+     },
+     "dTumbuh": {
+      "tag": "select",
+      "classes": [],
+      "attrs": {}
+     },
+     "dHasil": {
+      "tag": "div",
+      "classes": [],
+      "attrs": {}
+     },
+     "dTabelSensitif": {
+      "tag": "table",
+      "classes": [
+       "tahunan"
+      ],
+      "attrs": {}
+     },
+     "dSimulasi": {
+      "tag": "div",
+      "classes": [],
+      "attrs": {}
+     },
+     "dAturan": {
+      "tag": "div",
+      "classes": [],
+      "attrs": {}
+     },
+     "dAgenNama": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "text"
+      }
+     },
+     "dAgenHP": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "tel"
+      }
+     },
+     "dTblRingkas": {
+      "tag": "button",
+      "classes": [
+       "aksi"
+      ],
+      "attrs": {}
+     },
+     "layarDPRingkas": {
+      "tag": "section",
+      "classes": [
+       "layar"
+      ],
+      "attrs": {}
+     },
+     "dIdentitas": {
+      "tag": "div",
+      "classes": [
+       "identitas"
+      ],
+      "attrs": {}
+     },
+     "dKotakRingkas": {
+      "tag": "div",
+      "classes": [
+       "blok"
+      ],
+      "attrs": {}
+     },
+     "dTabelKomponen": {
+      "tag": "table",
+      "classes": [
+       "tahunan"
+      ],
+      "attrs": {}
+     },
+     "dCatatanKomponen": {
+      "tag": "p",
+      "classes": [
+       "catatan"
+      ],
+      "attrs": {}
+     },
+     "dTabelSensitif2": {
+      "tag": "table",
+      "classes": [
+       "tahunan"
+      ],
+      "attrs": {}
+     },
+     "dTabelSiap": {
+      "tag": "table",
+      "classes": [
+       "tahunan"
+      ],
+      "attrs": {}
+     },
+     "dCatatanSiap": {
+      "tag": "p",
+      "classes": [
+       "catatan"
+      ],
+      "attrs": {}
+     },
+     "dTabelTunda": {
+      "tag": "table",
+      "classes": [
+       "tahunan"
+      ],
+      "attrs": {}
+     },
+     "dSangkalan": {
+      "tag": "p",
+      "classes": [
+       "catatan"
+      ],
+      "attrs": {}
+     },
+     "dKakiAgen": {
+      "tag": "div",
+      "classes": [
+       "kaki"
+      ],
+      "attrs": {}
+     },
+     "dTblCetak": {
+      "tag": "button",
+      "classes": [
+       "aksi"
+      ],
+      "attrs": {}
+     },
+     "layarRAYA": {
+      "tag": "section",
+      "classes": [
+       "layar"
+      ],
+      "attrs": {}
+     },
+     "rayaNama": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "text"
+      }
+     },
+     "rayaTglLahir": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "date"
+      }
+     },
+     "rayaGenderInfo": {
+      "tag": "div",
+      "classes": [
+       "raya-profile-readonly"
+      ],
+      "attrs": {}
+     },
+     "rayaProfileHint": {
+      "tag": "p",
+      "classes": [
+       "catatan"
+      ],
+      "attrs": {}
+     },
+     "rayaPlan": {
+      "tag": "select",
+      "classes": [],
+      "attrs": {}
+     },
+     "rayaFreq": {
+      "tag": "select",
+      "classes": [],
+      "attrs": {}
+     },
+     "rayaKontribusi": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "text"
+      }
+     },
+     "rayaHitung": {
+      "tag": "button",
+      "classes": [
+       "aksi"
+      ],
+      "attrs": {
+       "type": "button"
+      }
+     },
+     "rayaHasil": {
+      "tag": "div",
+      "classes": [
+       "blok"
+      ],
+      "attrs": {}
+     },
+     "rayaBandingBuka": {
+      "tag": "button",
+      "classes": [
+       "aksi",
+       "sekunder"
+      ],
+      "attrs": {
+       "type": "button"
+      }
+     },
+     "rayaPreview": {
+      "tag": "button",
+      "classes": [
+       "aksi",
+       "psg-preview-btn",
+       "sekunder"
+      ],
+      "attrs": {
+       "data-preview-attached": "1",
+       "type": "button"
+      }
+     },
+     "rayaCetak": {
+      "tag": "button",
+      "classes": [
+       "aksi",
+       "sekunder"
+      ],
+      "attrs": {
+       "data-preview-attached": "1",
+       "type": "button"
+      }
+     },
+     "rayaSaveLibrary": {
+      "tag": "button",
+      "classes": [
+       "aksi",
+       "btn-simpan-library",
+       "sekunder"
+      ],
+      "attrs": {
+       "type": "button"
+      }
+     },
+     "layarRAYABanding": {
+      "tag": "section",
+      "classes": [
+       "layar"
+      ],
+      "attrs": {}
+     },
+     "layarFinancialCalc": {
+      "tag": "section",
+      "classes": [
+       "layar"
+      ],
+      "attrs": {}
+     },
+     "btnFinancialSegitiga": {
+      "tag": "button",
+      "classes": [
+       "financial-calc-item",
+       "mode-kartu"
+      ],
+      "attrs": {
+       "type": "button"
+      }
+     },
+     "btnFinancialKPR": {
+      "tag": "button",
+      "classes": [
+       "financial-calc-item",
+       "mode-kartu"
+      ],
+      "attrs": {
+       "type": "button"
+      }
+     },
+     "btnFinancialR2": {
+      "tag": "button",
+      "classes": [
+       "financial-calc-item",
+       "mode-kartu"
+      ],
+      "attrs": {
+       "type": "button"
+      }
+     },
+     "layarKPR": {
+      "tag": "section",
+      "classes": [
+       "layar"
+      ],
+      "attrs": {}
+     },
+     "pNama": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "text"
+      }
+     },
+     "pHarga": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "text"
+      }
+     },
+     "pDP": {
+      "tag": "select",
+      "classes": [],
+      "attrs": {}
+     },
+     "pTenor": {
+      "tag": "select",
+      "classes": [],
+      "attrs": {}
+     },
+     "pRate": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "number"
+      }
+     },
+     "pHasil": {
+      "tag": "div",
+      "classes": [],
+      "attrs": {}
+     },
+     "pTabelJadwal": {
+      "tag": "table",
+      "classes": [
+       "tahunan"
+      ],
+      "attrs": {}
+     },
+     "pCatatanJadwal": {
+      "tag": "p",
+      "classes": [
+       "catatan"
+      ],
+      "attrs": {}
+     },
+     "pAturan": {
+      "tag": "div",
+      "classes": [],
+      "attrs": {}
+     },
+     "pAgenNama": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "text"
+      }
+     },
+     "pAgenHP": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "tel"
+      }
+     },
+     "pTblRingkas": {
+      "tag": "button",
+      "classes": [
+       "aksi"
+      ],
+      "attrs": {}
+     },
+     "layarKPRRingkas": {
+      "tag": "section",
+      "classes": [
+       "layar"
+      ],
+      "attrs": {}
+     },
+     "pIdentitas": {
+      "tag": "div",
+      "classes": [
+       "identitas"
+      ],
+      "attrs": {}
+     },
+     "pKotakRingkas": {
+      "tag": "div",
+      "classes": [
+       "blok"
+      ],
+      "attrs": {}
+     },
+     "pTabelRinci": {
+      "tag": "table",
+      "classes": [
+       "tahunan"
+      ],
+      "attrs": {}
+     },
+     "pTabelJadwal2": {
+      "tag": "table",
+      "classes": [
+       "tahunan"
+      ],
+      "attrs": {}
+     },
+     "pCatatanJadwal2": {
+      "tag": "p",
+      "classes": [
+       "catatan"
+      ],
+      "attrs": {}
+     },
+     "pSangkalan": {
+      "tag": "p",
+      "classes": [
+       "catatan"
+      ],
+      "attrs": {}
+     },
+     "pKakiAgen": {
+      "tag": "div",
+      "classes": [
+       "kaki"
+      ],
+      "attrs": {}
+     },
+     "pTblCetak": {
+      "tag": "button",
+      "classes": [
+       "aksi"
+      ],
+      "attrs": {}
+     },
+     "layarR2": {
+      "tag": "section",
+      "classes": [
+       "layar"
+      ],
+      "attrs": {}
+     },
+     "rNama": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "text"
+      }
+     },
+     "rNilai": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "text"
+      }
+     },
+     "rDP": {
+      "tag": "select",
+      "classes": [],
+      "attrs": {}
+     },
+     "rTenor": {
+      "tag": "select",
+      "classes": [],
+      "attrs": {}
+     },
+     "rRate": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "number"
+      }
+     },
+     "rTgl": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "date"
+      }
+     },
+     "rJK": {
+      "tag": "div",
+      "classes": [
+       "segmen"
+      ],
+      "attrs": {}
+     },
+     "rMpp": {
+      "tag": "select",
+      "classes": [],
+      "attrs": {}
+     },
+     "rMetode": {
+      "tag": "div",
+      "classes": [
+       "segmen"
+      ],
+      "attrs": {}
+     },
+     "rWaiver": {
+      "tag": "div",
+      "classes": [
+       "segmen"
+      ],
+      "attrs": {}
+     },
+     "rInfoUsia": {
+      "tag": "p",
+      "classes": [
+       "catatan"
+      ],
+      "attrs": {}
+     },
+     "rHasil": {
+      "tag": "div",
+      "classes": [],
+      "attrs": {}
+     },
+     "rAturan": {
+      "tag": "div",
+      "classes": [],
+      "attrs": {}
+     },
+     "rAgenNama": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "text"
+      }
+     },
+     "rAgenHP": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "tel"
+      }
+     },
+     "rTblRingkas": {
+      "tag": "button",
+      "classes": [
+       "aksi"
+      ],
+      "attrs": {}
+     },
+     "layarR2Ringkas": {
+      "tag": "section",
+      "classes": [
+       "layar"
+      ],
+      "attrs": {}
+     },
+     "rIdentitas": {
+      "tag": "div",
+      "classes": [
+       "identitas"
+      ],
+      "attrs": {}
+     },
+     "rKotakRingkas": {
+      "tag": "div",
+      "classes": [
+       "blok"
+      ],
+      "attrs": {}
+     },
+     "rTabelBanding": {
+      "tag": "table",
+      "classes": [
+       "tahunan"
+      ],
+      "attrs": {}
+     },
+     "rCatatanBanding": {
+      "tag": "p",
+      "classes": [
+       "catatan"
+      ],
+      "attrs": {}
+     },
+     "rTabelDapat": {
+      "tag": "table",
+      "classes": [
+       "tahunan"
+      ],
+      "attrs": {}
+     },
+     "rSangkalan": {
+      "tag": "p",
+      "classes": [
+       "catatan"
+      ],
+      "attrs": {}
+     },
+     "rKakiAgen": {
+      "tag": "div",
+      "classes": [
+       "kaki"
+      ],
+      "attrs": {}
+     },
+     "rTblCetak": {
+      "tag": "button",
+      "classes": [
+       "aksi"
+      ],
+      "attrs": {}
+     },
+     "layarPDK": {
+      "tag": "section",
+      "classes": [
+       "layar"
+      ],
+      "attrs": {}
+     },
+     "nNama": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "text"
+      }
+     },
+     "nUsiaOrtu": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "number"
+      }
+     },
+     "nInflasi": {
+      "tag": "select",
+      "classes": [],
+      "attrs": {}
+     },
+     "nDanaBersama": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "text"
+      }
+     },
+     "nDaftar": {
+      "tag": "div",
+      "classes": [],
+      "attrs": {}
+     },
+     "nTambah": {
+      "tag": "button",
+      "classes": [
+       "aksi"
+      ],
+      "attrs": {}
+     },
+     "nHasil": {
+      "tag": "div",
+      "classes": [],
+      "attrs": {}
+     },
+     "nAturan": {
+      "tag": "div",
+      "classes": [],
+      "attrs": {}
+     },
+     "nAgenNama": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "text"
+      }
+     },
+     "nAgenHP": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "tel"
+      }
+     },
+     "nTblRingkas": {
+      "tag": "button",
+      "classes": [
+       "aksi"
+      ],
+      "attrs": {}
+     },
+     "layarPDKRingkas": {
+      "tag": "section",
+      "classes": [
+       "layar"
+      ],
+      "attrs": {}
+     },
+     "nIdentitas": {
+      "tag": "div",
+      "classes": [
+       "identitas"
+      ],
+      "attrs": {}
+     },
+     "nKotakRingkas": {
+      "tag": "div",
+      "classes": [
+       "blok"
+      ],
+      "attrs": {}
+     },
+     "nTabelAnak": {
+      "tag": "table",
+      "classes": [
+       "tahunan"
+      ],
+      "attrs": {}
+     },
+     "nCatatanAnak": {
+      "tag": "p",
+      "classes": [
+       "catatan"
+      ],
+      "attrs": {}
+     },
+     "nTabelUrutan": {
+      "tag": "table",
+      "classes": [
+       "tahunan"
+      ],
+      "attrs": {}
+     },
+     "nCatatanUrutan": {
+      "tag": "p",
+      "classes": [
+       "catatan"
+      ],
+      "attrs": {}
+     },
+     "nSangkalan": {
+      "tag": "p",
+      "classes": [
+       "catatan"
+      ],
+      "attrs": {}
+     },
+     "nKakiAgen": {
+      "tag": "div",
+      "classes": [
+       "kaki"
+      ],
+      "attrs": {}
+     },
+     "nTblCetak": {
+      "tag": "button",
+      "classes": [
+       "aksi"
+      ],
+      "attrs": {}
+     },
+     "layarCOMBO": {
+      "tag": "section",
+      "classes": [
+       "layar"
+      ],
+      "attrs": {}
+     },
+     "oNama": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "text"
+      }
+     },
+     "oTgl": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "date"
+      }
+     },
+     "oJK": {
+      "tag": "div",
+      "classes": [
+       "segmen"
+      ],
+      "attrs": {}
+     },
+     "oMetode": {
+      "tag": "div",
+      "classes": [
+       "segmen"
+      ],
+      "attrs": {}
+     },
+     "oInfoUsia": {
+      "tag": "p",
+      "classes": [
+       "catatan"
+      ],
+      "attrs": {}
+     },
+     "oDaftar": {
+      "tag": "div",
+      "classes": [],
+      "attrs": {}
+     },
+     "oTambah": {
+      "tag": "button",
+      "classes": [
+       "aksi"
+      ],
+      "attrs": {}
+     },
+     "oHasil": {
+      "tag": "div",
+      "classes": [],
+      "attrs": {}
+     },
+     "oAturan": {
+      "tag": "div",
+      "classes": [],
+      "attrs": {}
+     },
+     "oAgenNama": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "text"
+      }
+     },
+     "oAgenHP": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "tel"
+      }
+     },
+     "oTblRingkas": {
+      "tag": "button",
+      "classes": [
+       "aksi"
+      ],
+      "attrs": {}
+     },
+     "layarCOMBORingkas": {
+      "tag": "section",
+      "classes": [
+       "layar"
+      ],
+      "attrs": {}
+     },
+     "oIdentitas": {
+      "tag": "div",
+      "classes": [
+       "identitas"
+      ],
+      "attrs": {}
+     },
+     "oKotakRingkas": {
+      "tag": "div",
+      "classes": [
+       "blok"
+      ],
+      "attrs": {}
+     },
+     "oTabelSlot": {
+      "tag": "table",
+      "classes": [
+       "tahunan"
+      ],
+      "attrs": {}
+     },
+     "oCatatanSlot": {
+      "tag": "p",
+      "classes": [
+       "catatan"
+      ],
+      "attrs": {}
+     },
+     "oTabelManfaat": {
+      "tag": "table",
+      "classes": [
+       "tahunan"
+      ],
+      "attrs": {}
+     },
+     "oCatatanManfaat": {
+      "tag": "p",
+      "classes": [
+       "catatan"
+      ],
+      "attrs": {}
+     },
+     "oTabelTimeline": {
+      "tag": "table",
+      "classes": [
+       "tahunan"
+      ],
+      "attrs": {}
+     },
+     "oCatatanTimeline": {
+      "tag": "p",
+      "classes": [
+       "catatan"
+      ],
+      "attrs": {}
+     },
+     "oTabelSkenario": {
+      "tag": "table",
+      "classes": [
+       "tahunan"
+      ],
+      "attrs": {}
+     },
+     "oCatatanSkenario": {
+      "tag": "p",
+      "classes": [
+       "catatan"
+      ],
+      "attrs": {}
+     },
+     "oWaiverBlok": {
+      "tag": "div",
+      "classes": [],
+      "attrs": {}
+     },
+     "oSangkalan": {
+      "tag": "p",
+      "classes": [
+       "catatan"
+      ],
+      "attrs": {}
+     },
+     "oKakiAgen": {
+      "tag": "div",
+      "classes": [
+       "kaki"
+      ],
+      "attrs": {}
+     },
+     "oTblCetak": {
+      "tag": "button",
+      "classes": [
+       "aksi"
+      ],
+      "attrs": {}
+     },
+     "layarGPRO": {
+      "tag": "section",
+      "classes": [
+       "layar"
+      ],
+      "attrs": {}
+     },
+     "qNama": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "text"
+      }
+     },
+     "qTgl": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "date"
+      }
+     },
+     "qJK": {
+      "tag": "div",
+      "classes": [
+       "segmen"
+      ],
+      "attrs": {}
+     },
+     "qPaket": {
+      "tag": "select",
+      "classes": [],
+      "attrs": {}
+     },
+     "qUP": {
+      "tag": "select",
+      "classes": [],
+      "attrs": {}
+     },
+     "qMetode": {
+      "tag": "div",
+      "classes": [
+       "segmen"
+      ],
+      "attrs": {}
+     },
+     "qInfoUsia": {
+      "tag": "p",
+      "classes": [
+       "catatan"
+      ],
+      "attrs": {}
+     },
+     "qHasil": {
+      "tag": "div",
+      "classes": [],
+      "attrs": {}
+     },
+     "qTabelUP": {
+      "tag": "table",
+      "classes": [
+       "tahunan"
+      ],
+      "attrs": {}
+     },
+     "qCatatanUP": {
+      "tag": "p",
+      "classes": [
+       "catatan"
+      ],
+      "attrs": {}
+     },
+     "qAturan": {
+      "tag": "div",
+      "classes": [],
+      "attrs": {}
+     },
+     "qAgenNama": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "text"
+      }
+     },
+     "qAgenHP": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "type": "tel"
+      }
+     },
+     "qTblRingkas": {
+      "tag": "button",
+      "classes": [
+       "aksi"
+      ],
+      "attrs": {}
+     },
+     "qTblBanding": {
+      "tag": "button",
+      "classes": [
+       "aksi",
+       "sekunder"
+      ],
+      "attrs": {}
+     },
+     "layarGPRORingkas": {
+      "tag": "section",
+      "classes": [
+       "layar"
+      ],
+      "attrs": {}
+     },
+     "qSubKop": {
+      "tag": "p",
+      "classes": [],
+      "attrs": {}
+     },
+     "qIdentitas": {
+      "tag": "div",
+      "classes": [
+       "identitas"
+      ],
+      "attrs": {}
+     },
+     "qKotakRingkas": {
+      "tag": "div",
+      "classes": [
+       "blok"
+      ],
+      "attrs": {}
+     },
+     "qTabelManfaat": {
+      "tag": "table",
+      "classes": [
+       "tahunan"
+      ],
+      "attrs": {}
+     },
+     "qCatatanManfaat": {
+      "tag": "p",
+      "classes": [
+       "catatan"
+      ],
+      "attrs": {}
+     },
+     "qTabelWaiver": {
+      "tag": "table",
+      "classes": [
+       "tahunan"
+      ],
+      "attrs": {}
+     },
+     "qCatatanWaiver": {
+      "tag": "p",
+      "classes": [
+       "catatan"
+      ],
+      "attrs": {}
+     },
+     "qTabelTimeline": {
+      "tag": "table",
+      "classes": [
+       "tahunan"
+      ],
+      "attrs": {}
+     },
+     "qCatatanTimeline": {
+      "tag": "p",
+      "classes": [
+       "catatan"
+      ],
+      "attrs": {}
+     },
+     "qSangkalan": {
+      "tag": "p",
+      "classes": [
+       "catatan"
+      ],
+      "attrs": {}
+     },
+     "qKakiAgen": {
+      "tag": "div",
+      "classes": [
+       "kaki"
+      ],
+      "attrs": {}
+     },
+     "qTblCetak": {
+      "tag": "button",
+      "classes": [
+       "aksi"
+      ],
+      "attrs": {}
+     },
+     "layarGPROBanding": {
+      "tag": "section",
+      "classes": [
+       "layar"
+      ],
+      "attrs": {}
+     },
+     "layarGPROBandingRingkas": {
+      "tag": "section",
+      "classes": [
+       "layar"
+      ],
+      "attrs": {}
+     },
+     "layarSolusiPdk": {
+      "tag": "section",
+      "classes": [
+       "layar"
+      ],
+      "attrs": {}
+     },
+     "layarGhpBanding": {
+      "tag": "section",
+      "classes": [
+       "layar"
+      ],
+      "attrs": {}
+     },
+     "layarBandingProduk": {
+      "tag": "section",
+      "classes": [
+       "layar"
+      ],
+      "attrs": {}
+     },
+     "layarSlipKomisi": {
+      "tag": "section",
+      "classes": [
+       "layar"
+      ],
+      "attrs": {}
+     },
+     "layarGhpPlanBanding": {
+      "tag": "section",
+      "classes": [
+       "layar"
+      ],
+      "attrs": {}
+     },
+     "layarDpSolusi": {
+      "tag": "section",
+      "classes": [
+       "layar"
+      ],
+      "attrs": {}
+     },
+     "layarDpSolusiRingkas": {
+      "tag": "section",
+      "classes": [
+       "layar"
+      ],
+      "attrs": {}
+     },
+     "layarDpBandingManual": {
+      "tag": "section",
+      "classes": [
+       "layar"
+      ],
+      "attrs": {}
+     },
+     "layarSegitiga": {
+      "tag": "section",
+      "classes": [
+       "layar"
+      ],
+      "attrs": {}
+     },
+     "layarSegitigaRingkas": {
+      "tag": "section",
+      "classes": [
+       "layar"
+      ],
+      "attrs": {}
+     },
+     "layarSegitigaSolusi": {
+      "tag": "section",
+      "classes": [
+       "layar"
+      ],
+      "attrs": {}
+     },
+     "layarGenWealth": {
+      "tag": "section",
+      "classes": [
+       "layar"
+      ],
+      "attrs": {}
+     },
+     "layarGenWealthRingkas": {
+      "tag": "section",
+      "classes": [
+       "layar"
+      ],
+      "attrs": {}
+     },
+     "layarGenWealthDeposito": {
+      "tag": "section",
+      "classes": [
+       "layar"
+      ],
+      "attrs": {}
+     },
+     "layarGenWealthBanding": {
+      "tag": "section",
+      "classes": [
+       "layar"
+      ],
+      "attrs": {}
+     },
+     "layarRizqia": {
+      "tag": "section",
+      "classes": [
+       "layar"
+      ],
+      "attrs": {}
+     },
+     "layarRizqiaRingkas": {
+      "tag": "section",
+      "classes": [
+       "layar"
+      ],
+      "attrs": {}
+     },
+     "layarSalesIdea": {
+      "tag": "section",
+      "classes": [
+       "layar"
+      ],
+      "attrs": {}
+     },
+     "siReset": {
+      "tag": "button",
+      "classes": [
+       "si-reset"
+      ],
+      "attrs": {
+       "type": "button"
+      }
+     },
+     "salesIdeaContent": {
+      "tag": "div",
+      "classes": [
+       "si-content"
+      ],
+      "attrs": {}
+     },
+     "siPrev": {
+      "tag": "button",
+      "classes": [
+       "si-prev"
+      ],
+      "attrs": {
+       "type": "button"
+      }
+     },
+     "siStepCount": {
+      "tag": "span",
+      "classes": [
+       "si-stepcount"
+      ],
+      "attrs": {}
+     },
+     "siNext": {
+      "tag": "button",
+      "classes": [
+       "si-next"
+      ],
+      "attrs": {
+       "type": "button"
+      }
+     },
+     "layarAktivitas": {
+      "tag": "section",
+      "classes": [
+       "layar"
+      ],
+      "attrs": {}
+     },
+     "layarAktRekap": {
+      "tag": "section",
+      "classes": [
+       "layar"
+      ],
+      "attrs": {}
+     },
+     "sangkalanCetak": {
+      "tag": "div",
+      "classes": [
+       "sangkalan-cetak"
+      ],
+      "attrs": {}
+     },
+     "layarSolusiHitung": {
+      "tag": "section",
+      "classes": [
+       "layar"
+      ],
+      "attrs": {}
+     },
+     "layarSolusiBanding": {
+      "tag": "section",
+      "classes": [
+       "layar"
+      ],
+      "attrs": {}
+     }
+    },
+    "classTokens": [
+     "aksi",
+     "aksi-row",
+     "aktif",
+     "angka",
+     "baris",
+     "batas",
+     "blok",
+     "brand-app",
+     "btn-simpan-library",
+     "catatan",
+     "cip",
+     "fase",
+     "financial-calc-grid",
+     "financial-calc-item",
+     "gpro-actions",
+     "gulir",
+     "header-actions",
+     "identitas",
+     "ikhtisar",
+     "k",
+     "kaki",
+     "kanan",
+     "kiri",
+     "kop",
+     "kotak",
+     "layar",
+     "lf-chart-wrap",
+     "lf-chart-wrap-jiwa",
+     "logo-cetak",
+     "logo-psg-app",
+     "logout-btn",
+     "mode-desc",
+     "mode-grid",
+     "mode-icon",
+     "mode-kartu",
+     "mode-title",
+     "nonaktif",
+     "pengantar",
+     "profil-entry",
+     "psg-preview-btn",
+     "quick-group",
+     "quick-group-copy",
+     "quick-group-icon",
+     "raya-actions",
+     "raya-profile-readonly",
+     "rel",
+     "sakelar",
+     "sangkalan-cetak",
+     "satu",
+     "segmen",
+     "sekunder",
+     "si-content",
+     "si-footer",
+     "si-hero",
+     "si-hero-brand",
+     "si-hero-mark",
+     "si-next",
+     "si-prev",
+     "si-reset",
+     "si-shell",
+     "si-stepcount",
+     "sorot",
+     "sorotan",
+     "sub",
+     "tahunan",
+     "tanpa-cetak",
+     "tegas",
+     "teks",
+     "usia-live",
+     "v"
+    ],
+    "segments": {
+     "cpJK": [
+      [
+       "PRIA",
+       "true"
+      ],
+      [
+       "WANITA",
+       "false"
+      ]
+     ],
+     "kkAnMode": [
+      [
+       "Tidak",
+       "true"
+      ],
+      [
+       "Ya",
+       "false"
+      ]
+     ],
+     "fJK": [
+      [
+       "PRIA",
+       "true"
+      ],
+      [
+       "WANITA",
+       "false"
+      ]
+     ],
+     "fSetoran": [
+      [
+       "Bulanan",
+       "false"
+      ],
+      [
+       "Tahunan",
+       "true"
+      ]
+     ],
+     "bJK": [
+      [
+       "PRIA",
+       "true"
+      ],
+      [
+       "WANITA",
+       "false"
+      ]
+     ],
+     "bMPP": [
+      [
+       "3",
+       "false"
+      ],
+      [
+       "5",
+       "true"
+      ],
+      [
+       "10",
+       "false"
+      ],
+      [
+       "15",
+       "false"
+      ],
+      [
+       "20",
+       "false"
+      ]
+     ],
+     "bMetode": [
+      [
+       "Bulanan",
+       "true"
+      ],
+      [
+       "Tahunan",
+       "false"
+      ]
+     ],
+     "bLiteUp": [
+      [
+       "Ya",
+       "false"
+      ],
+      [
+       "Tidak",
+       "true"
+      ]
+     ],
+     "bRider": [
+      [
+       "Tidak",
+       "true"
+      ],
+      [
+       "Ya",
+       "false"
+      ]
+     ],
+     "cJK": [
+      [
+       "PRIA",
+       "true"
+      ],
+      [
+       "WANITA",
+       "false"
+      ]
+     ],
+     "cBayar": [
+      [
+       "3",
+       "false"
+      ],
+      [
+       "5",
+       "false"
+      ],
+      [
+       "10",
+       "true"
+      ]
+     ],
+     "cLindung": [
+      [
+       "15",
+       "false"
+      ],
+      [
+       "20",
+       "false"
+      ],
+      [
+       "25",
+       "true"
+      ]
+     ],
+     "cMetode": [
+      [
+       "Bulanan",
+       "false"
+      ],
+      [
+       "Tahunan",
+       "true"
+      ]
+     ],
+     "mJK": [
+      [
+       "PRIA",
+       "true"
+      ],
+      [
+       "WANITA",
+       "false"
+      ]
+     ],
+     "mBayar": [
+      [
+       "3",
+       "false"
+      ],
+      [
+       "5",
+       "false"
+      ],
+      [
+       "10",
+       "true"
+      ]
+     ],
+     "mLindung": [
+      [
+       "15",
+       "false"
+      ],
+      [
+       "20",
+       "false"
+      ],
+      [
+       "25",
+       "true"
+      ]
+     ],
+     "mMetode": [
+      [
+       "Bulanan",
+       "false"
+      ],
+      [
+       "Tahunan",
+       "true"
+      ]
+     ],
+     "kJK": [
+      [
+       "PRIA",
+       "true"
+      ],
+      [
+       "WANITA",
+       "false"
+      ]
+     ],
+     "kMppG": [
+      [
+       "5",
+       "true"
+      ],
+      [
+       "10",
+       "false"
+      ],
+      [
+       "15",
+       "false"
+      ]
+     ],
+     "kMetG": [
+      [
+       "Bulanan",
+       "false"
+      ],
+      [
+       "Tahunan",
+       "true"
+      ]
+     ],
+     "kWaiverG": [
+      [
+       "Ya",
+       "true"
+      ],
+      [
+       "Tidak",
+       "false"
+      ]
+     ],
+     "kMetL": [
+      [
+       "Bulanan",
+       "false"
+      ],
+      [
+       "Tahunan",
+       "true"
+      ]
+     ],
+     "gJK": [
+      [
+       "Pria",
+       "true"
+      ],
+      [
+       "Wanita",
+       "false"
+      ]
+     ],
+     "gMpp": [
+      [
+       "5",
+       "true"
+      ],
+      [
+       "10",
+       "false"
+      ],
+      [
+       "15",
+       "false"
+      ]
+     ],
+     "gMetode": [
+      [
+       "Bulanan",
+       "false"
+      ],
+      [
+       "Tahunan",
+       "true"
+      ]
+     ],
+     "gMode": [
+      [
+       "By UP",
+       "true"
+      ],
+      [
+       "By Premi Net",
+       "false"
+      ]
+     ],
+     "gWakaf": [
+      [
+       "Non Wakaf",
+       "true"
+      ],
+      [
+       "Wakaf",
+       "false"
+      ]
+     ],
+     "gWaiverRider": [
+      [
+       "Tidak",
+       "true"
+      ],
+      [
+       "Ya",
+       "false"
+      ]
+     ],
+     "gRider": [
+      [
+       "Tidak",
+       "true"
+      ],
+      [
+       "Ya",
+       "false"
+      ]
+     ],
+     "xMpp": [
+      [
+       "5",
+       "true"
+      ],
+      [
+       "10",
+       "false"
+      ]
+     ],
+     "xMetode": [
+      [
+       "Bulanan",
+       "false"
+      ],
+      [
+       "Tahunan",
+       "true"
+      ]
+     ],
+     "hMode": [
+      [
+       "Individu",
+       "true"
+      ],
+      [
+       "Keluarga",
+       "false"
+      ]
+     ],
+     "hJK": [
+      [
+       "Pria",
+       "true"
+      ],
+      [
+       "Wanita",
+       "false"
+      ]
+     ],
+     "hSkema": [
+      [
+       "10-90",
+       "true"
+      ],
+      [
+       "90-90",
+       "false"
+      ]
+     ],
+     "hMetode": [
+      [
+       "Bulanan",
+       "true"
+      ],
+      [
+       "Tahunan",
+       "false"
+      ]
+     ],
+     "hRider": [
+      [
+       "Ya",
+       "true"
+      ],
+      [
+       "Tidak",
+       "false"
+      ]
+     ],
+     "rJK": [
+      [
+       "Pria",
+       "true"
+      ],
+      [
+       "Wanita",
+       "false"
+      ]
+     ],
+     "rMetode": [
+      [
+       "Bulanan",
+       "true"
+      ],
+      [
+       "Tahunan",
+       "false"
+      ]
+     ],
+     "rWaiver": [
+      [
+       "Ya",
+       "true"
+      ],
+      [
+       "Tidak",
+       "false"
+      ]
+     ],
+     "oJK": [
+      [
+       "PRIA",
+       "true"
+      ],
+      [
+       "WANITA",
+       "false"
+      ]
+     ],
+     "oMetode": [
+      [
+       "Bulanan",
+       "true"
+      ],
+      [
+       "Tahunan",
+       "false"
+      ]
+     ],
+     "qJK": [
+      [
+       "PRIA",
+       "true"
+      ],
+      [
+       "WANITA",
+       "false"
+      ]
+     ],
+     "qMetode": [
+      [
+       "Bulanan",
+       "true"
+      ],
+      [
+       "Tahunan",
+       "false"
+      ]
+     ]
+    },
+    "printButtons": [
+     "bTblCetak",
+     "cTblCetak",
+     "cmpTblCetak",
+     "dTblCetak",
+     "gTblCetak",
+     "hTblCetak",
+     "kTblCetak",
+     "mTblCetak",
+     "nTblCetak",
+     "oTblCetak",
+     "pTblCetak",
+     "qTblCetak",
+     "rTblCetak",
+     "rayaCetak",
+     "tblCetak",
+     "xTblCetak"
+    ]
+   },
+   "comparison-summary.html": {
+    "inlineScripts": [
+     "02b137ac4722bb1c81844f1859cf52eb1d991943fde72442e7056e58a3fbd6d4",
+     "0db6fac18dd0f0b8fc2a1c5540ebc24807b150e4c1cfe56426f0942529b1f2be"
+    ],
+    "externalScripts": [
+     "src/access-gate.js",
+     "src/preview-cetak.js",
+     "src/theme-switcher.js"
+    ],
+    "stylesheets": [
+     "src/styles.css",
+     "src/cetak-besar.css"
+    ],
+    "ids": [
+     "benefits",
+     "ci",
+     "cmpBack",
+     "cmpHome",
+     "cmpLogout",
+     "customer",
+     "generate",
+     "life",
+     "sangkalanCetak",
+     "selectedCount",
+     "targets"
+    ],
+    "duplicateIds": [],
+    "idAttrs": {
+     "customer": {
+      "tag": "div",
+      "classes": [
+       "sub"
+      ],
+      "attrs": {}
+     },
+     "cmpHome": {
+      "tag": "button",
+      "classes": [
+       "sakelar"
+      ],
+      "attrs": {
+       "type": "button"
+      }
+     },
+     "cmpBack": {
+      "tag": "button",
+      "classes": [
+       "sakelar"
+      ],
+      "attrs": {
+       "type": "button"
+      }
+     },
+     "cmpLogout": {
+      "tag": "button",
+      "classes": [
+       "logout-btn"
+      ],
+      "attrs": {
+       "type": "button"
+      }
+     },
+     "targets": {
+      "tag": "div",
+      "classes": [
+       "section",
+       "targets"
+      ],
+      "attrs": {}
+     },
+     "life": {
+      "tag": "div",
+      "classes": [],
+      "attrs": {}
+     },
+     "ci": {
+      "tag": "div",
+      "classes": [],
+      "attrs": {}
+     },
+     "benefits": {
+      "tag": "div",
+      "classes": [],
+      "attrs": {}
+     },
+     "selectedCount": {
+      "tag": "b",
+      "classes": [],
+      "attrs": {}
+     },
+     "generate": {
+      "tag": "button",
+      "classes": [
+       "aksi"
+      ],
+      "attrs": {}
+     },
+     "sangkalanCetak": {
+      "tag": "div",
+      "classes": [
+       "sangkalan-cetak"
+      ],
+      "attrs": {}
+     }
+    },
+    "classTokens": [
+     "actions",
+     "aksi",
+     "logout-btn",
+     "print-logo",
+     "sakelar",
+     "sangkalan-cetak",
+     "section",
+     "selected-bar",
+     "small",
+     "sub",
+     "summary-shell",
+     "targets",
+     "title",
+     "top"
+    ],
+    "segments": {},
+    "printButtons": [
+     "text:🖨 Cetak / PDF"
+    ]
+   },
+   "program-summary.html": {
+    "inlineScripts": [
+     "02b137ac4722bb1c81844f1859cf52eb1d991943fde72442e7056e58a3fbd6d4",
+     "a677e3718adabddb70d89776b699908b108cd7c3cccc030d915ac7e539819893",
+     "c5fa2283ac48102750b9d897db33c23bbf3ebef2f89f9dae1b6a786dddfaec6c"
+    ],
+    "externalScripts": [
+     "src/access-gate.js",
+     "src/preview-cetak.js",
+     "src/theme-switcher.js"
+    ],
+    "stylesheets": [
+     "src/styles.css",
+     "src/cetak-besar.css"
+    ],
+    "ids": [
+     "comboOutput",
+     "programBack",
+     "programHome",
+     "programLogout",
+     "programSimpanLibrary",
+     "sangkalanCetak",
+     "selectedProducts",
+     "targets",
+     "whoMeta",
+     "whoName"
+    ],
+    "duplicateIds": [],
+    "idAttrs": {
+     "whoName": {
+      "tag": "div",
+      "classes": [
+       "name"
+      ],
+      "attrs": {}
+     },
+     "whoMeta": {
+      "tag": "div",
+      "classes": [
+       "sub"
+      ],
+      "attrs": {}
+     },
+     "programSimpanLibrary": {
+      "tag": "button",
+      "classes": [
+       "aksi"
+      ],
+      "attrs": {
+       "type": "button"
+      }
+     },
+     "programHome": {
+      "tag": "button",
+      "classes": [
+       "sakelar"
+      ],
+      "attrs": {
+       "type": "button"
+      }
+     },
+     "programBack": {
+      "tag": "button",
+      "classes": [
+       "sakelar"
+      ],
+      "attrs": {
+       "type": "button"
+      }
+     },
+     "programLogout": {
+      "tag": "button",
+      "classes": [
+       "logout-btn"
+      ],
+      "attrs": {
+       "type": "button"
+      }
+     },
+     "targets": {
+      "tag": "div",
+      "classes": [
+       "targets"
+      ],
+      "attrs": {}
+     },
+     "selectedProducts": {
+      "tag": "div",
+      "classes": [
+       "selected-products"
+      ],
+      "attrs": {}
+     },
+     "comboOutput": {
+      "tag": "div",
+      "classes": [
+       "combo-output"
+      ],
+      "attrs": {}
+     },
+     "sangkalanCetak": {
+      "tag": "div",
+      "classes": [
+       "sangkalan-cetak"
+      ],
+      "attrs": {}
+     }
+    },
+    "classTokens": [
+     "actions",
+     "aksi",
+     "box",
+     "brand-top",
+     "combo-output",
+     "head",
+     "logout-btn",
+     "name",
+     "print-logo",
+     "sakelar",
+     "sangkalan-cetak",
+     "section",
+     "selected-products",
+     "shell",
+     "sub",
+     "targets",
+     "targets-title",
+     "title"
+    ],
+    "segments": {},
+    "printButtons": [
+     "text:🖨 Cetak / PDF"
+    ]
+   }
+  }
+ },
+ "runtime": {
+  "shownScreens": [
+   "AKTIVITAS",
+   "BSL",
+   "BSL_TIME",
+   "CEM",
+   "CEM_ILUS",
+   "COMBO",
+   "COMBO_RINGKAS",
+   "COMPARE",
+   "CRIS",
+   "CRIS_ILUS",
+   "DP",
+   "DP_RINGKAS",
+   "FINANCIAL_CALC",
+   "FLEX",
+   "FLEX_ILUS",
+   "GENWEALTH",
+   "GENWEALTH_RINGKAS",
+   "GHP",
+   "GHP_ILUS",
+   "GPRO",
+   "GPRO_RINGKAS",
+   "GSPA",
+   "GSPA_TIME",
+   "KARTU_KONSULTAN",
+   "KMB",
+   "KMB_RINGKAS",
+   "KPR",
+   "KPR_RINGKAS",
+   "LF",
+   "LF_RINGKAS",
+   "LIBRARY_ILUSTRASI",
+   "NEEDS",
+   "PDK",
+   "PDK_RINGKAS",
+   "PLANNING",
+   "PRODUK",
+   "PROFILE",
+   "R2",
+   "R2_RINGKAS",
+   "RAYA",
+   "RAYA_BANDING",
+   "RIZQIA",
+   "RIZQIA_RINGKAS",
+   "SALES_IDEA",
+   "SEGITIGA",
+   "SEGITIGA_RINGKAS",
+   "SLIP_KOMISI",
+   "SOLUSI_BANDING",
+   "SOLUSI_HITUNG",
+   "SOLUSI_SEGITIGA"
+  ],
+  "layarKeys": [
+   "AKTIVITAS",
+   "AKT_REKAP",
+   "BANDING_PRODUK",
+   "BSL",
+   "BSL_TIME",
+   "CEM",
+   "CEM_ILUS",
+   "COMBO",
+   "COMBO_RINGKAS",
+   "COMPARE",
+   "CRIS",
+   "CRIS_ILUS",
+   "DP",
+   "DP_BANDING_MANUAL",
+   "DP_RINGKAS",
+   "DP_SOLUSI",
+   "DP_SOLUSI_RINGKAS",
+   "FINANCIAL_CALC",
+   "FLEX",
+   "FLEX_ILUS",
+   "GENWEALTH",
+   "GENWEALTH_BANDING",
+   "GENWEALTH_DEPOSITO",
+   "GENWEALTH_RINGKAS",
+   "GHP",
+   "GHP_BANDING",
+   "GHP_ILUS",
+   "GHP_PLAN_BANDING",
+   "GPRO",
+   "GPRO_BANDING",
+   "GPRO_BANDING_RINGKAS",
+   "GPRO_RINGKAS",
+   "GSPA",
+   "GSPA_TIME",
+   "KARTU_KONSULTAN",
+   "KMB",
+   "KMB_RINGKAS",
+   "KPR",
+   "KPR_RINGKAS",
+   "LF",
+   "LF_RINGKAS",
+   "LIBRARY_ILUSTRASI",
+   "NEEDS",
+   "PDK",
+   "PDK_RINGKAS",
+   "PLANNING",
+   "PRODUK",
+   "PROFILE",
+   "R2",
+   "R2_RINGKAS",
+   "RAYA",
+   "RAYA_BANDING",
+   "RIZQIA",
+   "RIZQIA_RINGKAS",
+   "SALES_IDEA",
+   "SEGITIGA",
+   "SEGITIGA_RINGKAS",
+   "SLIP_KOMISI",
+   "SOLUSI_BANDING",
+   "SOLUSI_HITUNG",
+   "SOLUSI_PDK",
+   "SOLUSI_SEGITIGA"
+  ],
+  "globals": {
+   "bukaLayar": "function",
+   "kembaliLayar": "function",
+   "tekanKembali": "function",
+   "InsuranceHubNavigation": "object",
+   "InsuranceHubEngine": "object",
+   "InsuranceHubEngines": "object",
+   "RayaProMaximaEngine": "object",
+   "InsuranceHubBSL2": "object",
+   "InsuranceHubGHP": "object",
+   "InsuranceHubCustomerProfile": "object",
+   "InsuranceHubConsultantCard": "object",
+   "InsuranceHubAtasNama": "object",
+   "InsuranceHubLibrary": "object",
+   "InsuranceHubAktivitas": "object",
+   "PSGPrintPreview": "object",
+   "PSGTheme": "object",
+   "insuranceHubLogout": "function",
+   "insuranceHubBersihkanSesi": "function",
+   "insuranceHubCabutOtorisasi": "function",
+   "insuranceHubIdentitas": "function",
+   "InsuranceHubNaming": "object",
+   "InsuranceHubUmum": "object",
+   "InsuranceHubIsianTerakhir": "object",
+   "InsuranceHubSegitiga": "object",
+   "InsuranceHubSegitigaSolusi": "object",
+   "InsuranceHubDpSolusi": "object",
+   "InsuranceHubSolusiPdk": "object",
+   "InsuranceHubGenWealth": "object",
+   "InsuranceHubRizqia": "object",
+   "InsuranceHubRaya": "object",
+   "InsuranceHubSlipKomisi": "object",
+   "InsuranceHubPromptFlyer": "object",
+   "InsuranceHubBandingProduk": "object",
+   "InsuranceHubCetakBanding": "object",
+   "InsuranceHubGhpAturan": "object",
+   "InsuranceHubTunggu12": "object",
+   "SalesIdea10Jari": "object",
+   "renderComparisonFromSaved": "function",
+   "renderCalculationHub": "function",
+   "ihUsiaGenerali": "function",
+   "PSG_APP_VERSION": "string",
+   "InsuranceHubLevel": "undefined"
+  },
+  "engines": [
+   "BSL2@1.0.0",
+   "CRIS@2.3.0",
+   "FLEX@2.6.0",
+   "GHP@2.7.0",
+   "GSPA@2.5.0",
+   "LF@2.2.0",
+   "NCP@2.4.0"
+  ],
+  "dateHooks": [
+   "bTgl",
+   "cTgl",
+   "cpAyahDob",
+   "cpIbuDob",
+   "cpPasanganDob",
+   "cpTgl",
+   "dTgl",
+   "fTgl",
+   "gTgl",
+   "gwTgl",
+   "hTgl",
+   "ht0",
+   "kTgl",
+   "mTgl",
+   "oTgl",
+   "qTgl",
+   "rTgl",
+   "rayaTglLahir",
+   "rzTgl",
+   "sgtTgl",
+   "xTgl"
+  ],
+  "printHooks": [
+   "bTblCetak",
+   "cTblCetak",
+   "cmpTblCetak",
+   "dTblCetak",
+   "gTblCetak",
+   "hTblCetak",
+   "kTblCetak",
+   "mTblCetak",
+   "nTblCetak",
+   "oTblCetak",
+   "pTblCetak",
+   "qTblCetak",
+   "rTblCetak",
+   "rayaBandCetak",
+   "rayaCetak",
+   "rayaPreview",
+   "rzCetak",
+   "sgtCetak",
+   "tblCetak",
+   "xTblCetak"
+  ],
+  "calc": {
+   "LF": {
+    "relUsia": "USIA 55Dana cair Rp 1 M Rp 92.917.334 /tahun Non-HNWMedis: NMPremi dasar Rp 87.435.150 /tahun + waiver Rp 5.482.184 /tahun (wajib)Total dibayar Rp 464.586.670 selama 5 tahunPremi disetahunkan Rp 92.917.334 — syarat HNW Rp 120.000.000 dan dana minimal Rp 1.000.000.000 Tawarkan Dana Ikut target Rp 100 jtRp 300 jtRp 500 jtRp 800 jtRp 1 MRp 1,5 MRp 2 MRp 2,5 MRp 3 MRp 3,5 MRp 4 MRp 4,5 MRp 5 MRp 10 MRp 12,5 M USIA 60Dana cair Rp 1 M Rp 72.528.159 /tahun Non-HNWMedis: NMPremi dasar Rp 68.248.950 /tahun + waiver Rp 4.279.209 /tahun (wajib)Total dibayar Rp 362.640.795 selama 5 tahunPremi disetahunkan Rp 72.528.159 — syarat HNW Rp 120.000.000 dan dana minimal Rp 1.000.000.000 Tawarkan Dana Ikut target Rp 100 jtRp 300 jtRp 500 jtRp 800 jtRp 1 MRp 1,5 MRp 2 MRp 2,5 MRp 3 MRp 3,5 MRp 4 MRp 4,5 MRp 5 MRp 10 MRp 12,5 M USIA 65Dana cair Rp 1 M Rp 61.911.576 /tahun Non-HNWMedis: NMPremi dasar Rp 58.258.750 /tahun + waiver Rp 3.652.826 /tahun (wajib)Total dibayar Rp 309.557.880 selama 5 tahunPremi disetahunkan Rp 61.911.576 — syarat HNW Rp 120.000.000 dan dana minimal Rp 1.000.000.000 Tawarkan Dana Ikut target Rp 100 jtRp 300 jtRp 500 jtRp 800 jtRp 1 MRp 1,5 MRp 2 MRp 2,5 MRp 3 MRp 3,5 MRp 4 MRp 4,5 MRp 5 MRp 10 MRp 12,5 M USIA 70Dana cair Rp 1 M Rp 51.983.516 /tahun Non-HNWMedis: NMPremi dasar Rp 48.916.450 /tahun + waiver Rp 3.067.066 /tahun (wajib)Total dibayar Rp 259.917.580 selama 5 tahunPremi disetahunkan Rp 51.983.516 — syarat HNW Rp 120.000.000 dan dana minimal Rp 1.000.000.000 Tawarkan Dana Ikut target Rp 100 jtRp 300 jtRp 500 jtRp 800 jtRp 1 MRp 1,5 MRp 2 MRp 2,5 MRp 3 MRp 3,5 MRp 4 MRp 4,5 MRp 5 MRp 10 MRp 12,5 M USIA 75Dana cair Rp 1 M Rp 45.220.437 /tahun Non-HNWMedis: NMPremi dasar Rp 42.552.400 /tahun + waiver Rp 2.668.037 /tahun (wajib)Total dibayar Rp 226.102.185 selama 5 tahunPremi disetahunkan Rp 45.220.437 — syarat HNW Rp 120.000.000 dan dana minimal Rp 1.000.000.000 Tawarkan Dana Ikut target Rp 100 jtRp 300 jtRp 500 jtRp 800 jtRp 1 MRp 1,5 MRp 2 MRp 2,5 MRp 3 MRp 3,5 MRp 4 MRp 4,5 MRp 5 MRp 10 MRp 12,5 M",
+    "nmBiasa": "Rp 3.500.000.000",
+    "nmHNW": "Rp 12.500.000.000",
+    "nmKet": "Dana pensiun sampai nilai di atas masih bisa diajukan tanpa pemeriksaan kesehatan pada usia 36 dengan status Reguler Agen. Di atas nilai itu, kategori medis pada tiap usia pensiun di bawah menunjukkan pemeriksaan yang diminta.",
+    "aturan": "Cara premi dihitungTarif dasar diambil dari kolom UP Rp100 juta pada database Lite Future, sesuai jenis kelamin, usia masuk, masa bayar, dan usia pensiun.Untuk dana pensiun di bawah Rp1 miliar, premi dihitung proporsional lurus dari tarif per Rp100 juta.Untuk dana pensiun mulai Rp1 miliar berlaku diskon 5%, dan diskon itu mengenai seluruh nominal, bukan hanya kelebihannya.Setoran di bawah Rp 3.300.000 per tahun tidak bisa diterbitkan, sehingga baris usia itu dikosongkan.Baris juga dikosongkan kalau kombinasi usia masuk, masa bayar, dan usia pensiun belum ada di database.Syarat status HNWSatu titik usia pensiun berstatus HNW kalau premi tahunan disetahunkan mencapai Rp 120.000.000 dan dana pensiunnya minimal Rp 1.000.000.000.Syarat premi berbeda per masa bayar: MPP 3 tahun Rp 200 juta, MPP 5 tahun Rp 120 juta, MPP 10 tahun ke atas Rp 100 juta.Status dinilai per usia pensiun, tidak digabung. Satu nasabah bisa HNW di usia 60 tetapi Non-HNW di usia 65.Tabel medis HNW berlaku sama untuk agen Reguler maupun Previllage.Kategori medis dan batas NMNM berarti non-medis: pengajuan tidak perlu pemeriksaan kesehatan.Huruf A sampai F menandakan paket pemeriksaan yang diminta; makin jauh hurufnya, makin lengkap pemeriksaannya.PF berarti perlu bukti keuangan, Medical berarti pemeriksaan penuh, N/A berarti kombinasi itu tidak dapat diajukan.Titik yang berstatus HNW memakai tabel medis HNW yang batasnya lebih longgar. Titik Non-HNW memakai tabel sesuai status agen.Sumber ketentuan: EM 030/GNR-PD/08/2026 Lampiran 1 dan EM 022/GNR-PD/06/2026 Lampiran 2.Bedanya dengan file ExcelDi file Excel, satu baris pada tabel medis agen Reguler bergeser satu kolom, sehingga ambang Rp1.000.000.001 terbaca sebagai teks.Akibatnya kategori medis gabungan bisa meleset, dan batas NM untuk usia 56 sampai 60 memunculkan pesan error di Excel.Aplikasi ini memakai posisi yang benar, mengikuti tabel agen Previllage yang strukturnya sama.",
+    "relRingkas": "USIA 55Setoran Rp 92.917.334/tahunRp 1.000.000.000 cairNon-HNWMedis: NMUSIA 60Setoran Rp 72.528.159/tahunRp 1.000.000.000 cairNon-HNWMedis: NMUSIA 65Setoran Rp 61.911.576/tahunRp 1.000.000.000 cairNon-HNWMedis: NMUSIA 70Setoran Rp 51.983.516/tahunRp 1.000.000.000 cairNon-HNWMedis: NMUSIA 75Setoran Rp 45.220.437/tahunRp 1.000.000.000 cairNon-HNWMedis: NM",
+    "ikhtisar": "Setoran gabungan / tahunRp 324.561.022Lama bayar5 tahunTotal premi dibayarRp 1.622.805.110Total dana pensiun yang disiapkanRp 5.000.000.000Kategori medis gabungan: D • Batas NM: Rp 3.500.000.000",
+    "identitas": "Nama nasabahBudi UjiUsia saat ini36 tahunJenis kelaminPRIAMasa bayar5 tahun, Tahunan"
+   },
+   "BSL": {
+    "bHasil": "Yang dibayar nasabahRp 592.050 /bulanDibayar selama 5 tahun, lalu berhenti. Total Rp 35.523.000.Premi per bulanRp 592.050Manfaat meninggal duniaRp 250.000.000Manfaat hidup di usia 100Rp 250.000.000Kode planBSL 5-100 PRIA + Lite UPTarif UP Dasar per Rp100 juta: Rp 311.700 · tarif Lite UP 400%: Rp 872.400",
+    "bFase": "Tahun 1 sampai 5Membayar Rp 592.050 per bulan. Total Rp 35.523.000.Tahun 6 sampai usia 100Tidak ada pembayaran lagi. Proteksi jiwa Rp 250.000.000 tetap berjalan sampai usia 100 tahun.Di usia 100 tahunKalau tertanggung masih hidup, manfaat hidup Rp 250.000.000 dibayarkan, yaitu 100% dari uang pertanggungan.",
+    "bInfoUP": "Total uang pertanggungan Rp250.000.000 — UP Dasar Rp50.000.000 ditambah Lite UP Rp200.000.000.",
+    "bKotakRingkas": "RingkasanPremi produk dasar per bulanRp 592.050Premi per TahunRp 7.104.600Lama bayar5 tahunTotal dibayarRp 35.523.000Manfaat meninggal dunia sampai usia 100Rp 250.000.000Manfaat hidup di usia 100: Rp 250.000.000",
+    "bTabel": "ThnUsiaStatusPremi dasarAkumulasiManfaat meninggalKeterangan139BayarRp 7.104.600Rp 7.104.600Rp 250.000.000240BayarRp 7.104.600Rp 14.209.200Rp 250.000.000341BayarRp 7.104.600Rp 21.313.800Rp 250.000.000442BayarRp 7.104.600Rp 28.418.400Rp 250.000.000543BayarRp 7.104.600Rp 35.523.000Rp 250.000.000644Lunas—Rp 35.523.000Rp 250.000.000Masa bayar selesai — proteksi tetap berjalan745Lunas—Rp 35.523.000Rp 250.000.000846Lunas—Rp 35.523.000Rp 250.000.000947Lunas—Rp 35.523.000Rp 250.000.0001048Lunas—Rp 35.523.000Rp 250.000.0001149Lunas—Rp 35.523.000Rp 250.000.0001250Lunas—Rp 35.523.000Rp 250.000.0001351Lunas—Rp 35.523.000Rp 250.000.0001452Lunas—Rp 35.523.000Rp 250.000.0001553Lunas—Rp 35.523.000Rp 250.000.0001654Lunas—Rp 35.523.000Rp 250.000.0001755Lunas—Rp 35.523.000Rp 250.000.0001856Lunas—Rp 35.523.000Rp 250.000.0001957Lunas—Rp 35.523.000Rp 250.000.0002058Lunas—Rp 35.523.000Rp 250.000.0002159Lunas—Rp 35.523.000Rp 250.000.0002260Lunas—Rp 35.523.000Rp 250.000.0002361Lunas—Rp 35.523.000Rp 250.000.0002462Lunas—Rp 35.523.000Rp 250.000.0002563Lunas—Rp 35.523.000Rp 250.000.0002664Lunas—Rp 35.523.000Rp 250.000.0002765Lunas—Rp 35.523.000Rp 250.000.0002866Lunas—Rp 35.523.000Rp 250.000.0002967Lunas—Rp 35.523.000Rp 250.000.0003068Lunas—Rp 35.523.000Rp 250.000.0003169Lunas—Rp 35.523.000Rp 250.000.0003270Lunas—Rp 35.523.000Rp 250.000.0003775Lunas—Rp 35.523.000Rp 250.000.0004280Lunas—Rp 35.523.000Rp 250.000.0004785Lunas—Rp 35.523.000Rp 250.000.0005290Lunas—Rp 35.523.000Rp 250.000.0005795Lunas—Rp 35.523.000Rp 250.000.00062100Lunas—Rp 35.523.000Rp 250.000.000Manfaat hidup 100% UP dibayarkan"
+   },
+   "CRIS": {
+    "cHasil": "Yang dibayar nasabahRp 18.810.000 /tahunDibayar selama 10 tahun, perlindungan berjalan 25 tahun. Total Rp 188.100.000.Premi per tahunRp 18.810.000UP sakit kritisRp 1.000.000.000Bonus 20% (maks Rp200 jt)Rp 200.000.000Total manfaat sakit kritisRp 1.200.000.000Manfaat AngioplastyRp 100.000.000Sisa UP setelah AngioplastyRp 1.100.000.000Jika sehat sampai akhir kontrak (150% premi)Rp 282.150.000Nilai yang sama juga menjadi manfaat meninggal dunia.Kode planCP 10-25 PRIATarif dasar per Rp500 juta: Rp 855.000",
+    "cFase": "Tahun 1 sampai 10Membayar Rp 18.810.000 per tahun. Total Rp 188.100.000.Kalau terdiagnosa salah satu dari 66 kondisi kritisManfaat dibayar Rp 1.200.000.000, yaitu UP Rp 1.000.000.000 ditambah bonus Rp 200.000.000.Kalau yang terjadi Angioplasty (pasang ring jantung)Dibayar Rp 100.000.000. Sisa manfaat kritis untuk klaim berikutnya menjadi Rp 1.100.000.000.Kalau tetap sehat sampai tahun ke-25Dana kembali Rp 282.150.000, setara 150% dari total premi yang dibayarkan.",
+    "cKotakRingkas": "RingkasanPremi per tahunRp 18.810.000Premi TahunanRp 18.810.000Lama bayar10 tahunTotal dibayarRp 188.100.000Total manfaat sakit kritisRp 1.200.000.000Jika sehat sampai akhir kontrak: Rp 282.150.000",
+    "cTabel": "ThnPremi setahunDana kembali jika sehatManfaat sakit kritisManfaat meninggal1Rp 18.810.000—Rp 1.200.000.000Rp 282.150.0002Rp 18.810.000—Rp 1.200.000.000Rp 282.150.0003Rp 18.810.000—Rp 1.200.000.000Rp 282.150.0004Rp 18.810.000—Rp 1.200.000.000Rp 282.150.0005Rp 18.810.000—Rp 1.200.000.000Rp 282.150.0006Rp 18.810.000—Rp 1.200.000.000Rp 282.150.0007Rp 18.810.000—Rp 1.200.000.000Rp 282.150.0008Rp 18.810.000—Rp 1.200.000.000Rp 282.150.0009Rp 18.810.000—Rp 1.200.000.000Rp 282.150.00010Rp 18.810.000—Rp 1.200.000.000Rp 282.150.00011——Rp 1.200.000.000Rp 282.150.00012——Rp 1.200.000.000Rp 282.150.00013——Rp 1.200.000.000Rp 282.150.00014——Rp 1.200.000.000Rp 282.150.00015——Rp 1.200.000.000Rp 282.150.00016——Rp 1.200.000.000Rp 282.150.00017——Rp 1.200.000.000Rp 282.150.00018——Rp 1.200.000.000Rp 282.150.00019——Rp 1.200.000.000Rp 282.150.00020——Rp 1.200.000.000Rp 282.150.00021——Rp 1.200.000.000Rp 282.150.00022——Rp 1.200.000.000Rp 282.150.00023——Rp 1.200.000.000Rp 282.150.00024——Rp 1.200.000.000Rp 282.150.00025—Rp 282.150.000Rp 1.200.000.000Rp 282.150.000TotalRp 188.100.000Rp 282.150.000Rp 1.200.000.000"
+   },
+   "CEM": {
+    "mHasil": "Yang dibayar nasabahRp 32.340.000 /tahunDibayar selama 10 tahun, perlindungan berjalan 25 tahun. Total Rp 323.400.000.Kontribusi per tahunRp 32.340.000Meninggal sebab apa punRp 1.000.000.000Meninggal karena kecelakaanRp 2.000.000.000Premi kembali di akhir kontrak (150%)Rp 485.100.000Selisih terhadap total premi: Rp 161.700.000Kode planNCP 10-25Tarif dasar per Rp1 miliar: Rp 2.940.000",
+    "mKotakRingkas": "RingkasanPremi per tahunRp 32.340.000Premi TahunanRp 32.340.000Lama bayar10 tahunTotal dibayarRp 323.400.000Premi kembali di akhir kontrakRp 485.100.000Perlindungan jiwa selama kontrak: Rp 1.000.000.000",
+    "mTabel": "ThnPremi setahunPremi kembaliMeninggal sebab apa punMeninggal kecelakaan1Rp 32.340.000—Rp 1.000.000.000Rp 2.000.000.0002Rp 32.340.000—Rp 1.000.000.000Rp 2.000.000.0003Rp 32.340.000—Rp 1.000.000.000Rp 2.000.000.0004Rp 32.340.000—Rp 1.000.000.000Rp 2.000.000.0005Rp 32.340.000—Rp 1.000.000.000Rp 2.000.000.0006Rp 32.340.000—Rp 1.000.000.000Rp 2.000.000.0007Rp 32.340.000—Rp 1.000.000.000Rp 2.000.000.0008Rp 32.340.000—Rp 1.000.000.000Rp 2.000.000.0009Rp 32.340.000—Rp 1.000.000.000Rp 2.000.000.00010Rp 32.340.000—Rp 1.000.000.000Rp 2.000.000.00011——Rp 1.000.000.000Rp 2.000.000.00012——Rp 1.000.000.000Rp 2.000.000.00013——Rp 1.000.000.000Rp 2.000.000.00014——Rp 1.000.000.000Rp 2.000.000.00015——Rp 1.000.000.000Rp 2.000.000.00016——Rp 1.000.000.000Rp 2.000.000.00017——Rp 1.000.000.000Rp 2.000.000.00018——Rp 1.000.000.000Rp 2.000.000.00019——Rp 1.000.000.000Rp 2.000.000.00020——Rp 1.000.000.000Rp 2.000.000.00021——Rp 1.000.000.000Rp 2.000.000.00022——Rp 1.000.000.000Rp 2.000.000.00023——Rp 1.000.000.000Rp 2.000.000.00024——Rp 1.000.000.000Rp 2.000.000.00025—Rp 485.100.000Rp 1.000.000.000Rp 2.000.000.000TotalRp 323.400.000Rp 485.100.000"
+   },
+   "GSPA": {
+    "gHasil": "Yang dibayar nasabah (santunan dasar + waiver)Rp 47.528.641 /tahunSelama 5 tahun, sampai usia 50. Total Rp 237.643.207. Santunan dasar Rp 43.635.900, waiver Rp 3.892.741.Premi gabungan per tahunRp 47.528.641Rider WaiverRp 3.892.741 /tahunTotal waiver selama masa bayar Rp 19.463.707. Sudah dipotong diskon 30% mengikuti tier UP Dasar.UP DasarRp 1.000.000.000Diskon premi (tier)30%Kontribusi per tahun setelah diskonRp 43.635.900Penghematan dari diskon (per bulan)Rp 1.700.100Sebelum diskon: Rp 5.667.000 per bulan. Tarif dasar per Rp100 juta: Rp 566.700Santunan untuk ahli waris saat klaimRp 1.000.000.000Dibanding total premi termasuk rider Rp 237.643.207, setara 4,2 kali.Estimasi santunan di usia 100 (dengan booster)Rp 1.825.000.000Naik Rp 75.000.000 setiap 5 tahun, sampai 11 kali.Tambahan meninggal di luar negeriRp 100.000.000Tambahan kecelakaan transportasi umumRp 1.000.000.000Tambahan meninggal saat haji atau umrahRp 1.000.000.000Potensi maksimum seluruh skenario: Rp 3.925.000.000",
+    "gFase": "Tahun 1 sampai 5Membayar Rp 43.635.900 per tahun, berhenti di usia 50.Setelah masa bayar selesaiTidak ada pembayaran lagi, perlindungan tetap berjalan sampai usia 100 tahun.Santunan yang terus tumbuhSetiap 5 tahun santunan naik Rp 75.000.000, maksimal 150% dari UP Dasar. Di usia 100 diperkirakan Rp 1.825.000.000.",
+    "gKotakRingkas": "RingkasanKontribusi per tahunRp 47.528.641Lama bayar5 tahunTotal bayarRp 237.643.207Kontribusi TahunanRp 47.528.641Santunan untuk ahli warisRp 1.000.000.000Di usia 100 dengan booster: Rp 1.825.000.000",
+    "gTabel": "ThnUsiaKontribusi per TahunSantunan dasarBoosterSantunan berjalan145Rp 47.528.641Rp 1.000.000.000—Rp 1.000.000.000246Rp 47.528.641Rp 1.000.000.000—Rp 1.000.000.000347Rp 47.528.641Rp 1.000.000.000—Rp 1.000.000.000448Rp 47.528.641Rp 1.000.000.000—Rp 1.000.000.000549Rp 47.528.641Rp 1.000.000.000Rp 75.000.000 (7,5%)Rp 1.075.000.000650—Rp 1.000.000.000Rp 75.000.000 (7,5%)Rp 1.075.000.0001054—Rp 1.000.000.000Rp 150.000.000 (15%)Rp 1.150.000.0001559—Rp 1.000.000.000Rp 225.000.000 (22,5%)Rp 1.225.000.0002064—Rp 1.000.000.000Rp 300.000.000 (30%)Rp 1.300.000.0002569—Rp 1.000.000.000Rp 375.000.000 (37,5%)Rp 1.375.000.0003074—Rp 1.000.000.000Rp 450.000.000 (45%)Rp 1.450.000.0003579—Rp 1.000.000.000Rp 525.000.000 (52,5%)Rp 1.525.000.0004084—Rp 1.000.000.000Rp 600.000.000 (60%)Rp 1.600.000.0004589—Rp 1.000.000.000Rp 675.000.000 (67,5%)Rp 1.675.000.0005094—Rp 1.000.000.000Rp 750.000.000 (75%)Rp 1.750.000.0005599—Rp 1.000.000.000Rp 825.000.000 (82,5%)Rp 1.825.000.00056100—Rp 1.000.000.000Rp 825.000.000 (82,5%)Rp 1.825.000.000",
+    "gTabelWaiver": "KeteranganNilaiTarif waiver per Rp100 juta UP DasarRp 55.151Kontribusi waiver sebelum diskonRp 551.510 /bulanDiskon mengikuti tier UP Dasar30%Kontribusi waiver bulananRp 386.057Kontribusi waiver tahunanRp 3.892.741Total waiver selama 5 tahun masa bayarRp 19.463.707Kontribusi santunan dasar yang dibebaskan bila klaim terjadi di awalRp 218.179.500"
+   },
+   "FLEX": {
+    "xHasil": "Yang dibayar nasabahRp 54.800.000 /tahunDibayar selama 5 tahun, lalu berhenti. Total Rp 274.000.000. Proteksi berjalan sampai usia 99.Premi per tahunRp 54.800.000Manfaat tahun 1–5Rp 1.000.000.000Manfaat tahun 6–10 (150%)Rp 1.500.000.000Manfaat tahun 11 ke atas (200%)Rp 2.000.000.000Bonus 75 (50% UP)Rp 500.000.000Tambahan kecelakaanRp 1.000.000.000Manfaat akhir masa asuransi (usia 99)Rp 1.500.000.000Tarif dasar per Rp 100 M: Rp 493.200.000 bulanan, Rp 5.480.000.000 tahunan.",
+    "xKotakRingkas": "RingkasanPremi per tahunRp 54.800.000Premi TahunanRp 54.800.000Lama bayar5 tahunTotal dibayarRp 274.000.000Manfaat meninggal tertinggi (tahun 11 ke atas)Rp 2.000.000.000Ditambah tambahan kecelakaan Rp 1.000.000.000, menjadi Rp 3.000.000.000.",
+    "xTabel": "ThnUsiaPremi setahunBonus 75MeninggalMeninggal kecelakaanCatatan135Rp 54.800.000—Rp 1.000.000.000Rp 2.000.000.000236Rp 54.800.000—Rp 1.000.000.000Rp 2.000.000.000337Rp 54.800.000—Rp 1.000.000.000Rp 2.000.000.000438Rp 54.800.000—Rp 1.000.000.000Rp 2.000.000.000539Rp 54.800.000—Rp 1.000.000.000Rp 2.000.000.000640——Rp 1.500.000.000Rp 2.500.000.0001044——Rp 1.500.000.000Rp 2.500.000.0001145——Rp 2.000.000.000Rp 3.000.000.0002054——Rp 2.000.000.000Rp 3.000.000.0003064——Rp 2.000.000.000Rp 3.000.000.0004074——Rp 2.000.000.000Rp 3.000.000.0004175—Rp 500.000.000Rp 1.500.000.000Rp 2.500.000.000Bonus 75 cair5084——Rp 1.500.000.000Rp 2.500.000.0006094——Rp 1.500.000.000Rp 2.500.000.0006599——Rp 1.500.000.000Rp 2.500.000.000Akhir masa, cair Rp 1.500.000.000Total premiRp 274.000.000"
+   },
+   "GHP": {
+    "hHasil": "Yang dibayar*Rp 711.600 /bulanBasis ringkasan mengikuti metode bayar yang dipilih. Total premi per tahun: Rp 8.539.200 *.Premi per bulan*Rp 711.600Premi GHP per bulan*Rp 694.300 *Premi per Tahun*Rp 8.539.200Plan Gold StandardRp 3.000.000.000Limit tahunan. Kamar 2 Bed, wilayah Indonesia.",
+    "hKotakRingkas": "RingkasanPremi per bulan*Rp 711.600TOTAL PREMI PER TAHUN **Rp 8.539.200 ** Premi asuransi kesehatan GHP tidak mengikat.PlanGen Pro 10-90Lama bayar premi dasar + rider non-GHP10 tahunRincian premi per bulanRp 17.300 jiwa + Rp 694.300 kesehatanTotal premi per bulan: Rp 711.600** Premi untuk asuransi kesehatan GHP tidak mengikat. Premi rider dibayar selama masa pertanggungan rider dan menyesuaikan usia tertanggung tiap tahun, sehingga tidak berhenti bersama masa bayar produk dasar. Karena itu total premi keseluruhan tidak ditampilkan.",
+    "hTabelPremi": "TertanggungJiwa /blnKesehatan /blnPremi Bulanan*Premi per Tahun*Budi Uji (37 th, Pria, Gold Standard)Rp 17.300Rp 694.300Rp 711.600Rp 8.539.200"
+   },
+   "GPRO": {
+    "qHasil": "Yang dibayar nasabahRp 2.768.000 /bulanSelama 10 tahun, sampai usia 47. Total Rp 332.160.000. Perlindungan berjalan sampai usia 90.Premi per bulanRp 2.768.000Manfaat meninggalRp 2.000.000.000Diskon yang sudah termasuk20%Kecelakaan transportasi umumRp 4.000.000.000Meninggal di luar IndonesiaRp 2.200.000.000Pembebasan premi sudah termasukTanpa premi tambahanBila terdiagnosa salah satu kondisi kritis yang dipertanggungkan, sisa premi sampai akhir masa bayar dibebaskan.",
+    "qTabelUP": "Uang pertanggunganDiskonPremi bulananPremi tahunanRp 1.000.000.00020%Rp 1.384.000Rp 15.224.000Rp 1.500.000.00020%Rp 2.076.000Rp 22.836.000Rp 2.000.000.00020%Rp 2.768.000Rp 30.448.000Rp 2.500.000.00030%Rp 3.027.500Rp 33.302.500Rp 3.000.000.00030%Rp 3.633.000Rp 39.963.000Rp 3.500.000.00030%Rp 4.238.500Rp 46.623.500Rp 4.000.000.00030%Rp 4.844.000Rp 53.284.000Rp 4.500.000.00030%Rp 5.449.500Rp 59.944.500Rp 5.000.000.00030%Rp 6.055.000Rp 66.605.000"
+   },
+   "KMB": {
+    "kHasil": "Total per tahun (GSPA + Lite Future)Rp 138.897.481Total yang dibayar sampai kedua masa bayar selesai: Rp 694.487.405.Kontribusi dasar GSPA bulananRp 3.077.900Belum termasuk WaiverKontribusi GSPA tahunan + WaiverRp 36.571.888Termasuk Waiver Rp 2.714.988 /tahunKontribusi GSPA bulanan + WaiverRp 3.347.155Waiver Rp 269.255 /bulanDiskon premi30%Santunan ahli warisRp 1.000.000.000Setoran Lite Future per tahunRp 102.325.593Dana pensiun di usia 60Rp 1.000.000.000Bila terdiagnosa penyakit kritisPremi dasar yang BELUM dibayar dibebaskan sampai akhir masa bayar. Sisa masa bayar dihitung setelah premi tahun berjalan dibayar. Premi waiver sendiri tidak ikut dibebaskan karena rider berakhir begitu klaim disetujui. Premi waiver itu sendiri tetap dibayar (Gen Aman Rp 2.714.988 per tahun, Lite Future Rp 7.596.343 per tahun), sesuai ketentuan polis. Premi rider kesehatan GHP/GHPS tidak termasuk.Kejadian padaGen AmanLite FutureTotal premi yang dibebaskanTahun ke-1 (usia 42)Rp 135.427.600Rp 378.917.000Rp 514.344.600Tahun ke-2 (usia 43)Rp 101.570.700Rp 284.187.750Rp 385.758.450Tahun ke-3 (usia 44)Rp 67.713.800Rp 189.458.500Rp 257.172.300Tahun ke-4 (usia 45)Rp 33.856.900Rp 94.729.250Rp 128.586.150"
+   },
+   "KPR": {
+    "pHasil": "Cicilan per bulanRp 18.577.357Selama 10 tahun, atau 120 kali angsuran.Uang muka (DP)Rp 400.000.000Pokok yang dibiayai KPRRp 1.600.000.000Cicilan per tahunRp 222.928.280Total seluruh cicilanRp 2.229.282.801TOTAL UANG KELUAR SAMPAI LUNASRp 2.629.282.801DP ditambah seluruh cicilan, untuk rumah seharga Rp 2.000.000.000.Total bunga dan biaya pembiayaanRp 629.282.801Setara 39,3% dari pokok KPR — uang yang keluar tanpa menambah nilai rumah.",
+    "pTabelJadwal": "Akhir tahunSudah dibayarBunga terbayarSisa utangTahun 1Rp 222.928.280Rp 108.370.932Rp 1.485.442.652Tahun 2Rp 445.856.560Rp 208.460.505Rp 1.362.603.945Tahun 3Rp 668.784.840Rp 299.670.057Rp 1.230.885.217Tahun 4Rp 891.713.120Rp 381.357.652Rp 1.089.644.532Tahun 5Rp 1.114.641.400Rp 452.834.947Rp 938.193.546Tahun 6Rp 1.337.569.681Rp 513.363.837Rp 775.794.156Tahun 7Rp 1.560.497.961Rp 562.152.862Rp 601.654.902Tahun 8Rp 1.783.426.241Rp 598.353.347Rp 414.927.106Tahun 9Rp 2.006.354.521Rp 621.055.264Rp 214.700.743Tahun 10Rp 2.229.282.801Rp 629.282.801Rp 0"
+   },
+   "R2": {
+    "rHasil": "Untuk nilai yang sama Rp 5.000.000.000Rp 7.750.655 /bulanGen Aman, tanpa uang muka. Jalur KPR Rp 35.953.131 per bulan ditambah uang muka Rp 1.000.000.000 di depan.Uang muka KPRRp 1.000.000.000Uang muka Gen AmanRp 0Cicilan KPR per bulanRp 35.953.131Kontribusi Gen Aman per bulanRp 7.750.655Selisih beban per bulanRp 28.202.476Kontribusi Gen Aman setara 21,6% dari cicilan KPR untuk nilai yang sama.Lama bayar KPR15 tahunLama bayar Gen Aman10 tahunTotal uang keluar KPRRp 7.471.563.550Total kontribusi Gen AmanRp 930.078.600Selisih total sampai selesaiRp 6.541.484.950Diskon kontribusi Gen Aman 45% untuk UP sebesar ini, dan tidak ada bunga pembiayaan."
+   },
+   "DP": {
+    "dHasil": "Target dana saat usia 70Rp 3.339.101.283Untuk membiayai 10 tahun masa pensiun, sampai usia 80.Waktu menuju pensiun30 tahunLama masa pensiun10 tahunBiaya hidup setara saat pensiunRp 24.272.625 /bulanHari ini Rp 10.000.000 per bulan, naik 3% per tahun selama 30 tahun.Dana sudah tersedia, nilainya saat pensiunRp 0Porsi kebutuhan yang sudah tertutup0%KEKURANGAN YANG PERLU DISIAPKANRp 3.339.101.283Dana yang sudah ada Rp 0 dikembangkan 0% per tahun selama 30 tahun, lalu dikurangkan dari target.",
+    "dSimulasi": "Setoran untuk menutup kekuranganRp 13.912.922 /bulanSelama 20 tahun, atau Rp 166.955.064 per tahun.Perlu terkumpul di akhir masa setoranRp 3.339.101.283Dana berkembang sendiri setelah itu10 tahun",
+    "dTabelSensitif": "InflasiBiaya /bln saat pensiunTarget danaKekurangan2%Rp 18.113.616Rp 2.380.068.477Rp 2.380.068.4773%Rp 24.272.625Rp 3.339.101.283Rp 3.339.101.2834%Rp 32.433.975Rp 4.672.869.354Rp 4.672.869.354"
+   },
+   "RAYA": {
+    "rayaHasil": "✓ MEMENUHI KETENTUAN DASAR RAYA PRO MAXIMANama nasabahBudi UjiTanggal lahir1985-05-05Usia masuk41 tahunGender—UP DASARRp 165.000.0005–15 · 5.5× kontribusi tahunan dasarADB WAJIBRp 165.000.000100% UP dasar, maksimum Rp500 jutaKontribusi dasarRp 30.000.000per tahunanKontribusi ADBRp 475.200per tahunanTotal kontribusiRp 30.475.200dasar + ADB per tahunanTabel Manfaat AsuransiFormat mengikuti struktur tabel ilustrasi resmi RAYA Pro Maxima. Kontribusi tahunan pada tabel sudah termasuk kontribusi ADB.TAHUNPOLISUSIAPESERTA(TAHUN)KONTRIBUSITAHUNAN [1]MANFAATTAHUNAN [2]MANFAAT MENINGGALDUNIA [3]MANFAATACCIDENTALDEATH BENEFITSYARIAHMANFAAT AKHIRMASA ASURANSIPENEBUSANPOLIS141Rp 30.475.200Rp 210.000.000Rp 165.000.000242Rp 30.475.200Rp 210.000.000Rp 165.000.000343Rp 30.475.200Rp 210.000.000Rp 165.000.000444Rp 30.475.200Rp 210.000.000Rp 165.000.000Rp 12.000.000545Rp 30.475.200Rp 210.000.000Rp 165.000.000Rp 30.000.000646Rp 4.500.000Rp 205.500.000Rp 165.000.000Rp 45.000.000747Rp 4.500.000Rp 201.000.000Rp 165.000.000Rp 45.000.000848Rp 4.500.000Rp 196.500.000Rp 165.000.000Rp 75.000.000949Rp 4.500.000Rp 192.000.000Rp 165.000.000Rp 75.000.0001050Rp 4.500.000Rp 187.500.000Rp 165.000.000Rp 90.000.0001151Rp 4.500.000Rp 183.000.000Rp 165.000.000Rp 90.000.0001252Rp 4.500.000Rp 178.500.000Rp 165.000.000Rp 97.500.0001353Rp 4.500.000Rp 174.000.000Rp 165.000.000Rp 97.500.0001454Rp 4.500.000Rp 169.500.000Rp 165.000.000Rp 105.000.0001555Rp 4.500.000Rp 165.000.000Rp 165.000.000Rp 165.000.000Rp 150.000.000Keterangan:[1] Tidak termasuk Kontribusi Kondisi Khusus.[2] Manfaat Tahunan akan diserahkan pada saat ulang tahun polis.[3] Manfaat Meninggal Dunia yang tercantum pada tabel di atas sudah memperhitungkan Manfaat Tahunan yang telah diserahkan (jika ada) kepada Pemegang Polis.Besaran Penebusan Polis pada akhir tahun Polis. Apabila pengajuan Penebusan Polis tidak dilakukan pada saat akhir tahun Polis maka pengembalian Dana Tanahud akan diperhitungkan secara proporsional sesuai dengan ketentuan Pengelola.Catatan pentingNama dan tanggal lahir mengikuti Profil Nasabah yang sedang aktif.Gender ditampilkan sebagai identitas, tetapi tidak digunakan dalam formula UP dasar.ADB wajib: 100% UP dasar, minimum Rp7,5 juta, maksimum Rp500 juta.5–15 maksimal usia masuk 55 tahun; 5–20 maksimal 50 tahun.Maksimum santunan dasar tetap mengikuti keputusan underwriting."
+   },
+   "COMBO": {
+    "oHasil": "Total yang dibayar nasabahRp 20.440.000 /bulan2 polis digabung. Total sampai seluruh masa bayar selesai Rp 1.059.240.000.Total premi per bulanRp 20.440.000Total premi per tahunRp 245.280.000Meninggal sebab apa punRp 1.895.860.000Meninggal karena kecelakaanRp 2.895.860.000Manfaat penyakit kritisRp 1.200.000.000Manfaat AngioplastyRp 100.000.000Total dana kembali di akhir kontrakRp 1.588.860.000Selisih terhadap total premi yang dibayar: Rp 529.620.000 lebih besar."
+   },
+   "PDK": {
+    "nHasil": "Isi usia anak sekarang dan biaya kuliah harga hari ini untuk melihat kebutuhannya."
+   }
+  },
+  "flow": {
+   "needs": "Hasil analisis awalKebutuhan proteksi jiwaRp 1,8 MPendekatan: pengganti penghasilan + utang − UP yang sudah dimiliki.Kebutuhan critical illnessRp 540 jtPatokan awal 36× penghasilan bulanan − UP CI yang sudah dimiliki.Ini adalah kebutuhan awal untuk percakapan perencanaan. Bukan keputusan underwriting, bukan jaminan manfaat, dan bukan pengganti ilustrasi resmi produk.Cetak / simpan PDF👁 PreviewSolusi📚 Simpan ke LibraryPrompt Flyer AIPrompt mengikuti seluruh ringkasan hasil yang sedang tampil. Tekan Salin, lalu tempel di aplikasi AI beserta PDF ringkasan yang sudah kamu simpan.Arah tema dinamis: Melindungi penghasilan hari ini dan menjaga rencana masa depan keluargaSalin prompt flyer",
+   "cards": "Alternatif yang Sedang DibandingkanAlternatif AGen AmanProteksi Jiwa · UP Rp1.800.000.000 · Bayar 5 tahun · Tahunan🗑Premi / tahunRp48.094.514Total bayarRp240.472.570Status✓ Memenuhi kebutuhanLihat hasil kalkulatorYang dibayar nasabah (santunan dasar + waiver)Rp 48.094.514 /tahunSelama 5 tahun, sampai usia 43. Total Rp 240.472.572. Santunan dasar Rp 45.019.260, waiver Rp 3.075.254.Premi gabungan per tahunRp 48.094.514Rider WaiverRp 3.075.254 /tahunTotal waiver selama masa bayar Rp 15.376.272. Sudah dipotong diskon 35% mengikuti tier UP Dasar.UP DasarRp 1.800.000.000Diskon premi (tier)35%Kontribusi per tahun setelah diskonRp 45.019.260Penghematan dari diskon (per bulan)Rp 2.203.740Sebelum diskon: Rp 6.296.400 per bulan. Tarif dasar per Rp100 juta: Rp 349.800Santunan untuk ahli waris saat klaimRp 1.800.000.000Dibanding total premi termasuk rider Rp 240.472.572, setara 7,5 kali.Estimasi santunan di usia 100 (dengan booster)Rp 3.420.000.000Naik Rp 135.000.000 setiap 5 tahun, sampai 12 kali.Tambahan meninggal di luar negeriRp 180.000.000Tambahan kecelakaan transportasi umumRp 1.800.000.000Tambahan meninggal saat haji atau umrahRp 1.000.000.000Potensi maksimum seluruh skenario: Rp 6.400.000.000RingkasanKontribusi per tahunRp 48.094.514Lama bayar5 tahunTotal bayarRp 240.472.572Kontribusi TahunanRp 48.094.514Santunan untuk ahli warisRp 1.800.000.000Di usia 100 dengan booster: Rp 3.420.000.000ThnUsiaKontribusi per TahunSantunan dasarBoosterSantunan berjalan138Rp 48.094.514Rp 1.800.000.000—Rp 1.800.000.000239Rp 48.094.514Rp 1.800.000.000—Rp 1.800.000.000340Rp 48.094.514Rp 1.800.000.000—Rp 1.800.000.000441Rp 48.094.514Rp 1.800.000.000—Rp 1.800.000.000542Rp 48.094.514Rp 1.800.000.000Rp 135.000.000 (7,5%)Rp 1.935.000.000643—Rp 1.800.000.000Rp 135.000.000 (7,5%)Rp 1.935.000.0001047—Rp 1.800.000.000Rp 270.000.000 (15%)Rp 2.070.000.0001552—Rp 1.800.000.000Rp 405.000.000 (22,5%)Rp 2.205.000.0002057—Rp 1.800.000.000Rp 540.000.000 (30%)Rp 2.340.000.0002562—Rp 1.800.000.000Rp 675.000.000 (37,5%)Rp 2.475.000.0003067—Rp 1.800.000.000Rp 810.000.000 (45%)Rp 2.610.000.0003572—Rp 1.800.000.000Rp 945.000.000 (52,5%)Rp 2.745.000.0004077—Rp 1.800.000.000Rp 1.080.000.000 (60%)Rp 2.880.000.0004582—Rp 1.800.000.000Rp 1.215.000.000 (67,5%)Rp 3.015.000.0005087—Rp 1.800.000.000Rp 1.350.000.000 (75%)Rp 3.150.000.0005592—Rp 1.800.000.000Rp 1.485.000.000 (82,5%)Rp 3.285.000.0006097—Rp 1.800.000.000Rp 1.620.000.000 (90%)Rp 3.420.000.00063100—Rp 1.800.000.000Rp 1.620.000.000 (90%)Rp 3.420.000.000Bila terdiagnosa penyakit kritisKontribusi santunan dasar yang BELUM dibayar dibebaskan sampai akhir masa bayar. Sisa masa bayar dihitung setelah premi tahun berjalan dibayar. Premi waiver sendiri tidak ikut dibebaskan karena rider berakhir begitu klaim disetujui. Kontribusi waiver sendiri (Rp 3.075.254 per tahun) tetap dibayar, sesuai ketentuan polis.Kejadian padaSisa masa bayarKontribusi dasar yang dibebaskanTahun ke-1 (usia 38)4 tahunRp 180.077.040Tahun ke-2 (usia 39)3 tahunRp 135.057.780Tahun ke-3 (usia 40)2 tahunRp 90.038.520Tahun ke-4 (usia 41)1 tahunRp 45.019.260Ringkasan Perbandingan",
+   "targets": "Proteksi JiwaRp1.800.000.000Critical IllnessRp540.000.000Total alternatif1",
+   "rows": 1,
+   "benefits": "Proteksi JiwaMeninggal DuniaRp1.800.000.000Sumber: Gen Aman Rp1.800.000.000Tambahan Manfaat TransportasiRp1.800.000.000Sumber: Gen Aman Rp1.800.000.000Tambahan Manfaat Luar NegeriRp180.000.000Sumber: Gen Aman Rp180.000.000Tambahan Manfaat HajiRp1.000.000.000Sumber: Gen Aman Rp1.000.000.000Critical IllnessBelum ada alternatif yang dipilih. Nyalakan minimal satu toggle di atas untuk melihat summary benefit.Pembebasan Premi (Waiver Gen Aman)Gen Aman — UP Rp1.800.000.000 · Bayar 5 tahunBila terdiagnosa penyakit kritisKontribusi santunan dasar yang BELUM dibayar dibebaskan sampai akhir masa bayar. Sisa masa bayar dihitung setelah premi tahun berjalan dibayar. Premi waiver sendiri tidak ikut dibebaskan karena rider berakhir begitu klaim disetujui. Kontribusi waiver sendiri (Rp 3.075.254 per tahun) tetap dibayar, sesuai ketentuan polis.Kejadian padaSisa masa bayarKontribusi dasar yang dibebaskanTahun ke-1 (usia 38)4 tahunRp 180.077.040Tahun ke-2 (usia 39)3 tahunRp 135.057.780Tahun ke-3 (usia 40)2 tahunRp 90.038.520Tahun ke-4 (usia 41)1 tahunRp 45.019.260",
+   "programWho": "Budi Santoso",
+   "programTargets": "Kebutuhan JiwaRp1.800.000.000Kebutuhan Critical IllnessRp540.000.000",
+   "programSections": [
+    "Ringkasan Program",
+    "Ringkasan",
+    "Manfaat Gabungan Program",
+    "Timeline Program"
+   ]
+  }
+ }
+}
