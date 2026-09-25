@@ -14,6 +14,7 @@
 <meta name="description" content="Alat kerja internal agen.">
 <title>PSG Selling Tools — Insurance Hub</title>
 <link rel="stylesheet" href="src/styles.css">
+<link rel="stylesheet" href="src/branding.css">
 <script src="src/access-gate.js"></script>
 <script>/* Tema dipasang sebelum CSS dilukis supaya tidak ada kedipan terang saat
    agen memakai tema Dark. Sengaja inline dan sesingkat mungkin. */
@@ -23,6 +24,44 @@ document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
   <link rel="stylesheet" href="src/cetak-besar.css">
 </head>
 <body class="psg-app">
+<!-- Splash PSG — hanya saat dibuka sebagai aplikasi terpasang (PWA).
+     Skrip di bawahnya memutuskan sebelum frame pertama dilukis; bila tidak
+     perlu tampil, elemen langsung dibuang. Tidak menyimpan apa pun. -->
+<div id="psgSplash" aria-hidden="true">
+  <div class="psg-splash-awal"></div>
+  <div class="psg-splash-partikel"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+  <div class="psg-splash-vinyet"></div>
+  <div class="psg-splash-isi">
+    <div class="psg-splash-logo-wadah">
+      <img class="psg-splash-logo" src="assets/logo-psg-terang.png" alt="" decoding="sync">
+      <span class="psg-splash-gloss"></span><span class="psg-splash-kilau"></span>
+    </div>
+    <div class="psg-splash-bayang"></div>
+    <div class="psg-splash-garis"></div>
+    <p class="psg-splash-nama">PSG SELLING TOOLS</p>
+    <p class="psg-splash-slogan">Bahagia <i>✦</i> Berkat <i>✦</i> Berlimpah</p>
+  </div>
+</div>
+<script>/* Splash hanya pada peluncuran aplikasi terpasang: mode standalone,
+   navigasi baru (bukan reload / back), dan bukan datang dari halaman lain
+   di aplikasi ini (logout, kembali dari ringkasan). ?splash=1 untuk pratinjau.
+   Tidak memakai storage. */
+(function(){var el=document.getElementById('psgSplash');if(!el)return;var tampil=false;
+try{var mm=function(q){return window.matchMedia&&window.matchMedia(q).matches;};
+var terpasang=mm('(display-mode: standalone)')||mm('(display-mode: fullscreen)')||mm('(display-mode: minimal-ui)')||window.navigator.standalone===true;
+var nav=performance.getEntriesByType?performance.getEntriesByType('navigation')[0]:null;
+var jenis=nav?nav.type:'navigate';
+var dariDalam=false;try{dariDalam=!!document.referrer&&new URL(document.referrer).origin===location.origin;}catch(e){}
+tampil=/[?&]splash=1(&|$)/.test(location.search)||(terpasang&&jenis==='navigate'&&!dariDalam&&!window.Android);}catch(e){tampil=false;}
+if(!tampil){el.parentNode.removeChild(el);return;}
+var root=document.documentElement,selesai=false;
+root.classList.add('psg-splash-aktif');el.classList.add('tampil');
+var gerakPelan=mm('(prefers-reduced-motion: reduce)');
+function buang(){if(el.parentNode)el.parentNode.removeChild(el);}
+function tutup(lewati){if(selesai)return;selesai=true;root.classList.remove('psg-splash-aktif');
+if(lewati)el.classList.add('psg-splash-lewati');setTimeout(buang,gerakPelan?0:(lewati?380:620));}
+setTimeout(function(){tutup(false);},gerakPelan?1300:3050);
+el.addEventListener('pointerdown',function(){tutup(true);});})();</script>
 <!-- Shell navigasi (src/app-shell.js). Hanya memanggil window.bukaLayar()
      atau tombol yang sudah ada; tidak mengubah mekanisme navigasi. -->
 <aside class="psg-nav psg-side tanpa-cetak" id="psgSide" aria-label="Navigasi utama">
@@ -70,6 +109,7 @@ document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
 </div>
 
 <header id="bilah">
+  <div class="psg-brand-strip" aria-hidden="true"><img class="psg-brand-strip-logo" src="assets/logo-psg-terang.png" alt=""><span class="psg-brand-strip-slogan">Bahagia <i>✦</i> Berkat <i>✦</i> Berlimpah</span></div>
   <button class="kiri" id="tblKiri" aria-label="Kembali">&#8249;</button>
   <div class="brand-app">
     <img class="logo-psg-app" src="assets/logo-psg-terang.png" alt="PSG — Patriot Shining Generation">
