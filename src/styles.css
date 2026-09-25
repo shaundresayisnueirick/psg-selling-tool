@@ -474,6 +474,14 @@ main{
   width:100%;max-width:calc(var(--content-max) + var(--gutter)*2);margin:0 auto;
   padding:var(--s-5) max(var(--gutter),env(safe-area-inset-right)) var(--s-8) max(var(--gutter),env(safe-area-inset-left));
 }
+/* Hitung Alternatif dan Banding Alternatif berada di luar <main>; di HP
+   keduanya diberi jarak tepi yang sama dengan layar lain. */
+@media screen and (max-width:767.98px){
+  #layarSolusiHitung,#layarSolusiBanding{
+    padding-left:max(var(--gutter),env(safe-area-inset-left));
+    padding-right:max(var(--gutter),env(safe-area-inset-right));
+  }
+}
 /* fungsional: hanya layar aktif yang tampil */
 .layar{display:none}
 .layar.aktif{display:block;animation:psgMasuk var(--t) var(--ease)}
@@ -1309,6 +1317,12 @@ details.quick-group > summary{
 [data-theme="dark"] main [style*="background:#fff"]{background:var(--surface-2)!important}
 [data-theme="dark"] main [style*="color:#8A94A3"],
 [data-theme="dark"] main [style*="color:#5B6573"]{color:var(--text-3)!important}
+/* Salinan layar di modal Preview dan dua layar Solusi yang berada di luar
+   <main> memuat gaya inline yang sama; di layar mereka ikut tema gelap. */
+@media screen{
+  [data-theme="dark"] :is(.psg-print-preview-modal,#layarSolusiHitung,#layarSolusiBanding) :is([style*="background:#FBFAF7"],[style*="background:#fff"]){background:var(--surface-2)!important}
+  [data-theme="dark"] :is(.psg-print-preview-modal,#layarSolusiHitung,#layarSolusiBanding) :is([style*="color:#8A94A3"],[style*="color:#5B6573"]){color:var(--text-3)!important}
+}
 
 
 /* =====================================================================
@@ -1342,6 +1356,20 @@ details.quick-group > summary{
 .banding-tabel td{padding:6px 4px;vertical-align:top;border-bottom:1px solid var(--divider)}
 .banding-tabel tr:last-child td{border-bottom:0}
 .banding-tabel td:first-child{color:var(--text-3);white-space:nowrap}
+/* Label yang nowrap bertemu td{overflow-wrap:anywhere} membuat kolom nilai
+   tinggal ±20px, sehingga angka pecah per huruf. Di layar, label kini boleh
+   terlipat di spasi dengan porsi tetap, dan pada kartu yang sempit label
+   ditumpuk di atas nilainya. Hasil cetak tetap memakai aturan lama. */
+@media screen{
+  .banding-kolom{container-type:inline-size}
+  .banding-tabel td:first-child{white-space:normal;width:42%}
+  .banding-tabel td + td{overflow-wrap:break-word}
+  @container (max-width:239.98px){
+    .banding-tabel,.banding-tabel tbody,.banding-tabel tr,.banding-tabel td{display:block}
+    .banding-tabel td:first-child{width:auto;padding-bottom:0;border-bottom:0}
+    .banding-tabel td + td{padding-top:2px}
+  }
+}
 .banding-premi{margin-top:auto;display:flex;flex-direction:column;gap:2px;padding:10px;border-radius:var(--r-md);background:var(--accent-soft);text-align:center}
 .banding-premi span{font-size:var(--fs-2xs);font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
 .banding-premi b{font-size:var(--fs-lg);font-weight:750;color:var(--figure)}
@@ -1543,6 +1571,7 @@ details.quick-group > summary{
 .kmb-step{position:relative;padding:7px 0 12px}
 .kmb-step + .kmb-step{border-top:1px dashed var(--border)}
 .kmb-dot{position:absolute;left:-30px;top:9px;display:flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:var(--gold);color:#fff;font-size:10px;font-weight:800;box-shadow:0 0 0 4px var(--surface)}
+@media screen{[data-theme="dark"] .kmb-dot{color:var(--on-accent)}}
 .kmb-step b{font-size:var(--fs-md);color:var(--text)}
 .kmb-step p{margin:4px 0 0;font-size:var(--fs-sm);line-height:1.5;color:var(--text-2)}
 .kmb-highlight{display:grid;grid-template-columns:1.1fr .9fr;gap:var(--s-3);align-items:stretch;margin:12px 0 18px;padding:var(--s-4);border-radius:var(--r-lg);background:var(--hero-glow),var(--hero-bg);color:var(--hero-text)}
@@ -1709,6 +1738,31 @@ main .sgs-row{border-color:var(--divider)}
 main .sgs-status{background:var(--surface-3)}
 main .sgs-card.gap .sgs-status{background:var(--accent-soft);color:var(--accent)}
 main .sgs-card.cukup .sgs-status{background:var(--success-soft);color:var(--success)}
+/* Hitung Alternatif (#layarSolusiHitung) dan Banding Alternatif
+   (#layarSolusiBanding) berada di luar <main>, sehingga aturan "main .sgs-*"
+   di atas tidak menjangkaunya dan kartu, toolbar, serta field putih dari
+   #sgsStyle tetap tampil di tema gelap. Di sini hanya warnanya yang
+   disamakan dengan token tema gelap; tata letak, tema terang, dan cetak
+   tidak berubah. */
+@media screen{
+  [data-theme="dark"] :is(#layarSolusiHitung,#layarSolusiBanding) :is(.sgs-card,.sgs-alt-card,.sgs-calc-row,.sgs-program-card,.sgs-pb-card,.sgs-pb-toolbar,.sgs-client-grid > div){
+    background:var(--surface);border-color:var(--border);color:var(--text);
+  }
+  [data-theme="dark"] :is(#layarSolusiHitung,#layarSolusiBanding) .sgs-card.gap{border-color:var(--accent-line)}
+  [data-theme="dark"] :is(#layarSolusiHitung,#layarSolusiBanding) .sgs-card.cukup{border-color:var(--success-line)}
+  [data-theme="dark"] :is(#layarSolusiHitung,#layarSolusiBanding) .sgs-editor{background:var(--surface-2);border-color:var(--border)}
+  [data-theme="dark"] :is(#layarSolusiHitung,#layarSolusiBanding) .sgs-program-hero{background:var(--accent-soft);color:var(--text)}
+  [data-theme="dark"] :is(#layarSolusiHitung,#layarSolusiBanding) :is(.sgs-calc-result,.sgs-pb-note,.sgs-pb-fixed){background:var(--surface-2);border-color:var(--border);color:var(--text-2)}
+  [data-theme="dark"] :is(#layarSolusiHitung,#layarSolusiBanding) .sgs-pb-result-ok{background:var(--success-soft);border-color:var(--success-line);color:var(--success)}
+  [data-theme="dark"] :is(#layarSolusiHitung,#layarSolusiBanding) :is(.sgs-program-card .peringatan,.sgs-pb-note.warning){background:var(--danger-soft);border-color:var(--danger-line);color:var(--danger)}
+  [data-theme="dark"] :is(#layarSolusiHitung,#layarSolusiBanding) :is(.sgs-product-select,.sgs-up-input,.sgs-pb-field,.sgs-profile-select,.sgs-pb-global-pay select){
+    border-color:var(--border-strong);background-color:var(--surface);color:var(--text);
+  }
+  [data-theme="dark"] :is(#layarSolusiHitung,#layarSolusiBanding) .sgs-row{border-color:var(--divider)}
+  [data-theme="dark"] :is(#layarSolusiHitung,#layarSolusiBanding) .sgs-status{background:var(--surface-3)}
+  [data-theme="dark"] :is(#layarSolusiHitung,#layarSolusiBanding) .sgs-card.gap .sgs-status{background:var(--accent-soft);color:var(--accent)}
+  [data-theme="dark"] :is(#layarSolusiHitung,#layarSolusiBanding) .sgs-card.cukup .sgs-status{background:var(--success-soft);color:var(--success)}
+}
 .sgs-product-map{margin-top:13px;padding:13px;border:1px solid var(--border);border-radius:var(--r-md);background:var(--surface-2)}
 .sgs-product-label{font-size:var(--fs-2xs);font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--text-3)}
 .sgs-product-default{margin-top:5px;font-size:var(--fs-base);font-weight:750;line-height:1.25}
