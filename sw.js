@@ -13,7 +13,7 @@
    - Hanya jawaban yang benar-benar berhasil (status 200) yang disimpan,
      sehingga halaman error tidak pernah ikut tersimpan. */
 
-const VERSI = 'insurance-hub-v92.2.0';
+const VERSI = 'insurance-hub-v92.3.0';
 
 /* Semua berkas inti ikut disimpan sejak pemasangan, supaya aplikasi tetap
    utuh walaupun kunjungan pertama terputus di tengah jalan. */
@@ -75,6 +75,7 @@ const BERKAS = [
   './src/sales-idea.js',
   './src/app-shell.js',
   './src/tanggal-placeholder.js',
+  './src/cetak-orientasi.js',
   './assets/logo-psg.png',
   './assets/logo-psg-terang.png',
   './icons/ikon-192.png',
