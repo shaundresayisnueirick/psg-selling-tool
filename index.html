@@ -60,7 +60,7 @@ var gerakPelan=mm('(prefers-reduced-motion: reduce)');
 function buang(){if(el.parentNode)el.parentNode.removeChild(el);}
 function tutup(lewati){if(selesai)return;selesai=true;root.classList.remove('psg-splash-aktif');
 if(lewati)el.classList.add('psg-splash-lewati');setTimeout(buang,gerakPelan?0:(lewati?380:620));}
-setTimeout(function(){tutup(false);},gerakPelan?1300:3050);
+setTimeout(function(){tutup(false);},gerakPelan?1300:5050);
 el.addEventListener('pointerdown',function(){tutup(true);});})();</script>
 <!-- Shell navigasi (src/app-shell.js). Hanya memanggil window.bukaLayar()
      atau tombol yang sudah ada; tidak mengubah mekanisme navigasi. -->
@@ -109,7 +109,7 @@ el.addEventListener('pointerdown',function(){tutup(true);});})();</script>
 </div>
 
 <header id="bilah">
-  <div class="psg-brand-strip" aria-hidden="true"><img class="psg-brand-strip-logo" src="assets/logo-psg-terang.png" alt=""><span class="psg-brand-strip-slogan">Bahagia <i>✦</i> Berkat <i>✦</i> Berlimpah</span></div>
+  <div class="psg-brand-strip" aria-hidden="true"><img class="psg-brand-strip-logo" src="assets/logo-psg-terang.png" alt=""></div>
   <button class="kiri" id="tblKiri" aria-label="Kembali">&#8249;</button>
   <div class="brand-app">
     <img class="logo-psg-app" src="assets/logo-psg-terang.png" alt="PSG — Patriot Shining Generation">

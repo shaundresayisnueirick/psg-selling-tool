@@ -3,7 +3,7 @@
    ---------------------------------------------------------------------
    Lapisan tampilan saja. Tidak ada aturan di sini yang mengubah logika,
    navigasi, penyimpanan, atau hasil cetak.
-   - .psg-brand-strip : logo PSG + slogan di header, hanya pada HP.
+   - .psg-brand-strip : logo PSG di kiri atas header, hanya pada HP.
    - #psgSplash       : splash saat PSG Selling Tools dibuka sebagai
                         aplikasi terpasang (PWA). Dikendalikan skrip inline
                         tepat sesudah elemennya di index.html.
@@ -12,41 +12,38 @@
 
 
 /* ---------------------------------------------------------------------
-   1. HEADER MOBILE — LOGO + SLOGAN
+   1. HEADER MOBILE — LOGO PSG DI KIRI ATAS
    --------------------------------------------------------------------- */
 .psg-brand-strip{display:none}
 
 @media screen and (max-width:767.98px){
-  /* Header dibuat dua baris: strip brand di atas, baris judul di bawah. */
+  /* Header dua baris: logo di baris atas, baris judul di bawahnya. */
   body.psg-app header#bilah{flex-wrap:wrap;align-content:flex-start;row-gap:0;padding-bottom:6px}
+  /* Baris judul tetap satu baris: .brand-app mengambil sisa ruang (basis 0),
+     jadi judul panjang terpotong rapi seperti sebelumnya dan tombol aksi
+     tidak pernah turun ke baris ketiga. */
+  body.psg-app header#bilah > .brand-app{flex:1 1 0}
   body.psg-app header#bilah > .psg-brand-strip{
     order:-1;flex:0 0 100%;min-width:0;
-    display:flex;align-items:center;justify-content:center;gap:9px;
-    height:26px;margin:0;padding-top:2px;
-    background:linear-gradient(90deg,transparent,var(--accent-line) 22%,var(--accent-line) 78%,transparent) bottom/100% 1px no-repeat;
+    display:flex;align-items:center;justify-content:flex-start;
+    height:28px;margin:0;padding-top:4px;
   }
-  .psg-brand-strip-logo{display:block;flex:none;height:17px;width:auto}
-  .psg-brand-strip-slogan{
-    min-width:0;overflow:hidden;white-space:nowrap;text-overflow:clip;
-    font-size:11px;font-weight:600;letter-spacing:.06em;line-height:1;color:var(--text-2);
-  }
-  .psg-brand-strip-slogan i{font-style:normal;color:var(--gold);margin:0 .28em;font-size:.92em}
-}
-@media screen and (max-width:360px){
-  body.psg-app header#bilah > .psg-brand-strip{gap:7px}
-  .psg-brand-strip-slogan{letter-spacing:.03em}
+  .psg-brand-strip-logo{display:block;flex:none;height:20px;width:auto}
 }
 
 
 /* ---------------------------------------------------------------------
    2. SPLASH PWA
-   Urutan (±3,6 detik):
-   0,0–0,6  merah PSG (sambungan dari splash bawaan sistem) meredup ke
-            panggung navy
-   0,2–1,5  logo muncul: dari miring 3D, jauh, dan buram menjadi tegak
-   1,4–2,2  kilau cahaya menyapu permukaan logo
-   1,6–2,4  garis emas, "PSG SELLING TOOLS", lalu slogan
-   3,05–3,6 splash memudar, aplikasi tampil
+   Urutan (±5,5 detik; splash utuh tampil selama 5 detik pertama):
+   0,0–1,0  panggung muncul: merah PSG (sambungan dari splash bawaan
+            sistem) meredup ke panggung navy, vinyet menguat
+   0,85–2,0 logo masuk: dari miring 3D, jauh, dan buram menjadi tegak
+   2,05–3,45 kilau emas menyapu permukaan logo
+   3,4–4,6  logo final: pendar emas halus di belakang logo, lalu garis
+            emas, "PSG SELLING TOOLS", dan slogan
+   4,5–5,05 ambient: logo bergoyang sangat pelan, partikel emas naik,
+            pendar "bernapas"
+   5,05–5,55 splash memudar, aplikasi tampil
    --------------------------------------------------------------------- */
 #psgSplash{display:none}
 #psgSplash.tampil{
@@ -59,21 +56,21 @@
     linear-gradient(180deg,#0F213D 0%,#0A1830 48%,#050B16 100%);
   font-family:var(--font-sans);
   -webkit-user-select:none;user-select:none;
-  animation:psgSplashKeluar .55s cubic-bezier(.4,0,.2,1) 3.05s forwards;
+  animation:psgSplashKeluar .5s cubic-bezier(.4,0,.2,1) 5.05s forwards;
 }
 /* Selama splash, isi aplikasi (termasuk gate login) belum ditampilkan. Kelas
    ini dilepas begitu splash mulai memudar, jadi aplikasi sudah siap di
    belakangnya. */
 /* Pengaman: penyembunyian dibatasi waktu lewat animasi (tanpa fill), jadi
    aplikasi tetap tampil walau skrip penutup splash tidak pernah berjalan. */
-html.psg-splash-aktif body > *:not(#psgSplash){animation:psgSplashSembunyi 3.1s step-end}
+html.psg-splash-aktif body > *:not(#psgSplash){animation:psgSplashSembunyi 5.1s step-end}
 html.insurance-auth-locked body > #psgSplash{visibility:visible!important}
 
 /* lapisan merah pembuka: menyambung warna splash bawaan PWA (#A60101) */
-.psg-splash-awal{position:absolute;inset:0;background:#A60101;animation:psgSplashAwal .7s cubic-bezier(.4,0,.2,1) forwards}
+.psg-splash-awal{position:absolute;inset:0;background:#A60101;animation:psgSplashAwal 1s cubic-bezier(.4,0,.2,1) forwards}
 
 /* vinyet halus agar pusat terasa lebih dalam */
-.psg-splash-vinyet{position:absolute;inset:0;pointer-events:none;background:radial-gradient(90% 70% at 50% 45%,transparent 55%,rgba(0,0,0,.45) 100%)}
+.psg-splash-vinyet{position:absolute;inset:0;pointer-events:none;background:radial-gradient(90% 70% at 50% 45%,transparent 55%,rgba(0,0,0,.45) 100%);opacity:.4;animation:psgSplashMuncul 1s ease-out .2s forwards}
 
 .psg-splash-isi{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;padding:24px;perspective:1100px}
 
@@ -81,8 +78,15 @@ html.insurance-auth-locked body > #psgSplash{visibility:visible!important}
   position:relative;width:min(58vw,236px);
   transform-style:preserve-3d;
   animation:
-    psgSplashMasuk 1.35s cubic-bezier(.16,.84,.24,1) .2s both,
-    psgSplashMelayang 2.2s ease-in-out 1.55s forwards;
+    psgSplashMasuk 1.15s cubic-bezier(.16,.84,.24,1) .85s both,
+    psgSplashMelayang 3.4s ease-in-out 2s forwards;
+}
+/* pendar emas di belakang logo: muncul saat logo final, lalu "bernapas" */
+.psg-splash-logo-wadah::before{
+  content:"";position:absolute;inset:-26% -18%;pointer-events:none;
+  background:radial-gradient(closest-side,rgba(212,178,106,.34),rgba(212,178,106,.10) 55%,transparent);
+  opacity:0;transform:translateZ(-2px);
+  animation:psgSplashPendar 1.1s ease-out 3.4s forwards,psgSplashNapas 1.8s ease-in-out 4.5s infinite alternate;
 }
 .psg-splash-logo{
   display:block;width:100%;height:auto;
@@ -94,44 +98,44 @@ html.insurance-auth-locked body > #psgSplash{visibility:visible!important}
   -webkit-mask:url("../assets/logo-psg-terang.png") center/100% 100% no-repeat;
           mask:url("../assets/logo-psg-terang.png") center/100% 100% no-repeat;
 }
-.psg-splash-gloss{background:linear-gradient(180deg,rgba(255,255,255,.26) 0%,rgba(255,255,255,.06) 42%,transparent 52%);mix-blend-mode:screen;opacity:0;animation:psgSplashMuncul .9s ease-out .9s forwards}
+.psg-splash-gloss{background:linear-gradient(180deg,rgba(255,255,255,.26) 0%,rgba(255,255,255,.06) 42%,transparent 52%);mix-blend-mode:screen;opacity:0;animation:psgSplashMuncul .8s ease-out 1.7s forwards}
 .psg-splash-kilau{
-  background:linear-gradient(105deg,transparent 38%,rgba(255,248,226,.0) 42%,rgba(255,248,226,.85) 50%,rgba(255,248,226,0) 58%,transparent 62%) no-repeat;
+  background:linear-gradient(105deg,transparent 36%,rgba(255,236,190,0) 41%,rgba(255,241,205,.9) 50%,rgba(255,236,190,0) 59%,transparent 64%) no-repeat;
   background-size:260% 100%;background-position:130% 0;
   mix-blend-mode:screen;
-  animation:psgSplashSapu .95s cubic-bezier(.45,.05,.3,1) 1.4s both;
+  animation:psgSplashSapu 1.4s cubic-bezier(.45,.05,.3,1) 2.05s both;
 }
 /* pantulan lembut di bawah logo — kesan kedalaman */
 .psg-splash-bayang{
   width:62%;height:14px;margin-top:10px;border-radius:50%;
   background:radial-gradient(closest-side,rgba(0,0,0,.55),transparent);
-  opacity:0;animation:psgSplashBayang 1.3s ease-out .45s forwards;
+  opacity:0;animation:psgSplashBayang 1s ease-out 1.1s forwards;
 }
 
-.psg-splash-garis{width:0;height:1px;margin:22px 0 14px;background:linear-gradient(90deg,transparent,#D4B26A,transparent);animation:psgSplashGaris .7s cubic-bezier(.4,0,.2,1) 1.6s forwards}
+.psg-splash-garis{width:0;height:1px;margin:22px 0 14px;background:linear-gradient(90deg,transparent,#D4B26A,transparent);animation:psgSplashGaris .7s cubic-bezier(.4,0,.2,1) 3.5s forwards}
 .psg-splash-nama{
   margin:0;font-size:13px;font-weight:650;letter-spacing:.34em;text-indent:.34em;color:#EFE3C2;
-  opacity:0;animation:psgSplashTeks .7s cubic-bezier(.2,.7,.2,1) 1.75s forwards;
+  opacity:0;animation:psgSplashTeks .7s cubic-bezier(.2,.7,.2,1) 3.65s forwards;
 }
 .psg-splash-slogan{
   margin:9px 0 0;font-size:12.5px;font-weight:500;letter-spacing:.05em;color:rgba(233,239,247,.74);
-  opacity:0;animation:psgSplashTeks .7s cubic-bezier(.2,.7,.2,1) 2.0s forwards;
+  opacity:0;animation:psgSplashTeks .7s cubic-bezier(.2,.7,.2,1) 3.9s forwards;
 }
 .psg-splash-slogan i{font-style:normal;color:#D4B26A;margin:0 .35em}
 
-/* partikel emas — sedikit dan pelan */
+/* partikel emas — sedikit dan pelan, terus naik sampai splash memudar */
 .psg-splash-partikel{position:absolute;inset:0;pointer-events:none}
 .psg-splash-partikel i{
   position:absolute;bottom:18%;width:3px;height:3px;border-radius:50%;
   background:#E9CF8F;box-shadow:0 0 6px rgba(233,207,143,.8);opacity:0;
-  animation:psgSplashPartikel 3.2s ease-in-out both;
+  animation:psgSplashPartikel 3.6s ease-in-out both;
 }
-.psg-splash-partikel i:nth-child(1){left:22%;animation-delay:.6s}
-.psg-splash-partikel i:nth-child(2){left:34%;animation-delay:1.1s;width:2px;height:2px}
-.psg-splash-partikel i:nth-child(3){left:47%;animation-delay:.9s}
-.psg-splash-partikel i:nth-child(4){left:61%;animation-delay:1.4s;width:2px;height:2px}
-.psg-splash-partikel i:nth-child(5){left:73%;animation-delay:.75s}
-.psg-splash-partikel i:nth-child(6){left:84%;animation-delay:1.25s;width:2px;height:2px}
+.psg-splash-partikel i:nth-child(1){left:22%;animation-delay:1.0s}
+.psg-splash-partikel i:nth-child(2){left:34%;animation-delay:2.1s;width:2px;height:2px}
+.psg-splash-partikel i:nth-child(3){left:47%;animation-delay:1.5s}
+.psg-splash-partikel i:nth-child(4){left:61%;animation-delay:2.4s;width:2px;height:2px}
+.psg-splash-partikel i:nth-child(5){left:73%;animation-delay:1.25s}
+.psg-splash-partikel i:nth-child(6){left:84%;animation-delay:1.9s;width:2px;height:2px}
 
 /* keluar lebih cepat bila layar diketuk */
 #psgSplash.tampil.psg-splash-lewati{animation:psgSplashKeluar .35s cubic-bezier(.4,0,.2,1) forwards}
@@ -149,12 +153,14 @@ html.insurance-auth-locked body > #psgSplash{visibility:visible!important}
 @keyframes psgSplashSapu{from{background-position:130% 0}to{background-position:-30% 0}}
 @keyframes psgSplashMuncul{to{opacity:1}}
 @keyframes psgSplashBayang{to{opacity:.8}}
+@keyframes psgSplashPendar{0%{opacity:0}55%{opacity:1}100%{opacity:.7}}
+@keyframes psgSplashNapas{from{opacity:.7}to{opacity:.45}}
 @keyframes psgSplashGaris{to{width:64px}}
 @keyframes psgSplashTeks{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 @keyframes psgSplashPartikel{
   0%{opacity:0;transform:translateY(0)}
   30%{opacity:.55}
-  100%{opacity:0;transform:translateY(-120px)}
+  100%{opacity:0;transform:translateY(-130px)}
 }
 @keyframes psgSplashKeluar{to{opacity:0;visibility:hidden}}
 @keyframes psgSplashSembunyi{0%,100%{visibility:hidden}}
@@ -163,7 +169,12 @@ html.insurance-auth-locked body > #psgSplash{visibility:visible!important}
    untuk preferensi ini, jadi splash langsung tampil dalam keadaan akhirnya —
    tanpa lapisan merah, kilau, partikel, maupun gerakan — lalu ditutup skrip. */
 @media (prefers-reduced-motion:reduce){
+  /* Pengaman tanpa gerak: bila skrip penutup tidak berjalan, splash tetap
+     hilang seketika (durasi 0) sesudah 1,4 detik. */
+  #psgSplash.tampil{animation:psgSplashKeluar 0s linear 1.4s forwards!important}
   .psg-splash-awal,.psg-splash-kilau,.psg-splash-partikel{display:none}
+  .psg-splash-vinyet{opacity:1}
+  .psg-splash-logo-wadah::before{opacity:.6}
   .psg-splash-gloss{opacity:1}
   .psg-splash-bayang{opacity:.8}
   .psg-splash-garis{width:64px}
