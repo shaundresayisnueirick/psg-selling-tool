@@ -48,6 +48,11 @@ const JS_DIIZINKAN = {
     ke: '5047860d6c7868c80548d215371e4c013c139185083ecc462033e47f1f8638a5',
     alasan: 'Pemecah tabel cetak memetakan sel menurut posisi kolom (colspan), bukan urutan DOM. Sebelumnya baris Total ber-colspan mendapat kolom lebih banyak dari judulnya: angka bertumpuk dan Total bergeser ke kolom yang salah. Tidak menyentuh nilai.',
   }],
+  'src/sales-idea.js': [{
+    dari: 'dfd143970d9e79bc8ec46687724748da98147b9ae78985619a71c83c7a0c747f',
+    ke: 'c3926c2b1a9698e27557b919f34ff8f18d84e16ebd88914e2fe3236ba841b5e8',
+    alasan: 'Sales Idea memakai pemutar interaktif (src/sales-idea-player.js): tiap langkah yang ada menjadi scene dengan Play/Pause/Replay/Next/Back. init() kini idempoten sehingga listener klik dokumen tidak lagi menumpuk tiap kali layar dibuka. Data, ID, kelas, dan API SalesIdea10Jari tidak berubah.',
+  }],
 };
 
 /* 1. Berkas JS dilindungi */
