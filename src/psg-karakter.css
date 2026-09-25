@@ -35,6 +35,14 @@
   .psg-k .k-tas-badan{fill:var(--k-tas)}
   .psg-k .k-tas-tali{fill:none;stroke:var(--k-tas);stroke-width:2.2;stroke-linejoin:round}
 
+  /* varian perluasan: wanita (blus & rok), rambut panjang */
+  .psg-k{--k-wanita:#b4566a;--k-rok:#39404f}
+  .psg-k .k-o-wanita .k-kain,.psg-k .k-o-wanita.k-lengan-kain{fill:var(--k-wanita);stroke:var(--k-wanita)}
+  .psg-k .k-rok{fill:var(--k-rok)}
+  .psg-k .k-h-panjang{fill:var(--k-rambut)}
+  .psg-k[data-usia="anak"] .k-celana{stroke-width:11}
+  .psg-k[data-usia="anak"] .k-lengan-kain{stroke-width:9.5}
+
   /* poros gerak (koordinat viewBox) */
   .psg-k .k-kaki-b{transform-origin:56px 124px}
   .psg-k .k-kaki-d{transform-origin:67px 124px}
@@ -42,6 +50,17 @@
   .psg-k .k-lengan-d{transform-origin:74px 64px}
   .psg-k .k-atas{transform-origin:62px 126px}
   .psg-k .k-tubuh{transform-origin:61px 230px}
+  .psg-k .k-kepala{transform-origin:63px 46px}
+  .psg-k .k-hasta-b{transform-origin:48px 90px}
+  .psg-k .k-hasta-d{transform-origin:74px 90px}
+  .psg-k .k-betis-b{transform-origin:55px 171.5px}
+  .psg-k .k-betis-d{transform-origin:68px 171.5px}
+  .psg-k[data-usia="anak"] .k-kaki-b{transform-origin:56px 162px}
+  .psg-k[data-usia="anak"] .k-kaki-d{transform-origin:66px 162px}
+  .psg-k[data-usia="anak"] .k-lengan-b{transform-origin:50px 116px}
+  .psg-k[data-usia="anak"] .k-lengan-d{transform-origin:74px 116px}
+  .psg-k[data-usia="anak"] .k-atas{transform-origin:62px 164px}
+  .psg-k[data-usia="anak"] .k-kepala{transform-origin:62px 100px}
 
   /* lapisan yang tampil ditentukan atribut data-* */
   .psg-k .k-o,.psg-k .k-h,.psg-k .k-kacamata,.psg-k .k-tas{opacity:0}
@@ -51,7 +70,9 @@
   .psg-k[data-rambut="muda"] .k-h-muda,
   .psg-k[data-rambut="tua"] .k-h-tua,
   .psg-k[data-kacamata] .k-kacamata,
-  .psg-k[data-tas] .k-tas{opacity:1}
+  .psg-k[data-tas] .k-tas,
+  .psg-k[data-pakaian="wanita"] .k-o-wanita,
+  .psg-k[data-rambut="panjang"] .k-h-panjang{opacity:1}
   /* postur: usia senior sedikit condong, tetap tegak dan sehat */
   .psg-k[data-usia="senior"] .k-atas{transform:rotate(2.5deg)}
 
@@ -61,5 +82,6 @@
     --k-muda:#4f93d6;--k-kerja:#34496d;--k-santai:#8fb09b;--k-dalam:#efe8da;
     --k-celana:#4a5570;--k-sepatu:#0d1119;--k-tas:#8a6240;
     --k-garis:rgba(0,0,0,.3);--k-bayang:rgba(0,0,0,.5);--k-kacamata:#0f141c;
+    --k-wanita:#c86a7e;--k-rok:#4a5266;
   }
 }
