@@ -556,12 +556,36 @@ input[readonly],input:disabled,select:disabled,textarea:disabled{background:var(
 input[type="date"]{min-height:var(--touch)}
 input[type="date"]::-webkit-calendar-picker-indicator{opacity:.6;cursor:pointer}
 [data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1)}
-select{
-  padding-right:38px;cursor:pointer;
+/* Tanggal kosong: DD/MM/YYYY abu-abu seperti placeholder. Atribut data-kosong
+   dipasang src/tanggal-placeholder.js; date picker bawaan tetap dipakai.
+   Di perangkat bermouse, begitu field difokuskan isian bawaan peramban tampil
+   lagi supaya tanggal bisa diketik. Di layar sentuh isian dipilih lewat picker,
+   jadi placeholder tetap terlihat sampai tanggal dipilih. */
+input[type="date"]{position:relative}
+input[type="date"][data-kosong]::-webkit-datetime-edit{color:transparent}
+input[type="date"][data-kosong]::before{
+  content:"DD/MM/YYYY";position:absolute;left:13px;top:50%;transform:translateY(-50%);
+  color:var(--text-3);opacity:.8;letter-spacing:.02em;pointer-events:none;
+}
+@media (pointer:fine){
+  input[type="date"][data-kosong]:focus::-webkit-datetime-edit{color:inherit}
+  input[type="date"][data-kosong]:focus::before{content:none}
+}
+select{padding-right:38px;cursor:pointer}
+/* Panah dropdown: gambar, repeat, posisi, dan ukuran selalu ditulis
+   bersama. Aturan lain yang memakai shorthand background (select:disabled,
+   dan .sgs-product-select dari segitiga-solusi.js) me-reset keempatnya —
+   di tema Original panahnya hilang, di tema Dark panahnya berulang di
+   sepanjang field. Selektor :root select setara kuatnya dengan aturan tema
+   Dark di bawah dan menang atas aturan-aturan shorthand itu. */
+:root select{
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23667085' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
   background-repeat:no-repeat;background-position:right 12px center;background-size:16px 16px;
 }
-[data-theme="dark"] select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238894A4' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")}
+[data-theme="dark"] select{
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238894A4' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 12px center;background-size:16px 16px;
+}
 input[type="checkbox"],input[type="radio"]{width:auto;min-height:0;padding:0;appearance:auto;-webkit-appearance:auto;accent-color:var(--ink-2)}
 [data-theme="dark"] input[type="checkbox"],[data-theme="dark"] input[type="radio"]{accent-color:var(--gold)}
 input[type="file"]{min-height:0;padding:0;border:0;background:none}

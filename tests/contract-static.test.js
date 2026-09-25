@@ -40,8 +40,21 @@ const INLINE_DIIZINKAN = {
   }],
 };
 
+/* Perubahan berkas JS dilindungi yang disetujui. Setiap entri menyebut hash
+   lama, hash baru, dan alasannya; selain entri ini berkas JS wajib identik. */
+const JS_DIIZINKAN = {
+  'src/preview-cetak.js': [{
+    dari: 'abe686a05ed724852a36ff89e964940514f9f719686b4e0fcd09e21fc3c92d29',
+    ke: '5047860d6c7868c80548d215371e4c013c139185083ecc462033e47f1f8638a5',
+    alasan: 'Pemecah tabel cetak memetakan sel menurut posisi kolom (colspan), bukan urutan DOM. Sebelumnya baris Total ber-colspan mendapat kolom lebih banyak dari judulnya: angka bertumpuk dan Total bergeser ke kolom yang salah. Tidak menyentuh nilai.',
+  }],
+};
+
 /* 1. Berkas JS dilindungi */
-for (const [f, h] of Object.entries(base.protectedFiles)) {
+for (const [f, h0] of Object.entries(base.protectedFiles)) {
+  const z = (JS_DIIZINKAN[f] || []).find((x) => x.dari === h0);
+  const h = z ? z.ke : h0;
+  if (z) notes.push(f + ': diubah dengan izin — ' + z.alasan);
   ok(cur.protectedFiles[f] !== undefined, 'Berkas JS hilang: ' + f);
   if (cur.protectedFiles[f] !== undefined) ok(cur.protectedFiles[f] === h, 'Berkas JS berubah (dilarang): ' + f);
 }
@@ -99,6 +112,7 @@ if (fails.length) {
   fails.slice(0, 80).forEach((f) => console.log('  ✗ ' + f));
   process.exit(1);
 }
+const jsIzin = Object.keys(base.protectedFiles).filter((f) => (JS_DIIZINKAN[f] || []).some((x) => x.dari === base.protectedFiles[f])).length;
 console.log('CONTRACT STATIC: LULUS — ' + checks + ' pemeriksaan, ' +
-  Object.keys(base.protectedFiles).length + ' berkas JS identik, ' +
+  (Object.keys(base.protectedFiles).length - jsIzin) + ' berkas JS identik' + (jsIzin ? ' + ' + jsIzin + ' diubah dengan izin' : '') + ', ' +
   base.pages['index.html'].ids.length + ' ID, ' + base.storageKeys.length + ' storage key.');
