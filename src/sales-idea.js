@@ -113,6 +113,8 @@
   }
   function adeganMode(){
     const m=mode,daftar=[];
+    // Retirement Planning: pilot cerita interaktif (src/sales-idea-retirement.js), data tetap retirementSteps.
+    if(m==='retirement'&&window.PSGRetirementStory)return window.PSGRetirementStory.adegan({langkah:retirementSteps,header:salesIdeaHeader('Retirement Planning','Visual sederhana untuk membuka percakapan pensiun'),padaLangkah:i=>{current=i;}});
     for(let i=0;i<jumlahLangkah(m);i++){
       daftar.push({id:m+'-'+(i+1),siapDi:'akhir',animate:animasiMasuk,render:root=>{current=m==='alasan'?10+i:i;renderIsi(root);}});
     }

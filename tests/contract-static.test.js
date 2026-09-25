@@ -50,8 +50,8 @@ const JS_DIIZINKAN = {
   }],
   'src/sales-idea.js': [{
     dari: 'dfd143970d9e79bc8ec46687724748da98147b9ae78985619a71c83c7a0c747f',
-    ke: 'c3926c2b1a9698e27557b919f34ff8f18d84e16ebd88914e2fe3236ba841b5e8',
-    alasan: 'Sales Idea memakai pemutar interaktif (src/sales-idea-player.js): tiap langkah yang ada menjadi scene dengan Play/Pause/Replay/Next/Back. init() kini idempoten sehingga listener klik dokumen tidak lagi menumpuk tiap kali layar dibuka. Data, ID, kelas, dan API SalesIdea10Jari tidak berubah.',
+    ke: 'dfe9b27bbb6e61536c51767ab27f6976aa306ac81bcd6209cada3b9771784eea',
+    alasan: 'Sales Idea memakai pemutar interaktif (src/sales-idea-player.js): tiap langkah yang ada menjadi scene dengan Play/Pause/Replay/Next/Back. init() kini idempoten sehingga listener klik dokumen tidak lagi menumpuk tiap kali layar dibuka. Retirement Planning memakai cerita interaktif (src/sales-idea-retirement.js) dengan data retirementSteps yang sama. Data, ID, kelas, dan API SalesIdea10Jari tidak berubah.',
   }],
 };
 

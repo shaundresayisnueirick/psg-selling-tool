@@ -1,0 +1,408 @@
+/* =====================================================================
+   SALES IDEA — RETIREMENT PLANNING (pilot interactive story)
+   ---------------------------------------------------------------------
+   Pasangan src/sales-idea-retirement.js. Hanya layar; cetak tidak
+   tersentuh (Sales Idea tidak punya jalur cetak).
+   0. Token tema — terang: bersih & premium; gelap: sinematik.
+      Semua warna lewat token, jadi ganti tema di tengah scene tidak
+      mengulang animasi (animasi hanya transform/opacity/clip/stroke).
+   1. Tata letak satu layar: bar atas ringkas, panggung mengisi sisa
+      tinggi, teks di bawah (HP) atau di samping (layar lebar).
+   2. Panggung & dunia berlapis (langit, kota/alam, tanah, kamera).
+   3–8. Komposisi scene 1–6. Ukuran memakai satuan container
+      (cqmin/cqw/cqh) sehingga komposisi menata ulang, bukan
+      sekadar mengecil; panggung tegak memakai varian potret.
+   ===================================================================== */
+@media screen{
+
+  /* ---------- 0. Token ---------- */
+  .rps{
+    --rps-langit-1:#f3f6fb;--rps-langit-2:#fbfcfe;--rps-cakrawala:#fcf5ea;
+    --rps-senja-1:#fbf3e8;--rps-senja-2:#fbe6cc;--rps-senja-3:#f5d2ab;
+    --rps-matahari:#f7c96c;--rps-matahari-glow:rgba(247,201,108,.34);
+    --rps-kota-jauh:#e4e9f1;--rps-kota-dekat:#d3dbe6;--rps-jendela:rgba(255,255,255,.75);
+    --rps-bukit-jauh:#e3ecdf;--rps-bukit-dekat:#d0e1cc;--rps-pohon:#a7c6a0;--rps-batang:#b69b80;
+    --rps-tanah-1:#edf0f4;--rps-tanah-2:#f8f9fb;
+    --rps-jalur:#dce1e8;
+    --rps-merah:#c62828;--rps-merah-2:#e25b5b;--rps-emas:#d19a2f;--rps-emas-2:#f1c86b;--rps-hijau:#3f9d5a;
+    --rps-merah-lembut:rgba(198,40,40,.12);--rps-emas-lembut:rgba(209,154,47,.16);--rps-hijau-lembut:rgba(63,157,90,.13);
+    --rps-tinta:#1d2939;--rps-tinta-2:#475467;--rps-tinta-3:#667085;
+    --rps-kartu:rgba(255,255,255,.94);--rps-kartu-garis:#e5e8ee;
+    --rps-bayang-kartu:0 10px 24px rgba(16,24,40,.09),0 2px 6px rgba(16,24,40,.05);
+    --rps-sinar:rgba(209,154,47,.42);--rps-kaca:rgba(255,255,255,.55);--rps-kaca-garis:#c9d1dc;
+    --rps-vignette:none;--rps-redam:rgba(16,24,40,.28);
+    --rps-panggung-garis:#e6e9ef;--rps-panggung-bayang:0 18px 40px rgba(16,24,40,.07);
+    --rps-aksen-teks:#a60101;
+  }
+  [data-theme="dark"] .rps{
+    --rps-langit-1:#060913;--rps-langit-2:#0c1325;--rps-cakrawala:#1c1a2b;
+    --rps-senja-1:#0a0e1d;--rps-senja-2:#2b1b27;--rps-senja-3:#5c2f1d;
+    --rps-matahari:#ffd384;--rps-matahari-glow:rgba(255,168,76,.3);
+    --rps-kota-jauh:#131b2d;--rps-kota-dekat:#1a243d;--rps-jendela:rgba(255,204,120,.78);
+    --rps-bukit-jauh:#121c25;--rps-bukit-dekat:#16261f;--rps-pohon:#1f3a2c;--rps-batang:#2c231c;
+    --rps-tanah-1:#0e1320;--rps-tanah-2:#070a11;
+    --rps-jalur:#243049;
+    --rps-merah:#f05a57;--rps-merah-2:#ff8a80;--rps-emas:#f2c060;--rps-emas-2:#ffe0a0;--rps-hijau:#5cc27a;
+    --rps-merah-lembut:rgba(240,90,87,.16);--rps-emas-lembut:rgba(242,192,96,.16);--rps-hijau-lembut:rgba(92,194,122,.15);
+    --rps-tinta:#eef2f8;--rps-tinta-2:#c4cbd7;--rps-tinta-3:#8f9aac;
+    --rps-kartu:rgba(17,23,37,.8);--rps-kartu-garis:rgba(255,255,255,.1);
+    --rps-bayang-kartu:0 14px 32px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.03);
+    --rps-sinar:rgba(242,192,96,.55);--rps-kaca:rgba(255,255,255,.05);--rps-kaca-garis:rgba(255,255,255,.22);
+    --rps-vignette:radial-gradient(120% 95% at 50% 42%,transparent 52%,rgba(0,0,0,.6) 100%);--rps-redam:rgba(0,0,0,.45);
+    --rps-panggung-garis:rgba(255,255,255,.07);--rps-panggung-bayang:0 24px 60px rgba(0,0,0,.55);
+    --rps-aksen-teks:var(--brand);
+  }
+
+  /* ---------- 1. Tata letak satu layar ---------- */
+  #layarSalesIdea.aktif .si-content.sip-fit > .rps{flex:1 1 auto}
+  .rps{min-height:0;width:100%;max-width:1500px;margin:0 auto;display:grid;grid-template-rows:auto minmax(0,1fr);gap:10px}
+  .rps-body{min-height:0;display:grid;grid-template-rows:minmax(0,1fr) auto;gap:12px}
+  @media (min-width:1024px),(min-aspect-ratio:3/2) and (max-height:560px){
+    .rps-body{grid-template-rows:minmax(0,1fr);grid-template-columns:minmax(0,1fr) clamp(260px,27vw,380px);gap:18px}
+  }
+
+  /* bar atas: satu baris di semua lebar */
+  #layarSalesIdea .rps > .si-presentation-topbar{
+    display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:10px;
+    min-height:56px;max-width:none;margin:0;padding:6px 0;
+  }
+  #layarSalesIdea .rps > .si-presentation-topbar .si-back-hub{grid-column:1;grid-row:1}
+  #layarSalesIdea .rps > .si-presentation-topbar .si-presentation-brand{grid-column:2;grid-row:1;min-width:0;justify-content:center;text-align:center}
+  #layarSalesIdea .rps > .si-presentation-topbar .si-close{grid-column:3;grid-row:1}
+  @media (max-width:620px){
+    #layarSalesIdea .rps > .si-presentation-topbar{min-height:50px;padding:3px 0;gap:6px}
+    #layarSalesIdea .rps > .si-presentation-topbar .si-back-hub{padding:0 8px 0 0}
+    #layarSalesIdea .rps > .si-presentation-topbar .si-presentation-brand{flex-wrap:nowrap;overflow:hidden}
+    #layarSalesIdea .rps > .si-presentation-topbar .si-presentation-brand b{font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    #layarSalesIdea .rps > .si-presentation-topbar .si-presentation-brand small{display:none}
+  }
+  @media (max-width:380px){
+    #layarSalesIdea .rps > .si-presentation-topbar .si-presentation-brand span{display:none}
+  }
+
+  /* panel teks: pesan asli langkah ini */
+  .rps-text{min-width:0;min-height:0;display:grid;gap:6px;align-content:start;padding:14px 16px;border:1px solid var(--border);border-radius:18px;background:var(--surface);box-shadow:var(--shadow-sm)}
+  .rps-kicker{font-size:10.5px;font-weight:900;letter-spacing:.12em;color:var(--rps-aksen-teks)}
+  .rps-title{margin:0;font-size:clamp(17px,2.1vw,26px);line-height:1.2;letter-spacing:-.015em;color:var(--text)}
+  .rps-focus{margin:0;font-size:clamp(12.5px,1.25vw,16px);line-height:1.35;font-weight:900;letter-spacing:.02em;color:var(--rps-aksen-teks)}
+  .rps-isi{margin:0;font-size:clamp(13px,1.12vw,15px);line-height:1.5;color:var(--text-2)}
+  .rps-cue{margin:4px 0 0;padding:9px 11px;border-radius:12px;background:var(--surface-2);border:1px solid var(--border);color:var(--text-3);font-size:11.5px;line-height:1.45}
+  @media (min-width:1024px),(min-aspect-ratio:3/2) and (max-height:560px){
+    .rps-text{align-content:center;padding:20px 22px;gap:10px}
+  }
+  @media (max-width:1023px) and (max-height:760px){
+    .rps-kicker,.rps-cue{display:none}
+    .rps-text{padding:11px 14px;gap:4px}
+  }
+  @media (min-aspect-ratio:3/2) and (max-height:560px){
+    .rps-text{overflow:auto;padding:12px 14px}
+    .rps-kicker,.rps-cue{display:none}
+  }
+
+  /* ---------- 2. Panggung & dunia ---------- */
+  .rps-stage{
+    --g:78%;
+    position:relative;margin:0;min-height:0;min-width:0;overflow:hidden;isolation:isolate;
+    container:rps / size;border-radius:22px;border:1px solid var(--rps-panggung-garis);
+    box-shadow:var(--rps-panggung-bayang);background:var(--rps-langit-2);
+    font-size:max(10px,2.25cqmin);line-height:1.25;color:var(--rps-tinta);
+    -webkit-user-select:none;user-select:none;
+  }
+  @media (max-width:620px){.rps-stage{border-radius:18px}}
+  .rps-cam,.rps-set{position:absolute;inset:0}
+  .rps-cam{transform-origin:50% 62%}
+  .rps-langit{position:absolute;inset:0;background:linear-gradient(180deg,var(--rps-langit-1) 0%,var(--rps-langit-2) 58%,var(--rps-cakrawala) 100%)}
+  .rps-langit-senja{opacity:0;background:linear-gradient(180deg,var(--rps-senja-1) 0%,var(--rps-senja-2) 55%,var(--rps-senja-3) 100%)}
+  .rps-langit-senja.rps-on{opacity:1}
+  .rps-matahari{position:absolute;right:12%;top:8%;width:34cqmin;aspect-ratio:1;opacity:0;border-radius:50%;
+    background:radial-gradient(circle,var(--rps-matahari) 0 17%,var(--rps-matahari-glow) 19%,transparent 68%)}
+  .rps-matahari.rps-on{opacity:1}
+  .rps-jauh{position:absolute;left:-4%;width:108%;bottom:calc(100% - var(--g));height:36%;overflow:visible}
+  .rps-jauh.rps-redup{opacity:.5}
+  .rps-kota-jauh rect{fill:var(--rps-kota-jauh)}
+  .rps-kota-dekat rect{fill:var(--rps-kota-dekat)}
+  .rps-jendela rect{fill:var(--rps-jendela)}
+  .rps-bukit-jauh{fill:var(--rps-bukit-jauh)}
+  .rps-bukit-dekat{fill:var(--rps-bukit-dekat)}
+  .rps-pohon circle{fill:var(--rps-pohon)}
+  .rps-pohon path{stroke:var(--rps-batang);stroke-width:5;stroke-linecap:round}
+  .rps-tanah{position:absolute;left:0;right:0;top:var(--g);bottom:0;background:linear-gradient(180deg,var(--rps-tanah-1),var(--rps-tanah-2))}
+  .rps-tanah::before{content:"";position:absolute;left:0;right:0;top:0;height:1px;background:var(--rps-panggung-garis)}
+  .rps-vignette{position:absolute;inset:0;pointer-events:none;background:var(--rps-vignette);z-index:5}
+  .rps-kanvas{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
+  .rps-kanvas path{fill:none;stroke-linecap:round;stroke-linejoin:round}
+  .rps-kanvas .rps-luas{fill:url(#rpsLuas);stroke:none}
+  @container rps (max-aspect-ratio:5/6){.rps-land{display:none}}
+  /* panggung tegak (HP): tokoh dan teks memakai tinggi panggung,
+     bukan hanya lebarnya, supaya visual tidak mengecil */
+  @container rps (max-aspect-ratio:5/6){
+    .rps-set{font-size:max(10.5px,2.7cqw)}
+    .rps-s1 .rps-aktor-1{left:13%;--tinggi:38cqh}
+    .rps-s4 .rps-aktor-4{--tinggi:38cqh}
+  }
+  @container rps (min-aspect-ratio:5/6){.rps-port{display:none}}
+
+  /* aktor di atas tanah */
+  .rps-aktor{position:absolute;left:50%;bottom:calc(100% - var(--g));height:var(--tinggi,38cqmin);aspect-ratio:1/2;translate:-50% 3%;z-index:2}
+  .rps-aktor .psg-k{height:100%;width:100%}
+
+  /* elemen teks umum */
+  .rps-chip,.rps-catatan,.rps-kapsul{position:absolute;translate:-50% -50%;white-space:nowrap}
+  .rps-chip{padding:.5em .95em;border-radius:99px;background:var(--rps-kartu);border:1px solid var(--rps-kartu-garis);box-shadow:var(--rps-bayang-kartu);font-weight:900;letter-spacing:.03em}
+  .rps-catatan{padding:.45em .9em;border-radius:99px;background:var(--rps-kartu);border:1px solid var(--rps-kartu-garis);color:var(--rps-tinta-2);font-weight:750;box-shadow:var(--rps-bayang-kartu)}
+  .rps-catatan b{color:var(--rps-tinta);font-weight:900}
+  .rps-alir-garis{stroke:var(--rps-emas);stroke-width:2;stroke-dasharray:1 1;stroke-dashoffset:0;opacity:.4}
+  .rps-alir-titik{stroke:var(--rps-emas-2);stroke-width:5.5;stroke-dasharray:0 .06;filter:drop-shadow(0 0 3px var(--rps-sinar))}
+  .rps-denyut{position:absolute;inset:0;border-radius:inherit}
+
+  /* ---------- 3. Scene 1 — satu kehidupan, tiga risiko ---------- */
+  .rps-s1{--g:70%}
+  .rps-jalur{position:absolute;left:6%;right:6%;top:var(--g);height:max(5px,1.15cqmin);translate:0 -50%;transform-origin:0 50%}
+  .rps-jalur > i{position:absolute;top:0;bottom:0;border-radius:99px}
+  .rps-jalur-dasar{left:0;right:0;background:var(--rps-jalur)}
+  .rps-jalur-produktif{left:0;width:72.7%;background:linear-gradient(90deg,var(--rps-merah-2),var(--rps-merah));transform-origin:0 50%}
+  .rps-jalur-pensiun{left:72.7%;right:0;background:linear-gradient(90deg,var(--rps-emas),var(--rps-emas-2));transform-origin:0 50%}
+  .rps-jalur-cahaya{left:72.7%;right:0;opacity:0;box-shadow:0 0 0 3px var(--rps-emas-lembut),0 0 18px 4px var(--rps-sinar)}
+  .rps-tahap{position:absolute;top:var(--g);width:0;height:0;z-index:1}
+  .rps-tahap-1{left:10%}.rps-tahap-2{left:30%}.rps-tahap-3{left:50%}.rps-tahap-4{left:70%}.rps-tahap-5{left:90%}
+  .rps-tahap-titik{position:absolute;left:0;top:0;width:max(12px,2.6cqmin);aspect-ratio:1;translate:-50% -50%;border-radius:50%;background:var(--rps-kartu);border:max(3px,.7cqmin) solid var(--rps-merah);box-shadow:0 2px 6px rgba(0,0,0,.12)}
+  .rps-tahap-4 .rps-tahap-titik,.rps-tahap-5 .rps-tahap-titik{border-color:var(--rps-emas)}
+  .rps-tahap-label{position:absolute;left:0;top:max(12px,2.8cqmin);translate:-50% 0;width:max(58px,15cqw);text-align:center;font-size:max(9.5px,1.85cqmin);font-weight:850;letter-spacing:.06em;color:var(--rps-tinta-2)}
+  .rps-aktor-1{left:10%;--tinggi:40cqmin}
+  .rps-risiko{position:absolute;top:21%;translate:-50% -50%;width:min(27cqw,31cqmin);padding:.65em .6em;border-radius:14px;text-align:center;
+    background:var(--rps-kartu);border:1.5px solid var(--c);box-shadow:var(--rps-bayang-kartu);font-weight:900;letter-spacing:.03em;color:var(--c);z-index:2}
+  .rps-risiko-1{left:18%;--c:var(--rps-merah)}
+  .rps-risiko-2{left:50%;--c:var(--rps-emas)}
+  .rps-risiko-3{left:82%;--c:var(--rps-hijau)}
+  .rps-risiko.rps-redup{opacity:.42}
+  .rps-risiko.rps-fokus{transform:scale(1.08)}
+  .rps-cincin{position:absolute;inset:-6px;border-radius:17px;pointer-events:none}
+  .rps-risiko:not(.rps-fokus) .rps-cincin{display:none}
+  .rps-fokus .rps-denyut{border:2px solid var(--rps-emas);box-shadow:0 0 0 5px var(--rps-emas-lembut),0 0 26px var(--rps-sinar)}
+  .rps-sorot{stroke:var(--rps-emas);stroke-width:2;stroke-dasharray:1 1;stroke-dashoffset:0;opacity:.8}
+  .rps-catatan-1{left:50%;top:89%;color:var(--rps-emas);border-color:var(--rps-emas-lembut)}
+  [data-theme="dark"] .rps-catatan-1{color:var(--rps-emas-2)}
+
+  /* ---------- 4. Scene 2 — dua fase dalam satu layar ---------- */
+  .rps-s2{--g:100%}
+  .rps-panel{--g:86%;position:absolute;top:4%;height:62%;width:45.5%;border-radius:18px;overflow:hidden;
+    background:linear-gradient(180deg,var(--rps-langit-1),var(--rps-langit-2));border:1px solid var(--rps-kartu-garis);box-shadow:var(--rps-bayang-kartu);z-index:1}
+  .rps-panel::after{content:"";position:absolute;left:0;right:0;top:var(--g);bottom:0;background:var(--rps-tanah-1);border-top:1px solid var(--rps-panggung-garis)}
+  .rps-panel-kiri{left:3%;--c:var(--rps-merah)}
+  .rps-panel-kanan{right:3%;--c:var(--rps-emas);background:linear-gradient(180deg,var(--rps-senja-1),var(--rps-senja-2))}
+  .rps-panel-dunia{position:absolute;inset:0}
+  .rps-panel-dunia .rps-jauh{height:44%;opacity:.9}
+  .rps-panel-hangat{position:absolute;right:-10%;top:-10%;width:70%;aspect-ratio:1;border-radius:50%;background:radial-gradient(closest-side,var(--rps-sinar),transparent)}
+  .rps-panel-judul{position:absolute;left:6%;top:6%;z-index:1;padding:.4em .75em;border-radius:99px;background:var(--rps-kartu);border:1px solid var(--rps-kartu-garis);
+    font-weight:900;letter-spacing:.08em;color:var(--c);font-size:max(10px,2.05cqmin);white-space:nowrap}
+  .rps-daftar{position:absolute;top:21%;margin:0;padding:0;list-style:none;display:grid;gap:.5em;font-size:max(10.5px,2.2cqmin);font-weight:800;color:var(--rps-tinta);z-index:1}
+  .rps-daftar li{display:flex;align-items:center;gap:.5em;white-space:nowrap}
+  .rps-daftar li::before{content:"";flex:none;width:.55em;height:.55em;border-radius:50%;background:var(--c);box-shadow:0 0 0 3px var(--rps-kartu)}
+  .rps-panel-kiri .rps-daftar{left:52%}
+  .rps-panel-kanan .rps-daftar{left:7%}
+  .rps-aktor-2a{left:26%;--tinggi:min(40cqh,38cqw)}
+  .rps-aktor-2b{left:76%;--tinggi:min(40cqh,38cqw)}
+  .rps-sekat{position:absolute;left:50%;top:4%;height:62%;width:2px;translate:-50% 0;background:linear-gradient(180deg,transparent,var(--rps-kartu-garis) 20%,var(--rps-kartu-garis) 80%,transparent)}
+  .rps-kapsul{left:50%;top:38%;z-index:3;padding:.55em 1em;border-radius:99px;font-weight:950;letter-spacing:.1em;color:#fff;
+    background:linear-gradient(90deg,var(--rps-merah),var(--rps-emas));box-shadow:0 8px 22px var(--rps-sinar),0 0 0 4px var(--rps-kartu)}
+  .rps-s2 .rps-kanvas{z-index:2}
+  .rps-penggaris{position:absolute;left:9%;right:9%;top:81%;height:0;z-index:1}
+  .rps-pg-a,.rps-pg-b{position:absolute;top:0;height:max(5px,1.1cqmin);translate:0 -50%;border-radius:99px;transform-origin:0 50%}
+  .rps-pg-a{left:0;width:50%;background:linear-gradient(90deg,var(--rps-merah-2),var(--rps-merah))}
+  .rps-pg-b{left:50%;width:50%;background:linear-gradient(90deg,var(--rps-emas),var(--rps-emas-2))}
+  .rps-umur{position:absolute;top:0;width:0;height:0}
+  .rps-umur-1{left:0}.rps-umur-2{left:50%}.rps-umur-3{left:100%}
+  .rps-umur i{position:absolute;width:max(12px,2.6cqmin);aspect-ratio:1;translate:-50% -50%;border-radius:50%;background:var(--rps-kartu);border:max(3px,.7cqmin) solid var(--rps-merah)}
+  .rps-umur-3 i{border-color:var(--rps-emas)}
+  .rps-umur span{position:absolute;bottom:max(10px,2.2cqmin);translate:-50% 0;font-size:max(15px,4.4cqmin);font-weight:950;color:var(--rps-merah);letter-spacing:-.02em}
+  .rps-umur-3 span{color:var(--rps-emas)}
+  .rps-pg-label{position:absolute;top:max(12px,2.6cqmin);translate:-50% 0;font-style:normal;font-weight:900;letter-spacing:.06em;font-size:max(9.5px,1.9cqmin);white-space:nowrap}
+  .rps-pg-label-a{left:25%;color:var(--rps-merah)}
+  .rps-pg-label-b{left:75%;color:var(--rps-emas)}
+  .rps-catatan-2{left:50%;top:95%}
+  @container rps (max-height:420px){.rps-catatan-2{display:none}.rps-penggaris{top:84%}}
+  @container rps (max-aspect-ratio:5/6){
+    .rps-panel{top:3%;height:66%}
+    .rps-sekat{top:3%;height:66%}
+    .rps-daftar{top:15%;left:9%!important;gap:.4em}
+    .rps-aktor-2a,.rps-aktor-2b{left:50%;--tinggi:min(34cqh,40cqw)}
+    .rps-kapsul{top:40%}
+    .rps-penggaris{top:82%}
+  }
+  @container rps (max-width:560px){
+    .rps-panel-judul{left:50%;translate:-50% 0;font-size:max(9.5px,1.9cqmin)}
+    .rps-daftar{top:18%;left:9%!important;font-size:max(10px,2.1cqmin)}
+    .rps-aktor-2a,.rps-aktor-2b{left:50%;--tinggi:min(30cqh,40cqw)}
+  }
+
+  /* ---------- 5. Scene 3 — masa produktif ---------- */
+  .rps-s3{--g:80%}
+  .rps-aktor-3{left:13%;--tinggi:40cqmin}
+  .rps-meja{position:absolute;left:27%;bottom:calc(100% - var(--g));width:max(52px,14cqmin);height:max(56px,16cqmin);translate:-50% 0;z-index:1}
+  .rps-meja-kaki{position:absolute;left:50%;bottom:0;top:12%;width:10%;translate:-50% 0;border-radius:4px;background:var(--rps-tinta-3);opacity:.55}
+  .rps-meja::before{content:"";position:absolute;left:0;right:0;top:8%;height:9%;border-radius:4px;background:var(--rps-tinta-2);opacity:.8}
+  .rps-meja::after{content:"";position:absolute;left:25%;right:25%;bottom:0;height:5%;border-radius:4px;background:var(--rps-tinta-3);opacity:.55}
+  .rps-laptop{position:absolute;left:18%;right:18%;bottom:92%;height:62%;border-radius:5px 5px 2px 2px;background:var(--rps-tinta);padding:7%}
+  .rps-laptop-layar{position:absolute;inset:9%;border-radius:3px;background:linear-gradient(135deg,var(--rps-emas-2),var(--rps-emas));box-shadow:0 0 18px var(--rps-sinar)}
+  .rps-koin{position:absolute;left:31%;top:40%;width:max(12px,3cqmin);aspect-ratio:1;translate:-50% -50%;border-radius:50%;opacity:0;
+    background:radial-gradient(circle at 35% 35%,var(--rps-emas-2),var(--rps-emas));box-shadow:0 0 10px var(--rps-sinar);z-index:2}
+  .rps-koin-2{left:28%}.rps-koin-3{left:34%}
+  .rps-earn{position:absolute;left:31%;top:16%;translate:-50% -50%;z-index:3;display:flex;align-items:center;gap:.55em;padding:.6em 1em .6em .65em;border-radius:99px;
+    background:var(--rps-kartu);border:1.5px solid var(--rps-emas);box-shadow:var(--rps-bayang-kartu),0 0 24px var(--rps-sinar);font-weight:950;letter-spacing:.04em;font-size:max(12px,2.8cqmin);white-space:nowrap}
+  .rps-earn-ikon{width:1.35em;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 35% 35%,var(--rps-emas-2),var(--rps-emas))}
+  .rps-s3 .rps-kanvas{z-index:1}
+  .rps-masa-depan{stroke:var(--rps-emas);stroke-width:3;stroke-dasharray:1 1;stroke-dashoffset:0;opacity:.8}
+  .rps-wadah{position:absolute;top:50%;bottom:calc(100% - var(--g));width:max(64px,17cqmin);translate:-50% 0;z-index:2}
+  .rps-wadah-spend{left:57%;--c:var(--rps-emas);--c2:var(--rps-emas-2)}
+  .rps-wadah-save{left:81%;--c:var(--rps-merah);--c2:var(--rps-merah-2)}
+  .rps-gelas{position:absolute;inset:0;overflow:hidden;border:2px solid var(--rps-kaca-garis);border-top:0;border-radius:0 0 1.1em 1.1em;background:var(--rps-kaca);box-shadow:inset 0 -10px 20px rgba(0,0,0,.04)}
+  .rps-gelas::before{content:"";position:absolute;left:-2px;right:-2px;top:0;height:3px;border-radius:3px;background:var(--rps-kaca-garis)}
+  .rps-isi-air{position:absolute;left:0;right:0;bottom:0;height:50%;transform-origin:50% 100%;background:linear-gradient(180deg,var(--c2),var(--c))}
+  .rps-isi-air::before{content:"";position:absolute;left:0;right:0;top:0;height:3px;background:rgba(255,255,255,.45)}
+  .rps-gelas-sinar{position:absolute;inset:0;box-shadow:inset 0 0 22px var(--rps-sinar)}
+  .rps-wadah-save{filter:drop-shadow(0 0 14px var(--rps-sinar))}
+  .rps-wadah-chip{position:absolute;left:50%;top:75%;translate:-50% -50%;padding:.35em .7em;border-radius:99px;background:rgba(0,0,0,.28);color:#fff;font-weight:950;letter-spacing:.03em;white-space:nowrap;font-size:max(10px,2.1cqmin)}
+  .rps-wadah-kata{position:absolute;left:50%;top:calc(100% + .55em);translate:-50% 0;display:grid;justify-items:center;line-height:1.2;white-space:nowrap;color:var(--rps-tinta-2);font-weight:700;font-size:max(10px,2cqmin)}
+  .rps-wadah-kata b{color:var(--c);font-weight:950;letter-spacing:.08em}
+  .rps-cakrawala{position:absolute;right:-12%;top:38%;width:34cqmin;height:48%;border-radius:50%;background:radial-gradient(closest-side,var(--rps-sinar),transparent)}
+  .rps-catatan-3{left:73%;top:15%;white-space:normal;text-align:center;max-width:44cqw}
+  @container rps (max-aspect-ratio:5/6){
+    .rps-s3{--g:76%}
+    .rps-aktor-3{left:14%;--tinggi:34cqh}
+    .rps-meja{left:33%}
+    .rps-earn{left:38%;top:13%}
+    .rps-koin{top:36%;left:35%}.rps-koin-2{left:32%}.rps-koin-3{left:38%}
+    .rps-wadah{top:45%;width:max(62px,18cqw)}
+    .rps-wadah-spend{left:60%}.rps-wadah-save{left:86%}
+    .rps-cakrawala{top:46%;right:-18%}
+    .rps-catatan-3{left:50%;top:94%;max-width:92cqw}
+  }
+  @container rps (max-width:420px) and (min-aspect-ratio:5/6){
+    .rps-catatan-3{left:70%;top:13%;max-width:52cqw}
+    .rps-earn{top:14%}
+  }
+
+  /* ---------- 6. Scene 4 — transisi ke pensiun ---------- */
+  .rps-s4{--g:80%}
+  .rps-s4 .rps-kota{opacity:0}
+  .rps-aktor-4{left:22%;--tinggi:44cqmin}
+  .rps-kerja{position:absolute;left:5%;top:9%;width:40%;z-index:2}
+  .rps-kerja-label{display:block;font-weight:950;letter-spacing:.08em;color:var(--rps-tinta-2);font-size:max(10px,2cqmin);margin-bottom:.4em}
+  .rps-kerja-baris{display:flex;align-items:center;gap:.6em}
+  .rps-kerja-garis{position:relative;flex:1 1 auto;height:max(5px,1.1cqmin);border-radius:99px;opacity:.38;overflow:visible}
+  .rps-kerja-isi{position:absolute;inset:0;border-radius:99px;background:linear-gradient(90deg,var(--rps-merah-2),var(--rps-merah));transform-origin:0 50%}
+  .rps-kerja-alir{position:absolute;inset:0;border-radius:99px;opacity:0;background:repeating-linear-gradient(90deg,rgba(255,255,255,.85) 0 6px,transparent 6px 24px)}
+  .rps-silang{flex:none;display:grid;place-items:center;width:max(28px,5.4cqmin);aspect-ratio:1;border-radius:50%;
+    background:var(--rps-merah);color:#fff;font-size:max(13px,2.6cqmin);font-weight:900;box-shadow:0 0 0 4px var(--rps-merah-lembut),0 6px 16px rgba(0,0,0,.18);z-index:3}
+  .rps-kartu{position:absolute;top:31%;translate:-50% -50%;width:max(92px,23cqmin);aspect-ratio:1/1.05;display:grid;place-content:center;justify-items:center;gap:.2em;border-radius:20px;
+    background:var(--rps-kartu);border:1.5px solid var(--c);box-shadow:var(--rps-bayang-kartu);z-index:2}
+  .rps-kartu span{font-weight:900;letter-spacing:.1em;color:var(--rps-tinta-2);font-size:max(10px,1.9cqmin)}
+  .rps-kartu b{font-weight:950;color:var(--c);font-size:max(18px,4.3cqmin);white-space:nowrap;letter-spacing:-.02em;line-height:1.05}
+  .rps-kartu small{font-weight:800;color:var(--rps-tinta-3);font-size:max(10px,1.9cqmin)}
+  .rps-kartu-kini{left:60%;--c:var(--rps-merah)}
+  .rps-kartu-nanti{left:86%;--c:var(--rps-emas);box-shadow:var(--rps-bayang-kartu),0 0 28px var(--rps-sinar)}
+  .rps-tanya{font-size:max(30px,8.4cqmin)!important}
+  .rps-panah{position:absolute;height:max(4px,.8cqmin);border-radius:99px;background:var(--rps-tinta-3);transform-origin:0 50%;z-index:1}
+  .rps-panah::after{content:"";position:absolute;right:-2px;top:50%;width:max(10px,2cqmin);aspect-ratio:1;translate:0 -50%;rotate:45deg;border-top:max(4px,.8cqmin) solid var(--rps-tinta-3);border-right:max(4px,.8cqmin) solid var(--rps-tinta-3);border-radius:2px}
+  .rps-panah-4{left:calc(60% + max(46px,11.5cqmin) + 1.5%);right:calc(14% + max(46px,11.5cqmin) + 2.2%);top:31%}
+  .rps-s4 .rps-matahari{right:auto;left:31%;top:24%;width:30cqmin}
+  .rps-target{position:absolute;left:73%;top:57%;translate:-50% -50%;text-align:center;padding:.5em 1em;border-radius:14px;background:var(--rps-kartu);border:1px solid var(--rps-kartu-garis);box-shadow:var(--rps-bayang-kartu);font-weight:950;letter-spacing:.06em;color:var(--rps-tinta);font-size:max(12px,2.7cqmin);max-width:46cqw;z-index:2}
+  .rps-dana{position:absolute;left:4%;right:5%;top:calc(var(--g) + 4.5%);height:0;z-index:2}
+  .rps-dana-garis{position:absolute;left:0;right:3.2em;top:0;height:max(6px,1.3cqmin);translate:0 -50%;border-radius:99px;transform-origin:0 50%;
+    background:linear-gradient(90deg,var(--rps-emas),var(--rps-emas-2));box-shadow:0 0 16px var(--rps-sinar)}
+  .rps-dana-garis::after{content:"";position:absolute;right:-.3em;top:50%;width:max(12px,2.4cqmin);aspect-ratio:1;translate:0 -50%;rotate:45deg;border-top:max(5px,1cqmin) solid var(--rps-emas-2);border-right:max(5px,1cqmin) solid var(--rps-emas-2);border-radius:2px}
+  .rps-dana-label{position:absolute;left:0;top:1em;font-weight:950;letter-spacing:.08em;color:var(--rps-emas);font-size:max(10px,2cqmin);white-space:nowrap}
+  .rps-dana-hidup{position:absolute;right:0;top:0;translate:0 -50%;font-weight:950;letter-spacing:.1em;color:var(--rps-tinta);font-size:max(11px,2.4cqmin)}
+  .rps-redam{position:absolute;inset:0;background:var(--rps-redam);opacity:0;pointer-events:none;z-index:4}
+  @container rps (max-aspect-ratio:5/6){
+    .rps-s4{--g:80%}
+    .rps-kerja{left:6%;top:6%;width:70%}
+    .rps-aktor-4{left:20%;--tinggi:36cqmin}
+    .rps-kartu{top:30%}
+    .rps-kartu-kini{left:55%}.rps-kartu-nanti{left:84%}
+    .rps-panah-4{left:calc(55% + max(46px,11.5cqmin) + 1%);right:calc(16% + max(46px,11.5cqmin) + 1%)}
+    .rps-target{left:69%;top:52%;max-width:56cqw}
+  }
+  @container rps (max-width:420px) and (min-aspect-ratio:5/6){
+    .rps-kerja{width:46%}
+    .rps-kartu{top:41%;width:max(80px,21cqmin)}
+    .rps-kartu-kini{left:57%}.rps-kartu-nanti{left:86%}
+    .rps-panah-4{top:41%;left:calc(57% + max(40px,10.5cqmin) + 1%);right:calc(14% + max(40px,10.5cqmin) + 1%)}
+    .rps-target{left:66%;top:66%;max-width:62cqw;font-size:max(11px,2.6cqmin);padding:.4em .8em}
+    .rps-s4 .rps-matahari{left:28%;top:30%}
+  }
+
+  /* ---------- 7. Scene 5 — waktu berjalan ---------- */
+  .rps-s5{--g:79%}
+  .rps-chip-1{left:21%;top:9%}.rps-chip-2{left:50%;top:9%}.rps-chip-3{left:79%;top:9%}
+  .rps-chip-1{color:var(--rps-merah)}.rps-chip-3{color:var(--rps-emas)}
+  .rps-kurva{position:absolute;inset:0;z-index:1}
+  .rps-luas-a{stop-color:var(--rps-merah);stop-opacity:.22}
+  .rps-luas-b{stop-color:var(--rps-merah);stop-opacity:0}
+  .rps-garis-bunga{stroke:var(--rps-merah);stroke-width:5}
+  [data-theme="dark"] .rps-garis-bunga{filter:drop-shadow(0 0 6px rgba(240,90,87,.55))}
+  .rps-garis-dasar{position:absolute;left:12%;width:74%;top:var(--g);height:0;translate:0 -50%;border-top:max(3px,.6cqmin) dashed var(--rps-emas);transform-origin:0 50%;z-index:1}
+  .rps-tik{position:absolute;top:var(--g);width:0;height:0;z-index:1}
+  .rps-tik i{position:absolute;width:max(8px,1.6cqmin);aspect-ratio:1;translate:-50% -50%;border-radius:50%;background:var(--rps-emas)}
+  .rps-tik span{position:absolute;top:max(11px,2.3cqmin);translate:-50% 0;font-size:max(10px,2cqmin);font-weight:900;color:var(--rps-tinta-2);white-space:nowrap}
+  .rps-tik-1{left:12%}.rps-tik-2{left:24.33%}.rps-tik-3{left:36.67%}.rps-tik-4{left:49%}.rps-tik-5{left:61.33%}.rps-tik-6{left:73.67%}.rps-tik-7{left:86%}
+  .rps-tik-kata{position:absolute;top:calc(var(--g) + max(26px,5.4cqmin));translate:-50% 0;font-style:normal;font-weight:950;letter-spacing:.08em;font-size:max(9.5px,1.8cqmin);color:var(--rps-tinta-3);white-space:nowrap}
+  .rps-tik-kata-a{left:12%}.rps-tik-kata-b{left:86%;color:var(--rps-merah)}
+  .rps-ujung{position:absolute;left:86%;top:24%;width:max(18px,3.6cqmin);aspect-ratio:1;translate:-50% -50%;border-radius:50%;z-index:2}
+  .rps-ujung .rps-denyut{border-radius:50%;background:var(--rps-merah);box-shadow:0 0 0 max(5px,1.1cqmin) var(--rps-merah-lembut),0 0 24px rgba(198,40,40,.45)}
+  .rps-rumus{position:absolute;left:42%;top:31%;translate:-50% -50%;padding:.55em 1em;border-radius:14px;background:var(--rps-kartu);border:1px solid var(--rps-kartu-garis);box-shadow:var(--rps-bayang-kartu);
+    font-weight:950;letter-spacing:.05em;font-size:max(11px,2.5cqmin);white-space:nowrap;z-index:2}
+  .rps-aktor-5{left:86%;--tinggi:32cqmin}
+  .rps-usia{position:absolute;left:50%;bottom:100%;translate:-50% -.4em;width:3.4em;height:1.9em;border-radius:12px;background:var(--rps-kartu);border:1.5px solid var(--rps-merah);box-shadow:var(--rps-bayang-kartu);overflow:hidden;font-size:max(12px,2.7cqmin)}
+  .rps-usia span{position:absolute;inset:0;display:grid;place-items:center;font-weight:950;color:var(--rps-merah);opacity:0}
+  .rps-usia .rps-usia-7{opacity:1}
+  @container rps (max-aspect-ratio:5/6){
+    .rps-s5{--g:82%}
+    .rps-chip{font-size:max(10px,2.6cqmin);padding:.45em .7em}
+    .rps-chip-1{left:19%}.rps-chip-3{left:81%}
+    .rps-rumus{left:50%;top:21%}
+    .rps-aktor-5{--tinggi:30cqh}
+  }
+  @container rps (max-width:420px){
+    .rps-chip{padding:.45em .6em;letter-spacing:0}
+    .rps-chip-1{left:18%}.rps-chip-3{left:82%}
+    .rps-rumus{font-size:max(10px,2.4cqmin)}
+  }
+
+  /* ---------- 8. Scene 6 — penutup ---------- */
+  .rps-s6{--g:76%}
+  .rps-panorama .rps-kota{-webkit-mask-image:linear-gradient(90deg,#000 38%,transparent 62%);mask-image:linear-gradient(90deg,#000 38%,transparent 62%)}
+  .rps-panorama .rps-alam{-webkit-mask-image:linear-gradient(90deg,transparent 42%,#000 68%);mask-image:linear-gradient(90deg,transparent 42%,#000 68%)}
+  .rps-panorama .rps-matahari{right:3%;top:16%}
+  .rps-kubah{stroke:var(--rps-hijau);stroke-width:2.5;stroke-dasharray:1 1;stroke-dashoffset:0;opacity:.85}
+  .rps-s6 .rps-kanvas{z-index:1}
+  .rps-perisai{position:absolute;left:50%;top:40%;translate:-50% -50%;display:flex;align-items:center;gap:.5em;padding:.5em .95em .5em .6em;border-radius:99px;z-index:3;
+    background:var(--rps-kartu);border:1.5px solid var(--rps-hijau);box-shadow:var(--rps-bayang-kartu),0 0 0 5px var(--rps-hijau-lembut);font-weight:950;letter-spacing:.08em;color:var(--rps-hijau);white-space:nowrap}
+  .rps-perisai-ikon{display:block;width:1.2em;height:1.4em;flex:none}
+  .rps-perisai-ikon path{fill:var(--rps-hijau)}
+  .rps-suar{position:absolute;top:57%;translate:-50% -50%;display:grid;justify-items:center;gap:.4em;z-index:2}
+  .rps-suar i{width:max(14px,2.8cqmin);aspect-ratio:1;border-radius:50%;background:var(--c);box-shadow:0 0 0 max(4px,.9cqmin) var(--rps-kartu),0 0 22px var(--c)}
+  .rps-suar span{padding:.4em .8em;border-radius:99px;background:var(--rps-kartu);border:1.5px solid var(--c);color:var(--c);font-weight:950;letter-spacing:.06em;white-space:nowrap;box-shadow:var(--rps-bayang-kartu)}
+  .rps-suar-1{left:25%;--c:var(--rps-merah)}
+  .rps-suar-2{left:50%;--c:var(--rps-emas)}
+  .rps-hangat{position:absolute;left:88%;top:var(--g);width:52cqmin;aspect-ratio:1.6;translate:-50% -55%;border-radius:50%;z-index:0}
+  .rps-hangat .rps-denyut{border-radius:50%;background:radial-gradient(closest-side,var(--rps-sinar),transparent)}
+  .rps-s1 .rps-jalur-cahaya,.rps-s6 .rps-jalur-cahaya{opacity:1}
+  .rps-aktor-6{left:88%;--tinggi:32cqmin}
+  .rps-pesan{position:absolute;left:50%;top:13%;translate:-50% -50%;display:grid;justify-items:center;gap:.35em;text-align:center;z-index:3;width:92cqw}
+  .rps-pesan b{font-size:max(17px,5.2cqmin);font-weight:950;letter-spacing:.04em;color:var(--rps-tinta);text-shadow:0 0 28px var(--rps-sinar)}
+  .rps-pesan span{font-size:max(11px,2.4cqmin);font-weight:800;color:var(--rps-tinta-2)}
+  @container rps (max-aspect-ratio:5/6){
+    .rps-s6{--g:80%}
+    .rps-perisai{top:44%}
+    .rps-suar{top:60%}
+    .rps-suar-1{left:24%}.rps-suar-2{left:56%}
+    .rps-pesan{top:14%}
+    .rps-aktor-6{--tinggi:30cqh}
+  }
+  @container rps (max-width:420px){
+    .rps-suar span{padding:.35em .6em;letter-spacing:.02em}
+    .rps-suar-1{left:22%}.rps-suar-2{left:59%}
+    .rps-perisai{padding:.4em .75em .4em .5em}
+  }
+}

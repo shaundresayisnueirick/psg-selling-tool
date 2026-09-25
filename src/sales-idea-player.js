@@ -199,8 +199,11 @@
     var tl = new Timeline();
     this.tl = tl;
     var kurang = gerakDikurangi();
-    if (!kurang && typeof scene.animate === 'function') scene.animate(tl, this.stage);
-    if (!kurang) tl.adopsi(this.stage);
+    /* Digambar saat layar tidak aktif (mis. init() tertunda setelah
+       ditutup): tampilkan keadaan akhir tanpa membuat animasi. */
+    var diam = kurang || !this.aktif();
+    if (!diam && typeof scene.animate === 'function') scene.animate(tl, this.stage);
+    if (!diam) tl.adopsi(this.stage);
     tl.siapkan();
     var self = this;
     tl.onSelesai = function () {
@@ -213,6 +216,9 @@
     if (kurang) {
       tl.selesaikan();
       this.status = 'selesai';
+    } else if (diam) {
+      tl.selesaikan();
+      this.status = 'siap';
     } else if (cara === 'putar') {
       tl.seek(0);
       this.status = 'berputar';

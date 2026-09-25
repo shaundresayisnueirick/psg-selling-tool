@@ -1,0 +1,65 @@
+/* =====================================================================
+   PSG Karakter — warna dan lapisan tokoh (pasangan psg-karakter.js)
+   ---------------------------------------------------------------------
+   Token --k-* bisa ditimpa per scene. Tema gelap mengangkat warna
+   pakaian agar siluet tetap terbaca di latar sinematik.
+   ===================================================================== */
+@media screen{
+  .psg-k{
+    --k-kulit:#e7b08e;--k-kulit-2:#d09474;
+    --k-rambut:#2b2421;--k-rambut-tua:#d3d7dd;
+    --k-muda:#3f7fbf;--k-kerja:#1f2d45;--k-santai:#7f9c8a;--k-dalam:#f3eee4;
+    --k-kemeja:#ffffff;--k-dasi:#c62828;--k-celana:#384152;--k-sepatu:#1b2130;
+    --k-tas:#6b4a2f;--k-garis:rgba(0,0,0,.22);--k-bayang:rgba(15,23,42,.16);--k-kacamata:#1f2937;
+    display:block;height:100%;width:auto;overflow:visible;
+  }
+  .psg-k--kiri{scale:-1 1}
+  .psg-k .k-bayang{fill:var(--k-bayang)}
+  .psg-k .k-kulit{fill:var(--k-kulit)}
+  .psg-k .k-kulit-2{fill:var(--k-kulit-2)}
+  .psg-k .k-celana{fill:none;stroke:var(--k-celana);stroke-width:14;stroke-linecap:round}
+  .psg-k .k-sepatu{fill:var(--k-sepatu)}
+  .psg-k .k-lengan-kain{fill:none;stroke-width:12;stroke-linecap:round}
+  .psg-k .k-o-muda .k-kain,.psg-k .k-o-muda.k-lengan-kain{fill:var(--k-muda);stroke:var(--k-muda)}
+  .psg-k .k-o-kerja .k-kain,.psg-k .k-o-kerja.k-lengan-kain{fill:var(--k-kerja);stroke:var(--k-kerja)}
+  .psg-k .k-o-santai .k-kain,.psg-k .k-o-santai.k-lengan-kain{fill:var(--k-santai);stroke:var(--k-santai)}
+  .psg-k .k-lengan-kain{fill:none!important}
+  .psg-k .k-kemeja{fill:var(--k-kemeja)}
+  .psg-k .k-dasi{fill:var(--k-dasi)}
+  .psg-k .k-dalam{fill:var(--k-dalam)}
+  .psg-k .k-garis{fill:none;stroke:var(--k-garis);stroke-width:1.4;stroke-linecap:round}
+  .psg-k .k-kancing{fill:var(--k-garis)}
+  .psg-k .k-h-muda{fill:var(--k-rambut)}
+  .psg-k .k-h-tua{fill:var(--k-rambut-tua)}
+  .psg-k .k-kacamata{fill:rgba(255,255,255,.28);stroke:var(--k-kacamata);stroke-width:1.5;stroke-linecap:round}
+  .psg-k .k-tas-badan{fill:var(--k-tas)}
+  .psg-k .k-tas-tali{fill:none;stroke:var(--k-tas);stroke-width:2.2;stroke-linejoin:round}
+
+  /* poros gerak (koordinat viewBox) */
+  .psg-k .k-kaki-b{transform-origin:56px 124px}
+  .psg-k .k-kaki-d{transform-origin:67px 124px}
+  .psg-k .k-lengan-b{transform-origin:48px 64px}
+  .psg-k .k-lengan-d{transform-origin:74px 64px}
+  .psg-k .k-atas{transform-origin:62px 126px}
+  .psg-k .k-tubuh{transform-origin:61px 230px}
+
+  /* lapisan yang tampil ditentukan atribut data-* */
+  .psg-k .k-o,.psg-k .k-h,.psg-k .k-kacamata,.psg-k .k-tas{opacity:0}
+  .psg-k[data-pakaian="muda"] .k-o-muda,
+  .psg-k[data-pakaian="kerja"] .k-o-kerja,
+  .psg-k[data-pakaian="santai"] .k-o-santai,
+  .psg-k[data-rambut="muda"] .k-h-muda,
+  .psg-k[data-rambut="tua"] .k-h-tua,
+  .psg-k[data-kacamata] .k-kacamata,
+  .psg-k[data-tas] .k-tas{opacity:1}
+  /* postur: usia senior sedikit condong, tetap tegak dan sehat */
+  .psg-k[data-usia="senior"] .k-atas{transform:rotate(2.5deg)}
+
+  [data-theme="dark"] .psg-k{
+    --k-kulit:#e2a986;--k-kulit-2:#c98b6b;
+    --k-rambut:#3a302b;--k-rambut-tua:#e4e7ec;
+    --k-muda:#4f93d6;--k-kerja:#34496d;--k-santai:#8fb09b;--k-dalam:#efe8da;
+    --k-celana:#4a5570;--k-sepatu:#0d1119;--k-tas:#8a6240;
+    --k-garis:rgba(0,0,0,.3);--k-bayang:rgba(0,0,0,.5);--k-kacamata:#0f141c;
+  }
+}
