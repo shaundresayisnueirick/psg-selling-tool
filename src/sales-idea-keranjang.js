@@ -623,7 +623,9 @@
        - ditutup / kembali ke hub / tab ditutup → hentikan
      Narasi dipecah per kalimat; setiap mulai baru selalu didahului
      cancel(), jadi tidak pernah ada dua suara bersamaan. Tidak ada
-     autoplay: suara hanya berjalan karena aksi pengguna. */
+     autoplay: suara hanya berjalan karena aksi pengguna.
+     Sales Idea lain memakai narator yang sama lewat window.PSGNarasi:
+     daftar(selektorScene, atributNomor, naskah) + tombol() + pasang(). */
   var NARASI = [
     'Setiap keluarga memiliki keranjang kehidupannya sendiri. Di dalamnya ada berbagai kebutuhan dan tanggung jawab yang harus kita bawa bersama sepanjang perjalanan hidup.',
     'Sebagian beban mungkin terasa kecil. Sebagian lainnya jauh lebih berat. Dan sering kali, semakin panjang perjalanan hidup, semakin banyak pula tanggung jawab yang harus kita siapkan.',
@@ -636,6 +638,7 @@
     'Dua pilar dapat membantu menopang kehidupan keluarga. Proteksi memberikan perlindungan ketika risiko terjadi. Dan dana atau uang membantu menyediakan sumber daya untuk melanjutkan kebutuhan kehidupan.',
     'Karena tujuan akhirnya bukan sekadar memiliki perlindungan. Tujuannya adalah memastikan keluarga tetap memiliki kemampuan untuk melanjutkan kehidupannya, bahkan ketika perjalanan tidak berjalan seperti yang kita harapkan.'
   ];
+  var SUMBER = [{ sel: '.kbs', attr: 'data-kbs', teks: NARASI }];
   var suara = { nyala: true, terpasang: false, root: null, stage: null, node: null, basi: null, aktif: false, kalimat: [], idx: 0, mulai: false, bicara: false, tertunda: false, gen: 0, jeda: 0 };
   function adaTTS() { return typeof window.speechSynthesis !== 'undefined' && typeof window.SpeechSynthesisUtterance === 'function'; }
   function pecahKalimat(t) {
@@ -681,7 +684,8 @@
   }
   function sinkronSuara() {
     var root = suara.root, stage = suara.stage;
-    var node = stage ? stage.querySelector('.kbs') : null;
+    var node = null, sumber = null;
+    if (stage) SUMBER.some(function (s) { sumber = s; node = stage.querySelector(s.sel); return !!node; });
     var aktif = !!(root && root.classList.contains('aktif'));
     /* scene yang masih tertinggal di DOM saat layar dibuka lagi (dan status
        lamanya) bukan scene yang sedang diputar: jangan pernah dinarasikan */
@@ -695,7 +699,7 @@
     if (node !== suara.node) {
       diamkan();
       suara.node = node;
-      suara.kalimat = pecahKalimat(NARASI[(+node.getAttribute('data-kbs') || 1) - 1] || '');
+      suara.kalimat = pecahKalimat(sumber.teks[(+node.getAttribute(sumber.attr) || 1) - 1] || '');
       suara.idx = 0;
       suara.mulai = false;
       suara.tertunda = false;
@@ -764,6 +768,15 @@
     var i = header.indexOf('<button type="button" class="si-close"');
     return i === -1 ? header : header.slice(0, i) + tombol + header.slice(i);
   }
+  window.PSGNarasi = {
+    daftar: function (sel, attr, teks) {
+      if (SUMBER.some(function (s) { return s.sel === sel; })) return;
+      SUMBER.push({ sel: sel, attr: attr, teks: teks });
+    },
+    pasang: pasangSuara,
+    tombol: sisipTombolSuara,
+    tandai: tandaiSuara
+  };
 
   function adegan(opsi) {
     var o = opsi || {};
