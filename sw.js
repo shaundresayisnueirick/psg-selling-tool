@@ -13,10 +13,16 @@
    - Hanya jawaban yang benar-benar berhasil (status 200) yang disimpan,
      sehingga halaman error tidak pernah ikut tersimpan. */
 
-const VERSI = 'insurance-hub-v95.0.0';
+const VERSI = 'insurance-hub-v103.0.0';
 
 /* Semua berkas inti ikut disimpan sejak pemasangan, supaya aplikasi tetap
-   utuh walaupun kunjungan pertama terputus di tengah jalan. */
+   utuh walaupun kunjungan pertama terputus di tengah jalan.
+
+   Modul cerita Sales Idea dimuat dengan ?v=<versi> (sama dengan tag di
+   index.html). Modul-modul ini saling bergantung (pemutar, tokoh, cerita);
+   URL berversi mencegah campuran versi lama-baru bila satu permintaan
+   jatuh ke cache atau cache HTTP. Naikkan ?v= bersama VERSI bila salah
+   satunya berubah. */
 const BERKAS = [
   './',
   './index.html',
@@ -25,6 +31,11 @@ const BERKAS = [
   './manifest.webmanifest',
   './src/styles.css',
   './src/branding.css',
+  './src/sales-idea-player.css?v=103',
+  './src/psg-karakter.css?v=103',
+  './src/sales-idea-retirement.css?v=103',
+  './src/sales-idea-keranjang.css?v=103',
+  './src/sales-idea-education.css?v=103',
   './src/cetak-besar.css',
   './src/access-gate.js',
   './src/theme-switcher.js',
@@ -77,6 +88,11 @@ const BERKAS = [
   './src/app-shell.js',
   './src/tanggal-placeholder.js',
   './src/cetak-orientasi.js',
+  './src/sales-idea-player.js?v=103',
+  './src/psg-karakter.js?v=103',
+  './src/sales-idea-retirement.js?v=103',
+  './src/sales-idea-keranjang.js?v=103',
+  './src/sales-idea-education.js?v=103',
   './assets/logo-psg.png',
   './assets/logo-psg-terang.png',
   './icons/ikon-192.png',

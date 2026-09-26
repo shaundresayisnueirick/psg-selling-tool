@@ -1,0 +1,178 @@
+/* =====================================================================
+   PEMUTAR SALES IDEA — tata letak, kontrol, dan tema
+   ---------------------------------------------------------------------
+   Pasangan src/sales-idea-player.js. Dimuat sesudah styles.css dan
+   branding.css, sebelum cetak-besar.css. Semua aturan hanya untuk layar;
+   hasil cetak tidak berubah.
+   1. Panggung: shell mengisi layar, isi scene bergulir di dalamnya,
+      bar kontrol selalu terlihat di bawah (aman untuk notch dan area
+      navigasi Android/iPhone).
+   2. Bar kontrol: Back · Play/Pause · Replay · Next + progress.
+   3. Wadah stage untuk scene baru (.sip-scene, tanpa gulir).
+   4. Tema gelap untuk chrome Sales Idea. Ilustrasi SVG adegan lama
+      tetap memakai warnanya sendiri sampai adegannya dibuat ulang.
+   ===================================================================== */
+@media screen{
+
+  /* ---------- 1. Panggung ---------- */
+  #layarSalesIdea.aktif{overflow:hidden}
+  #layarSalesIdea.aktif .si-shell{
+    display:flex;flex-direction:column;height:100%;min-height:0;
+    padding:env(safe-area-inset-top) max(28px,env(safe-area-inset-right)) 0 max(28px,env(safe-area-inset-left));
+  }
+  #layarSalesIdea.aktif .si-content{
+    flex:1 1 auto;min-height:0;width:100%;
+    overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;
+    padding-bottom:16px;
+  }
+  /* progress lama di dalam isi digantikan progress pemutar */
+  #layarSalesIdea.aktif .si-content .si-progress{display:none}
+  /* tombol atas presentasi: target sentuh minimal 44px */
+  #layarSalesIdea .si-back-hub,#layarSalesIdea .si-close{min-height:44px;min-width:44px}
+
+  /* ---------- 2. Bar kontrol ---------- */
+  #layarSalesIdea.aktif .si-footer{
+    flex:none;position:static;width:100%;max-width:1500px;margin:0 auto;
+    display:flex;flex-direction:column;align-items:stretch;gap:8px;
+    padding:10px 0 max(12px,env(safe-area-inset-bottom));
+    background:transparent;border-top:1px solid var(--border);
+  }
+  .sip-meta{display:flex;align-items:center;gap:14px;min-width:0}
+  .sip-progress{list-style:none;margin:0;padding:0;display:flex;align-items:center;flex:1 1 auto;min-width:0}
+  .sip-progress li{display:flex;align-items:center;flex:1 1 0;min-width:0}
+  .sip-progress li:first-child{flex:0 0 auto}
+  .sip-progress li::before{content:"";flex:1 1 auto;height:2px;margin:0 3px;border-radius:2px;background:var(--border-strong)}
+  .sip-progress li:first-child::before{display:none}
+  .sip-progress li::after{content:"";flex:none;box-sizing:border-box;width:11px;height:11px;border-radius:50%;border:2px solid var(--border-strong);background:var(--surface)}
+  .sip-progress li.sip-sudah::before,.sip-progress li.sip-kini::before{background:var(--brand)}
+  .sip-progress li.sip-sudah::after{border-color:var(--brand);background:var(--brand)}
+  .sip-progress li.sip-kini::after{width:13px;height:13px;border-color:var(--brand);background:var(--brand);box-shadow:0 0 0 4px var(--brand-soft)}
+  #layarSalesIdea .sip-meta .si-stepcount{display:inline-block;flex:none;font-size:12px;font-weight:800;letter-spacing:.02em;color:var(--text-3);white-space:nowrap;font-variant-numeric:tabular-nums}
+
+  .sip-controls{display:flex;align-items:center;justify-content:center;gap:8px;min-width:0}
+  #layarSalesIdea .sip-controls button{
+    display:inline-flex;align-items:center;justify-content:center;gap:6px;
+    min-height:44px;min-width:44px;padding:0 16px;border-radius:12px;
+    font:inherit;font-size:14px;font-weight:800;line-height:1;white-space:nowrap;cursor:pointer;
+    border:1px solid var(--border-strong);background:var(--surface);color:var(--text-2);
+    transition:background-color .15s ease,border-color .15s ease,color .15s ease,opacity .15s ease;
+  }
+  #layarSalesIdea .sip-controls .sip-play{border-color:var(--brand);background:var(--brand-soft);color:var(--brand);min-width:108px}
+  #layarSalesIdea[data-sip-status="berputar"] .sip-controls .sip-play{background:var(--surface)}
+  #layarSalesIdea .sip-controls .si-next{min-width:112px!important;border-color:#a60101!important;background:#a60101!important;color:#fff}
+  #layarSalesIdea .sip-controls button:disabled{opacity:.42;cursor:not-allowed}
+  #layarSalesIdea .sip-controls button:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+  #layarSalesIdea .sip-controls button:not(:disabled):hover{border-color:var(--text-3)}
+  #layarSalesIdea .sip-controls .si-next:not(:disabled):hover{filter:brightness(1.08)}
+
+  @media (max-width:480px){
+    #layarSalesIdea .sip-controls{gap:6px}
+    #layarSalesIdea .sip-controls button{padding:0 12px;font-size:13.5px}
+    #layarSalesIdea .sip-controls .sip-replay .sip-label{display:none}
+    #layarSalesIdea .sip-controls .sip-play{min-width:96px}
+    #layarSalesIdea .sip-controls .si-next{min-width:88px!important}
+  }
+  @media (max-width:620px){
+    #layarSalesIdea.aktif .si-shell{padding-left:max(12px,env(safe-area-inset-left));padding-right:max(12px,env(safe-area-inset-right))}
+  }
+
+  /* ---------- 3. Wadah stage untuk scene baru ----------
+     Scene dengan fit:true menggambar .sip-scene; seluruh inti cerita
+     muat di layar tanpa gulir: visual mengisi sisa tinggi, teks di
+     bawah (HP) atau di samping (layar lebar). */
+  #layarSalesIdea.aktif .si-content.sip-fit{overflow:hidden;display:flex;flex-direction:column;padding-bottom:12px}
+  .sip-scene{flex:1 1 auto;min-height:0;display:grid;grid-template-rows:minmax(0,1fr) auto;gap:14px;padding-top:12px}
+  .sip-scene-visual{position:relative;min-height:0;display:grid;place-items:center;overflow:hidden;border:1px solid var(--border);border-radius:var(--r-2xl);background:var(--surface)}
+  .sip-scene-visual > svg{display:block;width:100%;height:100%;max-height:100%}
+  .sip-scene-text{min-width:0;display:grid;gap:6px;align-content:start}
+  .sip-scene-text h3{margin:0;font-size:clamp(19px,2.4vw,27px);line-height:1.2;letter-spacing:-.02em;color:var(--text)}
+  .sip-scene-text p{margin:0;font-size:14px;line-height:1.55;color:var(--text-2)}
+  @media (min-width:1024px){
+    .sip-scene{grid-template-rows:minmax(0,1fr);grid-template-columns:minmax(0,1.6fr) minmax(300px,.8fr);gap:20px}
+    .sip-scene-text{align-content:center}
+  }
+
+  /* ---------- 4. Tema gelap ----------
+     Token lokal Sales Idea (sengaja terang) dikembalikan ke token tema. */
+  [data-theme="dark"] #layarSalesIdea{
+    color-scheme:dark;
+    --bg:inherit;--surface:inherit;--surface-2:inherit;--surface-3:inherit;--border:inherit;--border-strong:inherit;
+    --text:inherit;--text-2:inherit;--text-3:inherit;--figure:inherit;
+  }
+  [data-theme="dark"] #layarSalesIdea.aktif{background:var(--bg)}
+  [data-theme="dark"] #layarSalesIdea.aktif .si-shell{background:var(--bg)}
+  [data-theme="dark"] #layarSalesIdea .sip-controls .si-next{border-color:var(--primary)!important;background:var(--primary)!important;color:var(--on-primary)}
+
+  /* bar atas presentasi */
+  [data-theme="dark"] #layarSalesIdea .si-presentation-topbar{border-bottom-color:var(--border)}
+  [data-theme="dark"] #layarSalesIdea :is(.si-back-hub,.si-close){border-color:var(--border);background:var(--surface);color:var(--brand)}
+  [data-theme="dark"] #layarSalesIdea :is(.si-back-hub,.si-close):hover{background:var(--brand-soft)}
+  @media (max-width:620px){
+    [data-theme="dark"] #layarSalesIdea .si-back-hub{border-color:transparent;background:transparent}
+  }
+  [data-theme="dark"] #layarSalesIdea .si-presentation-brand span{color:var(--brand)}
+  [data-theme="dark"] #layarSalesIdea .si-presentation-brand b{color:var(--text)}
+  [data-theme="dark"] #layarSalesIdea .si-presentation-brand small{color:var(--text-3)}
+
+  /* hub */
+  [data-theme="dark"] #layarSalesIdea .si-hub-head h2{color:var(--brand)}
+  [data-theme="dark"] #layarSalesIdea .si-hub-head p{color:var(--text-2)}
+  [data-theme="dark"] #layarSalesIdea .si-choice-card{border-color:var(--border);background:var(--surface);box-shadow:var(--shadow-sm)}
+  [data-theme="dark"] #layarSalesIdea .si-choice-card:hover{border-color:var(--brand-line)}
+  [data-theme="dark"] #layarSalesIdea .si-choice-card .si-choice-visual{background:linear-gradient(145deg,var(--surface-2),var(--surface-3))}
+  [data-theme="dark"] #layarSalesIdea .si-choice-card > div:nth-child(2) > span{color:var(--brand)}
+  [data-theme="dark"] #layarSalesIdea .si-choice-card h3{color:var(--text)}
+  [data-theme="dark"] #layarSalesIdea .si-choice-card p{color:var(--text-2)}
+  [data-theme="dark"] #layarSalesIdea .si-choice-card > strong{color:var(--brand);border-top-color:var(--border)}
+  [data-theme="dark"] #layarSalesIdea .si-hub-note{color:var(--text-3);background:var(--surface-2);border-color:var(--border)}
+
+  /* kepala tiap Sales Idea */
+  [data-theme="dark"] #layarSalesIdea .si-eyebrow{color:var(--brand)}
+  [data-theme="dark"] #layarSalesIdea .si-topline h2{color:var(--text)}
+  [data-theme="dark"] #layarSalesIdea .si-topline p{color:var(--text-2)}
+  [data-theme="dark"] #layarSalesIdea .si-counter{background:var(--brand-soft);border-color:var(--brand-line);color:var(--brand)}
+
+  /* kartu teks presentasi (semua Sales Idea) */
+  [data-theme="dark"] #layarSalesIdea :is(.si-presentation-card,.kb-presentation-card,.ep-presentation-card,.rp-presentation-card,.ac-presentation-card){border-color:var(--border);background:var(--surface);box-shadow:var(--shadow-sm)}
+  [data-theme="dark"] #layarSalesIdea :is(.si-presentation-card.produk,.si-presentation-card.pertanyaan){border-top-color:var(--brand)}
+  [data-theme="dark"] #layarSalesIdea .si-presentation-kicker{color:var(--brand)}
+  [data-theme="dark"] #layarSalesIdea .si-presentation-focus{color:var(--text)}
+  [data-theme="dark"] #layarSalesIdea .si-presentation-text{color:var(--text-2)}
+  [data-theme="dark"] #layarSalesIdea .si-presentation-highlight{background:var(--accent-soft);border-color:var(--accent-line)}
+  [data-theme="dark"] #layarSalesIdea .si-presentation-highlight > span{background:var(--brand);color:var(--text-inverse)}
+  [data-theme="dark"] #layarSalesIdea .si-presentation-highlight b{color:var(--accent)}
+  [data-theme="dark"] #layarSalesIdea .si-presentation-highlight p{color:var(--text-2)}
+  [data-theme="dark"] #layarSalesIdea .si-transition{background:var(--brand-soft);color:var(--text)}
+  [data-theme="dark"] #layarSalesIdea :is(.kb-agent-cue,.ep-cue,.rp-cue,.ac-cue){background:var(--surface-2);border-color:var(--border);color:var(--text-3)}
+  [data-theme="dark"] #layarSalesIdea .kb-agent-cue b{color:var(--text-2)}
+  [data-theme="dark"] #layarSalesIdea .kb-agent-cue p{color:var(--text-3)}
+
+  /* 10 Jari + 3 Alasan */
+  [data-theme="dark"] #layarSalesIdea .si-hand-wrap{background:var(--surface);border-color:var(--border)}
+  [data-theme="dark"] #layarSalesIdea .si-hand-label{color:var(--text-3)}
+  [data-theme="dark"] #layarSalesIdea .si-legend-item{background:var(--surface-2);border-color:var(--border)}
+  [data-theme="dark"] #layarSalesIdea .si-legend-item b{color:var(--text)}
+  [data-theme="dark"] #layarSalesIdea .si-legend-item small{color:var(--text-3)}
+  [data-theme="dark"] #layarSalesIdea .si-legend-no{background:var(--surface-3);color:var(--text-2);border-color:var(--surface)}
+  [data-theme="dark"] #layarSalesIdea .si-legend-item.active{background:var(--brand-soft);border-color:var(--brand-line)}
+  [data-theme="dark"] #layarSalesIdea .si-legend-item.active b{color:var(--brand)}
+  [data-theme="dark"] #layarSalesIdea .si-legend-item.active .si-legend-no{background:var(--brand);color:var(--text-inverse)}
+  [data-theme="dark"] #layarSalesIdea .si-reason-icon{background:var(--brand-soft);border-color:var(--brand-line)}
+  [data-theme="dark"] #layarSalesIdea .si-reason-progress span{background:var(--surface-3);color:var(--text-3)}
+  [data-theme="dark"] #layarSalesIdea .si-reason-progress span.active{background:var(--brand);color:var(--text-inverse)}
+  [data-theme="dark"] #layarSalesIdea .si-reason-progress span.done{background:var(--brand-soft);color:var(--brand)}
+  [data-theme="dark"] #layarSalesIdea .si-reason-points > div{background:var(--surface-2);border-color:var(--border)}
+  [data-theme="dark"] #layarSalesIdea .si-reason-points span{background:var(--brand-soft);color:var(--brand)}
+  [data-theme="dark"] #layarSalesIdea .si-reason-points b{color:var(--text)}
+
+  /* kartu visual: bingkai ikut tema, ilustrasi di dalamnya tetap */
+  [data-theme="dark"] #layarSalesIdea :is(.kb-visual-card,.ep-visual-card,.rp-visual-card,.ac-visual-card){border-color:var(--border);background:var(--surface);box-shadow:var(--shadow-sm)}
+  [data-theme="dark"] #layarSalesIdea :is(.kb-scene,.ep-scene,.rp-scene,.ac-scene){background:var(--surface)}
+  [data-theme="dark"] #layarSalesIdea :is(.kb-visual-caption,.ep-caption,.rp-caption,.ac-caption){background:var(--surface);border-top-color:var(--border)}
+  [data-theme="dark"] #layarSalesIdea :is(.kb-visual-caption,.ep-caption,.rp-caption,.ac-caption) span{color:var(--brand)}
+  [data-theme="dark"] #layarSalesIdea :is(.kb-visual-caption,.ep-caption,.rp-caption,.ac-caption) b{color:var(--text)}
+  [data-theme="dark"] #layarSalesIdea :is(.kb-legend,.kb-pillar-summary){background:var(--surface);border-top-color:var(--border)}
+  [data-theme="dark"] #layarSalesIdea .kb-legend span{background:var(--accent-soft);border-color:var(--accent-line);color:var(--accent)}
+  [data-theme="dark"] #layarSalesIdea .kb-pillar-summary > div{background:var(--brand-soft);border-color:var(--brand-line);color:var(--brand)}
+  [data-theme="dark"] #layarSalesIdea .ep-chip-row span{background:var(--accent-soft);border-color:var(--accent-line);color:var(--accent)}
+}

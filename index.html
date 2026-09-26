@@ -15,6 +15,11 @@
 <title>PSG Selling Tools — Insurance Hub</title>
 <link rel="stylesheet" href="src/styles.css">
 <link rel="stylesheet" href="src/branding.css">
+<link rel="stylesheet" href="src/sales-idea-player.css?v=103">
+<link rel="stylesheet" href="src/psg-karakter.css?v=103">
+<link rel="stylesheet" href="src/sales-idea-retirement.css?v=103">
+<link rel="stylesheet" href="src/sales-idea-keranjang.css?v=103">
+<link rel="stylesheet" href="src/sales-idea-education.css?v=103">
 <script src="src/access-gate.js"></script>
 <script>/* Tema dipasang sebelum CSS dilukis supaya tidak ada kedipan terang saat
    agen memakai tema Dark. Sengaja inline dan sesingkat mungkin. */
@@ -2242,9 +2247,17 @@ el.addEventListener('pointerdown',function(){tutup(true);});})();</script>
       </div>
       <div class="si-content" id="salesIdeaContent"></div>
       <div class="si-footer">
-        <button class="si-prev" id="siPrev" type="button">← Mulai</button>
-        <span class="si-stepcount" id="siStepCount">Langkah 1 dari 13</span>
-        <button class="si-next" id="siNext" type="button">Berikutnya →</button>
+        <!-- Kontrol pemutar Sales Idea (src/sales-idea-player.js) -->
+        <div class="sip-meta">
+          <ol class="sip-progress" id="siProgress" aria-hidden="true"></ol>
+          <span class="si-stepcount" id="siStepCount" aria-live="polite">Langkah 1 / 13</span>
+        </div>
+        <div class="sip-controls" role="group" aria-label="Kontrol presentasi">
+          <button class="si-prev" id="siPrev" type="button" aria-label="Langkah sebelumnya"><span aria-hidden="true">←</span> <span class="sip-label">Back</span></button>
+          <button class="sip-btn sip-play" id="siPlay" type="button" aria-label="Putar scene"><span aria-hidden="true">▶</span> <span class="sip-label">Play</span></button>
+          <button class="sip-btn sip-replay" id="siReplay" type="button" aria-label="Ulangi scene"><span aria-hidden="true">↻</span> <span class="sip-label">Replay</span></button>
+          <button class="si-next" id="siNext" type="button" aria-label="Langkah berikutnya"><span class="sip-label">Next</span> <span aria-hidden="true">→</span></button>
+        </div>
       </div>
     </div>
   </section>
@@ -2344,5 +2357,10 @@ el.addEventListener('pointerdown',function(){tutup(true);});})();</script>
 <script src="src/app-shell.js"></script>
 <script src="src/tanggal-placeholder.js"></script>
 <script src="src/cetak-orientasi.js"></script>
+<script src="src/sales-idea-player.js?v=103"></script>
+<script src="src/psg-karakter.js?v=103"></script>
+<script src="src/sales-idea-retirement.js?v=103"></script>
+<script src="src/sales-idea-keranjang.js?v=103"></script>
+<script src="src/sales-idea-education.js?v=103"></script>
 </body>
 </html>

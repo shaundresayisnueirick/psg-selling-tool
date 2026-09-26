@@ -1714,6 +1714,40 @@ details.quick-group > summary{
 .sgt-urut{margin:6px 0 0 18px;padding:0}
 .sgt-urut li{margin-bottom:4px}
 .sgt-pensiun-wrap{width:100%}
+/* Posisi atap TUA / PENSIUN (layar saja; hasil cetak tidak berubah).
+   Wadah atap juga berkelas .sgt-lapis-wrap dan .sgt-pensiun-wrap, yang
+   ditulis sesudah .sgt-atap-wrap dan menimpa position/align-items/width-nya.
+   Akibatnya atap jatuh ke alur normal di bawah ruang 104px yang disiapkan
+   untuknya: ada ruang kosong di atas atap dan alas atap menimpa LIFE.
+   Di sini atap ditaruh di alur secara eksplisit dengan tinggi pas 104px;
+   jaraknya ke LIFE mengikuti jarak antar-lapis (gap .sgt-gambar). */
+@media screen{
+  .sgt-gambar.sgt-rumah{padding-top:0}
+  .sgt-rumah > .sgt-atap-wrap{position:relative;top:auto;left:auto;transform:none;width:300px;height:104px;align-items:flex-end}
+  /* nomor prioritas atap duduk di dalam alas segitiga, bukan di ruang
+     kosong di sebelahnya (di tema gelap nomor itu nyaris tak terlihat) */
+  .sgt-rumah > .sgt-atap-wrap > .sgt-nomor{top:auto;bottom:10px;left:46px;transform:none}
+}
+/* Gambar dan keterangan berdampingan (mulai 646px, lebar tempat keduanya
+   berdampingan pada tata letak sebelumnya): kolom keterangan memakai baris
+   yang sama dengan atap dan tiap lapis lewat subgrid, sehingga TUA/PENSIUN,
+   LIFE, CRITICAL ILLNESS, dan HEALTH selalu sejajar dengan bentuknya
+   walaupun tinggi teksnya berubah. Tanpa dukungan subgrid, tata letak lama
+   tetap dipakai. */
+@media screen and (min-width:646px){
+  @supports (grid-template-rows:subgrid){
+    .sgt-bungkus{display:grid;grid-template-columns:300px minmax(0,1fr);grid-template-rows:repeat(4,auto);column-gap:var(--s-5);row-gap:3px;align-items:stretch}
+    .sgt-bungkus > .sgt-gambar.sgt-rumah{grid-column:1;grid-row:1 / span 4;display:grid;grid-template-rows:subgrid;align-items:stretch;justify-items:center;min-width:0;padding:0}
+    .sgt-bungkus .sgt-house-stack{display:contents}
+    .sgt-bungkus .sgt-rumah > .sgt-atap-wrap{height:auto;min-height:104px}
+    .sgt-bungkus .sgt-house-stack > .sgt-lapis-wrap{align-items:stretch}
+    .sgt-bungkus .sgt-house-stack .sgt-lapis{justify-content:center}
+    .sgt-bungkus > .sgt-arti{grid-column:2;grid-row:1 / span 4;display:grid;grid-template-rows:subgrid;min-width:0}
+    .sgt-bungkus .sgt-arti-baris{display:flex;flex-direction:column;justify-content:center;align-items:flex-start}
+    /* teks TUA / PENSIUN rata bawah, sejajar dengan label di alas atap */
+    .sgt-bungkus .sgt-arti-baris:first-child{justify-content:flex-end}
+  }
+}
 
 /* Solusi Segitiga & Program Builder.
    segitiga-solusi.js menyuntikkan <style id="sgsStyle"> berwarna tetap

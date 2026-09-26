@@ -74,6 +74,10 @@
   let current = 0;
   let mode = 'jari';
   const $ = id => document.getElementById(id);
+  // Pemutar interaktif (src/sales-idea-player.js) dan penanda listener
+  // dokumen: keduanya dibuat sekali saja walau init() dipanggil berulang.
+  let pemutar = null;
+  let dokumenTerpasang = false;
 
   function handHtml(side, activeIndex){
     const isLeft = side === 'left';
@@ -84,11 +88,51 @@
     return `<div class="si-hand-wrap ${side}"><div class="si-hand-label">${isLeft?'5 JARI PRODUK':'5 JARI PERTANYAAN'}</div><div class="si-hand-body"><div class="si-real-hand-stage">${svg}</div><div class="si-hand-legend">${items.map((item,i)=>`<div class="si-legend-item ${activeIndex===i?'active':''}"><span class="si-legend-no">${item[0]}</span><div><b>${item[1]}</b><small>${isLeft?item[2]:'Pertanyaan '+item[2]}</small></div></div>`).join('')}</div></div></div>`;
   }
 
-  function closeSalesIdea(){document.body.classList.remove('si-modal-open');if(window.bukaLayar)window.bukaLayar('PRODUK');}
+  function closeSalesIdea(){if(pemutar)pemutar.berhenti();document.body.classList.remove('si-modal-open');if(window.bukaLayar)window.bukaLayar('PRODUK');}
   function openSalesIdea(modeName){mode=modeName;current=0;document.body.classList.add('si-modal-open');render();}
   function salesIdeaHeader(title,subtitle){return `<div class="si-presentation-topbar"><button type="button" class="si-back-hub" data-si-hub>← Sales Idea</button><div class="si-presentation-brand"><span>PSG</span><b>${title}</b><small>${subtitle}</small></div><button type="button" class="si-close" data-si-close aria-label="Tutup Sales Idea">✕</button></div>`;}
   function renderHub(root){root.innerHTML=`<div class="si-hub"><div class="si-hub-head"><div><span class="si-eyebrow">PSG • PRESENTATION TOOLS</span><h2>Sales Idea</h2><p>Pilih satu Sales Idea. Materinya akan dibuka sebagai layar presentasi penuh agar visual dapat ditunjukkan langsung kepada prospek.</p></div><button type="button" class="si-close si-close-hub" data-si-close>✕ Tutup</button></div><div class="si-choice-grid"><button type="button" class="si-choice-card" data-si-choice="jari"><div class="si-choice-visual fingers-choice">🖐️</div><div><span>SALES IDEA 01</span><h3>10 Jari</h3><p>5 ujung risiko + 5 pertanyaan untuk membangun kesadaran.</p></div><strong>Mulai presentasi →</strong></button><button type="button" class="si-choice-card" data-si-choice="basket"><div class="si-choice-visual basket-choice">🧺</div><div><span>SALES IDEA 02</span><h3>Keranjang Kehidupan</h3><p>Visual beban kehidupan, keluarga, proteksi, dan uang.</p></div><strong>Mulai presentasi →</strong></button><button type="button" class="si-choice-card" data-si-choice="education"><div class="si-choice-visual education-choice">🎓</div><div><span>SALES IDEA 03</span><h3>Education Planning</h3><p>Tujuan pendidikan, inflasi, mulai lebih awal, dan proteksi.</p></div><strong>Mulai presentasi →</strong></button><button type="button" class="si-choice-card" data-si-choice="retirement"><div class="si-choice-visual retirement-choice">⌛</div><div><span>SALES IDEA 04</span><h3>Retirement Planning</h3><p>Risiko hidup terlalu lama, kebutuhan aset, compounding, dan proteksi.</p></div><strong>Mulai presentasi →</strong></button><button type="button" class="si-choice-card" data-si-choice="asset"><div class="si-choice-visual asset-choice">🏠</div><div><span>SALES IDEA 05</span><h3>Asset Creation</h3><p>Mengubah rencana aset menjadi pembahasan warisan untuk anak.</p></div><strong>Mulai presentasi →</strong></button></div><div class="si-hub-note">Layar presentasi menampilkan visual dan highlight inti. Tidak ada script dialog agen–prospek.</div></div>`;}
-  function render(){const root=$('salesIdeaContent');if(!root)return;document.body.classList.add('si-modal-open');if(mode==='hub')renderHub(root);else if(mode==='jari')renderFinger(root);else if(mode==='alasan')renderReasons(root);else if(mode==='basket')renderBasket(root);else if(mode==='education')renderEducation(root);else if(mode==='retirement')renderRetirement(root);else if(mode==='asset')renderAssetCreation(root);updateNav();}
+  function renderIsi(root){if(mode==='jari')renderFinger(root);else if(mode==='alasan')renderReasons(root);else if(mode==='basket')renderBasket(root);else if(mode==='education')renderEducation(root);else if(mode==='retirement')renderRetirement(root);else if(mode==='asset')renderAssetCreation(root);}
+  function render(){
+    const root=$('salesIdeaContent');if(!root)return;document.body.classList.add('si-modal-open');
+    const p=siapkanPemutar();
+    if(mode==='hub'){if(p)p.muat([]);renderHub(root);updateNav();return;}
+    if(p){updateNav();p.muat(adeganMode(),mode==='alasan'?current-10:current);return;}
+    renderIsi(root);updateNav();
+  }
+
+  /* Setiap langkah yang sudah ada menjadi satu scene pemutar. Isi dan
+     urutannya tetap dari renderer di atas; pemutar hanya menambah gerak
+     masuk yang ringan dan mengendalikan animasi CSS yang sudah ada. */
+  const SCENE_VISUAL='.si-hands,.kb-visual-card,.ep-visual-card,.rp-visual-card,.ac-visual-card,.si-reason-progress';
+  const SCENE_TEKS='.si-presentation-card,.kb-presentation-card,.ep-presentation-card,.rp-presentation-card,.ac-presentation-card';
+  function jumlahLangkah(m){return (m==='basket'||m==='education')?10:((m==='retirement'||m==='asset')?6:(m==='alasan'?3:13));}
+  function animasiMasuk(tl,stage){
+    tl.add(stage.querySelector(SCENE_VISUAL),[{opacity:0,transform:'translateY(16px) scale(.985)'},{opacity:1,transform:'none'}],{duration:700});
+    tl.add(stage.querySelector(SCENE_TEKS),[{opacity:0,transform:'translateY(12px)'},{opacity:1,transform:'none'}],{duration:560,delay:260});
+  }
+  function adeganMode(){
+    const m=mode,daftar=[];
+    // Retirement Planning: pilot cerita interaktif (src/sales-idea-retirement.js), data tetap retirementSteps.
+    if(m==='retirement'&&window.PSGRetirementStory)return window.PSGRetirementStory.adegan({langkah:retirementSteps,header:salesIdeaHeader('Retirement Planning','Visual sederhana untuk membuka percakapan pensiun'),padaLangkah:i=>{current=i;}});
+    // Keranjang Kehidupan: cerita interaktif (src/sales-idea-keranjang.js), data tetap basketSteps.
+    if(m==='basket'&&window.PSGKeranjangStory)return window.PSGKeranjangStory.adegan({langkah:basketSteps,header:salesIdeaHeader('Keranjang Kehidupan','Visual storytelling tentang beban kehidupan'),padaLangkah:i=>{current=i;}});
+    // Education Planning: cerita interaktif (src/sales-idea-education.js), data tetap educationSteps.
+    if(m==='education'&&window.PSGEducationStory)return window.PSGEducationStory.adegan({langkah:educationSteps,header:salesIdeaHeader('Education Planning','Visual storytelling tentang tujuan pendidikan anak'),padaLangkah:i=>{current=i;}});
+    for(let i=0;i<jumlahLangkah(m);i++){
+      daftar.push({id:m+'-'+(i+1),siapDi:'akhir',animate:animasiMasuk,render:root=>{current=m==='alasan'?10+i:i;renderIsi(root);}});
+    }
+    return daftar;
+  }
+  function siapkanPemutar(){
+    if(pemutar)return pemutar;
+    const P=window.PSGStoryPlayer,sec=$('layarSalesIdea'),stage=$('salesIdeaContent');
+    if(!P||!sec||!stage)return null;
+    pemutar=P.buat({root:sec,stage:stage,
+      ui:{prev:$('siPrev'),next:$('siNext'),play:$('siPlay'),replay:$('siReplay'),count:$('siStepCount'),progress:$('siProgress')},
+      aktif:()=>sec.classList.contains('aktif'),onTutup:closeSalesIdea});
+    return pemutar;
+  }
 
   function renderFinger(root){
     const s=current<10?fingers[current]:null;
@@ -292,16 +336,18 @@
   function updateNav(){
     const prev=$('siPrev'),next=$('siNext'),count=$('siStepCount'),footer=document.querySelector('.si-footer');
     if(mode==='hub'){if(footer)footer.style.display='none';return;} if(footer)footer.style.display='';
+    if(pemutar)return; // tombol, counter, dan progress diatur pemutar
     const total=(mode==='basket'||mode==='education')?10:((mode==='retirement'||mode==='asset')?6:13); const pos=(mode==='basket'||mode==='education'||mode==='retirement'||mode==='asset')?current:(current<10?current:current+1);
     if(prev){prev.disabled=current===0;prev.textContent=current===0?'← Awal':'← Sebelumnya';} if(next){next.textContent=current===total-1?'✓ Selesai':'Berikutnya →';} if(count)count.textContent=`Langkah ${pos+1} dari ${total}`;
   }
 
   function next(){
+    if(pemutar&&mode!=='hub'){pemutar.next();return;}
     const max=(mode==='basket'||mode==='education')?9:((mode==='retirement'||mode==='asset')?5:12);
     if(current<max){current++;render();}
     else {current=0;render();}
   }
-  function prev(){if(current>0){current--;render();}}
+  function prev(){if(pemutar&&mode!=='hub'){pemutar.back();return;}if(current>0){current--;render();}}
   function reset(){current=0;mode='hub';render();}
   function setMode(nextMode){if(['jari','basket','education','retirement','asset','alasan'].includes(nextMode)){mode=nextMode;current=0;render();}else if(nextMode==='hub'){mode='hub';current=0;render();}}
 
@@ -312,7 +358,7 @@
     if(nextBtn&&!nextBtn.dataset.bound){nextBtn.dataset.bound='1';nextBtn.addEventListener('click',next);}
     if(prevBtn&&!prevBtn.dataset.bound){prevBtn.dataset.bound='1';prevBtn.addEventListener('click',prev);}
     if(resetBtn&&!resetBtn.dataset.bound){resetBtn.dataset.bound='1';resetBtn.addEventListener('click',reset);}
-    document.addEventListener('click',e=>{const choice=e.target.closest('[data-si-choice]');if(choice){openSalesIdea(choice.dataset.siChoice);return;}const hub=e.target.closest('[data-si-hub]');if(hub){mode='hub';current=0;render();return;}const close=e.target.closest('[data-si-close]');if(close){closeSalesIdea();return;}});
+    if(!dokumenTerpasang){dokumenTerpasang=true;document.addEventListener('click',e=>{const choice=e.target.closest('[data-si-choice]');if(choice){openSalesIdea(choice.dataset.siChoice);return;}const hub=e.target.closest('[data-si-hub]');if(hub){mode='hub';current=0;render();return;}const close=e.target.closest('[data-si-close]');if(close){closeSalesIdea();return;}});}
     render();
   }
 
