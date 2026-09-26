@@ -63,12 +63,14 @@
 
   /* bar atas: satu baris di semua lebar */
   #layarSalesIdea .rps > .si-presentation-topbar{
-    display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:10px;
+    display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;align-items:center;gap:10px;
     min-height:56px;max-width:none;margin:0;padding:6px 0;
   }
   #layarSalesIdea .rps > .si-presentation-topbar .si-back-hub{grid-column:1;grid-row:1}
   #layarSalesIdea .rps > .si-presentation-topbar .si-presentation-brand{grid-column:2;grid-row:1;min-width:0;justify-content:center;text-align:center}
-  #layarSalesIdea .rps > .si-presentation-topbar .si-close{grid-column:3;grid-row:1}
+  /* tombol Narasi: komponen & gaya dari Keranjang, warna aksen Retirement */
+  #layarSalesIdea .rps > .si-presentation-topbar .kbs-suara{grid-column:3;grid-row:1;--kbs-aksen-teks:var(--rps-aksen-teks);--kbs-emas:var(--rps-emas)}
+  #layarSalesIdea .rps > .si-presentation-topbar .si-close{grid-column:4;grid-row:1}
   @media (max-width:620px){
     #layarSalesIdea .rps > .si-presentation-topbar{min-height:50px;padding:3px 0;gap:6px}
     #layarSalesIdea .rps > .si-presentation-topbar .si-back-hub{padding:0 8px 0 0}

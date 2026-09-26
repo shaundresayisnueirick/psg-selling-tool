@@ -494,9 +494,27 @@
 
   var PETA = { risks: S1, timeline: S2, ratio: S3, target: S4, compound: S5, complete: S6 };
 
+  /* Narasi presenter per scene (urutan = retirementSteps). Dibacakan
+     oleh narator yang sama dengan Keranjang (window.PSGNarasi). */
+  var NARASI = [
+    'Ketika kita membicarakan perencanaan keuangan, ada tiga risiko besar yang perlu kita pikirkan: meninggal terlalu cepat, hidup terlalu lama, dan disabilitas. Di sini kita fokus pada risiko hidup terlalu lama. Kebutuhan hidup tetap berjalan, sementara penghasilan dari bekerja sudah berhenti.',
+    'Masa pensiun bisa berlangsung panjang. Dalam ilustrasi sederhana ini, kita mulai bekerja di usia 25, pensiun di usia 55, dan hidup sampai usia 85. Artinya, sekitar 30 tahun masa bekerja perlu membantu membiayai sekitar 30 tahun masa pensiun. Penghasilan saat bekerja perlu menopang dua fase kehidupan.',
+    'Lalu, berapa yang perlu disisihkan? Materi ini memakai ilustrasi menyisihkan 50 persen penghasilan, dan 50 persen sisanya untuk dibelanjakan. Kalau saat ini belum mampu menyisihkan 50 persen, jangan menunggu sempurna. Mulailah dari angka yang realistis.',
+    'Sekarang bayangkan gaya hidup kita hari ini, misalnya 10 juta rupiah per bulan. Kebutuhan saat pensiun nanti tidak otomatis sama dengan angka itu. Targetnya perlu dihitung, dengan mempertimbangkan waktu, inflasi, dan asumsi hasil.',
+    'Waktu adalah aset. Efek bunga berbunga bekerja bersama waktu. Dalam ilustrasi ini, dengan asumsi menyisihkan 1 juta rupiah per bulan selama 30 tahun dan hasil 6 persen per tahun, dananya bisa tumbuh menjadi sekitar 1 miliar rupiah. Angka ini adalah ilustrasi dengan asumsi, bukan hasil yang pasti. Pesannya: semakin awal kita mulai, semakin banyak waktu bagi dana untuk berkembang.',
+    'Jadi, ada tiga hal yang bekerja bersama: mulai lebih awal, memanfaatkan efek bunga berbunga, dan proteksi. Bangun dana pensiun sedini mungkin. Lalu siapkan proteksi, agar rencana ini tidak berhenti ketika kemampuan kita menghasilkan penghasilan terganggu.'
+  ];
+  var N = null;
+
   function adegan(opsi) {
     var o = opsi || {};
     var langkah = Array.isArray(o.langkah) ? o.langkah : [];
+    N = window.PSGNarasi || null;
+    if (N) {
+      N.daftar('.rps', 'data-rps', NARASI);
+      N.pasang();
+      o = Object.assign({}, o, { header: N.tombol(o.header || '') });
+    }
     return langkah.map(function (step, i) {
       var sc = PETA[step.scene];
       var n = i + 1;
@@ -504,10 +522,12 @@
         id: 'retirement-' + n,
         fit: true,
         siapDi: 'akhir',
+        manual: true,
         render: function (stage) {
           if (typeof o.padaLangkah === 'function') o.padaLangkah(i);
           stage.innerHTML = kerangka(o, step, n, sc ? sc.set(step) : '', sc ? sc.dunia : {}, sc ? sc.kelas : '');
           amati(stage);
+          if (N) N.tandai();
         },
         animate: function (tl, stage) {
           animasiTeks(tl, stage);
