@@ -117,6 +117,8 @@
     if(m==='retirement'&&window.PSGRetirementStory)return window.PSGRetirementStory.adegan({langkah:retirementSteps,header:salesIdeaHeader('Retirement Planning','Visual sederhana untuk membuka percakapan pensiun'),padaLangkah:i=>{current=i;}});
     // Keranjang Kehidupan: cerita interaktif (src/sales-idea-keranjang.js), data tetap basketSteps.
     if(m==='basket'&&window.PSGKeranjangStory)return window.PSGKeranjangStory.adegan({langkah:basketSteps,header:salesIdeaHeader('Keranjang Kehidupan','Visual storytelling tentang beban kehidupan'),padaLangkah:i=>{current=i;}});
+    // Education Planning: cerita interaktif (src/sales-idea-education.js), data tetap educationSteps.
+    if(m==='education'&&window.PSGEducationStory)return window.PSGEducationStory.adegan({langkah:educationSteps,header:salesIdeaHeader('Education Planning','Visual storytelling tentang tujuan pendidikan anak'),padaLangkah:i=>{current=i;}});
     for(let i=0;i<jumlahLangkah(m);i++){
       daftar.push({id:m+'-'+(i+1),siapDi:'akhir',animate:animasiMasuk,render:root=>{current=m==='alasan'?10+i:i;renderIsi(root);}});
     }

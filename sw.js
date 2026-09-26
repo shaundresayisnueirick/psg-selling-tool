@@ -13,7 +13,7 @@
    - Hanya jawaban yang benar-benar berhasil (status 200) yang disimpan,
      sehingga halaman error tidak pernah ikut tersimpan. */
 
-const VERSI = 'insurance-hub-v101.0.0';
+const VERSI = 'insurance-hub-v102.0.0';
 
 /* Semua berkas inti ikut disimpan sejak pemasangan, supaya aplikasi tetap
    utuh walaupun kunjungan pertama terputus di tengah jalan.
@@ -31,10 +31,11 @@ const BERKAS = [
   './manifest.webmanifest',
   './src/styles.css',
   './src/branding.css',
-  './src/sales-idea-player.css?v=101',
-  './src/psg-karakter.css?v=101',
-  './src/sales-idea-retirement.css?v=101',
-  './src/sales-idea-keranjang.css?v=101',
+  './src/sales-idea-player.css?v=102',
+  './src/psg-karakter.css?v=102',
+  './src/sales-idea-retirement.css?v=102',
+  './src/sales-idea-keranjang.css?v=102',
+  './src/sales-idea-education.css?v=102',
   './src/cetak-besar.css',
   './src/access-gate.js',
   './src/theme-switcher.js',
@@ -87,10 +88,11 @@ const BERKAS = [
   './src/app-shell.js',
   './src/tanggal-placeholder.js',
   './src/cetak-orientasi.js',
-  './src/sales-idea-player.js?v=101',
-  './src/psg-karakter.js?v=101',
-  './src/sales-idea-retirement.js?v=101',
-  './src/sales-idea-keranjang.js?v=101',
+  './src/sales-idea-player.js?v=102',
+  './src/psg-karakter.js?v=102',
+  './src/sales-idea-retirement.js?v=102',
+  './src/sales-idea-keranjang.js?v=102',
+  './src/sales-idea-education.js?v=102',
   './assets/logo-psg.png',
   './assets/logo-psg-terang.png',
   './icons/ikon-192.png',

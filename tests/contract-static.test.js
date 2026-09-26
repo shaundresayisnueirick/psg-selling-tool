@@ -50,8 +50,8 @@ const JS_DIIZINKAN = {
   }],
   'src/sales-idea.js': [{
     dari: 'dfd143970d9e79bc8ec46687724748da98147b9ae78985619a71c83c7a0c747f',
-    ke: '01aa062c43d92869814bbcf1f647ec43602ee459aafa70695106ebf0f50e9d23',
-    alasan: 'Sales Idea memakai pemutar interaktif (src/sales-idea-player.js): tiap langkah yang ada menjadi scene dengan Play/Pause/Replay/Next/Back. init() kini idempoten sehingga listener klik dokumen tidak lagi menumpuk tiap kali layar dibuka. Retirement Planning memakai cerita interaktif (src/sales-idea-retirement.js) dengan data retirementSteps yang sama. Keranjang Kehidupan memakai cerita interaktif (src/sales-idea-keranjang.js) dengan data basketSteps yang sama. Data, ID, kelas, dan API SalesIdea10Jari tidak berubah.',
+    ke: '4a5c599f27938d1aa130bee49f65240ea76c7f6a6486b0283c5c065581bd8137',
+    alasan: 'Sales Idea memakai pemutar interaktif (src/sales-idea-player.js): tiap langkah yang ada menjadi scene dengan Play/Pause/Replay/Next/Back. init() kini idempoten sehingga listener klik dokumen tidak lagi menumpuk tiap kali layar dibuka. Retirement Planning memakai cerita interaktif (src/sales-idea-retirement.js) dengan data retirementSteps yang sama. Keranjang Kehidupan memakai cerita interaktif (src/sales-idea-keranjang.js) dengan data basketSteps yang sama. Education Planning memakai cerita interaktif (src/sales-idea-education.js) dengan data educationSteps yang sama. Data, ID, kelas, dan API SalesIdea10Jari tidak berubah.',
   }],
 };
 
