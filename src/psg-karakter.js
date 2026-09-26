@@ -224,22 +224,25 @@
     },
     kacamata: '<g class="k-kacamata"><rect x="50.2" y="28" width="8.4" height="6.6" rx="2.4"/><rect x="61.4" y="28" width="8.4" height="6.6" rx="2.4"/><path d="M58.6 30.6 H61.4"/></g>'
   };
+  /* titik putar ditulis inline di markup: geometri pose tidak bergantung
+     pada versi psg-karakter.css yang kebetulan termuat */
+  function poros(x, y) { return ' style="transform-origin:' + x + 'px ' + y + 'px"'; }
   function svgDepan(o) {
     var pakaian = DEPAN.o[o.pakaian] ? o.pakaian : 'kerja';
     var usia = o.usia === 'senior' ? 'senior' : 'dewasa';
     var rambut = usia === 'senior' ? 'tua' : 'muda';
     var daftarO = Object.keys(DEPAN.o);
     var kaki = function (sisi, p, l, a, sepatu) {
-      return '<g class="k-kaki k-kaki-' + sisi + '"><path class="k-celana" d="M' + xy(p) + ' L' + xy(l) + '"/>' +
-        '<g class="k-betis k-betis-' + sisi + '"><path class="k-celana" d="M' + xy(l) + ' L' + xy(a) + '"/><path class="k-sepatu" d="' + sepatu + '"/></g></g>';
+      return '<g class="k-kaki k-kaki-' + sisi + '"' + poros(p[0], p[1]) + '><path class="k-celana" d="M' + xy(p) + ' L' + xy(l) + '"/>' +
+        '<g class="k-betis k-betis-' + sisi + '"' + poros(l[0], l[1]) + '><path class="k-celana" d="M' + xy(l) + ' L' + xy(a) + '"/><path class="k-sepatu" d="' + sepatu + '"/></g></g>';
     };
     var lengan = function (sisi, x) {
       var h = '';
       daftarO.forEach(function (k) { h += '<path class="k-o k-o-' + k + ' k-lengan-kain" d="M' + x + ' 64 L' + x + ' 90"/>'; });
-      h += '<g class="k-hasta k-hasta-' + sisi + '">';
+      h += '<g class="k-hasta k-hasta-' + sisi + '"' + poros(x, 90) + '>';
       daftarO.forEach(function (k) { h += '<path class="k-o k-o-' + k + ' k-lengan-kain" d="M' + x + ' 90 L' + x + ' 115"/>'; });
       h += '<circle class="k-kulit k-tangan" cx="' + x + '" cy="120" r="5.6"/></g>';
-      return '<g class="k-lengan k-lengan-' + sisi + '">' + h + '</g>';
+      return '<g class="k-lengan k-lengan-' + sisi + '"' + poros(x, 64) + '>' + h + '</g>';
     };
     var baju = daftarO.map(function (k) { return '<g class="k-o k-o-' + k + '"><path class="k-kain" d="' + DEPAN.badan + '"/>' + DEPAN.o[k] + '</g>'; }).join('');
     var rmb = Object.keys(DEPAN.rambut).map(function (k) { return '<path class="k-h k-h-' + k + '" d="' + DEPAN.rambut[k] + '"/>'; }).join('');
@@ -250,12 +253,12 @@
       (o.kacamata ? ' data-kacamata=""' : '') +
       (o.gaya ? ' style="' + String(o.gaya).replace(/"/g, '') + '"' : '') + '>' +
       '<ellipse class="k-bayang" cx="60" cy="233" rx="30" ry="4.6"/>' +
-      '<g class="k-tubuh">' +
+      '<g class="k-tubuh"' + poros(60, 230) + '>' +
         kaki('b', [52, 124], [51, 171.5], [50, 219], 'M40 226 C40 219 44 215 50 215 C56 215 59 219 59 226 Z') +
         kaki('d', [68, 124], [69, 171.5], [70, 219], 'M61 226 C61 219 64 215 70 215 C76 215 80 219 80 226 Z') +
-        '<g class="k-atas">' + lengan('b', 44) + lengan('d', 76) +
+        '<g class="k-atas"' + poros(60, 126) + '>' + lengan('b', 44) + lengan('d', 76) +
           '<rect class="k-kulit" x="55" y="42" width="10" height="13" rx="4.5"/>' + baju +
-          '<g class="k-kepala">' + DEPAN.kepala + rmb + DEPAN.kacamata + '</g>' +
+          '<g class="k-kepala"' + poros(60, 46) + '>' + DEPAN.kepala + rmb + DEPAN.kacamata + '</g>' +
         '</g>' +
       '</g></svg>';
   }

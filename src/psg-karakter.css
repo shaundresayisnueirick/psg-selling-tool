@@ -61,18 +61,7 @@
   .psg-k[data-usia="anak"] .k-lengan-d{transform-origin:74px 116px}
   .psg-k[data-usia="anak"] .k-atas{transform-origin:62px 164px}
   .psg-k[data-usia="anak"] .k-kepala{transform-origin:62px 100px}
-  /* tampak depan (hadap:'depan') */
-  .psg-k[data-hadap="depan"] .k-kaki-b{transform-origin:52px 124px}
-  .psg-k[data-hadap="depan"] .k-kaki-d{transform-origin:68px 124px}
-  .psg-k[data-hadap="depan"] .k-betis-b{transform-origin:51px 171.5px}
-  .psg-k[data-hadap="depan"] .k-betis-d{transform-origin:69px 171.5px}
-  .psg-k[data-hadap="depan"] .k-lengan-b{transform-origin:44px 64px}
-  .psg-k[data-hadap="depan"] .k-lengan-d{transform-origin:76px 64px}
-  .psg-k[data-hadap="depan"] .k-hasta-b{transform-origin:44px 90px}
-  .psg-k[data-hadap="depan"] .k-hasta-d{transform-origin:76px 90px}
-  .psg-k[data-hadap="depan"] .k-atas{transform-origin:60px 126px}
-  .psg-k[data-hadap="depan"] .k-tubuh{transform-origin:60px 230px}
-  .psg-k[data-hadap="depan"] .k-kepala{transform-origin:60px 46px}
+  /* tampak depan (hadap:'depan'): titik putar ditulis inline oleh psg-karakter.js */
 
   /* lapisan yang tampil ditentukan atribut data-* */
   .psg-k .k-o,.psg-k .k-h,.psg-k .k-kacamata,.psg-k .k-tas{opacity:0}

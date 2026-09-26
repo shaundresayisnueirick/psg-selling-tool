@@ -179,7 +179,7 @@
   ST[4] = ubah(ST[3], { tanah: 1, pencari: { gy: 2 }, kel: KEL_TANAH });
   /* lelah: bahu turun, siku makin menekuk (lengan atas turun, lengan bawah tetap tegak) */
   ST[5] = ubah(ST[4], { label: 1, pencari: { bahu: 1.8, lB: 144, sB: 26, lD: -144, sD: -26, lutut: 5 } });
-  ST[6] = ubah(ST[5], { pencari: { bahu: 3.2, lB: 134, sB: 42, lD: -134, sD: -42, lutut: 12, kepala: 5 },
+  ST[6] = ubah(ST[5], { pencari: { bahu: 3.2, lB: 134, sB: 42, lD: -134, sD: -42, lutut: 12 },
     kel: { istri: [0, -10, -8], anak1: [0, 4, -12], anak2: [0, -7, -12] } });
   /* risiko: genggaman kanan lepas, landasan bertumpu di tangan kiri dan miring ke arah anak-anak */
   ST[7] = ubah(ST[6], { label: 0, redup: 0.38,
