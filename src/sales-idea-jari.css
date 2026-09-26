@@ -1,0 +1,152 @@
+/* =====================================================================
+   SALES IDEA — 10 JARI (cerita tangan interaktif)
+   ---------------------------------------------------------------------
+   Pasangan src/sales-idea-jari.js. Hanya layar.
+   0. Token tema — terang: bersih & hangat; gelap: kulit diredam,
+      tanpa putih menyilaukan. Warna lewat token, jadi ganti tema di
+      tengah scene tidak mengulang animasi.
+   1. Tata letak satu layar: bar atas, panggung, panel teks (bawah di
+      HP, samping di layar lebar) — pola yang sama dengan Retirement.
+   2. Panggung: satu SVG (viewBox 400×300) yang menyesuaikan ukuran
+      panggung; lengan memanjang ke tepi bawah di panggung tegak.
+   3. Pose jari: keadaan akhir tiap scene (lipat / hitung / fokus).
+   4. Panel teks & ringkasan SKCMT.
+   Tidak ada animasi/transisi CSS di dalam panggung: semua gerak milik
+   timeline pemutar (animasi CSS akan ikut diadopsi pemutar).
+   ===================================================================== */
+@media screen{
+
+  /* ---------- 0. Token ---------- */
+  .jps{
+    --jps-latar-1:#fffaf4;--jps-latar-2:#f3ece4;--jps-sorot:rgba(255,226,190,.75);
+    --jps-kulit-1:#f7d9c4;--jps-kulit-2:#e9b596;--jps-kulit-3:#c98a6c;
+    --jps-telapak-1:#f9dfcc;--jps-telapak-2:#e6ad8d;
+    --jps-garis:#a8664f;--jps-teduh:#5b2d20;--jps-bayang:rgba(96,52,32,.22);
+    --jps-sinar:#f0b43c;--jps-emas:#c8912e;
+    --jps-lencana-bg:#fffdfa;--jps-lencana-teks:#8a2a14;--jps-lencana-garis:#e7c9a4;
+    --jps-chip-bg:rgba(255,255,255,.96);--jps-chip-garis:#e5cfb6;--jps-chip-teks:#3a1d14;
+    --jps-panggung-garis:#ece3d8;--jps-panggung-bayang:0 18px 40px rgba(60,32,16,.08);
+    --jps-aksen-teks:#a60101;
+  }
+  [data-theme="dark"] .jps{
+    --jps-latar-1:#1a1f33;--jps-latar-2:#090d19;--jps-sorot:rgba(255,178,102,.2);
+    --jps-kulit-1:#d6a98c;--jps-kulit-2:#b88063;--jps-kulit-3:#855440;
+    --jps-telapak-1:#d9ae92;--jps-telapak-2:#ad7657;
+    --jps-garis:#6e3f2e;--jps-teduh:#12080a;--jps-bayang:rgba(0,0,0,.5);
+    --jps-sinar:#f2c060;--jps-emas:#f0c060;
+    --jps-lencana-bg:#18203a;--jps-lencana-teks:#f5cd7a;--jps-lencana-garis:rgba(242,192,96,.55);
+    --jps-chip-bg:rgba(17,23,40,.92);--jps-chip-garis:rgba(242,192,96,.4);--jps-chip-teks:#f5ead8;
+    --jps-panggung-garis:rgba(255,255,255,.07);--jps-panggung-bayang:0 24px 60px rgba(0,0,0,.55);
+    --jps-aksen-teks:var(--brand);
+  }
+
+  /* ---------- 1. Tata letak satu layar ---------- */
+  #layarSalesIdea.aktif .si-content.sip-fit > .jps{flex:1 1 auto}
+  .jps{min-height:0;width:100%;max-width:1500px;margin:0 auto;display:grid;grid-template-rows:auto minmax(0,1fr);gap:10px}
+  .jps-body{min-height:0;display:grid;grid-template-rows:minmax(0,1fr) auto;gap:12px}
+  @media (min-width:1024px),(min-aspect-ratio:3/2) and (max-height:560px){
+    .jps-body{grid-template-rows:minmax(0,1fr);grid-template-columns:minmax(0,1fr) clamp(260px,27vw,380px);gap:18px}
+  }
+  #layarSalesIdea .jps > .si-presentation-topbar{
+    display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:10px;
+    min-height:56px;max-width:none;margin:0;padding:6px 0;
+  }
+  #layarSalesIdea .jps > .si-presentation-topbar .si-back-hub{grid-column:1;grid-row:1}
+  #layarSalesIdea .jps > .si-presentation-topbar .si-presentation-brand{grid-column:2;grid-row:1;min-width:0;justify-content:center;text-align:center}
+  #layarSalesIdea .jps > .si-presentation-topbar .si-close{grid-column:3;grid-row:1}
+  @media (max-width:620px){
+    #layarSalesIdea .jps > .si-presentation-topbar{min-height:50px;padding:3px 0;gap:6px}
+    #layarSalesIdea .jps > .si-presentation-topbar .si-back-hub{padding:0 8px 0 0}
+    #layarSalesIdea .jps > .si-presentation-topbar .si-presentation-brand{flex-wrap:nowrap;overflow:hidden}
+    #layarSalesIdea .jps > .si-presentation-topbar .si-presentation-brand b{font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    #layarSalesIdea .jps > .si-presentation-topbar .si-presentation-brand small{display:none}
+  }
+  @media (max-width:380px){
+    #layarSalesIdea .jps > .si-presentation-topbar .si-presentation-brand span{display:none}
+  }
+
+  /* ---------- 2. Panggung ---------- */
+  .jps-stage{
+    position:relative;margin:0;min-height:170px;min-width:0;overflow:hidden;isolation:isolate;
+    border-radius:22px;border:1px solid var(--jps-panggung-garis);box-shadow:var(--jps-panggung-bayang);
+    background:var(--jps-latar-2);-webkit-user-select:none;user-select:none;
+  }
+  @media (max-width:620px){.jps-stage{border-radius:18px}}
+  .jps-latar{position:absolute;inset:0;background:radial-gradient(120% 95% at 50% 40%,var(--jps-latar-1) 0%,var(--jps-latar-2) 78%)}
+  .jps-svg{position:absolute;inset:0;width:100%;height:100%;display:block;overflow:hidden}
+  .jps-kamera{transform-origin:200px 180px}
+  .jps-tangan,.jps-gestur,.jps-napas,.jps-gerak{transform-origin:0 0}
+
+  .jps-lengan{opacity:.96}
+  .jps-telapak{stroke:var(--jps-kulit-3);stroke-width:.8;stroke-opacity:.45}
+  .jps-kulit-jari{stroke:var(--jps-kulit-3);stroke-width:.8;stroke-opacity:.5}
+  .jps-garis-telapak,.jps-lipatan{fill:none;stroke:var(--jps-garis);stroke-width:1.5;stroke-linecap:round;opacity:.42}
+  .jps-lipatan{stroke-width:1.2;opacity:.5}
+  .jps-ujung{fill:var(--jps-kulit-1);opacity:.55}
+  .jps-cekung{opacity:.32}
+  .jps-kilap{fill:var(--jps-kulit-1);opacity:.16}
+  .jps-teduh{fill:var(--jps-teduh);opacity:0}
+  .jps-sinar{fill:none;stroke:var(--jps-sinar);stroke-width:7;filter:url(#jpsKabur);opacity:0}
+  .jps-lencana{opacity:0}
+  .jps-lencana circle{fill:var(--jps-lencana-bg);stroke:var(--jps-lencana-garis);stroke-width:1.2}
+  .jps-lencana text{fill:var(--jps-lencana-teks);font-family:inherit;font-size:10px;font-weight:900;text-anchor:middle}
+
+  /* ---------- 3. Pose jari (keadaan akhir) ---------- */
+  .jps-lipat .jps-gerak{transform:translate(0px,3px) scale(.96,.72)}
+  .jps-j1.jps-lipat .jps-gerak{transform:rotate(30deg) scale(.9,.8)}
+  .jps-lipat .jps-teduh{opacity:.3}
+  .jps-hitung .jps-teduh{opacity:.07}
+  .jps-hitung .jps-lencana{opacity:1}
+  .jps-fokus .jps-gerak{transform:translate(0px,-7px) scale(1.03)}
+  .jps-j1.jps-fokus .jps-gerak{transform:rotate(-6deg) translate(0px,-5px) scale(1.03)}
+  .jps-fokus .jps-sinar,.jps-fokus .jps-lencana{opacity:1}
+  .jps-fokus .jps-lencana circle{fill:var(--jps-sinar);stroke:var(--jps-sinar)}
+  .jps-fokus .jps-lencana text{fill:#3a1d0c}
+  /* tangan pertanyaan: pergelangan sedikit miring — gestur bertanya */
+  .jps-tangan-q .jps-gestur{transform:rotate(-4deg)}
+
+  /* label fokus di ujung jari */
+  .jps-chip-pil{fill:var(--jps-chip-bg);stroke:var(--jps-chip-garis);stroke-width:1}
+  .jps-chip-tali{fill:none;stroke:var(--jps-sinar);stroke-width:1.3;stroke-linecap:round;opacity:.85}
+  .jps-chip-teks{fill:var(--jps-chip-teks);font-family:inherit;font-size:12px;font-weight:850;letter-spacing:.01em;text-anchor:middle}
+
+  /* ---------- 4. Panel teks ---------- */
+  .jps-text{min-width:0;min-height:0;display:grid;gap:6px;align-content:start;padding:14px 16px;border:1px solid var(--border);border-radius:18px;background:var(--surface);box-shadow:var(--shadow-sm)}
+  .jps-ringkas{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px}
+  .jps-ringkas-label{font-size:10.5px;font-weight:900;letter-spacing:.1em;color:var(--text-3)}
+  .jps-ringkas-selesai{padding:2px 8px;border-radius:999px;background:var(--surface-2);border:1px solid var(--border);font-size:10.5px;font-weight:900;letter-spacing:.08em;color:var(--text-2)}
+  .jps-ubin-deret{display:inline-flex;gap:4px}
+  .jps-ubin{position:relative;display:inline-grid;place-items:center;width:24px;height:24px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text-3);font-size:11.5px;overflow:hidden}
+  .jps-ubin b{position:relative;font-weight:900}
+  .jps-ubin-isi{position:absolute;inset:0;opacity:0;background:color-mix(in srgb,var(--jps-aksen-teks) 16%,transparent)}
+  .jps-ubin-hitung{color:var(--text);border-color:color-mix(in srgb,var(--jps-aksen-teks) 30%,var(--border))}
+  .jps-ubin-hitung .jps-ubin-isi{opacity:.45}
+  .jps-ubin-fokus{color:var(--jps-aksen-teks);border-color:var(--jps-aksen-teks)}
+  .jps-ubin-fokus .jps-ubin-isi{opacity:1}
+  .jps-kicker{font-size:10.5px;font-weight:900;letter-spacing:.12em;color:var(--jps-aksen-teks)}
+  .jps-title{margin:0;font-size:clamp(17px,2.1vw,26px);line-height:1.2;letter-spacing:-.015em;color:var(--text)}
+  .jps-focus{margin:0;font-size:clamp(12.5px,1.25vw,16px);line-height:1.35;font-weight:900;letter-spacing:.02em;color:var(--jps-aksen-teks)}
+  .jps-isi{margin:0;font-size:clamp(13px,1.12vw,15px);line-height:1.5;color:var(--text-2)}
+  .jps-inti{display:grid;gap:2px;padding:9px 11px;border-radius:12px;background:var(--surface-2);border:1px solid var(--border)}
+  .jps-inti b{font-size:11px;font-weight:900;letter-spacing:.06em;color:var(--text-3);text-transform:uppercase}
+  .jps-inti p{margin:0;font-size:13px;line-height:1.45;color:var(--text)}
+  .jps-lanjut{display:grid;gap:2px;padding:9px 11px;border-radius:12px;border:1px dashed color-mix(in srgb,var(--jps-aksen-teks) 45%,var(--border));font-size:12.5px;line-height:1.4;color:var(--text-2)}
+  .jps-lanjut b{color:var(--text)}
+  .jps-cue{margin:2px 0 0;color:var(--text-3);font-size:11.5px;line-height:1.45}
+  @media (min-width:1024px),(min-aspect-ratio:3/2) and (max-height:560px){
+    .jps-text{align-content:center;padding:20px 22px;gap:10px}
+  }
+  @media (max-width:620px){
+    .jps-kicker,.jps-cue{display:none}
+    .jps-text{padding:11px 14px;gap:5px}
+  }
+  @media (max-width:1023px) and (max-height:760px){
+    .jps-kicker,.jps-cue{display:none}
+    .jps-text{padding:11px 14px;gap:5px}
+    .jps-inti{padding:7px 10px}
+  }
+  @media (min-aspect-ratio:3/2) and (max-height:560px){
+    .jps-text{overflow:auto;padding:12px 14px}
+    .jps-kicker,.jps-cue{display:none}
+  }
+}
