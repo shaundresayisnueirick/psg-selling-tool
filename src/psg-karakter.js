@@ -22,6 +22,9 @@
      jenis    : 'wanita' → rambut panjang + pakaian 'wanita'
      usia     : 'anak' juga didukung (proporsi anak)
      gaya     : override token --k-* per tokoh (mis. warna baju anak)
+     hadap    : 'depan' → tampak depan simetris, bersendi (pose menopang
+                di atas kepala); kelas lengan/kaki sama: -b = kiri
+                layar, -d = kanan layar
    PSGKarakter.jalan(tl, root, { mulai, durasi, langkah })
      Mendaftarkan siklus jalan (kaki, lengan, ayunan badan) ke
      timeline pemutar. Jumlah langkah dibulatkan ke genap supaya
@@ -39,6 +42,7 @@
 
   function svg(opsi) {
     var o = opsi || {};
+    if (o.hadap === 'depan') return svgDepan(o);
     if (o.sendi || o.usia === 'anak' || o.jenis === 'wanita') return svgLanjut(o);
     var usia = o.usia || 'dewasa';
     var pakaian = o.pakaian || 'kerja';
@@ -201,6 +205,61 @@
       '</g></svg>';
   }
 
+  /* ---------- Tampak depan (dewasa, bersendi) ----------
+     Simetris terhadap x = 60. Lengan digambar di belakang badan
+     sehingga sendi bahu tertutup saat lengan diangkat. Poros:
+     bahu 44/76,64 · siku 44/76,90 · tangan 44/76,120 ·
+     pinggul 52/68,124 · lutut 51/69,171.5 · kepala 60,46. */
+  var DEPAN = {
+    badan: 'M40 64 C40 57 47 53 55 53 H65 C73 53 80 57 80 64 L77 122 C77 126 74 128 70 128 H50 C46 128 43 126 43 122 Z',
+    o: {
+      muda: '<path class="k-kulit" d="M54 53 Q60 61 66 53 Z"/>',
+      kerja: '<path class="k-kemeja" d="M54 53 L60 76 L66 53 Z"/><path class="k-dasi" d="M58.7 56 H61.3 L62.9 77 L60 81 L57.1 77 Z"/><path class="k-garis" d="M53.5 53.5 L58 80 M66.5 53.5 L62 80"/>',
+      santai: '<path class="k-dalam" d="M54.5 53 L60 70 L65.5 53 Z"/><path class="k-garis" d="M60 70 V126"/><circle class="k-kancing" cx="62.2" cy="86" r="1.5"/><circle class="k-kancing" cx="62.2" cy="102" r="1.5"/>'
+    },
+    kepala: '<ellipse class="k-kulit-2" cx="44.6" cy="33" rx="2.6" ry="4"/><ellipse class="k-kulit-2" cx="75.4" cy="33" rx="2.6" ry="4"/><circle class="k-kulit" cx="60" cy="31" r="15.5"/>',
+    rambut: {
+      muda: 'M44.6 31 C44 18.5 51 13 60 13 C69 13 76 18.5 75.4 31 C73 25 67.5 22.5 60 22.5 C52.5 22.5 47 25 44.6 31 Z',
+      tua: 'M45.2 30 C45.2 20 51.6 15.6 60 15.6 C68.4 15.6 74.8 20 74.8 30 C72.4 25.6 67 24 60 24 C53 24 47.6 25.6 45.2 30 Z'
+    },
+    kacamata: '<g class="k-kacamata"><rect x="50.2" y="28" width="8.4" height="6.6" rx="2.4"/><rect x="61.4" y="28" width="8.4" height="6.6" rx="2.4"/><path d="M58.6 30.6 H61.4"/></g>'
+  };
+  function svgDepan(o) {
+    var pakaian = DEPAN.o[o.pakaian] ? o.pakaian : 'kerja';
+    var usia = o.usia === 'senior' ? 'senior' : 'dewasa';
+    var rambut = usia === 'senior' ? 'tua' : 'muda';
+    var daftarO = Object.keys(DEPAN.o);
+    var kaki = function (sisi, p, l, a, sepatu) {
+      return '<g class="k-kaki k-kaki-' + sisi + '"><path class="k-celana" d="M' + xy(p) + ' L' + xy(l) + '"/>' +
+        '<g class="k-betis k-betis-' + sisi + '"><path class="k-celana" d="M' + xy(l) + ' L' + xy(a) + '"/><path class="k-sepatu" d="' + sepatu + '"/></g></g>';
+    };
+    var lengan = function (sisi, x) {
+      var h = '';
+      daftarO.forEach(function (k) { h += '<path class="k-o k-o-' + k + ' k-lengan-kain" d="M' + x + ' 64 L' + x + ' 90"/>'; });
+      h += '<g class="k-hasta k-hasta-' + sisi + '">';
+      daftarO.forEach(function (k) { h += '<path class="k-o k-o-' + k + ' k-lengan-kain" d="M' + x + ' 90 L' + x + ' 115"/>'; });
+      h += '<circle class="k-kulit k-tangan" cx="' + x + '" cy="120" r="5.6"/></g>';
+      return '<g class="k-lengan k-lengan-' + sisi + '">' + h + '</g>';
+    };
+    var baju = daftarO.map(function (k) { return '<g class="k-o k-o-' + k + '"><path class="k-kain" d="' + DEPAN.badan + '"/>' + DEPAN.o[k] + '</g>'; }).join('');
+    var rmb = Object.keys(DEPAN.rambut).map(function (k) { return '<path class="k-h k-h-' + k + '" d="' + DEPAN.rambut[k] + '"/>'; }).join('');
+    var kelas = 'psg-k psg-k--depan' + (o.kelas ? ' ' + o.kelas : '');
+    return '' +
+      '<svg class="' + kelas + '" viewBox="0 0 120 240" aria-hidden="true" focusable="false"' +
+      ' data-hadap="depan" data-usia="' + usia + '" data-pakaian="' + pakaian + '" data-rambut="' + rambut + '" data-sendi=""' +
+      (o.kacamata ? ' data-kacamata=""' : '') +
+      (o.gaya ? ' style="' + String(o.gaya).replace(/"/g, '') + '"' : '') + '>' +
+      '<ellipse class="k-bayang" cx="60" cy="233" rx="30" ry="4.6"/>' +
+      '<g class="k-tubuh">' +
+        kaki('b', [52, 124], [51, 171.5], [50, 219], 'M40 226 C40 219 44 215 50 215 C56 215 59 219 59 226 Z') +
+        kaki('d', [68, 124], [69, 171.5], [70, 219], 'M61 226 C61 219 64 215 70 215 C76 215 80 219 80 226 Z') +
+        '<g class="k-atas">' + lengan('b', 44) + lengan('d', 76) +
+          '<rect class="k-kulit" x="55" y="42" width="10" height="13" rx="4.5"/>' + baju +
+          '<g class="k-kepala">' + DEPAN.kepala + rmb + DEPAN.kacamata + '</g>' +
+        '</g>' +
+      '</g></svg>';
+  }
+
   function tambah(tl, el, kf, o) { if (el) tl.add(el, kf, o); }
 
   function jalan(tl, root, opsi) {
@@ -221,17 +280,36 @@
       ];
     };
     var q = function (s) { return root.querySelector(s); };
-    tambah(tl, q('.k-kaki-d'), ayun(-19), dasar);
-    tambah(tl, q('.k-kaki-b'), ayun(19), dasar);
-    tambah(tl, q('.k-lengan-d'), ayun(14), dasar);
-    tambah(tl, q('.k-lengan-b'), ayun(-14), dasar);
-    tambah(tl, q('.k-tubuh'), [
+    var bob = [
       { transform: 'translateY(0)' },
       { transform: 'translateY(-2.2px)', offset: .25 },
       { transform: 'translateY(0)', offset: .5 },
       { transform: 'translateY(-2.2px)', offset: .75 },
       { transform: 'translateY(0)' }
-    ], dasar);
+    ];
+    if (root.getAttribute && root.getAttribute('data-hadap') === 'depan') {
+      /* tampak depan: berjalan mendekat — telapak bergantian terangkat,
+         badan bergeser ke kaki tumpuan */
+      var angkat = function (o) {
+        return [
+          { transform: 'translateY(0px)', offset: 0 },
+          { transform: 'translateY(0px)', offset: o, easing: EASE },
+          { transform: 'translateY(-4px)', offset: o + .25, easing: EASE },
+          { transform: 'translateY(0px)', offset: o + .5 },
+          { transform: 'translateY(0px)', offset: 1 }
+        ];
+      };
+      tambah(tl, q('.k-betis-b'), angkat(0), dasar);
+      tambah(tl, q('.k-betis-d'), angkat(.5), dasar);
+      tambah(tl, q('.k-atas'), ayun(-1.6), dasar);
+      tambah(tl, q('.k-tubuh'), bob, dasar);
+      return;
+    }
+    tambah(tl, q('.k-kaki-d'), ayun(-19), dasar);
+    tambah(tl, q('.k-kaki-b'), ayun(19), dasar);
+    tambah(tl, q('.k-lengan-d'), ayun(14), dasar);
+    tambah(tl, q('.k-lengan-b'), ayun(-14), dasar);
+    tambah(tl, q('.k-tubuh'), bob, dasar);
   }
 
   /* Ganti lapisan secara berurutan dengan satu jejak keyframe per

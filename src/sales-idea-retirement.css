@@ -352,6 +352,13 @@
   .rps-ujung .rps-denyut{border-radius:50%;background:var(--rps-merah);box-shadow:0 0 0 max(5px,1.1cqmin) var(--rps-merah-lembut),0 0 24px rgba(198,40,40,.45)}
   .rps-rumus{position:absolute;left:42%;top:31%;translate:-50% -50%;padding:.55em 1em;border-radius:14px;background:var(--rps-kartu);border:1px solid var(--rps-kartu-garis);box-shadow:var(--rps-bayang-kartu);
     font-weight:950;letter-spacing:.05em;font-size:max(11px,2.5cqmin);white-space:nowrap;z-index:2}
+    /* hasil tepat di bawah rumus: top = pusat rumus + setengah tinggi rumus (1.15em) + jarak */
+  .rps-hasil{--rumus:max(11px,2.5cqmin);position:absolute;left:42%;top:calc(31% + 1.15 * var(--rumus) + max(7px,1.3cqmin));translate:-50% 0;
+    display:grid;justify-items:center;gap:.25em;width:max-content;max-width:38cqw;padding:.5em .9em .6em;border-radius:14px;
+    background:var(--rps-kartu);border:1.5px solid var(--rps-merah);box-shadow:var(--rps-bayang-kartu);text-align:center;z-index:3}
+  .rps-hasil b{font-weight:950;letter-spacing:.03em;font-size:max(15px,3.4cqmin);line-height:1.1;color:var(--rps-merah);white-space:nowrap}
+  .rps-hasil small{font-size:max(9.5px,1.5cqmin);line-height:1.35;font-weight:700;color:var(--rps-tinta-2);text-wrap:balance}
+  .rps-hasil-pendek{display:none}
   .rps-aktor-5{left:86%;--tinggi:32cqmin}
   .rps-usia{position:absolute;left:50%;bottom:100%;translate:-50% -.4em;width:3.4em;height:1.9em;border-radius:12px;background:var(--rps-kartu);border:1.5px solid var(--rps-merah);box-shadow:var(--rps-bayang-kartu);overflow:hidden;font-size:max(12px,2.7cqmin)}
   .rps-usia span{position:absolute;inset:0;display:grid;place-items:center;font-weight:950;color:var(--rps-merah);opacity:0}
@@ -361,12 +368,22 @@
     .rps-chip{font-size:max(10px,2.6cqmin);padding:.45em .7em}
     .rps-chip-1{left:19%}.rps-chip-3{left:81%}
     .rps-rumus{left:50%;top:21%}
+    .rps-hasil{left:46%;top:calc(21% + 1.15 * var(--rumus) + max(7px,1.3cqmin));max-width:56cqw}
     .rps-aktor-5{--tinggi:30cqh}
   }
   @container rps (max-width:420px){
     .rps-chip{padding:.45em .6em;letter-spacing:0}
     .rps-chip-1{left:18%}.rps-chip-3{left:82%}
     .rps-rumus{font-size:max(10px,2.4cqmin)}
+    .rps-hasil{--rumus:max(10px,2.4cqmin)}
+    .rps-hasil-panjang{display:none}
+    .rps-hasil-pendek{display:block;white-space:nowrap}
+  }
+  /* panggung pendek (HP mendatar): keterangan singkat, kartu di kiri yang bebas dari kurva */
+  @container rps (max-height:300px) and (min-aspect-ratio:5/6){
+    .rps-hasil{left:4%;translate:0 0;justify-items:start;text-align:left}
+    .rps-hasil-panjang{display:none}
+    .rps-hasil-pendek{display:block;white-space:nowrap}
   }
 
   /* ---------- 8. Scene 6 — penutup ---------- */

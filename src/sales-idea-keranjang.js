@@ -2,11 +2,14 @@
    Sales Idea — Keranjang Kehidupan (interactive story)
    ------------------------------------------------------------
    Metafora: pencari nafkah = penyangga utama kehidupan keluarga.
-   Ia menopang keranjang batu dengan kedua tangan; beban terlihat
+   Ia berdiri tepat di tengah, di bawah landasan, dan menopang
+   keranjang batu di atas kepala dengan kedua tangan (seperti
+   mengangkat barbel): keranjang → kedua tangan → pencari nafkah →
+   keluarga. Istri di kirinya, anak-anak di kanannya. Beban terlihat
    lewat perubahan tubuh (bahu, siku, lutut, condong, gemetar),
    bukan lewat keranjang yang membesar. Saat penopang tidak mampu,
-   keranjang miring ke arah keluarga; dua pilar di kiri dan kanan
-   lalu mengambil alih beban.
+   genggaman kanan lepas dan keranjang miring ke arah anak-anak;
+   dua pilar di kiri dan kanan lalu mengambil alih beban.
 
    Sepuluh scene mengikuti 10 langkah basketSteps di sales-idea.js
    dengan urutan yang sama. Judul dan isi diambil dari data itu;
@@ -18,8 +21,9 @@
    - Satu rig SVG (koordinat tetap). viewBox dihitung dari ukuran
      panggung sehingga area inti selalu utuh dan mengisi layar;
      ResizeObserver memperbaruinya tanpa menyentuh animasi.
-   - Pose penopang memakai kinematika maju: tangan dihitung dari
-     bahu/siku/lutut/condong, dan landasan mengikuti tangan.
+   - Penopang memakai tokoh tampak depan (PSGKarakter hadap:'depan').
+     Pose memakai kinematika maju: tangan dihitung dari bahu/siku/
+     lutut/condong/skala, dan landasan mengikuti tangan.
    - Tiap langkah punya keadaan akhir (STATUS). Render = keadaan
      akhir sebagai gaya statis; animasi bergerak dari keadaan akhir
      langkah sebelumnya. Satu elemen, satu jejak animasi.
@@ -98,7 +102,8 @@
   /* ---------------- geometri rig ---------------- */
   var SK = 0.86, PX = 240, PY = 406;            // penopang: skala, x tengah, tanah depan
   var SKK = 0.62, KY = 394;                      // keluarga: skala, tanah belakang
-  var ANGGOTA = [['istri', 150], ['anak1', 124], ['anak2', 182]];
+  /* istri di kiri menghadap kanan; anak-anak di kanan menghadap kiri */
+  var ANGGOTA = [['istri', 176], ['anak1', 302], ['anak2', 334]];
   var INTI = { x0: 56, x1: 424, y0: 26, y1: 420 };  // area yang selalu utuh di layar
   var CAM_O = [240, 223];
   var PILAR_X = [96, 384];
@@ -108,33 +113,42 @@
     [160, 176, 10, 7, 'abu', -1], [322, 178, 9, 6, 'kuning', -1], [196, 126, 9, 6, 'toska', -1], [282, 125, 10, 7, 'merah', -1],
     [218, 116, 8, 5, 'hijau', -1], [262, 115, 8, 5, 'ungu', -1]
   ];
-  var BATU_KECIL = 12, BATU_BESAR = 7, BATU_UJUNG = 10;
+  var BATU_KECIL = 12, BATU_BESAR = 7, BATU_UJUNG = 11;
   var KOLOM = [111, 197, 283, 369], BARIS = [44, 74];
 
   function putar(p, c, deg) {
     var r = deg * Math.PI / 180, s = Math.sin(r), co = Math.cos(r), x = p[0] - c[0], y = p[1] - c[1];
     return [c[0] + x * co - y * s, c[1] + x * s + y * co];
   }
-  /* posisi tangan (koordinat rig) dari pose penopang */
+  /* posisi tangan (koordinat rig) dari pose penopang tampak depan;
+     'b' = tangan kiri layar, 'd' = tangan kanan layar */
   function tangan(p, sisi) {
-    var d = sisi === 'd', x = d ? 74 : 48;
+    var d = sisi === 'd', x = d ? 76 : 44;
     var h = putar([x, 120], [x, 90], d ? p.sD : p.sB);
     h = putar(h, [x, 64], d ? p.lD : p.lB);
-    h = putar(h, [62, 126], p.condong);
+    h = putar(h, [60, 126], p.condong);
     h[1] += p.bahu + 95 * (1 - Math.cos(p.lutut * Math.PI / 180));
-    return [PX + (61 - h[0]) * SK + p.x, PY - (226 - h[1]) * SK + p.gy];
+    var s = p.skala == null ? 1 : p.skala;
+    var x0 = PX + (h[0] - 60) * SK, y0 = PY - (226 - h[1]) * SK;
+    return [PX + p.x + s * (x0 - PX), PY + p.gy + s * (y0 - PY)];
   }
-  var ISTIRAHAT = { x: 0, gy: 0, bahu: 0, condong: 0, lutut: 0, lD: -176, lB: 176, sD: 0, sB: 0, kepala: 0 };
+  /* pose menopang: kedua lengan terangkat lebar, siku sedikit menekuk */
+  var ISTIRAHAT = { x: 0, gy: 0, skala: 1, bahu: 0, condong: 0, lutut: 0, lD: -150, lB: 150, sD: -15, sB: 15, kepala: 0 };
   var T0D = tangan(ISTIRAHAT, 'd'), T0B = tangan(ISTIRAHAT, 'b');
-  var POROS = [f(T0B[0]), f(T0B[1] - 5.6 * SK)];  // puncak tangan belakang = alas landasan
+  var POROS = [f(T0B[0]), f(T0B[1] - 5.6 * SK)];  // puncak tangan kiri = alas landasan
   var ALAS = POROS[1];
+  var TENGAH = [f((T0B[0] + T0D[0]) / 2), ALAS];      // tengah kedua tangan (= PX)
 
   function transformMuatan(s) {
     var m = s.muatan, t;
     if (m.mode === 'tangan') {
+      /* ikut titik tengah kedua tangan; miring berporos di tengah (bukan di tangan kiri) */
       var a = tangan(s.pencari, 'd'), b = tangan(s.pencari, 'b');
-      t = [(a[0] + b[0] - T0D[0] - T0B[0]) / 2, (a[1] + b[1] - T0D[1] - T0B[1]) / 2];
-    } else if (m.mode === 'belakang') {
+      var r = m.r * Math.PI / 180, dx = POROS[0] - TENGAH[0], dy = POROS[1] - TENGAH[1];
+      t = [(a[0] + b[0] - T0D[0] - T0B[0]) / 2 - (dx - (dx * Math.cos(r) - dy * Math.sin(r))),
+        (a[1] + b[1] - T0D[1] - T0B[1]) / 2 - (dy - (dx * Math.sin(r) + dy * Math.cos(r)))];
+    } else if (m.mode === 'kiri') {
+      /* genggaman kanan lepas: landasan bertumpu pada tangan kiri saja */
       var bb = tangan(s.pencari, 'b');
       t = [bb[0] - T0B[0], bb[1] - T0B[1]];
     } else t = [m.tx, m.ty];
@@ -148,7 +162,7 @@
   /* ---------------- keadaan akhir tiap langkah ---------------- */
   var DASAR = {
     cam: [240, 223, 1], redup: 0, beku: 0, hangat: 0, cahaya: 0, tanah: 0,
-    pencari: { o: 0, x: 0, gy: 0, bahu: 0, condong: 0, lutut: 0, lD: 0, lB: 0, sD: 0, sB: 0, kepala: 0 },
+    pencari: { o: 0, x: 0, gy: 0, skala: 1, bahu: 0, condong: 0, lutut: 0, lD: 0, lB: 0, sD: 0, sB: 0, kepala: 0 },
     muatan: { mode: 'bebas', tx: 0, ty: -34, r: 0 },
     batu: { geser: 0, ujung: 0 }, label: 0, tag: 0,
     kel: { o: 0, istri: [0, 0, 0], anak1: [0, 0, 0], anak2: [0, 0, 0] },
@@ -160,18 +174,22 @@
   ST[1] = klon(DASAR);
   ST[2] = ubah(ST[1], { tag: 1 });
   ST[3] = ubah(ST[2], { tag: 0, pencari: Object.assign({ o: 1 }, ISTIRAHAT), muatan: { mode: 'tangan', r: 0 }, kel: { o: 1 }, bayang: [0, 1, 0.16] });
-  ST[4] = ubah(ST[3], { tanah: 1, pencari: { gy: 2 }, kel: { istri: [0, -10, 0], anak1: [0, 5, 0], anak2: [0, -4, 0] } });
-  ST[5] = ubah(ST[4], { label: 1, pencari: { bahu: 1.8, sD: 8, sB: -8, lutut: 5 } });
-  ST[6] = ubah(ST[5], { pencari: { bahu: 3.2, condong: 4.5, sD: 18, sB: -18, lutut: 12, kepala: 5 }, muatan: { r: -2 },
-    kel: { istri: [0, -10, -8], anak1: [0, 5, -12], anak2: [0, -4, -12] } });
+  /* tanah tidak rata: istri di punuk, anak pertama di cekungan, anak kedua di punuk kecil */
+  var KEL_TANAH = { istri: [0, -10, 0], anak1: [0, 4, 0], anak2: [0, -7, 0] };
+  ST[4] = ubah(ST[3], { tanah: 1, pencari: { gy: 2 }, kel: KEL_TANAH });
+  /* lelah: bahu turun, siku makin menekuk (lengan atas turun, lengan bawah tetap tegak) */
+  ST[5] = ubah(ST[4], { label: 1, pencari: { bahu: 1.8, lB: 144, sB: 26, lD: -144, sD: -26, lutut: 5 } });
+  ST[6] = ubah(ST[5], { pencari: { bahu: 3.2, lB: 134, sB: 42, lD: -134, sD: -42, lutut: 12, kepala: 5 },
+    kel: { istri: [0, -10, -8], anak1: [0, 4, -12], anak2: [0, -7, -12] } });
+  /* risiko: genggaman kanan lepas, landasan bertumpu di tangan kiri dan miring ke arah anak-anak */
   ST[7] = ubah(ST[6], { label: 0, redup: 0.38,
-    pencari: { bahu: 4, condong: 6, lutut: 16, lD: -30, sD: 5, sB: -26, kepala: 12 }, muatan: { mode: 'belakang', r: -7 },
-    batu: { geser: -8, ujung: 1 }, bayang: [-80, 1.35, 0.42],
-    kel: { istri: [-6, -10, -14], anak1: [4, 5, -16], anak2: [-8, -4, -16] } });
+    pencari: { bahu: 4, condong: 5, lutut: 16, lB: 132, sB: 44, lD: -118, sD: -12, kepala: 10 }, muatan: { mode: 'kiri', r: 7 },
+    batu: { geser: 8, ujung: 1 }, bayang: [78, 1.35, 0.42],
+    kel: { istri: [5, -10, -14], anak1: [7, 4, -16], anak2: [9, -7, -16] } });
   ST[8] = ubah(ST[7], { beku: 1, tanya: 1, pilar: { hantu: 1 } });
   ST[9] = ubah(ST[8], { beku: 0, tanya: 0, redup: 0, hangat: 0.5, pilar: { kiri: 0, kanan: 0, hantu: 0 },
     pencari: Object.assign({ o: 1 }, ISTIRAHAT, { gy: 2 }), muatan: { mode: 'tangan', r: 0 }, batu: { geser: 0, ujung: 0 },
-    bayang: [0, 1, 0.16], kel: { istri: [0, -10, 0], anak1: [0, 5, 0], anak2: [0, -4, 0] } });
+    bayang: [0, 1, 0.16], kel: KEL_TANAH });
   ST[10] = ubah(ST[9], { hangat: 1, cahaya: 1, pilar: { label: 1 } });
 
   /* gaya CSS untuk satu keadaan, dikelompokkan per subsistem */
@@ -185,12 +203,14 @@
     },
     penopang: function (s) {
       var p = s.pencari, drop = 95 * (1 - Math.cos(p.lutut * Math.PI / 180)), g = {};
-      g['.kbs-pencari'] = { opacity: p.o, transform: 'translate(' + f(p.x) + 'px,' + f(p.gy) + 'px)' };
+      g['.kbs-pencari'] = { opacity: p.o, transform: 'translate(' + f(p.x) + 'px,' + f(p.gy) + 'px) scale(' + f(p.skala) + ')' };
       g['.kbs-pencari .k-tubuh'] = { transform: 'translateY(' + f(drop) + 'px)' };
       g['.kbs-pencari .k-atas'] = { transform: 'translateY(' + f(p.bahu) + 'px) rotate(' + f(p.condong) + 'deg)' };
+      /* tampak depan: lutut menekuk ke luar (kuda-kuda), telapak tetap di bawah pinggul */
       ['d', 'b'].forEach(function (x) {
-        g['.kbs-pencari .k-kaki-' + x] = { transform: 'rotate(' + f(-p.lutut) + 'deg)' };
-        g['.kbs-pencari .k-betis-' + x] = { transform: 'rotate(' + f(2 * p.lutut) + 'deg)' };
+        var a = x === 'b' ? p.lutut : -p.lutut;
+        g['.kbs-pencari .k-kaki-' + x] = { transform: 'rotate(' + f(a) + 'deg)' };
+        g['.kbs-pencari .k-betis-' + x] = { transform: 'rotate(' + f(-2 * a) + 'deg)' };
       });
       g['.kbs-pencari .k-lengan-d'] = { transform: 'rotate(' + f(p.lD) + 'deg)' };
       g['.kbs-pencari .k-hasta-d'] = { transform: 'rotate(' + f(p.sD) + 'deg)' };
@@ -202,7 +222,7 @@
     },
     batu: function (s) {
       return { '.kbs-batu': { transform: 'translateX(' + f(s.batu.geser) + 'px)' },
-        '.kbs-batu-ujung': { transform: 'translate(' + f(-44 * s.batu.ujung) + 'px,' + f(-16 * s.batu.ujung) + 'px) rotate(' + f(-18 * s.batu.ujung) + 'deg)' } };
+        '.kbs-batu-ujung': { transform: 'translate(' + f(44 * s.batu.ujung) + 'px,' + f(-16 * s.batu.ujung) + 'px) rotate(' + f(18 * s.batu.ujung) + 'deg)' } };
     },
     label: function (s) { return { '.kbs-label-semua': { opacity: s.label } }; },
     tag: function (s) { return { '.kbs-tag-semua': { opacity: s.tag } }; },
@@ -287,7 +307,11 @@
     var anggota = ANGGOTA.map(function (a) {
       var nama = a[0], x = a[1];
       var o = nama === 'istri' ? { jenis: 'wanita' } : nama === 'anak1' ? { usia: 'anak', jenis: 'wanita', gaya: '--k-wanita:#d9894a;--k-rok:#d9894a' } : { usia: 'anak', pakaian: 'muda', gaya: '--k-muda:#4f8fcf;--k-celana:#3b4a63' };
-      return '<g class="kbs-anggota kbs-' + nama + '"><g transform="translate(' + f(x - 61 * SKK) + ' ' + f(KY - 226 * SKK) + ') scale(' + SKK + ')">' + tokoh(o) + '</g></g>';
+      /* anak-anak di kanan dicerminkan agar menghadap penopang */
+      var cermin = nama !== 'istri';
+      var pos = cermin ? 'translate(' + f(x + 61 * SKK) + ' ' + f(KY - 226 * SKK) + ') scale(' + (-SKK) + ' ' + SKK + ')'
+        : 'translate(' + f(x - 61 * SKK) + ' ' + f(KY - 226 * SKK) + ') scale(' + SKK + ')';
+      return '<g class="kbs-anggota kbs-' + nama + '"><g transform="' + pos + '">' + tokoh(o) + '</g></g>';
     }).join('');
     return '' +
       '<svg class="kbs-rig" viewBox="' + INTI.x0 + ' ' + INTI.y0 + ' ' + (INTI.x1 - INTI.x0) + ' ' + (INTI.y1 - INTI.y0) + '" preserveAspectRatio="xMidYMid meet" aria-hidden="true">' +
@@ -312,10 +336,10 @@
         /* tanah */
         '<g class="kbs-tanah">' +
           '<path class="kbs-tanah-rata" d="M-800 394 H1200 V800 H-800 Z"/>' +
-          '<path class="kbs-tanah-naik" d="M-800 396 L40 396 C 70 396, 90 403, 110 401 C 118 400, 122 399, 128 397 C 136 392, 142 384, 152 384 C 162 384, 170 391, 182 390 C 194 389, 204 399, 218 399 C 236 399, 250 396, 270 396 C 292 396, 306 386, 324 386 C 342 386, 360 393, 384 393 C 410 393, 430 397, 470 397 L1200 397 V800 H-800 Z"/>' +
+          '<path class="kbs-tanah-naik" d="M-800 396 L50 396 C 80 396, 104 400, 128 399 C 146 398, 158 384, 176 384 C 192 384, 202 393, 216 397 C 234 401, 258 400, 276 399 C 288 398, 294 398, 302 398 C 314 398, 320 387, 334 387 C 350 387, 362 393, 386 393 C 410 393, 430 397, 470 397 L1200 397 V800 H-800 Z"/>' +
           '<path class="kbs-tanah-depan" d="M-800 404 C -200 402, 100 408, 240 408 C 400 408, 700 402, 1200 404 V800 H-800 Z"/>' +
         '</g>' +
-        '<ellipse class="kbs-hangat" cx="200" cy="330" rx="260" ry="190" fill="url(#kbsHangat)"/>' +
+        '<ellipse class="kbs-hangat" cx="240" cy="330" rx="260" ry="190" fill="url(#kbsHangat)"/>' +
         '<ellipse class="kbs-bayang-muatan" cx="240" cy="404" rx="118" ry="9" fill="url(#kbsBayang)" style="transform-origin:240px 404px"/>' +
         /* pilar (muncul dari tanah) */
         '<g class="kbs-hantu"><rect x="' + (PILAR_X[0] - 18) + '" y="' + ALAS + '" width="36" height="' + f(406 - ALAS) + '" rx="3"/><rect x="' + (PILAR_X[1] - 18) + '" y="' + ALAS + '" width="36" height="' + f(406 - ALAS) + '" rx="3"/></g>' +
@@ -326,8 +350,8 @@
         '<g class="kbs-keluarga">' + anggota + '</g>' +
         /* penopang + landasan + keranjang */
         '<g class="kbs-getar">' +
-          '<g class="kbs-pencari"><g transform="translate(' + f(PX + 61 * SK) + ' ' + f(PY - 226 * SK) + ') scale(' + (-SK) + ' ' + SK + ')">' +
-            tokoh({ sendi: true, usia: 'dewasa', pakaian: 'kerja' }) + '</g></g>' +
+          '<g class="kbs-pencari" style="transform-origin:' + PX + 'px ' + PY + 'px"><g transform="translate(' + f(PX - 60 * SK) + ' ' + f(PY - 226 * SK) + ') scale(' + SK + ')">' +
+            tokoh({ hadap: 'depan', usia: 'dewasa', pakaian: 'kerja' }) + '</g></g>' +
           '<g class="kbs-muatan" style="transform-origin:' + POROS[0] + 'px ' + POROS[1] + 'px">' +
             '<path class="kbs-balok-atas" d="M86 ' + f(ALAS - 24) + ' H404 L400 ' + f(ALAS - 18) + ' H80 Z"/>' +
             '<rect class="kbs-balok" x="80" y="' + f(ALAS - 18) + '" width="320" height="18" rx="3"/>' +
@@ -344,7 +368,7 @@
         '<g class="kbs-pilar-label-semua">' + labelPilar(PILAR_X[0], 'PROTEKSI', 'kiri') + labelPilar(PILAR_X[1], 'UANG', 'kanan') + '</g>' +
         '<rect class="kbs-redup" x="-800" y="-600" width="2000" height="1600"/>' +
         '<rect class="kbs-beku" x="-800" y="-600" width="2000" height="1600"/>' +
-        '<g class="kbs-tanya" style="transform-origin:206px 60px"><circle cx="206" cy="58" r="23"/><text class="kbs-tanya-tanda" x="206" y="68.5">?</text><text class="kbs-tanya-sub" x="206" y="99">Bagaimana menjaganya?</text></g>' +
+        '<g class="kbs-tanya" style="transform-origin:274px 60px"><circle cx="274" cy="58" r="23"/><text class="kbs-tanya-tanda" x="274" y="68.5">?</text><text class="kbs-tanya-sub" x="274" y="99">Bagaimana menjaganya?</text></g>' +
       '</g>' +
       '</svg>';
   }
@@ -438,22 +462,24 @@
     muncul(tl, satu(st, '.kbs-tag-besar'), 2400, 480, 'translateY(8px) scale(.92)');
   };
 
-  /* 3 · penopang datang, mengangkat tangan, landasan turun ke tangannya; keluarga di sampingnya */
+  /* 3 · penopang berjalan mendekat ke tengah, mengangkat kedua tangan, landasan turun
+         ke tangannya; istri datang dari kiri, anak-anak dari kanan */
   ANIM[3] = function (tl, st) {
-    var S = ST[3], awal = ubah(S, { pencari: { o: 0, x: 230, lD: 0, lB: 0 }, muatan: { mode: 'bebas', tx: 0, ty: -34 } });
+    var S = ST[3], turun = { lD: 0, lB: 0, sD: 0, sB: 0 };
+    var awal = ubah(S, { pencari: Object.assign({ o: 0, skala: 0.74, gy: -18 }, turun), muatan: { mode: 'bebas', tx: 0, ty: -34 } });
     urut(tl, st, 'tag', [[0, ST[2]], [450, S]]);
     urut(tl, st, 'penopang', [
       [0, awal], [250, ubah(awal, { pencari: { o: 1 } })],
-      [2200, ubah(awal, { pencari: { o: 1, x: 0 } }), 'linear'],
-      [3000, ubah(awal, { pencari: { o: 1, x: 0, lD: -176, lB: 176 } }), LEMBUT],
+      [2200, ubah(awal, { pencari: { o: 1, skala: 1, gy: 0 } }), 'linear'],
+      [3000, ubah(S, { muatan: { mode: 'bebas', tx: 0, ty: -34 } }), LEMBUT],
       [3900, S, 'cubic-bezier(.5,0,.6,1)'],
       [4250, ubah(S, { pencari: { lutut: 10, bahu: 2.5 } }), 'ease-out'],
       [4800, S, 'ease-in-out']
     ]);
     urut(tl, st, 'bayang', [[0, ST[2]], [3900, ST[2]], [4300, S]]);
     ANGGOTA.forEach(function (a, i) {
-      var t0 = 2500 + i * 150, sel = '.kbs-' + a[0];
-      jejak(tl, satu(st, sel), [[t0, { opacity: 0, transform: 'translate(-170px,0px)' }], [t0 + 200, { opacity: 1 }], [t0 + 2000, { transform: 'translate(0px,0px)' }, 'linear']]);
+      var t0 = 2500 + i * 150, sel = '.kbs-' + a[0], dari = a[0] === 'istri' ? -170 : 170;
+      jejak(tl, satu(st, sel), [[t0, { opacity: 0, transform: 'translate(' + dari + 'px,0px)' }], [t0 + 200, { opacity: 1 }], [t0 + 2000, { transform: 'translate(0px,0px)' }, 'linear']]);
       if (a[0] !== 'istri') jejak(tl, satu(st, sel + ' .k-kepala'), [[4800, { transform: 'rotate(0deg)' }], [5200, { transform: 'rotate(-10deg)' }], [5700, { transform: 'rotate(-10deg)' }], [6100, { transform: 'rotate(0deg)' }]]);
     });
     jalan(tl, st, '.kbs-pencari', 250, 1950, 6);
@@ -488,32 +514,33 @@
 
   /* 6 · lelah: bahu turun, siku menekuk, tubuh membungkuk, langkah pelan, tangan hampir lepas */
   ANIM[6] = function (tl, st) {
-    var A = ST[5], S = ST[6], lelah = ubah(S, { muatan: { r: -2 } });
-    urut(tl, st, 'kamera', [[0, A], [2600, cam(236, 232, 1.1)(A), LEMBUT], [4900, cam(236, 232, 1.1)(A)], [5800, S, LEMBUT]]);
+    var A = ST[5], S = ST[6], lelah = S;
+    urut(tl, st, 'kamera', [[0, A], [2600, cam(240, 232, 1.1)(A), LEMBUT], [4900, cam(240, 232, 1.1)(A)], [5800, S, LEMBUT]]);
     urut(tl, st, 'penopang', [
       [0, A],
-      [1300, ubah(A, { pencari: { x: -2.5, bahu: 2.4, condong: 2, sD: 12, sB: -12, lutut: 8 } }), 'ease-in-out'],
+      [1300, ubah(A, { pencari: { bahu: 2.4, condong: 0.8, lB: 139, sB: 34, lD: -139, sD: -34, lutut: 8 } }), 'ease-in-out'],
       [2600, lelah, 'ease-in-out'],
       [3000, lelah],
-      [3500, ubah(lelah, { pencari: { lD: -160, sD: 30 }, muatan: { r: -4.5 } }), 'ease-out'],
-      [4300, ubah(lelah, { pencari: { lD: -176, sD: 18 } }), 'cubic-bezier(.3,0,.2,1)'],
+      /* genggaman kanan hampir lepas, lalu kembali */
+      [3500, ubah(lelah, { pencari: { lD: -126, sD: -30 }, muatan: { r: 4.5 } }), 'ease-out'],
+      [4300, ubah(lelah, { pencari: { lD: -136, sD: -40 } }), 'cubic-bezier(.3,0,.2,1)'],
       [4800, S]
     ]);
     urut(tl, st, 'keluarga', [[3100, A], [3700, S]]);
     tl.loop(satu(st, '.kbs-getar'), [{ transform: 'translate(0px,0px)' }, { transform: 'translate(.35px,-.25px)' }, { transform: 'translate(-.3px,.2px)' }, { transform: 'translate(0px,0px)' }], { duration: 420, easing: 'linear' });
   };
 
-  /* 7 · risiko: fokus ke tangan, genggaman lepas, landasan miring ke arah keluarga */
+  /* 7 · risiko: fokus ke tangan, genggaman kanan lepas, landasan miring ke arah anak-anak */
   ANIM[7] = function (tl, st) {
     var A = ST[6], S = ST[7];
     urut(tl, st, 'label', [[0, A], [700, S]]);
-    urut(tl, st, 'kamera', [[0, A], [1200, cam(236, 214, 1.6)(A), LEMBUT], [2700, cam(236, 214, 1.6)(A)],
-      [3500, cam(206, 190, 1.3)(A), LEMBUT], [4300, cam(160, 300, 1.35)(A), LEMBUT], [5200, cam(160, 300, 1.35)(A)], [6400, S, LEMBUT]]);
+    urut(tl, st, 'kamera', [[0, A], [1200, cam(244, 214, 1.6)(A), LEMBUT], [2700, cam(244, 214, 1.6)(A)],
+      [3500, cam(272, 196, 1.3)(A), LEMBUT], [4300, cam(304, 300, 1.35)(A), LEMBUT], [5200, cam(304, 300, 1.35)(A)], [6400, S, LEMBUT]]);
     urut(tl, st, 'cahaya', [[400, A], [3000, S, 'ease-in']]);
     urut(tl, st, 'penopang', [
       [0, A],
-      [1300, ubah(A, { pencari: { lD: -168, sD: 22 } }), 'ease-in'],
-      [1900, ubah(A, { pencari: { lD: -150, sD: 12, sB: -22, condong: 5, lutut: 13 }, muatan: { mode: 'belakang', r: -3.5 } }), 'ease-in'],
+      [1300, ubah(A, { pencari: { lD: -142, sD: -34 }, muatan: { r: 2.8 } }), 'ease-in'],
+      [1900, ubah(A, { pencari: { lD: -128, sD: -20, lB: 133, sB: 43, condong: 3, lutut: 13 }, muatan: { mode: 'kiri', r: 3.5 } }), 'ease-in'],
       [2950, ubah(S, {}), 'cubic-bezier(.45,0,.35,1)'],
       [3300, S]
     ]);
@@ -534,14 +561,15 @@
   /* 9 · dua pilar naik dari tanah, mengambil beban, keranjang kembali datar */
   ANIM[9] = function (tl, st) {
     var A = ST[8], S = ST[9];
-    var kontak = kontakKiri(A);
+    var kontak = kontakKanan(A);
     urut(tl, st, 'tanya', [[0, A], [500, ubah(A, { tanya: 0 })]]);
     urut(tl, st, 'cahaya', [[0, A], [600, ubah(A, { beku: 0 })], [1900, ubah(A, { beku: 0 })], [3400, S, 'ease-in-out']]);
-    jejak(tl, satu(st, '.kbs-pilar-kiri'), [[300, { transform: 'translateY(196px)' }], [1900, { transform: 'translateY(' + f(kontak) + 'px)' }, BERAT], [3100, { transform: 'translateY(0px)' }, LEMBUT]]);
-    jejak(tl, satu(st, '.kbs-pilar-kanan'), [[700, { transform: 'translateY(196px)' }], [3100, { transform: 'translateY(0px)' }, BERAT]]);
+    /* pilar kanan (sisi yang turun) menyentuh landasan lebih dulu */
+    jejak(tl, satu(st, '.kbs-pilar-kanan'), [[300, { transform: 'translateY(196px)' }], [1900, { transform: 'translateY(' + f(kontak) + 'px)' }, BERAT], [3100, { transform: 'translateY(0px)' }, LEMBUT]]);
+    jejak(tl, satu(st, '.kbs-pilar-kiri'), [[700, { transform: 'translateY(196px)' }], [3100, { transform: 'translateY(0px)' }, BERAT]]);
     jejak(tl, satu(st, '.kbs-hantu'), [[300, { opacity: 1 }], [2300, { opacity: 0 }]]);
     semua(st, '.kbs-debu').forEach(function (el, i) {
-      var t = i ? 2200 : 1700;
+      var t = i ? 1700 : 2200;
       jejak(tl, el, [[t - 300, { opacity: 0, transform: 'scale(.6)' }], [t, { opacity: 0.7, transform: 'none' }], [t + 900, { opacity: 0, transform: 'scale(1.3)' }]]);
     });
     var lega = ubah(A, { muatan: { mode: 'bebas', tx: 0, ty: 0, r: 0 } });
@@ -555,18 +583,18 @@
     urut(tl, st, 'keluarga', [[3000, A], [4300, S, LEMBUT]]);
     urut(tl, st, 'kamera', [[0, A], [1300, cam(240, 300, 1.08)(A), LEMBUT], [3100, cam(240, 236, 1.03)(A), LEMBUT], [4700, S, LEMBUT]]);
   };
-  function kontakKiri(s) {
-    /* tinggi alas landasan di atas pilar kiri saat miring */
+  function kontakKanan(s) {
+    /* tinggi alas landasan di atas pilar kanan saat miring */
     var m = transformMuatan(s).match(/translate\(([-\d.]+)px,([-\d.]+)px\) rotate\(([-\d.]+)deg\)/);
     var t = [+m[1], +m[2]], r = +m[3];
-    var p = putar([PILAR_X[0] - 18, ALAS], POROS, r);
+    var p = putar([PILAR_X[1] + 18, ALAS], POROS, r);
     return p[1] + t[1] - ALAS;
   }
 
   /* 10 · proteksi + uang: label pilar, cahaya hangat, keluarga tertopang */
   ANIM[10] = function (tl, st) {
     var A = ST[9], S = ST[10];
-    urut(tl, st, 'kamera', [[0, cam(206, 300, 1.12)(A)], [4000, S, LEMBUT]]);
+    urut(tl, st, 'kamera', [[0, cam(240, 300, 1.12)(A)], [4000, S, LEMBUT]]);
     urut(tl, st, 'cahaya', [[800, A], [3600, S, 'ease-in-out']]);
     muncul(tl, satu(st, '.kbs-pilar-label-kiri'), 900, 700, 'translateY(10px)');
     muncul(tl, satu(st, '.kbs-pilar-label-kanan'), 1300, 700, 'translateY(10px)');

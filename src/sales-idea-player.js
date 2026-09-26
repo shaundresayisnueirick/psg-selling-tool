@@ -23,14 +23,16 @@
 
    Player:
      status: 'siap' | 'berputar' | 'jeda' | 'selesai'
-     PLAY / PAUSE / RESUME / REPLAY / NEXT / BACK. NEXT dan REPLAY
-     selalu menggambar ulang scene (DOM baru, timeline baru), jadi
-     tidak ada state animasi lama yang terbawa. BACK menampilkan
+     PLAY / PAUSE / RESUME / REPLAY / NEXT / BACK. NEXT, PLAY dari
+     akhir, dan REPLAY selalu menggambar ulang scene (DOM baru,
+     timeline baru), jadi tidak ada state animasi lama yang terbawa.
+     REPLAY kembali ke frame awal dan menunggu PLAY. BACK menampilkan
      scene sebelumnya dalam keadaan siap.
 
-   Gerak dikurangi (prefers-reduced-motion): tidak ada animasi yang
-   dibuat; scene langsung tampil di keadaan akhirnya dan navigasi
-   tetap berjalan. Semua listener dipasang sekali per player.
+   Gerak dikurangi (prefers-reduced-motion): tidak ada gerak otomatis —
+   scene dibuka di keadaan akhir, NEXT tidak berputar sendiri, tanpa
+   animasi ambient. PLAY/REPLAY adalah permintaan eksplisit presenter,
+   jadi scene tetap bisa diputar. Semua listener dipasang sekali.
    ============================================================ */
 (function () {
   'use strict';
@@ -50,11 +52,14 @@
     this.jam = null;
     this.raf = 0;
     this.onSelesai = null;
+    this.tanpaAmbient = false;
     this._frame = this._frame.bind(this);
   }
   Timeline.prototype.add = function (el, keyframes, opsi) {
     if (!el || typeof el.animate !== 'function') return null;
     var o = Object.assign({ fill: 'backwards', easing: 'cubic-bezier(.16,.84,.24,1)' }, opsi || {});
+    /* gerak dikurangi: animasi berulang tanpa akhir (ambient) tidak dibuat */
+    if (this.tanpaAmbient && o.iterations === Infinity) return null;
     var a = el.animate(keyframes, o);
     a.pause();
     this._daftar(a);
@@ -181,11 +186,23 @@
 
   Player.prototype.muat = function (scenes, awal) {
     this.scenes = Array.isArray(scenes) ? scenes : [];
-    if (!this.scenes.length) { this.berhenti(); this._ui(); return; }
+    if (!this.scenes.length) {
+      this.berhenti();
+      /* Tanpa scene (mis. kembali ke hub): lepas mode panggung-tetap
+         supaya isi hub bisa digulir lagi. */
+      if (this.stage) this.stage.classList.remove('sip-fit');
+      this._ui();
+      return;
+    }
     this.tampilkan(Math.max(0, Math.min(this.scenes.length - 1, awal || 0)), 'siap');
   };
 
-  /* cara: 'siap' | 'putar' */
+  /* cara:
+       'siap'   dibuka / BACK: frame sesuai siapDi (biasanya akhir)
+       'lanjut' NEXT: berputar otomatis; bila gerak dikurangi langsung akhir
+       'awal'   REPLAY: kembali ke frame awal, menunggu PLAY
+       'putar'  PLAY dari awal. Permintaan eksplisit presenter, jadi tetap
+                diputar walau gerak dikurangi (hanya ambient yang tidak). */
   Player.prototype.tampilkan = function (i, cara) {
     var scene = this.scenes[i];
     if (!scene) return;
@@ -199,9 +216,11 @@
     var tl = new Timeline();
     this.tl = tl;
     var kurang = gerakDikurangi();
-    /* Digambar saat layar tidak aktif (mis. init() tertunda setelah
-       ditutup): tampilkan keadaan akhir tanpa membuat animasi. */
-    var diam = kurang || !this.aktif();
+    var eksplisit = cara === 'putar' || cara === 'awal';
+    /* Tanpa animasi bila layar tidak aktif (mis. init() tertunda setelah
+       ditutup) atau gerak dikurangi tanpa permintaan PLAY/REPLAY. */
+    var diam = !this.aktif() || (kurang && !eksplisit);
+    tl.tanpaAmbient = kurang;
     if (!diam && typeof scene.animate === 'function') scene.animate(tl, this.stage);
     if (!diam) tl.adopsi(this.stage);
     tl.siapkan();
@@ -213,16 +232,21 @@
       self._ui();
     };
 
-    if (kurang) {
+    if (diam) {
+      tl.selesaikan();
+      this.status = kurang ? 'selesai' : 'siap';
+    } else if ((cara === 'putar' || cara === 'lanjut') && !tl.anak.length) {
+      /* Tidak ada yang bisa diputar: langsung di keadaan akhir. */
       tl.selesaikan();
       this.status = 'selesai';
-    } else if (diam) {
-      tl.selesaikan();
-      this.status = 'siap';
-    } else if (cara === 'putar') {
+      if (this._bolehAmbient()) tl.putarAmbient();
+    } else if (cara === 'putar' || cara === 'lanjut') {
       tl.seek(0);
       this.status = 'berputar';
       tl.play();
+    } else if (cara === 'awal') {
+      tl.seek(0);
+      this.status = 'siap';
     } else {
       if (scene.siapDi === 'awal') tl.seek(0); else tl.selesaikan();
       this.status = 'siap';
@@ -231,11 +255,12 @@
   };
 
   Player.prototype.play = function () {
-    if (!this.tl || !this.scenes.length) return;
-    if (gerakDikurangi()) { this.tampilkan(this.i, 'siap'); return; }
-    if (this.status === 'berputar') return;
-    if (this.status === 'selesai' || (this.status === 'siap' && this.tl.waktu() >= this.tl.durasi)) {
-      this.replay();
+    if (!this.scenes.length) return;
+    if (this.status === 'berputar' && this.tl) return;
+    /* Timeline sudah dihentikan, sudah di akhir, atau tanpa animasi:
+       putar scene ini dari awal. */
+    if (!this.tl || this.status === 'selesai' || !this.tl.anak.length || this.tl.waktu() >= this.tl.durasi) {
+      this.tampilkan(this.i, 'putar');
       return;
     }
     this.status = 'berputar';
@@ -249,8 +274,9 @@
     this._ui();
   };
   Player.prototype.toggle = function () { if (this.status === 'berputar') this.pause(); else this.play(); };
-  Player.prototype.replay = function () { if (this.scenes.length) this.tampilkan(this.i, 'putar'); };
-  Player.prototype.next = function () { if (this.i < this.scenes.length - 1) this.tampilkan(this.i + 1, 'putar'); };
+  /* REPLAY: kembali ke awal scene ini; PLAY memutarnya lagi dari awal */
+  Player.prototype.replay = function () { if (this.scenes.length) this.tampilkan(this.i, 'awal'); };
+  Player.prototype.next = function () { if (this.i < this.scenes.length - 1) this.tampilkan(this.i + 1, 'lanjut'); };
   Player.prototype.back = function () { if (this.i > 0) this.tampilkan(this.i - 1, 'siap'); };
 
   /* Bersihkan timeline; isi scene yang tampil tidak disentuh. */

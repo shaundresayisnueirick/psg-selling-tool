@@ -400,6 +400,10 @@
         '<i class="rps-garis-dasar"></i>' +
         '<i class="rps-ujung"><i class="rps-denyut"></i></i>' +
         '<div class="rps-rumus">WAKTU + HASIL = COMPOUNDING</div>' +
+        /* hasil ilustrasi (bukan jaminan): Rp1 jt/bln, 30 th, 6%/th ≈ Rp1 M */
+        '<div class="rps-hasil"><b>≈ Rp1 MILIAR</b>' +
+          '<small class="rps-hasil-panjang">Ilustrasi dengan asumsi Rp1 juta/bulan selama 30 tahun, 6%/tahun.</small>' +
+          '<small class="rps-hasil-pendek">Ilustrasi: Rp1 jt/bln, 30 thn, 6%/thn</small></div>' +
         UMUR5.map(function (u, i) { return '<b class="rps-tik rps-tik-' + (i + 1) + '"><i></i><span>' + u + '</span></b>'; }).join('') +
         '<em class="rps-tik-kata rps-tik-kata-a">MULAI</em><em class="rps-tik-kata rps-tik-kata-b">30 TAHUN</em>' +
         '<div class="rps-aktor rps-aktor-5">' +
@@ -438,6 +442,7 @@
       /* akibat: waktu + hasil */
       jejak(tl, satu(st, '.rps-ujung'), [[T1 - 100, { opacity: 0, transform: 'scale(.3)' }], [T1 + 450, { opacity: 1, transform: 'none' }, PEGAS]]);
       muncul(tl, satu(st, '.rps-rumus'), T1 + 150, 600, 'translateY(10px)');
+      muncul(tl, satu(st, '.rps-hasil'), T1 + 350, 650, 'translateY(10px) scale(.96)');
       muncul(tl, satu(st, '.rps-tik-kata-b'), T1, 450, 'translateY(6px)');
       tl.loop(satu(st, '.rps-ujung .rps-denyut'), [{ transform: 'none', opacity: 1 }, { transform: 'scale(1.25)', opacity: .55 }, { transform: 'none', opacity: 1 }], { duration: 2600 });
     }
