@@ -8,6 +8,8 @@
      render   : menggambar isi scene ke dalam stage (DOM baru).
      animate  : mendaftarkan animasi scene ke timeline (opsional).
      siapDi   : 'awal' | 'akhir' — frame yang tampil sebelum PLAY.
+     manual   : true — NEXT/BACK tidak memutar sendiri; scene tampil di
+                frame awal dan menunggu PLAY (opsional).
 
    Timeline:
      - Semua gerak memakai Web Animations API. Satu "jam" induk
@@ -276,8 +278,10 @@
   Player.prototype.toggle = function () { if (this.status === 'berputar') this.pause(); else this.play(); };
   /* REPLAY: kembali ke awal scene ini; PLAY memutarnya lagi dari awal */
   Player.prototype.replay = function () { if (this.scenes.length) this.tampilkan(this.i, 'awal'); };
-  Player.prototype.next = function () { if (this.i < this.scenes.length - 1) this.tampilkan(this.i + 1, 'lanjut'); };
-  Player.prototype.back = function () { if (this.i > 0) this.tampilkan(this.i - 1, 'siap'); };
+  /* Scene dengan manual: true adalah sesi putar tersendiri: NEXT/BACK
+     menampilkannya di frame awal, diam, menunggu PLAY. */
+  Player.prototype.next = function () { var j = this.i + 1; if (j < this.scenes.length) this.tampilkan(j, this.scenes[j].manual ? 'awal' : 'lanjut'); };
+  Player.prototype.back = function () { var j = this.i - 1; if (j >= 0) this.tampilkan(j, this.scenes[j].manual ? 'awal' : 'siap'); };
 
   /* Bersihkan timeline; isi scene yang tampil tidak disentuh. */
   Player.prototype._bersihkan = function () {

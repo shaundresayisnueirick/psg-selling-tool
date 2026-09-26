@@ -28,6 +28,9 @@
      akhir sebagai gaya statis; animasi bergerak dari keadaan akhir
      langkah sebelumnya. Satu elemen, satu jejak animasi.
 
+   - Narasi suara (Web Speech API, bahasa Indonesia): lihat bagian
+     "narasi suara" di bawah. Tombol Narasi ada di bilah judul.
+
    API: PSGKeranjangStory.adegan({ langkah, header, padaLangkah })
    ============================================================ */
 (function () {
@@ -263,7 +266,14 @@
   }
 
   /* ---------------- markup rig ---------------- */
-  function tokoh(o) { return window.PSGKarakter ? window.PSGKarakter.svg(o) : ''; }
+  /* Tokoh adalah <svg> bersarang di dalam SVG panggung. Ukurannya ditulis
+     sebagai atribut (120×240, sama dengan viewBox tokoh): tidak semua browser
+     menerapkan width/height CSS pada <svg> bersarang, dan tanpa atribut ukuran
+     tokoh jatuh ke 100% panggung — membesar dan bergeser dari posisinya. */
+  function tokoh(o) {
+    var s = window.PSGKarakter ? window.PSGKarakter.svg(o) : '';
+    return s.replace('<svg class="psg-k', '<svg width="120" height="240" class="psg-k');
+  }
   function batuSvg(b, i) {
     var cls = 'kbs-b kbs-b-' + b[4] + (i === BATU_UJUNG ? ' kbs-batu-ujung' : '');
     return '<g class="' + cls + '" data-i="' + i + '" style="transform-origin:' + b[0] + 'px ' + b[1] + 'px">' +
@@ -411,7 +421,7 @@
   /* ---------------- kerangka scene ---------------- */
   function kerangka(opsi, step, i) {
     var n = i + 1;
-    return '<div class="kbs" data-kbs="' + n + '">' + (opsi.header || '') +
+    return '<div class="kbs" data-kbs="' + n + '">' + sisipTombolSuara(opsi.header || '') +
       '<div class="kbs-body">' +
         '<figure class="kbs-stage kbs-s' + n + '" role="img" aria-label="' + esc('Ilustrasi langkah ' + n + ': ' + step.title) + '">' +
           '<div class="kbs-langit"></div>' + rig(n) + '<div class="kbs-vignette"></div>' +
@@ -601,15 +611,171 @@
     tl.loop(satu(st, '.kbs-cahaya-pilar .kbs-denyut'), [{ opacity: 1 }, { opacity: 0.7 }, { opacity: 1 }], { duration: 3600, easing: 'ease-in-out' });
   };
 
+  /* ---------------- narasi suara (Web Speech API) ----------------
+     Satu narator untuk seluruh sesi. Ia tidak mengubah pemutar; ia
+     mengikuti keadaannya lewat MutationObserver (status data-sip-status,
+     kelas .aktif, dan scene yang sedang dirender):
+       - scene mulai berputar (hanya PLAY)   → narasi scene dari awal
+       - PAUSE                               → hentikan, ingat kalimat
+       - RESUME                              → lanjut dari kalimat itu
+       - REPLAY / NEXT / BACK / scene baru   → hentikan narasi lama
+       - timeline selesai                    → narasi dibiarkan selesai
+       - ditutup / kembali ke hub / tab ditutup → hentikan
+     Narasi dipecah per kalimat; setiap mulai baru selalu didahului
+     cancel(), jadi tidak pernah ada dua suara bersamaan. Tidak ada
+     autoplay: suara hanya berjalan karena aksi pengguna. */
+  var NARASI = [
+    'Setiap keluarga memiliki keranjang kehidupannya sendiri. Di dalamnya ada berbagai kebutuhan dan tanggung jawab yang harus kita bawa bersama sepanjang perjalanan hidup.',
+    'Sebagian beban mungkin terasa kecil. Sebagian lainnya jauh lebih berat. Dan sering kali, semakin panjang perjalanan hidup, semakin banyak pula tanggung jawab yang harus kita siapkan.',
+    'Pada banyak keluarga, pencari nafkah menjadi salah satu penopang utama kehidupan keluarga. Dengan kedua tangan, ia menopang beban agar pasangan dan anak-anaknya tetap bisa menjalani kehidupan.',
+    'Perjalanan kehidupan tidak selalu berjalan mulus. Ada perubahan, ada tantangan, dan ada masa ketika perjalanan terasa jauh lebih berat dari yang kita bayangkan.',
+    'Beban itu bukan hanya satu hal. Ada makanan, pendidikan, kesehatan, cicilan, orang tua, persiapan pensiun, tabungan, dan berbagai kebutuhan lainnya.',
+    'Namun manusia memiliki batas. Seiring waktu, penopang utama bisa merasa lelah. Dan ketika kemampuan untuk menopang mulai berkurang, seluruh beban itu menjadi semakin berat.',
+    'Yang perlu kita pikirkan bukan hanya bagaimana keluarga berjalan ketika semuanya baik-baik saja. Tetapi bagaimana jika suatu saat penopang utama tidak lagi mampu menjalankan perannya?',
+    'Di sinilah kita perlu memikirkan penopang tambahan. Bukan untuk menggantikan peran seseorang, tetapi untuk menjaga agar kehidupan keluarga tetap memiliki pijakan ketika risiko terjadi.',
+    'Dua pilar dapat membantu menopang kehidupan keluarga. Proteksi memberikan perlindungan ketika risiko terjadi. Dan dana atau uang membantu menyediakan sumber daya untuk melanjutkan kebutuhan kehidupan.',
+    'Karena tujuan akhirnya bukan sekadar memiliki perlindungan. Tujuannya adalah memastikan keluarga tetap memiliki kemampuan untuk melanjutkan kehidupannya, bahkan ketika perjalanan tidak berjalan seperti yang kita harapkan.'
+  ];
+  var suara = { nyala: true, terpasang: false, root: null, stage: null, node: null, basi: null, aktif: false, kalimat: [], idx: 0, mulai: false, bicara: false, tertunda: false, gen: 0, jeda: 0 };
+  function adaTTS() { return typeof window.speechSynthesis !== 'undefined' && typeof window.SpeechSynthesisUtterance === 'function'; }
+  function pecahKalimat(t) {
+    return (String(t).match(/[^.!?]+[.!?]+/g) || [t]).map(function (x) { return x.trim(); }).filter(Boolean);
+  }
+  function suaraIndonesia() {
+    var v = [];
+    try { v = window.speechSynthesis.getVoices() || []; } catch (e) { v = []; }
+    var id = v.filter(function (x) { return /^id([-_]|$)/i.test(x.lang || ''); });
+    return id.filter(function (x) { return x.localService; })[0] || id[0] || null;
+  }
+  function diamkan() {
+    suara.gen++;
+    suara.bicara = false;
+    clearTimeout(suara.jeda);
+    if (adaTTS()) { try { window.speechSynthesis.cancel(); } catch (e) {} }
+    tandaiSuara();
+  }
+  function ucapkan() {
+    if (!adaTTS() || !suara.nyala) return;
+    var g = ++suara.gen;
+    try { window.speechSynthesis.cancel(); } catch (e) {}
+    suara.bicara = true;
+    suara.mulai = true;
+    tandaiSuara();
+    function lanjut() {
+      if (g !== suara.gen) return;
+      if (suara.idx >= suara.kalimat.length) { suara.bicara = false; tandaiSuara(); return; }
+      var u = new window.SpeechSynthesisUtterance(suara.kalimat[suara.idx]);
+      u.lang = 'id-ID';
+      var v = suaraIndonesia();
+      if (v) u.voice = v;
+      u.rate = 0.96;
+      u.pitch = 1;
+      u.onend = function () { if (g !== suara.gen) return; suara.idx++; lanjut(); };
+      u.onerror = function () { if (g !== suara.gen) return; suara.bicara = false; tandaiSuara(); };
+      try { window.speechSynthesis.speak(u); } catch (e) { suara.bicara = false; tandaiSuara(); }
+    }
+    /* jeda singkat sesudah cancel(): beberapa browser membuang ucapan
+       yang dimulai tepat pada tick yang sama dengan cancel() */
+    clearTimeout(suara.jeda);
+    suara.jeda = setTimeout(lanjut, 80);
+  }
+  function sinkronSuara() {
+    var root = suara.root, stage = suara.stage;
+    var node = stage ? stage.querySelector('.kbs') : null;
+    var aktif = !!(root && root.classList.contains('aktif'));
+    /* scene yang masih tertinggal di DOM saat layar dibuka lagi (dan status
+       lamanya) bukan scene yang sedang diputar: jangan pernah dinarasikan */
+    if (aktif && !suara.aktif) suara.basi = node;
+    suara.aktif = aktif;
+    if (node && node === suara.basi) node = null;
+    if (!aktif || !node) {
+      if (suara.node || suara.bicara) { diamkan(); suara.node = null; }
+      return;
+    }
+    if (node !== suara.node) {
+      diamkan();
+      suara.node = node;
+      suara.kalimat = pecahKalimat(NARASI[(+node.getAttribute('data-kbs') || 1) - 1] || '');
+      suara.idx = 0;
+      suara.mulai = false;
+      suara.tertunda = false;
+    }
+    var status = root.getAttribute('data-sip-status');
+    if (status === 'berputar') {
+      if (suara.nyala && !suara.bicara && !document.hidden && suara.idx < suara.kalimat.length) ucapkan();
+    } else if (status === 'jeda' || status === 'siap') {
+      if (suara.bicara) diamkan();
+      if (status === 'siap') { suara.idx = 0; suara.mulai = false; }
+    }
+    /* 'selesai': narasi yang masih berjalan dibiarkan sampai tuntas */
+    tandaiSuara();
+  }
+  function tandaiSuara() {
+    var ada = adaTTS();
+    semua(document, '[data-kbs-suara]').forEach(function (b) {
+      b.disabled = !ada;
+      b.setAttribute('aria-pressed', ada && suara.nyala ? 'true' : 'false');
+      b.setAttribute('aria-label', !ada ? 'Narasi suara tidak didukung browser ini' : suara.nyala ? 'Narasi suara aktif — ketuk untuk mematikan' : 'Narasi suara mati — ketuk untuk menyalakan');
+      b.title = b.getAttribute('aria-label');
+      b.classList.toggle('kbs-suara-mati', !ada || !suara.nyala);
+      b.classList.toggle('kbs-suara-bicara', ada && suara.nyala && suara.bicara);
+    });
+  }
+  function pasangSuara() {
+    if (suara.terpasang) return;
+    var root = document.getElementById('layarSalesIdea'), stage = document.getElementById('salesIdeaContent');
+    if (!root || !stage) return;
+    suara.terpasang = true;
+    suara.root = root;
+    suara.stage = stage;
+    if (window.MutationObserver) {
+      var mo = new MutationObserver(sinkronSuara);
+      mo.observe(root, { attributes: true, attributeFilter: ['class', 'data-sip-status'] });
+      mo.observe(stage, { childList: true });
+    }
+    document.addEventListener('click', function (e) {
+      var b = e.target && e.target.closest && e.target.closest('[data-kbs-suara]');
+      if (!b) return;
+      suara.nyala = !suara.nyala;
+      if (!suara.nyala) diamkan();
+      else {
+        var st = root.getAttribute('data-sip-status');
+        if (st === 'berputar' || (st === 'selesai' && suara.mulai && suara.idx < suara.kalimat.length)) ucapkan();
+      }
+      tandaiSuara();
+    });
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) { if (suara.bicara) { diamkan(); suara.tertunda = true; } }
+      else if (suara.tertunda) {
+        suara.tertunda = false;
+        var st = root.getAttribute('data-sip-status');
+        if (suara.node && (st === 'berputar' || st === 'selesai')) ucapkan();
+      }
+    });
+    window.addEventListener('pagehide', diamkan);
+  }
+  var IKON_SUARA = '<svg class="kbs-suara-ikon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">' +
+    '<path class="kbs-suara-badan" d="M4 9.5h3.2L12 5.6v12.8l-4.8-3.9H4z"/>' +
+    '<path class="kbs-suara-gelombang kbs-suara-g1" d="M15.2 9.2a4 4 0 0 1 0 5.6"/>' +
+    '<path class="kbs-suara-gelombang kbs-suara-g2" d="M17.8 6.6a7.6 7.6 0 0 1 0 10.8"/>' +
+    '<path class="kbs-suara-coret" d="M15.5 9.5l5 5m0-5l-5 5"/></svg>';
+  function sisipTombolSuara(header) {
+    var tombol = '<button type="button" class="kbs-suara" data-kbs-suara aria-pressed="true">' + IKON_SUARA + '<span class="kbs-suara-teks">Narasi</span></button>';
+    var i = header.indexOf('<button type="button" class="si-close"');
+    return i === -1 ? header : header.slice(0, i) + tombol + header.slice(i);
+  }
+
   function adegan(opsi) {
     var o = opsi || {};
     var langkah = Array.isArray(o.langkah) ? o.langkah : [];
+    pasangSuara();
     return langkah.map(function (step, i) {
       var n = i + 1;
       return {
         id: 'basket-' + n,
         fit: true,
         siapDi: 'akhir',
+        manual: true,
         render: function (stage) {
           if (typeof o.padaLangkah === 'function') o.padaLangkah(i);
           stage.innerHTML = kerangka(o, step, i);
@@ -617,6 +783,7 @@
           terapkan(st, ST[n] || ST[1]);
           ukurLabel(st);
           amati(stage);
+          tandaiSuara();
         },
         animate: function (tl, stage) {
           var st = stage.querySelector('.kbs-stage');

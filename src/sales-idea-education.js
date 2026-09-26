@@ -49,6 +49,10 @@
   function satu(st, sel) { return st.querySelector(sel); }
   function semua(st, sel) { return Array.prototype.slice.call(st.querySelectorAll(sel)); }
   function tokoh(o) { return window.PSGKarakter ? window.PSGKarakter.svg(o) : ''; }
+  /* Pengendara sepeda: ukuran nested <svg> lewat atribut, karena tidak
+     semua browser menerapkan width/height CSS pada <svg> di dalam SVG
+     (tanpa itu tokoh jadi 100% viewport dan lepas dari sepeda). */
+  function pengendara(o) { return tokoh(o).replace('<svg class="psg-k', '<svg width="120" height="240" class="psg-k'); }
 
   /* jejak(tl, el, [[ms, {props}, easingMenujuFrameIni], ...]) — satu jejak per elemen */
   function jejak(tl, el, frames) {
@@ -228,8 +232,8 @@
         '<g class="eps-engkol" style="transform-origin:' + C[0] + 'px ' + C[1] + 'px"><path d="M' + C.join(' ') + ' h' + SEP.CR + ' M' + C.join(' ') + ' h' + (-SEP.CR) + '"/>' +
           '<rect x="' + (C[0] + SEP.CR - 5) + '" y="' + (C[1] - 2) + '" width="10" height="4" rx="1.5"/><rect x="' + (C[0] - SEP.CR - 5) + '" y="' + (C[1] - 2) + '" width="10" height="4" rx="1.5"/>' +
           '<circle cx="' + C[0] + '" cy="' + C[1] + '" r="6"/></g>' +
-        '<g class="eps-bonceng" transform="translate(-21 -16)">' + tokoh(ANAK) + '</g>' +
-        '<g class="eps-pengayuh">' + tokoh(ORTU) + '</g>' +
+        '<g class="eps-bonceng" transform="translate(-21 -16)">' + pengendara(ANAK) + '</g>' +
+        '<g class="eps-pengayuh">' + pengendara(ORTU) + '</g>' +
       '</g></g>';
   }
   /* pose pengayuh untuk sudut pedal th, condong badan, dan tunduk kepala */

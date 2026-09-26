@@ -53,12 +53,13 @@
     .kbs-body{grid-template-rows:minmax(0,1fr);grid-template-columns:minmax(0,1fr) clamp(260px,27vw,380px);gap:18px}
   }
   #layarSalesIdea .kbs > .si-presentation-topbar{
-    display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:10px;
+    display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;align-items:center;gap:10px;
     min-height:56px;max-width:none;margin:0;padding:6px 0;
   }
   #layarSalesIdea .kbs > .si-presentation-topbar .si-back-hub{grid-column:1;grid-row:1}
   #layarSalesIdea .kbs > .si-presentation-topbar .si-presentation-brand{grid-column:2;grid-row:1;min-width:0;justify-content:center;text-align:center}
-  #layarSalesIdea .kbs > .si-presentation-topbar .si-close{grid-column:3;grid-row:1}
+  #layarSalesIdea .kbs > .si-presentation-topbar .kbs-suara{grid-column:3;grid-row:1}
+  #layarSalesIdea .kbs > .si-presentation-topbar .si-close{grid-column:4;grid-row:1}
   @media (max-width:620px){
     #layarSalesIdea .kbs > .si-presentation-topbar{min-height:50px;padding:3px 0;gap:6px}
     #layarSalesIdea .kbs > .si-presentation-topbar .si-back-hub{padding:0 8px 0 0}
@@ -68,6 +69,29 @@
   }
   @media (max-width:380px){
     #layarSalesIdea .kbs > .si-presentation-topbar .si-presentation-brand span{display:none}
+  }
+  /* tombol narasi suara (bilah judul) */
+  .kbs-suara{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:44px;min-width:44px;padding:0 14px 0 11px;
+    border-radius:12px;border:1px solid var(--border);background:var(--surface);color:var(--text-2);
+    font:inherit;font-size:13px;font-weight:850;letter-spacing:.02em;cursor:pointer;white-space:nowrap}
+  .kbs-suara:hover{background:var(--surface-2)}
+  .kbs-suara:focus-visible{outline:2px solid var(--kbs-emas);outline-offset:2px}
+  .kbs-suara[disabled]{opacity:.5;cursor:not-allowed}
+  .kbs-suara-ikon{width:20px;height:20px;flex:none;overflow:visible}
+  .kbs-suara-badan{fill:currentColor}
+  .kbs-suara-gelombang,.kbs-suara-coret{fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round}
+  .kbs-suara-coret{display:none}
+  .kbs-suara[aria-pressed="true"]{color:var(--kbs-aksen-teks);border-color:color-mix(in srgb,var(--kbs-aksen-teks) 40%,var(--border))}
+  .kbs-suara.kbs-suara-mati .kbs-suara-gelombang{display:none}
+  .kbs-suara.kbs-suara-mati .kbs-suara-coret{display:inline}
+  /* indikator statis (tanpa animasi): pemutar mengadopsi animasi apa pun di
+     dalam scene, jadi tanda "sedang bernarasi" cukup lewat warna */
+  .kbs-suara .kbs-suara-gelombang{opacity:.5}
+  .kbs-suara.kbs-suara-bicara{background:var(--kbs-aksen-teks);border-color:var(--kbs-aksen-teks);color:#fff}
+  .kbs-suara.kbs-suara-bicara .kbs-suara-gelombang{opacity:1}
+  @media (max-width:620px){
+    .kbs-suara{padding:0;width:44px}
+    .kbs-suara-teks{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
   }
   .kbs-text{min-width:0;min-height:0;display:grid;gap:6px;align-content:start;padding:14px 16px;border:1px solid var(--border);border-radius:18px;background:var(--surface);box-shadow:var(--shadow-sm)}
   .kbs-kicker{font-size:10.5px;font-weight:900;letter-spacing:.12em;color:var(--kbs-aksen-teks)}
