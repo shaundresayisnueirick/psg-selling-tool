@@ -13,8 +13,8 @@
    teks fokus renderer lama di sales-idea.js. Label jari memakai
    legenda tangan lama. Tidak ada isi bisnis baru.
 
-   Keadaan akhir = keadaan CSS statis. Frame awal (OPEN / NEXT /
-   BACK / REPLAY) = keadaan sebelum jari scene ini diangkat.
+   Keadaan akhir = keadaan CSS statis. Frame awal (tampil saat OPEN,
+   titik mulai putar) = keadaan sebelum jari scene ini diangkat.
    Gerak dikurangi: tanpa animasi — selalu keadaan akhir.
    Satu SVG tanpa <svg> bersarang; semua gerak lewat timeline
    pemutar (Web Animations API), tanpa timer dan tanpa listener.

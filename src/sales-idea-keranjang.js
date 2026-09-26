@@ -615,7 +615,7 @@
      Satu narator untuk seluruh sesi. Ia tidak mengubah pemutar; ia
      mengikuti keadaannya lewat MutationObserver (status data-sip-status,
      kelas .aktif, dan scene yang sedang dirender):
-       - scene mulai berputar (hanya PLAY)   → narasi scene dari awal
+       - scene mulai berputar (PLAY / NEXT / BACK / REPLAY) → narasi scene dari awal
        - PAUSE                               → hentikan, ingat kalimat
        - RESUME                              → lanjut dari kalimat itu
        - REPLAY / NEXT / BACK / scene baru   → hentikan narasi lama
