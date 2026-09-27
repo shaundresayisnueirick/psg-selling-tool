@@ -47,22 +47,39 @@
   @media (min-width:1024px),(min-aspect-ratio:3/2) and (max-height:560px){
     .jps-body{grid-template-rows:minmax(0,1fr);grid-template-columns:minmax(0,1fr) clamp(260px,27vw,380px);gap:18px}
   }
-  #layarSalesIdea .jps > .si-presentation-topbar{
-    display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:10px;
+  /* bilah judul 10 Jari & 3 alasan (renderer lama) dengan tombol Narasi */
+  #layarSalesIdea .jps > .si-presentation-topbar,
+  #layarSalesIdea .si-presentation-topbar.jps-bar-suara{
+    display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;align-items:center;gap:10px;
     min-height:56px;max-width:none;margin:0;padding:6px 0;
   }
-  #layarSalesIdea .jps > .si-presentation-topbar .si-back-hub{grid-column:1;grid-row:1}
-  #layarSalesIdea .jps > .si-presentation-topbar .si-presentation-brand{grid-column:2;grid-row:1;min-width:0;justify-content:center;text-align:center}
-  #layarSalesIdea .jps > .si-presentation-topbar .si-close{grid-column:3;grid-row:1}
+  #layarSalesIdea .jps > .si-presentation-topbar .si-back-hub,
+  #layarSalesIdea .jps-bar-suara .si-back-hub{grid-column:1;grid-row:1}
+  #layarSalesIdea .jps > .si-presentation-topbar .si-presentation-brand,
+  #layarSalesIdea .jps-bar-suara .si-presentation-brand{grid-column:2;grid-row:1;min-width:0;justify-content:center;text-align:center}
+  #layarSalesIdea .jps > .si-presentation-topbar .kbs-suara,
+  #layarSalesIdea .jps-bar-suara .kbs-suara{grid-column:3;grid-row:1}
+  #layarSalesIdea .jps > .si-presentation-topbar .si-close,
+  #layarSalesIdea .jps-bar-suara .si-close{grid-column:4;grid-row:1}
+  /* tombol Narasi: komponen & gaya dari Keranjang, warna aksen 10 Jari */
+  #layarSalesIdea .jps > .si-presentation-topbar .kbs-suara{--kbs-aksen-teks:var(--jps-aksen-teks);--kbs-emas:var(--jps-emas)}
+  #layarSalesIdea .jps-bar-suara .kbs-suara{--kbs-aksen-teks:#a60101;--kbs-emas:#c8912e}
+  [data-theme="dark"] #layarSalesIdea .jps-bar-suara .kbs-suara{--kbs-aksen-teks:var(--brand);--kbs-emas:#f0c060}
   @media (max-width:620px){
-    #layarSalesIdea .jps > .si-presentation-topbar{min-height:50px;padding:3px 0;gap:6px}
-    #layarSalesIdea .jps > .si-presentation-topbar .si-back-hub{padding:0 8px 0 0}
-    #layarSalesIdea .jps > .si-presentation-topbar .si-presentation-brand{flex-wrap:nowrap;overflow:hidden}
-    #layarSalesIdea .jps > .si-presentation-topbar .si-presentation-brand b{font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    #layarSalesIdea .jps > .si-presentation-topbar .si-presentation-brand small{display:none}
+    #layarSalesIdea .jps > .si-presentation-topbar,
+    #layarSalesIdea .si-presentation-topbar.jps-bar-suara{min-height:50px;padding:3px 0;gap:6px}
+    #layarSalesIdea .jps > .si-presentation-topbar .si-back-hub,
+    #layarSalesIdea .jps-bar-suara .si-back-hub{padding:0 8px 0 0}
+    #layarSalesIdea .jps > .si-presentation-topbar .si-presentation-brand,
+    #layarSalesIdea .jps-bar-suara .si-presentation-brand{flex-wrap:nowrap;overflow:hidden}
+    #layarSalesIdea .jps > .si-presentation-topbar .si-presentation-brand b,
+    #layarSalesIdea .jps-bar-suara .si-presentation-brand b{font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    #layarSalesIdea .jps > .si-presentation-topbar .si-presentation-brand small,
+    #layarSalesIdea .jps-bar-suara .si-presentation-brand small{display:none}
   }
   @media (max-width:380px){
-    #layarSalesIdea .jps > .si-presentation-topbar .si-presentation-brand span{display:none}
+    #layarSalesIdea .jps > .si-presentation-topbar .si-presentation-brand span,
+    #layarSalesIdea .jps-bar-suara .si-presentation-brand span{display:none}
   }
 
   /* ---------- 2. Panggung ---------- */
@@ -108,6 +125,8 @@
   /* label fokus di ujung jari */
   .jps-chip-pil{fill:var(--jps-chip-bg);stroke:var(--jps-chip-garis);stroke-width:1}
   .jps-chip-tali{fill:none;stroke:var(--jps-sinar);stroke-width:1.3;stroke-linecap:round;opacity:.85}
+  /* BAB 1: label tiap risiko hanya tampil selama ketukannya */
+  .jps-bab1 .jps-chip-isi{opacity:0}
   .jps-chip-teks{fill:var(--jps-chip-teks);font-family:inherit;font-size:12px;font-weight:850;letter-spacing:.01em;text-anchor:middle}
 
   /* ---------- 4. Panel teks ---------- */
@@ -123,6 +142,10 @@
   .jps-ubin-hitung .jps-ubin-isi{opacity:.45}
   .jps-ubin-fokus{color:var(--jps-aksen-teks);border-color:var(--jps-aksen-teks)}
   .jps-ubin-fokus .jps-ubin-isi{opacity:1}
+  /* BAB 1: satu baris fokus per ketukan, ditumpuk di tempat yang sama */
+  .jps-fokus-tumpuk{display:grid}
+  .jps-fokus-tumpuk > .jps-focus{grid-area:1/1;opacity:0}
+  .jps-fokus-tumpuk > .jps-fk0{opacity:1}
   .jps-kicker{font-size:10.5px;font-weight:900;letter-spacing:.12em;color:var(--jps-aksen-teks)}
   .jps-title{margin:0;font-size:clamp(17px,2.1vw,26px);line-height:1.2;letter-spacing:-.015em;color:var(--text)}
   .jps-focus{margin:0;font-size:clamp(12.5px,1.25vw,16px);line-height:1.35;font-weight:900;letter-spacing:.02em;color:var(--jps-aksen-teks)}

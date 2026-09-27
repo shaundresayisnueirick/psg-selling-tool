@@ -34,10 +34,11 @@
      scene (DOM baru, timeline baru), jadi tidak ada state animasi lama
      yang terbawa.
 
-   Gerak dikurangi (prefers-reduced-motion): tidak ada gerak otomatis —
-   scene dibuka di keadaan akhir, NEXT/BACK menampilkan keadaan akhir
-   tanpa berputar sendiri, tanpa animasi ambient. PLAY/REPLAY adalah permintaan eksplisit presenter,
-   jadi scene tetap bisa diputar. Semua listener dipasang sekali.
+   Gerak dikurangi (prefers-reduced-motion): hanya gerak dekoratif yang
+   ditiadakan — animasi ambient (loop tak berujung) tidak dibuat, dan
+   OPEN menampilkan keadaan akhir tanpa berputar. PLAY / NEXT / BACK /
+   REPLAY adalah aksi eksplisit presenter, jadi cerita tetap diputar
+   (perilaku sama di HP, tablet, laptop). Semua listener dipasang sekali.
    ============================================================ */
 (function () {
   'use strict';
@@ -209,13 +210,12 @@
   };
 
   /* cara:
-       'siap'   dibuka: frame sesuai siapDi, diam
-       'lanjut' NEXT / BACK: berputar otomatis; bila gerak dikurangi
-                langsung keadaan akhir
+       'siap'   dibuka: frame sesuai siapDi, diam (gerak dikurangi: akhir)
+       'lanjut' NEXT / BACK: langsung berputar
        'awal'   frame awal, menunggu PLAY
-       'putar'  PLAY / REPLAY dari awal. Permintaan eksplisit presenter,
-                jadi tetap diputar walau gerak dikurangi (hanya ambient
-                yang tidak). */
+       'putar'  PLAY / REPLAY dari awal.
+     Semua kecuali 'siap' adalah aksi eksplisit presenter: tetap diputar
+     walau gerak dikurangi (hanya ambient yang tidak). */
   Player.prototype.tampilkan = function (i, cara) {
     var scene = this.scenes[i];
     if (!scene) return;
@@ -229,9 +229,9 @@
     var tl = new Timeline();
     this.tl = tl;
     var kurang = gerakDikurangi();
-    var eksplisit = cara === 'putar' || cara === 'awal';
+    var eksplisit = cara !== 'siap';
     /* Tanpa animasi bila layar tidak aktif (mis. init() tertunda setelah
-       ditutup) atau gerak dikurangi tanpa permintaan PLAY/REPLAY. */
+       ditutup) atau gerak dikurangi saat scene baru dibuka (OPEN). */
     var diam = !this.aktif() || (kurang && !eksplisit);
     tl.tanpaAmbient = kurang;
     if (!diam && typeof scene.animate === 'function') scene.animate(tl, this.stage);
@@ -319,12 +319,10 @@
   };
   Player.prototype._gerakBerubah = function () {
     if (!this.tl || !this.scenes.length || !this.aktif()) return;
-    if (gerakDikurangi()) {
-      this.tl.jedaAmbient();
-      this.tl.selesaikan();
-      this.status = 'selesai';
-      this._ui();
-    }
+    /* Preferensi berubah di tengah scene: cerita jalan terus, hanya
+       ambient yang ikut preferensi. */
+    if (gerakDikurangi()) this.tl.jedaAmbient();
+    else if (this._bolehAmbient() && (this.status === 'berputar' || this.status === 'selesai')) this.tl.putarAmbient();
   };
 
   function sedangMengetik(t) {

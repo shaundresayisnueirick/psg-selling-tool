@@ -119,9 +119,9 @@
     if(m==='basket'&&window.PSGKeranjangStory)return window.PSGKeranjangStory.adegan({langkah:basketSteps,header:salesIdeaHeader('Keranjang Kehidupan','Visual storytelling tentang beban kehidupan'),padaLangkah:i=>{current=i;}});
     // Education Planning: cerita interaktif (src/sales-idea-education.js), data tetap educationSteps.
     if(m==='education'&&window.PSGEducationStory)return window.PSGEducationStory.adegan({langkah:educationSteps,header:salesIdeaHeader('Education Planning','Visual storytelling tentang tujuan pendidikan anak'),padaLangkah:i=>{current=i;}});
-    // 10 Jari: cerita tangan interaktif (src/sales-idea-jari.js) untuk 10 jari, data tetap fingers; 3 alasan tetap scene lama.
-    if(m==='jari'&&window.PSGJariStory)daftar.push(...window.PSGJariStory.adegan({langkah:fingers,teks:teksJari,header:salesIdeaHeader('10 Jari','Visual 5 produk + 5 pertanyaan + 3 alasan'),padaLangkah:i=>{current=i;}}));
-    for(let i=daftar.length;i<jumlahLangkah(m);i++){
+    // 10 Jari: cerita tangan interaktif (src/sales-idea-jari.js), 9 langkah — BAB 1 (5 risiko satu scene), BAB 2 (5 pertanyaan), BAB 3 (3 alasan, renderer lama). Data tetap fingers & reasons.
+    if(m==='jari'&&window.PSGJariStory)return window.PSGJariStory.adegan({langkah:fingers,teks:teksJari,header:salesIdeaHeader('10 Jari','Visual 5 produk + 5 pertanyaan + 3 alasan'),padaLangkah:i=>{current=i;},alasan:{jumlah:reasons.length,render:(root,k)=>{current=10+k;renderIsi(root);},animate:animasiMasuk}});
+    for(let i=0;i<jumlahLangkah(m);i++){
       daftar.push({id:m+'-'+(i+1),siapDi:'akhir',animate:animasiMasuk,render:root=>{current=m==='alasan'?10+i:i;renderIsi(root);}});
     }
     return daftar;

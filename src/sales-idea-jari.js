@@ -1,23 +1,25 @@
 /* ============================================================
    Sales Idea — 10 Jari (cerita tangan interaktif)
    ------------------------------------------------------------
-   Identitas visual: satu tangan di tengah panggung.
-     Scene 1–5  : tangan produk menghitung lima ujung risiko SKCMT;
-                  tiap scene mengangkat satu jari (jempol → kelingking),
-                  jari lain yang belum dihitung sedikit melipat.
-     Scene 6–10 : tangan produk bergeser menjadi ringkasan, tangan
-                  pertanyaan (cermin) masuk ke tengah dan menghitung
-                  lima pertanyaan dengan gestur bertanya.
+   Identitas visual: satu tangan di tengah panggung. 9 langkah:
+     1   BAB 1 — satu scene sinematik: pembuka, lalu tangan produk
+         menghitung S K C M T (jempol → kelingking) dalam satu PLAY,
+         lalu penutup. Tiap ketukan punya fokus, label, dan narasi.
+     2–6 BAB 2 — tangan produk menjadi ringkasan, tangan pertanyaan
+         (cermin) menghitung lima pertanyaan, satu scene per pertanyaan.
+     7–9 BAB 3 — 3 alasan dengan renderer lama (sales-idea.js), hanya
+         ditambah narasi dan tombol Narasi.
 
-   Teks panel (judul, fokus, isi, inti) memakai data `fingers` dan
-   teks fokus renderer lama di sales-idea.js. Label jari memakai
-   legenda tangan lama. Tidak ada isi bisnis baru.
+   Teks panel memakai data `fingers`/`reasons` dan teks fokus renderer
+   lama di sales-idea.js; label jari memakai legenda tangan lama.
+   Narasi dibacakan narator bersama (window.PSGNarasi). Tidak ada isi
+   bisnis baru.
 
-   Keadaan akhir = keadaan CSS statis. Frame awal (tampil saat OPEN,
-   titik mulai putar) = keadaan sebelum jari scene ini diangkat.
-   Gerak dikurangi: tanpa animasi — selalu keadaan akhir.
-   Satu SVG tanpa <svg> bersarang; semua gerak lewat timeline
-   pemutar (Web Animations API), tanpa timer dan tanpa listener.
+   Keadaan akhir = keadaan CSS statis. Frame awal (OPEN) = keadaan
+   sebelum jari diangkat. Gerak dikurangi: cerita tetap diputar oleh
+   aksi presenter; hanya gerak dekoratif (ambient, dorongan kamera)
+   yang ditiadakan. Satu SVG tanpa <svg> bersarang; semua gerak lewat
+   timeline pemutar (Web Animations API), tanpa timer dan listener.
    ============================================================ */
 (function () {
   'use strict';
@@ -28,6 +30,40 @@
   /* legenda tangan pertanyaan lama (handHtml di sales-idea.js) */
   var TANYA = ['Kebal?', 'Bisa memilih?', 'Tahu kapan?', 'Butuh uang besar?', 'Kantong sendiri / orang lain?'];
   var CUE = 'Gunakan visual ini sebagai alat bantu presentasi. Agen bebas mengembangkan percakapan sesuai respons prospek.';
+
+  /* ---------------- narasi (Bahasa Indonesia) ----------------
+     Dasar: dialog presenter & teks di data fingers/reasons (sales-idea.js).
+     BAB 1 berupa segmen: pembuka, S, K, C, M, T, penutup — satu segmen
+     per ketukan visual. */
+  var NARASI_BAB1 = [
+    'Kalau kita bicara tentang produk asuransi, ujung-ujungnya bisa kita sederhanakan menjadi lima hal.',
+    'Yang pertama adalah sakit kritis, yaitu risiko ketika kita terkena penyakit berat.',
+    'Yang kedua adalah kecelakaan. Di sini kita belum membahas nama produk, tetapi memahami risiko yang ingin kita siapkan dan lindungi.',
+    'Berikutnya adalah risiko cacat tetap. Kondisi ini bisa terjadi karena kecelakaan maupun penyakit, dan dampaknya bisa membuat kemampuan kita untuk bekerja atau beraktivitas terganggu.',
+    'Yang keempat adalah meninggal. Ini juga bagian dari lima ujung kebutuhan perlindungan.',
+    'Dan yang kelima adalah tua. Artinya, hidup kita bisa panjang, sementara setelah masa produktif selesai, kebutuhan hidup tetap perlu dibiayai.',
+    'Jadi, lima jari pertama: sakit kritis, kecelakaan, cacat, meninggal, dan tua. S, K, C, M, T.'
+  ];
+  var NARASI_JARI = [
+    NARASI_BAB1,
+    'Pertanyaan pertama: adakah orang di dunia ini yang kebal terhadap sakit kritis, kecelakaan, cacat, meninggal, dan tua? Kita tidak kebal.',
+    'Pertanyaan kedua: kalau tidak ada yang kebal, apakah kita bisa memilih mau terkena yang mana? Misalnya, Tuhan, jangan kena yang macam-macam, saya sakit gigi saja. Kita tidak bisa memilih.',
+    'Pertanyaan ketiga: apakah kita bisa tahu kapan itu terjadi? Misalnya, kalau saya masih muda jangan dulu, nanti saja umur 70 atau 80 tahun. Kita tidak tahu kapan.',
+    'Pertanyaan keempat: kalau terkena salah satu dari sakit kritis, kecelakaan, cacat, meninggal, atau tua, kira-kira butuh uang kecil atau uang besar? Risiko besar dapat membutuhkan dana besar.',
+    'Pertanyaan kelima: kalau ingin mendapatkan uang besar, maunya pakai kantong sendiri atau kantong orang lain?'
+  ];
+  var NARASI_ALASAN = [
+    'Alasan pertama adalah bukti nyata. Bukti itu sudah banyak di sekitar kita. Kita sering mendengar teman, keluarga, kenalan, atau tokoh publik mengalami sakit berat atau musibah dan membutuhkan bantuan. Artinya, risiko itu bukan sekadar teori.',
+    'Alasan kedua: tidak ada pilihan. Ketika risiko besar terjadi, dana besar tetap harus tersedia. Menabung membutuhkan waktu, sementara musibah tidak menunggu dana terkumpul. Kalau musibah datang sebelum dana cukup, kita bisa terpaksa meminjam, meminta bantuan, atau menjual harta. Jadi pertanyaannya: bagaimana menyiapkan dana besar sebelum risiko terjadi?',
+    'Alasan ketiga adalah cinta keluarga. Asuransi dapat diposisikan sebagai salah satu bentuk persiapan, agar keluarga tetap memiliki dukungan finansial ketika kita sudah tidak ada. Kita tentu ingin membahagiakan anak. Pertanyaannya: kita ingin membahagiakan anak selama seumur hidup kita, atau seumur hidup anak kita? Kalau punya kesempatan menyayangi dan membahagiakan anak, kita bisa mempersiapkannya sejak sekarang.'
+  ];
+  /* Ketukan BAB 1: durasi tiap ketukan mengikuti perkiraan lama narasinya
+     (±70 md per huruf pada kecepatan 0,96) plus jeda, minimal 4,5 detik. */
+  var KETUK = (function () {
+    var mulai = [], t = 0;
+    NARASI_BAB1.forEach(function (seg) { mulai.push(t); t += Math.max(4500, Math.round(seg.length * 70) + 900); });
+    return { mulai: mulai, akhir: t };
+  })();
 
   /* Geometri jari dalam koordinat tangan: pergelangan di (0,0), atas = -y.
      bx/by pangkal jari, a sudut (derajat), L panjang, w lebar. */
@@ -175,127 +211,214 @@
     return [1, 2, 3, 4, 5].map(function (k) { return k < fokus ? 'hitung' : (k === fokus ? 'fokus' : 'lipat'); });
   }
   function arahLabel(k, m) { return k === 1 ? -m : (k === 5 ? m : 0); }
-  function panggung(n, langkah) {
-    var kunci = langkah.slice(0, 5).map(function (s) { return s.key; });
-    var isi;
-    if (n <= 5) {
-      isi = tangan('p', POS.pTengah, keadaanJari(n), kunci) +
-        label(langkah[n - 1].title, ujung(POS.pTengah, JARI[n - 1], 7), arahLabel(n, 1), n);
-    } else {
-      var q = n - 5;
-      isi = tangan('p', POS.pRekap, keadaanJari(6), kunci, REDUP_REKAP) +
-        tangan('q', POS.qTengah, keadaanJari(q), ['1', '2', '3', '4', '5']) +
-        label(TANYA[q - 1], ujung(POS.qTengah, JARI[q - 1], 7), arahLabel(q, -1), q);
-    }
+  function kunciProduk(langkah) { return langkah.slice(0, 5).map(function (s) { return s.key; }); }
+  function svgPanggung(cx, isi) {
     return '<svg class="jps-svg" viewBox="0 0 400 300" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false">' + defs() +
-      '<g class="jps-kamera"><ellipse class="jps-halo" cx="' + (n <= 5 ? 205 : 220) + '" cy="170" rx="176" ry="150" fill="url(#jpsHalo)"/>' + isi + '</g></svg>';
+      '<g class="jps-kamera"><ellipse class="jps-halo" cx="' + cx + '" cy="170" rx="176" ry="150" fill="url(#jpsHalo)"/>' + isi + '</g></svg>';
+  }
+  /* BAB 1: tangan produk dengan kelima jari terhitung (keadaan akhir) dan
+     label tiap risiko (tampil bergiliran saat diputar) */
+  function panggungBab1(langkah) {
+    return svgPanggung(205, tangan('p', POS.pTengah, keadaanJari(6), kunciProduk(langkah)) +
+      langkah.slice(0, 5).map(function (s, i) { return label(s.title, ujung(POS.pTengah, JARI[i], 7), arahLabel(i + 1, 1), i + 1); }).join(''));
+  }
+  /* BAB 2: pertanyaan q — tangan produk sebagai ringkasan, tangan pertanyaan di tengah */
+  function panggungTanya(q, langkah) {
+    return svgPanggung(220, tangan('p', POS.pRekap, keadaanJari(6), kunciProduk(langkah), REDUP_REKAP) +
+      tangan('q', POS.qTengah, keadaanJari(q), ['1', '2', '3', '4', '5']) +
+      label(TANYA[q - 1], ujung(POS.qTengah, JARI[q - 1], 7), arahLabel(q, -1), q));
   }
   function ubin(isi, fokus) {
     return '<span class="jps-ubin-deret">' + isi.map(function (x, i) {
-      var k = i + 1;
-      return '<span class="jps-ubin' + (k < fokus ? ' jps-ubin-hitung' : (k === fokus ? ' jps-ubin-fokus' : '')) + '"><i class="jps-ubin-isi"></i><b>' + esc(x) + '</b></span>';
+      var k = i + 1, kelas = fokus == null ? ' jps-ubin-hitung' : (k < fokus ? ' jps-ubin-hitung' : (k === fokus ? ' jps-ubin-fokus' : ''));
+      return '<span class="jps-ubin' + kelas + '" data-k="' + k + '"><i class="jps-ubin-isi"></i><b>' + esc(x) + '</b></span>';
     }).join('') + '</span>';
   }
-  function ringkas(n, langkah) {
-    if (n <= 5) {
-      return '<div class="jps-ringkas"><span class="jps-ringkas-label">5 JARI PRODUK</span>' +
-        ubin(langkah.slice(0, 5).map(function (s) { return s.key; }), n) + '</div>';
-    }
-    return '<div class="jps-ringkas"><span class="jps-ringkas-selesai">' + esc(langkah.slice(0, 5).map(function (s) { return s.key; }).join('')) + ' ✓</span>' +
-      '<span class="jps-ringkas-label">5 JARI PERTANYAAN</span>' + ubin(['1', '2', '3', '4', '5'], n - 5) + '</div>';
-  }
-  function kerangka(o, step, n) {
-    var t = typeof o.teks === 'function' ? (o.teks(n - 1) || {}) : {};
-    var produk = step.type === 'produk';
-    var aria = 'Ilustrasi tangan: ' + (produk ? 'jari produk ' + step.key : 'jari pertanyaan ' + step.q) + ' — ' + step.title;
-    return '<div class="jps" data-jps="' + n + '">' + (o.header || '') +
+  function teksLangkah(o, i) { return typeof o.teks === 'function' ? (o.teks(i) || {}) : {}; }
+  function kerangkaBab1(o) {
+    var produk = o.langkah.slice(0, 5);
+    var judul = produk.map(function (s) { return s.title; });
+    var inti = teksLangkah(o, 0).supporting;
+    return '<div class="jps" data-jps="1" data-ketuk="0">' + (o.header || '') +
       '<div class="jps-body">' +
-        '<figure class="jps-stage jps-s' + n + '" role="img" aria-label="' + esc(aria) + '">' +
-          '<div class="jps-latar"></div>' + panggung(n, o.langkah) +
+        '<figure class="jps-stage jps-bab1" role="img" aria-label="' + esc('Ilustrasi tangan: lima jari produk — ' + judul.join(', ')) + '">' +
+          '<div class="jps-latar"></div>' + panggungBab1(o.langkah) +
         '</figure>' +
         '<div class="jps-text">' +
-          ringkas(n, o.langkah) +
-          '<span class="jps-kicker">' + (produk ? 'JARI PRODUK' : 'JARI PERTANYAAN ' + esc(step.q)) + ' • ' + n + ' / 10 JARI</span>' +
+          '<div class="jps-ringkas"><span class="jps-ringkas-label">5 JARI PRODUK</span>' + ubin(kunciProduk(o.langkah), null) + '</div>' +
+          '<span class="jps-kicker">BAB 1 • JARI PRODUK • 1–5 / 10 JARI</span>' +
+          '<h3 class="jps-title">5 Jari Produk</h3>' +
+          '<div class="jps-fokus-tumpuk"><p class="jps-focus jps-fk0">' + esc(judul.join(' • ').toUpperCase()) + '</p>' +
+            produk.map(function (s, i) { return '<p class="jps-focus jps-fk' + (i + 1) + '" aria-hidden="true">' + esc(teksLangkah(o, i).focus || s.title) + '</p>'; }).join('') +
+          '</div>' +
+          (inti ? '<div class="jps-inti"><b>Inti yang disampaikan</b><p>' + esc(inti) + '</p></div>' : '') +
+          '<p class="jps-cue">' + esc(CUE) + '</p>' +
+        '</div>' +
+      '</div></div>';
+  }
+  function kerangkaTanya(o, q) {
+    var step = o.langkah[4 + q], n = 5 + q, t = teksLangkah(o, n - 1), kunci = kunciProduk(o.langkah);
+    return '<div class="jps" data-jps="' + (q + 1) + '">' + (o.header || '') +
+      '<div class="jps-body">' +
+        '<figure class="jps-stage jps-s' + n + '" role="img" aria-label="' + esc('Ilustrasi tangan: jari pertanyaan ' + step.q + ' — ' + step.title) + '">' +
+          '<div class="jps-latar"></div>' + panggungTanya(q, o.langkah) +
+        '</figure>' +
+        '<div class="jps-text">' +
+          '<div class="jps-ringkas"><span class="jps-ringkas-selesai">' + esc(kunci.join('')) + ' ✓</span>' +
+            '<span class="jps-ringkas-label">5 JARI PERTANYAAN</span>' + ubin(['1', '2', '3', '4', '5'], q) + '</div>' +
+          '<span class="jps-kicker">BAB 2 • JARI PERTANYAAN ' + esc(step.q) + ' • ' + n + ' / 10 JARI</span>' +
           '<h3 class="jps-title">' + esc(step.title) + '</h3>' +
           (t.focus ? '<p class="jps-focus">' + esc(t.focus) + '</p>' : '') +
           '<p class="jps-isi">' + esc(step.body) + '</p>' +
           (t.supporting ? '<div class="jps-inti"><b>Inti yang disampaikan</b><p>' + esc(t.supporting) + '</p></div>' : '') +
-          (n === 10 ? '<div class="jps-lanjut"><b>10 Jari selesai.</b><span>Lanjutkan ke 3 alasan untuk menambahkan unsur emosional.</span></div>' : '') +
+          (q === 5 ? '<div class="jps-lanjut"><b>10 Jari selesai.</b><span>Lanjutkan ke 3 alasan untuk menambahkan unsur emosional.</span></div>' : '') +
           '<p class="jps-cue">' + esc(CUE) + '</p>' +
         '</div>' +
       '</div></div>';
   }
 
   /* ---------------- gerak ---------------- */
-  function animasi(tl, stage, n) {
-    /* gerak dikurangi: tidak ada animasi; panggung tetap di keadaan akhir */
-    if (MQ && MQ.matches) return;
-    var sv = satu(stage, '.jps-svg');
-    if (!sv) return;
-    var produk = n <= 5, k = produk ? n : n - 5, t0 = n === 6 ? 800 : 0;
-    var tg = satu(sv, produk ? '.jps-tangan-p' : '.jps-tangan-q');
-    /* semua jejak berakhir bersama timeline: RESUME tidak pernah memulai
-       ulang animasi yang sudah lewat (play() memutar ulang animasi yang
-       sudah selesai) */
-    var akhir = t0 + 1600;
-    function jejak(tl2, el, frames) {
+  function gerakDikurangi() { return !!(MQ && MQ.matches); }
+  /* jejak yang berakhir bersama timeline scene: RESUME tidak pernah memulai
+     ulang animasi yang sudah lewat */
+  function penjejak(tl, akhir) {
+    return function (el, frames) {
+      if (!el) return;
       if (frames[frames.length - 1][0] < akhir) frames = frames.concat([[akhir, {}, 'linear']]);
-      jejakDasar(tl2, el, frames);
-    }
-    jejak(tl, satu(sv, '.jps-kamera'), [[0, { transform: 'translate(0px,4px) scale(.985)' }], [1000, { transform: 'none' }]]);
-    if (n === 6) {
-      /* pergantian tangan: produk menjadi ringkasan, pertanyaan masuk */
-      jejak(tl, satu(sv, '.jps-tangan-p'), [[0, { transform: tf(POS.pTengah), opacity: 1 }], [950, { transform: tf(POS.pRekap), opacity: REDUP_REKAP }]]);
-      jejak(tl, tg, [[150, { transform: tf(POS.qLuar), opacity: 0 }], [1050, { transform: tf(POS.qTengah), opacity: 1 }]]);
-      jejak(tl, satu(tg, '.jps-gestur'), [[150, { transform: 'rotate(8deg)' }], [1250, { transform: 'rotate(-4deg)' }]]);
-    } else if (!produk) {
-      /* gestur bertanya: pergelangan sedikit memiring lalu kembali */
-      jejak(tl, satu(tg, '.jps-gestur'), [[0, { transform: 'rotate(-4deg)' }], [600, { transform: 'rotate(-8deg)' }], [1600, { transform: 'rotate(-4deg)' }]]);
-    } else {
-      var miring = [-2.5, -1.2, 0, 1.2, 2.5][k - 1];
-      jejak(tl, satu(tg, '.jps-gestur'), [[0, { transform: 'none' }], [550, { transform: 'rotate(' + miring + 'deg) translate(0px,-3px)' }], [1600, { transform: 'none' }]]);
-    }
-    if (n === 1) {
-      /* tangan terbuka → jari lain melipat pelan, jempol yang diangkat */
-      [2, 3, 4, 5].forEach(function (j, i) {
-        var g = satu(tg, '.jps-j' + j), t = 250 + i * 60;
-        jejak(tl, satu(g, '.jps-gerak'), [[t, { transform: 'none' }], [t + 800, { transform: LIPAT }]]);
-        jejak(tl, satu(g, '.jps-teduh'), [[t, { opacity: 0 }], [t + 800, { opacity: 0.3 }]]);
-      });
-    }
-    var fj = satu(tg, '.jps-j' + k), jempol = k === 1;
-    jejak(tl, satu(fj, '.jps-gerak'), [[t0 + 300, { transform: n === 1 ? 'none' : (jempol ? LIPAT_JEMPOL : LIPAT) }], [t0 + 1100, { transform: jempol ? ANGKAT_JEMPOL : ANGKAT }, PEGAS]]);
-    jejak(tl, satu(fj, '.jps-teduh'), [[t0 + 300, { opacity: n === 1 ? 0 : 0.3 }], [t0 + 900, { opacity: 0 }]]);
-    jejak(tl, satu(fj, '.jps-sinar'), [[t0 + 700, { opacity: 0 }], [t0 + 1300, { opacity: 1 }]]);
-    jejak(tl, satu(fj, '.jps-lencana'), [[t0 + 900, { opacity: 0 }], [t0 + 1300, { opacity: 1 }]]);
-    jejak(tl, satu(sv, '.jps-chip-isi'), [[t0 + 1000, { opacity: 0, transform: 'translate(0px,6px)' }], [t0 + 1500, { opacity: 1, transform: 'none' }]]);
-    jejak(tl, satu(stage, '.jps-ubin-fokus .jps-ubin-isi'), [[t0 + 1100, { opacity: 0 }], [t0 + 1500, { opacity: 1 }]]);
-    /* ambient halus: napas tangan & cahaya bergeser (berhenti saat jeda) */
+      jejakDasar(tl, el, frames);
+    };
+  }
+  function ambient(tl, sv) {
     semua(sv, '.jps-napas').forEach(function (el, i) {
       tl.loop(el, [{ transform: 'none' }, { transform: 'translate(0px,-1.6px) rotate(' + (i ? 0.4 : -0.5) + 'deg)' }, { transform: 'none' }], { duration: 5600 + i * 700, easing: 'ease-in-out' });
     });
     tl.loop(satu(sv, '.jps-halo'), [{ transform: 'none' }, { transform: 'translate(6px,-3px)' }, { transform: 'none' }], { duration: 9000, easing: 'ease-in-out' });
   }
+  /* BAB 1: satu sekuens sinematik — pembuka, S K C M T, penutup. Tiap
+     ketukan berdurasi sesuai panjang narasinya; data-ketuk pada node scene
+     memberi tahu narator ketukan mana yang sudah mulai. */
+  function animasiBab1(tl, stage) {
+    var sv = satu(stage, '.jps-svg'), node = satu(stage, '.jps');
+    if (!sv || !node) return;
+    var B = KETUK.mulai, jj = penjejak(tl, KETUK.akhir), tg = satu(sv, '.jps-tangan-p');
+    if (!gerakDikurangi()) jj(satu(sv, '.jps-kamera'), [[0, { transform: 'translate(0px,4px) scale(.985)' }], [1000, { transform: 'none' }]]);
+    /* condong halus ke tiap jari fokus, lalu gestur penutup */
+    var g = [[0, { transform: 'none' }]];
+    [-2.5, -1.2, 0, 1.2, 2.5].forEach(function (m, i) {
+      var t = B[i + 1];
+      g.push([t, { transform: 'none' }], [t + 550, { transform: 'rotate(' + m + 'deg) translate(0px,-3px)' }], [t + 1600, { transform: 'none' }]);
+    });
+    g.push([B[6], { transform: 'none' }], [B[6] + 700, { transform: 'translate(0px,-5px)' }], [B[6] + 1800, { transform: 'none' }]);
+    jj(satu(tg, '.jps-gestur'), g);
+    /* akhir pembuka: kelima jari melipat pelan, siap dihitung */
+    var lipat = B[1] - 1100;
+    for (var k = 1; k <= 5; k++) {
+      var fj = satu(tg, '.jps-j' + k), t = B[k], t2 = B[k + 1], d = (k - 1) * 70;
+      var lip = k === 1 ? LIPAT_JEMPOL : LIPAT, ang = k === 1 ? ANGKAT_JEMPOL : ANGKAT;
+      jj(satu(fj, '.jps-gerak'), [[lipat + d, { transform: 'none' }], [lipat + 800 + d, { transform: lip }], [t + 200, { transform: lip }],
+        [t + 1000, { transform: ang }, PEGAS], [t2 + 100, { transform: ang }], [t2 + 700, { transform: 'none' }]]);
+      jj(satu(fj, '.jps-teduh'), [[lipat + d, { opacity: 0 }], [lipat + 800 + d, { opacity: 0.3 }], [t + 200, { opacity: 0.3 }], [t + 800, { opacity: 0 }],
+        [t2 + 100, { opacity: 0 }], [t2 + 700, { opacity: 0.07 }]]);
+      jj(satu(fj, '.jps-sinar'), [[t + 600, { opacity: 0 }], [t + 1200, { opacity: 1 }], [t2 + 100, { opacity: 1 }], [t2 + 600, { opacity: 0 }]]);
+      jj(satu(fj, '.jps-lencana'), [[t + 800, { opacity: 0 }], [t + 1200, { opacity: 1 }]]);
+      jj(satu(sv, '.jps-chip[data-k="' + k + '"] .jps-chip-isi'), [[t + 900, { opacity: 0, transform: 'translate(0px,6px)' }], [t + 1400, { opacity: 1, transform: 'none' }],
+        [t2, { opacity: 1 }], [t2 + 400, { opacity: 0 }]]);
+      jj(satu(stage, '.jps-ubin[data-k="' + k + '"] .jps-ubin-isi'), [[t + 800, { opacity: 0 }], [t + 1200, { opacity: 0.45 }]]);
+      jj(satu(stage, '.jps-ubin[data-k="' + k + '"]'), [[t + 800, { transform: 'none' }], [t + 1050, { transform: 'scale(1.18)' }], [t + 1450, { transform: 'none' }]]);
+      jj(satu(stage, '.jps-fk' + k), [[t, { opacity: 0 }], [t + 400, { opacity: 1 }], [t2, { opacity: 1 }], [t2 + 300, { opacity: 0 }]]);
+    }
+    jj(satu(stage, '.jps-fk0'), [[B[1], { opacity: 1 }], [B[1] + 300, { opacity: 0 }], [B[6], { opacity: 0 }], [B[6] + 400, { opacity: 1 }]]);
+    tl.tick(function (t) {
+      var n = 0;
+      while (n < B.length && B[n] <= t) n++;
+      if (node.getAttribute('data-ketuk') !== String(n)) node.setAttribute('data-ketuk', n);
+    });
+    ambient(tl, sv);
+  }
+  /* BAB 2: pertanyaan q — Q1 membawa pergantian tangan dari BAB 1 */
+  function animasiTanya(tl, stage, q) {
+    var sv = satu(stage, '.jps-svg');
+    if (!sv) return;
+    var t0 = q === 1 ? 800 : 0, jj = penjejak(tl, t0 + 1600), tg = satu(sv, '.jps-tangan-q');
+    if (!gerakDikurangi()) jj(satu(sv, '.jps-kamera'), [[0, { transform: 'translate(0px,4px) scale(.985)' }], [1000, { transform: 'none' }]]);
+    if (q === 1) {
+      /* produk menjadi ringkasan, tangan pertanyaan masuk */
+      jj(satu(sv, '.jps-tangan-p'), [[0, { transform: tf(POS.pTengah), opacity: 1 }], [950, { transform: tf(POS.pRekap), opacity: REDUP_REKAP }]]);
+      jj(tg, [[150, { transform: tf(POS.qLuar), opacity: 0 }], [1050, { transform: tf(POS.qTengah), opacity: 1 }]]);
+      jj(satu(tg, '.jps-gestur'), [[150, { transform: 'rotate(8deg)' }], [1250, { transform: 'rotate(-4deg)' }]]);
+    } else {
+      /* gestur bertanya: pergelangan sedikit memiring lalu kembali */
+      jj(satu(tg, '.jps-gestur'), [[0, { transform: 'rotate(-4deg)' }], [600, { transform: 'rotate(-8deg)' }], [1600, { transform: 'rotate(-4deg)' }]]);
+    }
+    var fj = satu(tg, '.jps-j' + q), jempol = q === 1;
+    jj(satu(fj, '.jps-gerak'), [[t0 + 300, { transform: jempol ? LIPAT_JEMPOL : LIPAT }], [t0 + 1100, { transform: jempol ? ANGKAT_JEMPOL : ANGKAT }, PEGAS]]);
+    jj(satu(fj, '.jps-teduh'), [[t0 + 300, { opacity: 0.3 }], [t0 + 900, { opacity: 0 }]]);
+    jj(satu(fj, '.jps-sinar'), [[t0 + 700, { opacity: 0 }], [t0 + 1300, { opacity: 1 }]]);
+    jj(satu(fj, '.jps-lencana'), [[t0 + 900, { opacity: 0 }], [t0 + 1300, { opacity: 1 }]]);
+    jj(satu(sv, '.jps-chip-isi'), [[t0 + 1000, { opacity: 0, transform: 'translate(0px,6px)' }], [t0 + 1500, { opacity: 1, transform: 'none' }]]);
+    jj(satu(stage, '.jps-ubin-fokus .jps-ubin-isi'), [[t0 + 1100, { opacity: 0 }], [t0 + 1500, { opacity: 1 }]]);
+    ambient(tl, sv);
+  }
 
+  /* BAB 3: 3 alasan memakai renderer lama; di sini hanya diberi penanda
+     narasi dan tombol Narasi di bilah judulnya */
+  function tandaiAlasan(stage, k) {
+    var kartu = satu(stage, '.si-presentation-card');
+    if (kartu) kartu.setAttribute('data-jps-alasan', k + 1);
+    if (!N) return;
+    var bar = satu(stage, '.si-presentation-topbar'), tutup = bar ? satu(bar, '.si-close') : null;
+    if (tutup && !satu(bar, '[data-kbs-suara]')) {
+      tutup.insertAdjacentHTML('beforebegin', N.tombolHtml());
+      bar.classList.add('jps-bar-suara');
+    }
+    N.tandai();
+  }
+
+  var N = null;
+  /* 9 langkah: BAB 1 (5 risiko, satu scene) · BAB 2 (5 pertanyaan) · BAB 3 (3 alasan) */
   function adegan(opsi) {
     var o = opsi || {};
     var langkah = Array.isArray(o.langkah) ? o.langkah.slice(0, 10) : [];
     o = Object.assign({}, o, { langkah: langkah });
-    return langkah.map(function (step, i) {
-      var n = i + 1;
-      return {
-        id: 'jari-' + n,
+    if (langkah.length < 10) return [];
+    N = window.PSGNarasi || null;
+    if (N) {
+      N.daftar('.jps', 'data-jps', NARASI_JARI);
+      N.daftar('[data-jps-alasan]', 'data-jps-alasan', NARASI_ALASAN);
+      N.pasang();
+      o.header = N.tombol(o.header || '');
+    }
+    var pada = function (i) { if (typeof o.padaLangkah === 'function') o.padaLangkah(i); };
+    var daftar = [{
+      id: 'jari-bab1',
+      fit: true,
+      siapDi: 'awal',
+      render: function (stage) { pada(0); stage.innerHTML = kerangkaBab1(o); tataLabel(stage); if (N) N.tandai(); },
+      animate: function (tl, stage) { animasiBab1(tl, stage); }
+    }];
+    [1, 2, 3, 4, 5].forEach(function (q) {
+      daftar.push({
+        id: 'jari-tanya-' + q,
         fit: true,
         siapDi: 'awal',
-        manual: true,
-        render: function (stage) {
-          if (typeof o.padaLangkah === 'function') o.padaLangkah(i);
-          stage.innerHTML = kerangka(o, step, n);
-          tataLabel(stage);
-        },
-        animate: function (tl, stage) { animasi(tl, stage, n); }
-      };
+        render: function (stage) { pada(4 + q); stage.innerHTML = kerangkaTanya(o, q); tataLabel(stage); if (N) N.tandai(); },
+        animate: function (tl, stage) { animasiTanya(tl, stage, q); }
+      });
     });
+    var a = o.alasan;
+    if (a && typeof a.render === 'function') {
+      for (var k = 0; k < (a.jumlah || 0); k++) {
+        (function (k) {
+          daftar.push({
+            id: 'jari-alasan-' + (k + 1),
+            siapDi: 'akhir',
+            render: function (stage) { a.render(stage, k); tandaiAlasan(stage, k); },
+            animate: a.animate
+          });
+        })(k);
+      }
+    }
+    return daftar;
   }
 
   window.PSGJariStory = { adegan: adegan };
