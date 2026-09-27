@@ -50,8 +50,8 @@ const JS_DIIZINKAN = {
   }],
   'src/core.js': [{
     dari: '385c5f77851f6b5b5c94b6e3bf6d65d3df77faef9b21a1c9cd4aa137c1833c7c',
-    ke: '0ecc6451f9b74f65eb9782caea43e6cb89eff027513e204865487e91a6631d65',
-    alasan: 'Profil dengan kelanjutan untuk alur Sales Idea → Mari Kita Hitung: konteks {source, topic, target} hanya di memori (tanpa profileId, tanpa storage key baru), dipasang lewat InsuranceHubCustomerProfile.bukaUntuk(). cpApply (titik akhir Simpan/Gunakan) lanjut ke target konteks dan mengangkat PROFILE dari riwayat; tanpa konteks tetap bukaLayar(\'PRODUK\'). bukaLayar dan tombol btnProfil membersihkan konteks saat meninggalkan Profil. Banner + tombol Buat Profil Baru (mekanisme Kosongkan form) dibuat hanya saat ada konteks. Penyimpanan profil, Financial Triangle, dan alur Dashboard tidak berubah.',
+    ke: 'aaac3ba87630cba4212b98dbbba97b74855c6af0b4e2c80757a732dd0e705051',
+    alasan: 'Profil dengan kelanjutan untuk alur Sales Idea → Mari Kita Hitung: konteks {source, topic, target} hanya di memori (tanpa profileId, tanpa storage key baru), dipasang lewat InsuranceHubCustomerProfile.bukaUntuk(). cpApply (titik akhir Simpan/Gunakan) lanjut ke target konteks dan mengangkat PROFILE dari riwayat; tanpa konteks tetap bukaLayar(\'PRODUK\'). bukaLayar dan tombol btnProfil membersihkan konteks saat meninggalkan Profil. Banner + tombol Buat Profil Baru (mekanisme Kosongkan form) dibuat hanya saat ada konteks. Penyimpanan profil, Financial Triangle, dan alur Dashboard tidak berubah. Perbaikan Edit Profil: cpFillForm membaca komponen pensiun dari p.snapshot.pensiun (jalur yang ditulis cpFormValue dan dibaca kalkulator Dana Pensiun), bukan p.snapshot.snapshot.pensiun yang tidak pernah ada — sebelumnya Edit → Simpan menimpa keenam komponen dengan 0.',
   }],
   'src/sales-idea.js': [{
     dari: 'dfd143970d9e79bc8ec46687724748da98147b9ae78985619a71c83c7a0c747f',
