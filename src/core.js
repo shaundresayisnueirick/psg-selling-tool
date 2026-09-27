@@ -101,8 +101,17 @@ const LAYAR = {
 let layarAktif = 'PRODUK';
 const riwayatLayar = [];
 let sedangKembali = false;
+/* Profil dengan kelanjutan: tujuan sesudah profil dipilih atau disimpan
+   ({source, topic, target}, tanpa profileId). Hanya di memori — hilang saat
+   muat ulang — dan hanya dipasang lewat InsuranceHubCustomerProfile.bukaUntuk()
+   (Sales Idea "Mari Kita Hitung"). Tanpa konteks, alur Profil tetap berakhir
+   di Dashboard seperti biasa. */
+let cpKonteks = null;
 function bukaLayar(nama) {
   if (!LAYAR[nama]) nama = 'PRODUK';
+  /* Meninggalkan Profil (Back, Home, tab bar, menutup Sales Idea) membatalkan
+     kelanjutan; hanya Profil itu sendiri yang boleh membawanya. */
+  if (cpKonteks && nama !== 'PROFILE') cpKonteksHapus();
   if (!sedangKembali && nama !== layarAktif) {
     riwayatLayar.push(layarAktif);
     if (riwayatLayar.length > 30) riwayatLayar.shift();
@@ -382,7 +391,61 @@ function cpApply(p) {
   if (!p) return;
   cpAutofillAll(p);
   cpSetActive(p.id); cpRender();
+  /* Satu-satunya titik akhir alur Profil (Simpan baru, Simpan perubahan,
+     Gunakan). Dengan konteks kelanjutan: lanjut ke tujuannya. */
+  if (cpKonteks) { const tujuan = cpKonteks.target; cpKonteksHapus(); cpLanjutKe(tujuan); return; }
   bukaLayar('PRODUK');
+}
+/* Profil hanya langkah perantara: sesudah tujuan dibuka, entri PROFILE
+   diangkat dari riwayat supaya Back dari tujuan kembali ke layar sebelum
+   Profil (mis. Sales Idea pada scene yang sama), bukan ke Profil. */
+function cpLanjutKe(tujuan) {
+  bukaLayar(LAYAR[tujuan] ? tujuan : 'PRODUK');
+  if (riwayatLayar[riwayatLayar.length - 1] === 'PROFILE') riwayatLayar.pop();
+}
+function cpKonteksHapus() {
+  cpKonteks = null;
+  const b = el('cpLanjut');
+  if (b) b.hidden = true;
+}
+/* Membuka layar Profil yang sama dengan Dashboard, dengan tujuan lanjutan.
+   Tujuan harus layar terdaftar; selain itu Profil dibuka seperti biasa. */
+function cpBukaUntuk(k) {
+  const target = String((k && k.target) || '');
+  if (!target || target === 'PROFILE' || !LAYAR[target]) { bukaLayar('PROFILE'); return false; }
+  cpKonteks = { source: String(k.source || ''), topic: String(k.topic || ''), target: target };
+  cpBannerLanjut();
+  bukaLayar('PROFILE');
+  return true;
+}
+/* Banner kecil di atas form, hanya selama ada konteks kelanjutan (dibuat
+   saat pertama dipakai, jadi layar Profil dari Dashboard tidak berubah).
+   Kalimatnya netral karena layar ini bisa terlihat oleh prospek. */
+function cpBannerLanjut() {
+  let b = el('cpLanjut');
+  if (!b) {
+    const layar = el('layarProfile'); if (!layar) return;
+    b = document.createElement('div');
+    b.id = 'cpLanjut'; b.className = 'blok cp-lanjut';
+    b.innerHTML = '<h2>Lanjutkan pembahasan Anda</h2>'
+      + '<p class="catatan">Data ini akan digunakan untuk membantu menghitung kebutuhan Anda.</p>'
+      + '<button class="sakelar" id="cpBuatBaru" type="button" style="min-height:44px">+ Buat Profil Baru</button>';
+    const kop = layar.querySelector('.kop');
+    layar.insertBefore(b, kop ? kop.nextSibling : layar.firstChild);
+    b.querySelector('#cpBuatBaru').addEventListener('click', cpFormBaru);
+  }
+  b.hidden = false;
+}
+/* "+ Buat Profil Baru": mekanisme Kosongkan form yang sudah ada, termasuk
+   keluar dari mode edit, supaya Simpan membuat profil baru yang bersih. */
+function cpFormBaru() {
+  cpFillForm({});
+  const bar = el('cpStatusBar');
+  if (bar) { bar.dataset.editId = ''; bar.textContent = 'Form dikosongkan.'; }
+  if (el('cpSimpan')) el('cpSimpan').textContent = 'Simpan profil';
+  if (el('cpReset')) el('cpReset').textContent = 'Kosongkan form';
+  const nama = el('cpNama');
+  if (nama) { nama.scrollIntoView({behavior:'smooth', block:'center'}); nama.focus({preventScroll:true}); }
 }
 function cpSave() {
   const p = cpFormValue();
@@ -602,7 +665,8 @@ function cpFamilyMembers(p){
   });
   return base.filter(x=>x && (x.id==='self' || x.nama || x.tglLahir));
 }
-window.InsuranceHubCustomerProfile = {read:cpRead, active:()=>cpRead().find(x=>x.id===cpGetActive()) || null, apply:cpApply, family:cpFamilyMembers, selectedFamily:()=>cpSelectedFamily};
+window.InsuranceHubCustomerProfile = {read:cpRead, active:()=>cpRead().find(x=>x.id===cpGetActive()) || null, apply:cpApply, family:cpFamilyMembers, selectedFamily:()=>cpSelectedFamily,
+  bukaUntuk:cpBukaUntuk, konteks:()=>cpKonteks ? {...cpKonteks} : null, batalKonteks:cpKonteksHapus};
 
 // Render product cards and wire navigation after the DOM has been parsed.
 if (el('daftarProduk')) {
@@ -628,7 +692,8 @@ if (el('daftarProduk')) {
   }).join('');
 }
 document.querySelectorAll('.produk[data-siap="1"]').forEach(b => b.addEventListener('click', () => bukaLayar(b.dataset.layar)));
-if (el('btnProfil')) el('btnProfil').addEventListener('click', () => bukaLayar('PROFILE'));
+/* Pintu Profil dari Dashboard/tab bar selalu Profil biasa (tanpa kelanjutan). */
+if (el('btnProfil')) el('btnProfil').addEventListener('click', () => { cpKonteksHapus(); bukaLayar('PROFILE'); });
 if (el('btnKartuKonsultan')) el('btnKartuKonsultan').addEventListener('click', () => bukaLayar('KARTU_KONSULTAN'));
 if (el('btnQuick')) el('btnQuick').addEventListener('click', () => { const q=el('quickCalculator'); if(q) q.scrollIntoView({behavior:'smooth',block:'start'}); });
 if (el('btnNeeds')) el('btnNeeds').addEventListener('click', () => { needsLoadActiveProfile(); bukaLayar('NEEDS'); });

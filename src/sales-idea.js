@@ -373,6 +373,9 @@
     render();
   }
 
-  window.SalesIdea10Jari={init,reset,next,prev,setMode,openSalesIdea,closeSalesIdea};
+  /* Keadaan presentasi untuk dibaca modul lain (kartu akhir "Mari Kita Hitung"):
+     mode aktif, indeks scene di pemutar, dan jumlah scene. Hanya dibaca. */
+  function keadaan(){if(mode==='hub')return {mode:'hub',indeks:0,total:0};if(pemutar)return {mode,indeks:pemutar.i,total:pemutar.scenes.length};return {mode,indeks:current,total:jumlahLangkah(mode)};}
+  window.SalesIdea10Jari={init,reset,next,prev,setMode,openSalesIdea,closeSalesIdea,keadaan};
   document.addEventListener('DOMContentLoaded',init);
 })();
