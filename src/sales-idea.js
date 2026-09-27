@@ -119,6 +119,10 @@
     if(m==='basket'&&window.PSGKeranjangStory)return window.PSGKeranjangStory.adegan({langkah:basketSteps,header:salesIdeaHeader('Keranjang Kehidupan','Visual storytelling tentang beban kehidupan'),padaLangkah:i=>{current=i;}});
     // Education Planning: cerita interaktif (src/sales-idea-education.js), data tetap educationSteps.
     if(m==='education'&&window.PSGEducationStory)return window.PSGEducationStory.adegan({langkah:educationSteps,header:salesIdeaHeader('Education Planning','Visual storytelling tentang tujuan pendidikan anak'),padaLangkah:i=>{current=i;}});
+    // Asset Creation: cerita interaktif (src/sales-idea-asset.js), data tetap assetCreationSteps.
+    if(m==='asset'&&window.PSGAssetStory)return window.PSGAssetStory.adegan({langkah:assetCreationSteps,header:salesIdeaHeader('Asset Creation','Visual sederhana untuk membuka percakapan aset dan warisan'),padaLangkah:i=>{current=i;}});
+    // 10 Jari: cerita tangan interaktif (src/sales-idea-jari.js), 9 langkah — BAB 1 (5 risiko satu scene), BAB 2 (5 pertanyaan), BAB 3 (3 alasan, renderer lama). Data tetap fingers & reasons.
+    if(m==='jari'&&window.PSGJariStory)return window.PSGJariStory.adegan({langkah:fingers,teks:teksJari,header:salesIdeaHeader('10 Jari','Visual 5 produk + 5 pertanyaan + 3 alasan'),padaLangkah:i=>{current=i;},alasan:{jumlah:reasons.length,render:(root,k)=>{current=10+k;renderIsi(root);},animate:animasiMasuk}});
     for(let i=0;i<jumlahLangkah(m);i++){
       daftar.push({id:m+'-'+(i+1),siapDi:'akhir',animate:animasiMasuk,render:root=>{current=m==='alasan'?10+i:i;renderIsi(root);}});
     }
@@ -134,16 +138,23 @@
     return pemutar;
   }
 
+  // Teks fokus & inti tiap jari; dipakai renderer ini dan cerita tangan interaktif.
+  function teksJari(i){
+    const s=fingers[i];if(!s)return null;
+    const focus = s.type==='produk'
+      ? (i===0?'UJUNG RISIKO: SAKIT KRITIS':i===1?'UJUNG RISIKO: KECELAKAAN':i===2?'UJUNG RISIKO: CACAT':i===3?'UJUNG RISIKO: MENINGGAL':'UJUNG RISIKO: TUA')
+      : (i===5?'KITA TIDAK KEBAL':i===6?'KITA TIDAK BISA MEMILIH':i===7?'KITA TIDAK TAHU KAPAN':i===8?'RISIKO DAPAT MEMBUTUHKAN DANA BESAR':'SUMBER DANA: KANTONG SENDIRI ATAU ORANG LAIN?');
+    const supporting = s.type==='produk'
+      ? 'Lima ujung kebutuhan perlindungan: Sakit Kritis, Kecelakaan, Cacat, Meninggal, dan Tua (SKCMT).'
+      : s.insight;
+    return {focus,supporting};
+  }
+
   function renderFinger(root){
     const s=current<10?fingers[current]:null;
     if(!s){ renderReasons(root); return; }
     const leftActive=current<5?current:-1, rightActive=current<5?-1:current-5;
-    const focus = s.type==='produk'
-      ? (current===0?'UJUNG RISIKO: SAKIT KRITIS':current===1?'UJUNG RISIKO: KECELAKAAN':current===2?'UJUNG RISIKO: CACAT':current===3?'UJUNG RISIKO: MENINGGAL':'UJUNG RISIKO: TUA')
-      : (current===5?'KITA TIDAK KEBAL':current===6?'KITA TIDAK BISA MEMILIH':current===7?'KITA TIDAK TAHU KAPAN':current===8?'RISIKO DAPAT MEMBUTUHKAN DANA BESAR':'SUMBER DANA: KANTONG SENDIRI ATAU ORANG LAIN?');
-    const supporting = s.type==='produk'
-      ? 'Lima ujung kebutuhan perlindungan: Sakit Kritis, Kecelakaan, Cacat, Meninggal, dan Tua (SKCMT).'
-      : s.insight;
+    const {focus,supporting}=teksJari(current);
     root.innerHTML=`${salesIdeaHeader('10 Jari','Visual 5 produk + 5 pertanyaan + 3 alasan')}<div class="si-topline"><div><span class="si-eyebrow">SALES IDEA 01</span><h2>10 JARI</h2><p>Gunakan visual ini sebagai alat bantu presentasi. Agen bebas mengembangkan percakapan sesuai respons prospek.</p></div><div class="si-counter"><b>${current+1}</b><span>/ 10 JARI</span></div></div><div class="si-progress"><span style="width:${(current+1)*10}%"></span></div><div class="si-hands">${handHtml('left',leftActive)}${handHtml('right',rightActive)}</div><div class="si-presentation-card ${s.type}"><div class="si-presentation-kicker">${s.type==='produk'?'JARI PRODUK':'JARI PERTANYAAN '+s.q}</div><div class="si-presentation-focus">${focus}</div><div class="si-presentation-text">${s.body}</div>${supporting?`<div class="si-presentation-highlight"><span>●</span><div><b>Inti yang disampaikan</b><p>${supporting}</p></div></div>`:''}</div>${current===9?`<div class="si-transition"><b>10 Jari selesai.</b><span>Lanjutkan ke 3 alasan untuk menambahkan unsur emosional.</span></div>`:''}`;
   }
 
@@ -362,6 +373,9 @@
     render();
   }
 
-  window.SalesIdea10Jari={init,reset,next,prev,setMode,openSalesIdea,closeSalesIdea};
+  /* Keadaan presentasi untuk dibaca modul lain (kartu akhir "Mari Kita Hitung"):
+     mode aktif, indeks scene di pemutar, dan jumlah scene. Hanya dibaca. */
+  function keadaan(){if(mode==='hub')return {mode:'hub',indeks:0,total:0};if(pemutar)return {mode,indeks:pemutar.i,total:pemutar.scenes.length};return {mode,indeks:current,total:jumlahLangkah(mode)};}
+  window.SalesIdea10Jari={init,reset,next,prev,setMode,openSalesIdea,closeSalesIdea,keadaan};
   document.addEventListener('DOMContentLoaded',init);
 })();

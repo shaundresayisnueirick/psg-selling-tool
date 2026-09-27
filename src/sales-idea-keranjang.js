@@ -615,7 +615,7 @@
      Satu narator untuk seluruh sesi. Ia tidak mengubah pemutar; ia
      mengikuti keadaannya lewat MutationObserver (status data-sip-status,
      kelas .aktif, dan scene yang sedang dirender):
-       - scene mulai berputar (hanya PLAY)   → narasi scene dari awal
+       - scene mulai berputar (PLAY / NEXT / BACK / REPLAY) → narasi scene dari awal
        - PAUSE                               → hentikan, ingat kalimat
        - RESUME                              → lanjut dari kalimat itu
        - REPLAY / NEXT / BACK / scene baru   → hentikan narasi lama
@@ -625,7 +625,10 @@
      cancel(), jadi tidak pernah ada dua suara bersamaan. Tidak ada
      autoplay: suara hanya berjalan karena aksi pengguna.
      Sales Idea lain memakai narator yang sama lewat window.PSGNarasi:
-     daftar(selektorScene, atributNomor, naskah) + tombol() + pasang(). */
+     daftar(selektorScene, atributNomor, naskah) + tombol() + pasang().
+     Naskah scene boleh berupa larik segmen: segmen ke-j baru diucapkan
+     bila node scene ber-data-ketuk ≥ j+1 (ketukan visual sudah mulai) dan
+     segmen sebelumnya tuntas — narasi mengikuti gambar, tidak terpotong. */
   var NARASI = [
     'Setiap keluarga memiliki keranjang kehidupannya sendiri. Di dalamnya ada berbagai kebutuhan dan tanggung jawab yang harus kita bawa bersama sepanjang perjalanan hidup.',
     'Sebagian beban mungkin terasa kecil. Sebagian lainnya jauh lebih berat. Dan sering kali, semakin panjang perjalanan hidup, semakin banyak pula tanggung jawab yang harus kita siapkan.',
@@ -639,7 +642,7 @@
     'Karena tujuan akhirnya bukan sekadar memiliki perlindungan. Tujuannya adalah memastikan keluarga tetap memiliki kemampuan untuk melanjutkan kehidupannya, bahkan ketika perjalanan tidak berjalan seperti yang kita harapkan.'
   ];
   var SUMBER = [{ sel: '.kbs', attr: 'data-kbs', teks: NARASI }];
-  var suara = { nyala: true, terpasang: false, root: null, stage: null, node: null, basi: null, aktif: false, kalimat: [], idx: 0, mulai: false, bicara: false, tertunda: false, gen: 0, jeda: 0 };
+  var suara = { nyala: true, terpasang: false, root: null, stage: null, node: null, basi: null, aktif: false, kalimat: [], butuh: [], gerbang: false, moKetuk: null, idx: 0, mulai: false, bicara: false, tertunda: false, gen: 0, jeda: 0 };
   function adaTTS() { return typeof window.speechSynthesis !== 'undefined' && typeof window.SpeechSynthesisUtterance === 'function'; }
   function pecahKalimat(t) {
     return (String(t).match(/[^.!?]+[.!?]+/g) || [t]).map(function (x) { return x.trim(); }).filter(Boolean);
@@ -649,6 +652,11 @@
     try { v = window.speechSynthesis.getVoices() || []; } catch (e) { v = []; }
     var id = v.filter(function (x) { return /^id([-_]|$)/i.test(x.lang || ''); });
     return id.filter(function (x) { return x.localService; })[0] || id[0] || null;
+  }
+  /* ketukan visual yang sudah dimulai pada scene aktif (tanpa atribut = bebas) */
+  function ketukSekarang() {
+    var v = suara.node ? suara.node.getAttribute('data-ketuk') : null;
+    return v == null ? Infinity : +v;
   }
   function diamkan() {
     suara.gen++;
@@ -667,6 +675,8 @@
     function lanjut() {
       if (g !== suara.gen) return;
       if (suara.idx >= suara.kalimat.length) { suara.bicara = false; tandaiSuara(); return; }
+      /* segmen berikutnya menunggu ketukan visualnya */
+      if ((suara.butuh[suara.idx] || 0) > ketukSekarang()) { suara.bicara = false; tandaiSuara(); return; }
       var u = new window.SpeechSynthesisUtterance(suara.kalimat[suara.idx]);
       u.lang = 'id-ID';
       var v = suaraIndonesia();
@@ -694,12 +704,23 @@
     if (node && node === suara.basi) node = null;
     if (!aktif || !node) {
       if (suara.node || suara.bicara) { diamkan(); suara.node = null; }
+      if (suara.moKetuk) suara.moKetuk.disconnect();
       return;
     }
     if (node !== suara.node) {
       diamkan();
       suara.node = node;
-      suara.kalimat = pecahKalimat(sumber.teks[(+node.getAttribute(sumber.attr) || 1) - 1] || '');
+      var isi = sumber.teks[(+node.getAttribute(sumber.attr) || 1) - 1] || '';
+      suara.gerbang = Array.isArray(isi);
+      suara.kalimat = [];
+      suara.butuh = [];
+      (suara.gerbang ? isi : [isi]).forEach(function (seg, j) {
+        pecahKalimat(seg).forEach(function (k) { suara.kalimat.push(k); suara.butuh.push(suara.gerbang ? j + 1 : 0); });
+      });
+      if (suara.moKetuk) {
+        suara.moKetuk.disconnect();
+        if (suara.gerbang) suara.moKetuk.observe(node, { attributes: true, attributeFilter: ['data-ketuk'] });
+      }
       suara.idx = 0;
       suara.mulai = false;
       suara.tertunda = false;
@@ -711,7 +732,10 @@
       if (suara.bicara) diamkan();
       if (status === 'siap') { suara.idx = 0; suara.mulai = false; }
     }
-    /* 'selesai': narasi yang masih berjalan dibiarkan sampai tuntas */
+    /* 'selesai': narasi yang masih berjalan dibiarkan sampai tuntas;
+       narasi bersegmen yang sedang menunggu ketukan dilanjutkan */
+    else if (status === 'selesai' && suara.gerbang && suara.mulai && suara.nyala && !suara.bicara && !document.hidden &&
+             suara.idx < suara.kalimat.length && (suara.butuh[suara.idx] || 0) <= ketukSekarang()) ucapkan();
     tandaiSuara();
   }
   function tandaiSuara() {
@@ -736,6 +760,7 @@
       var mo = new MutationObserver(sinkronSuara);
       mo.observe(root, { attributes: true, attributeFilter: ['class', 'data-sip-status'] });
       mo.observe(stage, { childList: true });
+      suara.moKetuk = new MutationObserver(sinkronSuara);
     }
     document.addEventListener('click', function (e) {
       var b = e.target && e.target.closest && e.target.closest('[data-kbs-suara]');
@@ -763,10 +788,12 @@
     '<path class="kbs-suara-gelombang kbs-suara-g1" d="M15.2 9.2a4 4 0 0 1 0 5.6"/>' +
     '<path class="kbs-suara-gelombang kbs-suara-g2" d="M17.8 6.6a7.6 7.6 0 0 1 0 10.8"/>' +
     '<path class="kbs-suara-coret" d="M15.5 9.5l5 5m0-5l-5 5"/></svg>';
+  function tombolSuara() {
+    return '<button type="button" class="kbs-suara" data-kbs-suara aria-pressed="true">' + IKON_SUARA + '<span class="kbs-suara-teks">Narasi</span></button>';
+  }
   function sisipTombolSuara(header) {
-    var tombol = '<button type="button" class="kbs-suara" data-kbs-suara aria-pressed="true">' + IKON_SUARA + '<span class="kbs-suara-teks">Narasi</span></button>';
     var i = header.indexOf('<button type="button" class="si-close"');
-    return i === -1 ? header : header.slice(0, i) + tombol + header.slice(i);
+    return i === -1 ? header : header.slice(0, i) + tombolSuara() + header.slice(i);
   }
   window.PSGNarasi = {
     daftar: function (sel, attr, teks) {
@@ -775,6 +802,7 @@
     },
     pasang: pasangSuara,
     tombol: sisipTombolSuara,
+    tombolHtml: tombolSuara,
     tandai: tandaiSuara
   };
 

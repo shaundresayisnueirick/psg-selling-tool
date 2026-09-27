@@ -48,10 +48,15 @@ const JS_DIIZINKAN = {
     ke: '5047860d6c7868c80548d215371e4c013c139185083ecc462033e47f1f8638a5',
     alasan: 'Pemecah tabel cetak memetakan sel menurut posisi kolom (colspan), bukan urutan DOM. Sebelumnya baris Total ber-colspan mendapat kolom lebih banyak dari judulnya: angka bertumpuk dan Total bergeser ke kolom yang salah. Tidak menyentuh nilai.',
   }],
+  'src/core.js': [{
+    dari: '385c5f77851f6b5b5c94b6e3bf6d65d3df77faef9b21a1c9cd4aa137c1833c7c',
+    ke: '0ecc6451f9b74f65eb9782caea43e6cb89eff027513e204865487e91a6631d65',
+    alasan: 'Profil dengan kelanjutan untuk alur Sales Idea → Mari Kita Hitung: konteks {source, topic, target} hanya di memori (tanpa profileId, tanpa storage key baru), dipasang lewat InsuranceHubCustomerProfile.bukaUntuk(). cpApply (titik akhir Simpan/Gunakan) lanjut ke target konteks dan mengangkat PROFILE dari riwayat; tanpa konteks tetap bukaLayar(\'PRODUK\'). bukaLayar dan tombol btnProfil membersihkan konteks saat meninggalkan Profil. Banner + tombol Buat Profil Baru (mekanisme Kosongkan form) dibuat hanya saat ada konteks. Penyimpanan profil, Financial Triangle, dan alur Dashboard tidak berubah.',
+  }],
   'src/sales-idea.js': [{
     dari: 'dfd143970d9e79bc8ec46687724748da98147b9ae78985619a71c83c7a0c747f',
-    ke: '4a5c599f27938d1aa130bee49f65240ea76c7f6a6486b0283c5c065581bd8137',
-    alasan: 'Sales Idea memakai pemutar interaktif (src/sales-idea-player.js): tiap langkah yang ada menjadi scene dengan Play/Pause/Replay/Next/Back. init() kini idempoten sehingga listener klik dokumen tidak lagi menumpuk tiap kali layar dibuka. Retirement Planning memakai cerita interaktif (src/sales-idea-retirement.js) dengan data retirementSteps yang sama. Keranjang Kehidupan memakai cerita interaktif (src/sales-idea-keranjang.js) dengan data basketSteps yang sama. Education Planning memakai cerita interaktif (src/sales-idea-education.js) dengan data educationSteps yang sama. Data, ID, kelas, dan API SalesIdea10Jari tidak berubah.',
+    ke: '9e320f87c96539ead6e0cd44c4029c044c8b2bb1e9e2e5055a42e80d1a92887c',
+    alasan: 'Sales Idea memakai pemutar interaktif (src/sales-idea-player.js): tiap langkah yang ada menjadi scene dengan Play/Pause/Replay/Next/Back. init() kini idempoten sehingga listener klik dokumen tidak lagi menumpuk tiap kali layar dibuka. Retirement Planning memakai cerita interaktif (src/sales-idea-retirement.js) dengan data retirementSteps yang sama. Keranjang Kehidupan memakai cerita interaktif (src/sales-idea-keranjang.js) dengan data basketSteps yang sama. Education Planning memakai cerita interaktif (src/sales-idea-education.js) dengan data educationSteps yang sama. 10 Jari memakai cerita tangan interaktif (src/sales-idea-jari.js) dalam 9 langkah (BAB 1: 5 risiko dalam satu scene, BAB 2: 5 pertanyaan, BAB 3: 3 alasan dengan renderer lama) dengan data fingers dan reasons yang sama; teks fokus/inti jari dipindah ke teksJari() tanpa perubahan isi. Asset Creation memakai cerita interaktif (src/sales-idea-asset.js) dengan data assetCreationSteps yang sama; renderer lama tetap sebagai cadangan. SalesIdea10Jari.keadaan() (hanya dibaca: mode, indeks scene, jumlah scene) dipakai kartu akhir "Mari Kita Hitung" (src/sales-idea-lanjut.js). Data, ID, kelas, dan API SalesIdea10Jari tidak berubah.',
   }],
 };
 

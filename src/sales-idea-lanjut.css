@@ -1,0 +1,48 @@
+/* =====================================================================
+   Kartu akhir Sales Idea — "Apakah Anda ingin melanjutkan?"
+   Pasangan src/sales-idea-lanjut.js. Melayang di atas bar kontrol
+   pemutar (tidak menutupinya); hanya transform/opacity yang bergerak.
+   ===================================================================== */
+@media screen{
+  #layarSalesIdea .sil-kartu{
+    position:absolute;left:0;right:0;margin:0 auto;z-index:25;
+    width:min(560px,calc(100% - 24px));box-sizing:border-box;
+    padding:16px 18px;border-radius:18px;
+    background:var(--surface,#fff);color:var(--text,#101828);
+    border:1px solid var(--border,#e4e7ec);
+    box-shadow:0 14px 34px rgba(16,24,40,.18),0 2px 6px rgba(16,24,40,.08);
+    opacity:0;transform:translateY(12px);
+    transition:opacity .24s ease,transform .28s cubic-bezier(.22,.8,.26,1);
+  }
+  #layarSalesIdea .sil-kartu[hidden]{display:none}
+  #layarSalesIdea .sil-kartu.sil-tampil{opacity:1;transform:none}
+  #layarSalesIdea .sil-judul{margin:0 0 12px;font-size:16px;font-weight:800;line-height:1.3;text-align:center;color:var(--text,#101828)}
+  #layarSalesIdea .sil-aksi{display:flex;flex-wrap:wrap;gap:10px}
+  #layarSalesIdea .sil-aksi button{
+    flex:1 1 180px;min-height:48px;min-width:44px;padding:0 16px;border-radius:12px;
+    font:inherit;font-size:15px;font-weight:800;cursor:pointer;
+    border:1px solid var(--border-strong,#d0d5dd);background:var(--surface,#fff);color:var(--text,#101828);
+  }
+  #layarSalesIdea .sil-aksi .sil-hitung{border-color:#a60101;background:#a60101;color:#fff}
+  #layarSalesIdea .sil-aksi button:focus-visible{outline:2px solid var(--focus,#2e90fa);outline-offset:2px}
+  #layarSalesIdea .sil-aksi .sil-hitung:hover{filter:brightness(1.08)}
+  #layarSalesIdea .sil-aksi .sil-lain:hover{border-color:var(--text-3,#667085)}
+
+  [data-theme="dark"] #layarSalesIdea .sil-kartu{box-shadow:0 14px 34px rgba(0,0,0,.55),0 2px 6px rgba(0,0,0,.4)}
+  [data-theme="dark"] #layarSalesIdea .sil-aksi .sil-hitung{border-color:var(--primary);background:var(--primary);color:var(--on-primary)}
+
+  /* HP sempit: tombol bertumpuk penuh lebar */
+  @media (max-width:380px){
+    #layarSalesIdea .sil-kartu{padding:14px}
+    #layarSalesIdea .sil-aksi button{flex-basis:100%}
+  }
+  /* landscape pendek: kartu ringkas, tombol berdampingan */
+  @media (min-aspect-ratio:3/2) and (max-height:420px){
+    #layarSalesIdea .sil-kartu{padding:10px 14px;width:min(520px,calc(100% - 24px))}
+    #layarSalesIdea .sil-judul{margin-bottom:8px;font-size:14px}
+    #layarSalesIdea .sil-aksi button{flex-basis:0;min-height:44px;font-size:14px}
+  }
+  @media (prefers-reduced-motion:reduce){
+    #layarSalesIdea .sil-kartu{transition:none;transform:none}
+  }
+}

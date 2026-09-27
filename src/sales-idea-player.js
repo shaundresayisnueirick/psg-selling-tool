@@ -8,8 +8,7 @@
      render   : menggambar isi scene ke dalam stage (DOM baru).
      animate  : mendaftarkan animasi scene ke timeline (opsional).
      siapDi   : 'awal' | 'akhir' — frame yang tampil sebelum PLAY.
-     manual   : true — NEXT/BACK tidak memutar sendiri; scene tampil di
-                frame awal dan menunggu PLAY (opsional).
+     manual   : tidak dipakai lagi (diterima demi kompatibilitas).
 
    Timeline:
      - Semua gerak memakai Web Animations API. Satu "jam" induk
@@ -25,16 +24,21 @@
 
    Player:
      status: 'siap' | 'berputar' | 'jeda' | 'selesai'
-     PLAY / PAUSE / RESUME / REPLAY / NEXT / BACK. NEXT, PLAY dari
-     akhir, dan REPLAY selalu menggambar ulang scene (DOM baru,
-     timeline baru), jadi tidak ada state animasi lama yang terbawa.
-     REPLAY kembali ke frame awal dan menunggu PLAY. BACK menampilkan
-     scene sebelumnya dalam keadaan siap.
+     OPEN  : scene pertama diam (frame sesuai siapDi), tanpa gerak.
+     PLAY  : memutar scene aktif.   PAUSE / RESUME: beku lalu lanjut
+             dari posisi yang sama; animasi yang sudah selesai tidak
+             pernah diputar ulang.
+     NEXT / BACK : pindah scene dan langsung memutarnya.
+     REPLAY: kembali ke scene 1 dan langsung memutarnya.
+     NEXT, BACK, PLAY dari akhir, dan REPLAY selalu menggambar ulang
+     scene (DOM baru, timeline baru), jadi tidak ada state animasi lama
+     yang terbawa.
 
-   Gerak dikurangi (prefers-reduced-motion): tidak ada gerak otomatis —
-   scene dibuka di keadaan akhir, NEXT tidak berputar sendiri, tanpa
-   animasi ambient. PLAY/REPLAY adalah permintaan eksplisit presenter,
-   jadi scene tetap bisa diputar. Semua listener dipasang sekali.
+   Gerak dikurangi (prefers-reduced-motion): hanya gerak dekoratif yang
+   ditiadakan — animasi ambient (loop tak berujung) tidak dibuat, dan
+   OPEN menampilkan keadaan akhir tanpa berputar. PLAY / NEXT / BACK /
+   REPLAY adalah aksi eksplisit presenter, jadi cerita tetap diputar
+   (perilaku sama di HP, tablet, laptop). Semua listener dipasang sekali.
    ============================================================ */
 (function () {
   'use strict';
@@ -105,7 +109,13 @@
     if (!this.jam) return;
     var t = this.waktu();
     if (t >= this.durasi) return;
-    this.anak.forEach(function (a) { a.currentTime = t; a.play(); });
+    /* Animasi yang sudah melewati akhirnya tetap diam di keadaan akhir:
+       play() pada animasi yang selesai akan memutarnya ulang dari 0
+       (auto-rewind Web Animations), itu sumber kedip saat RESUME. */
+    this.anak.forEach(function (a) {
+      a.currentTime = t;
+      if (t < akhirAnimasi(a)) a.play();
+    });
     this.jam.play();
     this.putarAmbient();
     if (this.ticks.length && !this.raf) this.raf = requestAnimationFrame(this._frame);
@@ -200,11 +210,12 @@
   };
 
   /* cara:
-       'siap'   dibuka / BACK: frame sesuai siapDi (biasanya akhir)
-       'lanjut' NEXT: berputar otomatis; bila gerak dikurangi langsung akhir
-       'awal'   REPLAY: kembali ke frame awal, menunggu PLAY
-       'putar'  PLAY dari awal. Permintaan eksplisit presenter, jadi tetap
-                diputar walau gerak dikurangi (hanya ambient yang tidak). */
+       'siap'   dibuka: frame sesuai siapDi, diam (gerak dikurangi: akhir)
+       'lanjut' NEXT / BACK: langsung berputar
+       'awal'   frame awal, menunggu PLAY
+       'putar'  PLAY / REPLAY dari awal.
+     Semua kecuali 'siap' adalah aksi eksplisit presenter: tetap diputar
+     walau gerak dikurangi (hanya ambient yang tidak). */
   Player.prototype.tampilkan = function (i, cara) {
     var scene = this.scenes[i];
     if (!scene) return;
@@ -218,9 +229,9 @@
     var tl = new Timeline();
     this.tl = tl;
     var kurang = gerakDikurangi();
-    var eksplisit = cara === 'putar' || cara === 'awal';
+    var eksplisit = cara !== 'siap';
     /* Tanpa animasi bila layar tidak aktif (mis. init() tertunda setelah
-       ditutup) atau gerak dikurangi tanpa permintaan PLAY/REPLAY. */
+       ditutup) atau gerak dikurangi saat scene baru dibuka (OPEN). */
     var diam = !this.aktif() || (kurang && !eksplisit);
     tl.tanpaAmbient = kurang;
     if (!diam && typeof scene.animate === 'function') scene.animate(tl, this.stage);
@@ -276,12 +287,11 @@
     this._ui();
   };
   Player.prototype.toggle = function () { if (this.status === 'berputar') this.pause(); else this.play(); };
-  /* REPLAY: kembali ke awal scene ini; PLAY memutarnya lagi dari awal */
-  Player.prototype.replay = function () { if (this.scenes.length) this.tampilkan(this.i, 'awal'); };
-  /* Scene dengan manual: true adalah sesi putar tersendiri: NEXT/BACK
-     menampilkannya di frame awal, diam, menunggu PLAY. */
-  Player.prototype.next = function () { var j = this.i + 1; if (j < this.scenes.length) this.tampilkan(j, this.scenes[j].manual ? 'awal' : 'lanjut'); };
-  Player.prototype.back = function () { var j = this.i - 1; if (j >= 0) this.tampilkan(j, this.scenes[j].manual ? 'awal' : 'siap'); };
+  /* REPLAY: kembali ke scene 1 dan langsung memutarnya */
+  Player.prototype.replay = function () { if (this.scenes.length) this.tampilkan(0, 'putar'); };
+  /* NEXT / BACK: pindah scene dan langsung memutarnya */
+  Player.prototype.next = function () { var j = this.i + 1; if (j < this.scenes.length) this.tampilkan(j, 'lanjut'); };
+  Player.prototype.back = function () { var j = this.i - 1; if (j >= 0) this.tampilkan(j, 'lanjut'); };
 
   /* Bersihkan timeline; isi scene yang tampil tidak disentuh. */
   Player.prototype._bersihkan = function () {
@@ -309,12 +319,10 @@
   };
   Player.prototype._gerakBerubah = function () {
     if (!this.tl || !this.scenes.length || !this.aktif()) return;
-    if (gerakDikurangi()) {
-      this.tl.jedaAmbient();
-      this.tl.selesaikan();
-      this.status = 'selesai';
-      this._ui();
-    }
+    /* Preferensi berubah di tengah scene: cerita jalan terus, hanya
+       ambient yang ikut preferensi. */
+    if (gerakDikurangi()) this.tl.jedaAmbient();
+    else if (this._bolehAmbient() && (this.status === 'berputar' || this.status === 'selesai')) this.tl.putarAmbient();
   };
 
   function sedangMengetik(t) {

@@ -1,0 +1,251 @@
+/* =====================================================================
+   SALES IDEA — ASSET CREATION (interactive story)
+   ---------------------------------------------------------------------
+   Pasangan src/sales-idea-asset.js. Hanya layar.
+   0. Token — terang: pagi/studio/senja lembut; gelap: malam sinematik.
+      Semua warna lapisan visual lewat token (tidak ada warna literal di
+      markup SVG), jadi ganti tema tidak mengulang scene.
+   1. Tata letak satu layar (pola yang sama dengan Education).
+   2. Panggung, dunia, material pseudo-3D, label, kartu.
+   ===================================================================== */
+@media screen{
+
+  /* ---------- 0. Token ---------- */
+  .acs{
+    --acs-langit-1:#e9f2fb;--acs-langit-2:#f3f5f1;--acs-langit-3:#fbf6ec;
+    --acs-studio-1:#edf1f7;--acs-studio-2:#f6f6f9;--acs-studio-3:#eef0f5;
+    --acs-senja-1:#f6e3d3;--acs-senja-2:#f1dde3;--acs-senja-3:#e5e2f2;
+    --acs-sore-1:#fbe7cf;--acs-sore-2:#f7e1d0;--acs-sore-3:#efe9df;
+    --acs-cahaya:rgba(255,206,120,.62);--acs-halo:rgba(255,236,196,.9);--acs-sapu:rgba(255,255,255,.95);--acs-bayang:rgba(36,48,68,.26);
+    --acs-matahari:#f6c24f;--acs-awan:#ffffff;--acs-kota:#dde4ec;--acs-bukit-1:#dfe9df;--acs-bukit-2:#d1e2cd;
+    --acs-tanah:#e8eedc;--acs-pohon:#bcd1b1;--acs-batang:#a99479;
+    --acs-lantai-garis:rgba(120,135,160,.22);--acs-lantai-cincin:rgba(120,135,160,.28);
+    --acs-lahan:#eadfc6;--acs-lahan-garis:#b9a47c;--acs-patok:#8f7a55;
+    --acs-fondasi-atas:#dfe3e8;--acs-fondasi-kiri:#c3c9d2;--acs-fondasi-kanan:#aeb5c0;--acs-rangka:#7b8595;
+    --acs-dinding-kiri:#f4e5cb;--acs-dinding-kanan:#e0c9a4;--acs-pelana:#ead5b1;
+    --acs-atap-depan:#c9624a;--acs-atap-belakang:#a64c39;--acs-jendela:#bcd6e9;--acs-jendela-nyala:#ffd98a;--acs-pintu:#8a6a4c;
+    --acs-alas-atas:#eef1f5;--acs-alas-kiri:#d6dce5;--acs-alas-kanan:#c1c9d4;
+    --acs-t1-atas:#dbe6f4;--acs-t1-kiri:#b6c9e2;--acs-t1-kanan:#98b0d0;
+    --acs-t2-atas:#d4ece4;--acs-t2-kiri:#a6d4c4;--acs-t2-kanan:#83bca9;
+    --acs-emas-atas:#f7d88e;--acs-emas-kiri:#e6b453;--acs-emas-kanan:#c8912e;--acs-emas-belakang:#d9a443;
+    --acs-maket-atas:#f5f7fa;--acs-maket-kiri:#e1e6ec;--acs-maket-kanan:#cbd2dc;--acs-maket-belakang:#e9edf2;--acs-maket-garis:rgba(90,105,130,.35);
+    --acs-kaca-atas:rgba(170,212,244,.8);--acs-kaca-kiri:rgba(128,182,230,.78);--acs-kaca-kanan:rgba(96,152,212,.8);--acs-kaca-belakang:rgba(150,196,236,.78);--acs-kaca-garis:rgba(58,110,170,.55);
+    --acs-hantu:rgba(120,130,150,.75);
+    --acs-kr-1:#fff3d4;--acs-kr-2:#f8d98f;--acs-kr-3:#e6b458;--acs-kr-4:#f3cf7e;--acs-kr-5:#dca24a;--acs-kr-6:#bf862c;--acs-kr-tepi:rgba(255,255,255,.75);
+    --acs-alas-kristal-atas:#f3eee7;--acs-alas-kristal-sisi:#dcd2c3;--acs-partikel:#f2b53f;--acs-busur:rgba(214,152,60,.55);--acs-cincin:rgba(214,152,60,.22);--acs-bintang:rgba(214,152,60,.5);
+    --acs-kartu:rgba(255,255,255,.95);--acs-kartu-garis:#e2e6ea;--acs-kartu-emas:#fff7e3;--acs-kartu-emas-garis:#e8c778;
+    --acs-teks-1:#1f2733;--acs-teks-2:#4b5563;--acs-teks-aksen:#a60101;--acs-teks-emas:#8f5d06;--acs-teks-biru:#1f5d99;--acs-teks-t1:#2b4f7e;--acs-teks-t2:#1f6e58;
+    --acs-garis:#8b97a8;--acs-titik:#a60101;
+    --acs-panggung-garis:#e5ebef;--acs-panggung-bayang:0 18px 40px rgba(30,50,70,.08);--acs-vignette:none;
+    --acs-aksen-teks:#a60101;--acs-emas:#c8912e;
+  }
+  [data-theme="dark"] .acs{
+    --acs-langit-1:#050a16;--acs-langit-2:#0a1428;--acs-langit-3:#161a2c;
+    --acs-studio-1:#070c18;--acs-studio-2:#0d1426;--acs-studio-3:#0a101f;
+    --acs-senja-1:#130c22;--acs-senja-2:#1e1030;--acs-senja-3:#0b1024;
+    --acs-sore-1:#1a1024;--acs-sore-2:#21142a;--acs-sore-3:#0e1322;
+    --acs-cahaya:rgba(255,190,100,.46);--acs-halo:rgba(255,196,120,.22);--acs-sapu:rgba(255,236,190,.8);--acs-bayang:rgba(0,0,0,.6);
+    --acs-matahari:#f3d7a1;--acs-awan:rgba(150,170,200,.18);--acs-kota:#111c2e;--acs-bukit-1:#0f1a2b;--acs-bukit-2:#132236;
+    --acs-tanah:#0f1828;--acs-pohon:#1b2d34;--acs-batang:#2a2621;
+    --acs-lantai-garis:rgba(140,170,220,.14);--acs-lantai-cincin:rgba(140,170,220,.2);
+    --acs-lahan:#1d2433;--acs-lahan-garis:#6f6247;--acs-patok:#b99e6c;
+    --acs-fondasi-atas:#3a4356;--acs-fondasi-kiri:#2a3242;--acs-fondasi-kanan:#212838;--acs-rangka:#9aa6bb;
+    --acs-dinding-kiri:#2b3448;--acs-dinding-kanan:#222a3b;--acs-pelana:#283044;
+    --acs-atap-depan:#8a3f33;--acs-atap-belakang:#6b3027;--acs-jendela:#3a4a66;--acs-jendela-nyala:#ffc97a;--acs-pintu:#ffcf87;
+    --acs-alas-atas:#1d2536;--acs-alas-kiri:#161d2c;--acs-alas-kanan:#111726;
+    --acs-t1-atas:#3a5378;--acs-t1-kiri:#2b3f5e;--acs-t1-kanan:#223350;
+    --acs-t2-atas:#2e6457;--acs-t2-kiri:#224c42;--acs-t2-kanan:#1b3d35;
+    --acs-emas-atas:#f4cf7c;--acs-emas-kiri:#d39a3a;--acs-emas-kanan:#a8742a;--acs-emas-belakang:#bf8733;
+    --acs-maket-atas:#2c3446;--acs-maket-kiri:#232b3b;--acs-maket-kanan:#1b2230;--acs-maket-belakang:#262e3f;--acs-maket-garis:rgba(170,190,220,.25);
+    --acs-kaca-atas:rgba(110,170,240,.5);--acs-kaca-kiri:rgba(80,140,220,.46);--acs-kaca-kanan:rgba(60,115,195,.5);--acs-kaca-belakang:rgba(96,156,230,.46);--acs-kaca-garis:rgba(150,200,255,.55);
+    --acs-hantu:rgba(170,190,220,.6);
+    --acs-kr-1:#fff0c8;--acs-kr-2:#f6d386;--acs-kr-3:#dca650;--acs-kr-4:#eec574;--acs-kr-5:#c89040;--acs-kr-6:#9c6c24;--acs-kr-tepi:rgba(255,240,200,.6);
+    --acs-alas-kristal-atas:#262d3f;--acs-alas-kristal-sisi:#1a2030;--acs-partikel:#ffcf6a;--acs-busur:rgba(255,200,110,.5);--acs-cincin:rgba(255,200,110,.18);--acs-bintang:rgba(255,230,180,.8);
+    --acs-kartu:rgba(17,23,37,.92);--acs-kartu-garis:rgba(255,255,255,.14);--acs-kartu-emas:rgba(60,44,18,.9);--acs-kartu-emas-garis:rgba(240,192,96,.5);
+    --acs-teks-1:#eef2f8;--acs-teks-2:#c4cbd7;--acs-teks-aksen:#ff8a80;--acs-teks-emas:#f3c96e;--acs-teks-biru:#8cbcff;--acs-teks-t1:#a9c4ec;--acs-teks-t2:#86d3bb;
+    --acs-garis:#6f7c92;--acs-titik:#ff8a80;
+    --acs-panggung-garis:rgba(255,255,255,.07);--acs-panggung-bayang:0 24px 60px rgba(0,0,0,.55);
+    --acs-vignette:radial-gradient(120% 95% at 50% 42%,transparent 52%,rgba(0,0,0,.55) 100%);
+    --acs-aksen-teks:var(--brand);--acs-emas:#f0c060;
+  }
+
+  /* ---------- 1. Tata letak satu layar ---------- */
+  #layarSalesIdea.aktif .si-content.sip-fit > .acs{flex:1 1 auto}
+  .acs{min-height:0;width:100%;max-width:1500px;margin:0 auto;display:grid;grid-template-rows:auto minmax(0,1fr);gap:10px}
+  .acs-body{min-height:0;display:grid;grid-template-rows:minmax(0,1fr) auto;gap:12px}
+  @media (min-width:1024px),(min-aspect-ratio:3/2) and (max-height:560px){
+    .acs-body{grid-template-rows:minmax(0,1fr);grid-template-columns:minmax(0,1fr) clamp(260px,27vw,380px);gap:18px}
+  }
+  #layarSalesIdea .acs > .si-presentation-topbar{
+    display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;align-items:center;gap:10px;
+    min-height:56px;max-width:none;margin:0;padding:6px 0;
+  }
+  #layarSalesIdea .acs > .si-presentation-topbar .si-back-hub{grid-column:1;grid-row:1}
+  #layarSalesIdea .acs > .si-presentation-topbar .si-presentation-brand{grid-column:2;grid-row:1;min-width:0;justify-content:center;text-align:center}
+  /* tombol Narasi: komponen & gaya dari Keranjang, warna aksen Asset Creation */
+  #layarSalesIdea .acs > .si-presentation-topbar .kbs-suara{grid-column:3;grid-row:1;--kbs-aksen-teks:var(--acs-aksen-teks);--kbs-emas:var(--acs-emas)}
+  #layarSalesIdea .acs > .si-presentation-topbar .si-close{grid-column:4;grid-row:1}
+  @media (max-width:620px){
+    #layarSalesIdea .acs > .si-presentation-topbar{min-height:50px;padding:3px 0;gap:6px}
+    #layarSalesIdea .acs > .si-presentation-topbar .si-back-hub{padding:0 8px 0 0}
+    #layarSalesIdea .acs > .si-presentation-topbar .si-presentation-brand{flex-wrap:nowrap;overflow:hidden}
+    #layarSalesIdea .acs > .si-presentation-topbar .si-presentation-brand b{font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    #layarSalesIdea .acs > .si-presentation-topbar .si-presentation-brand small{display:none}
+  }
+  @media (max-width:380px){
+    #layarSalesIdea .acs > .si-presentation-topbar .si-presentation-brand span{display:none}
+  }
+  /* HP landscape pendek: bilah atas dipadatkan supaya panggung lebih tinggi */
+  @media (min-aspect-ratio:3/2) and (max-height:420px){
+    #layarSalesIdea .acs > .si-presentation-topbar{min-height:46px;padding:1px 0;gap:8px}
+    #layarSalesIdea .acs > .si-presentation-topbar .si-presentation-brand small{display:none}
+    #layarSalesIdea .acs > .si-presentation-topbar .si-presentation-brand b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  }
+  .acs-text{min-width:0;min-height:0;display:grid;gap:6px;align-content:start;padding:14px 16px;border:1px solid var(--border);border-radius:18px;background:var(--surface);box-shadow:var(--shadow-sm)}
+  .acs-kicker{font-size:10.5px;font-weight:900;letter-spacing:.12em;color:var(--acs-aksen-teks)}
+  .acs-title{margin:0;font-size:clamp(17px,2.1vw,26px);line-height:1.2;letter-spacing:-.015em;color:var(--text)}
+  .acs-focus{margin:0;font-size:clamp(12.5px,1.25vw,16px);line-height:1.35;font-weight:900;letter-spacing:.02em;color:var(--acs-aksen-teks);overflow-wrap:anywhere}
+  .acs-isi{margin:0;font-size:clamp(13px,1.12vw,15px);line-height:1.5;color:var(--text-2)}
+  .acs-cue{display:flex;gap:10px;margin:4px 0 0;padding:10px 12px;border-radius:12px;background:var(--surface-2);border:1px solid var(--border)}
+  .acs-cue > span{font-size:17px;flex:none;line-height:1.2}
+  .acs-cue b{font-size:11.5px;color:var(--text-2)}
+  .acs-cue p{margin:2px 0 0;font-size:11.5px;line-height:1.45;color:var(--text-3)}
+  @media (min-width:1024px),(min-aspect-ratio:3/2) and (max-height:560px){
+    .acs-text{align-content:center;padding:20px 22px;gap:10px}
+  }
+  @media (max-width:1023px) and (max-height:760px){
+    .acs-kicker,.acs-cue{display:none}
+    .acs-text{padding:11px 14px;gap:4px}
+  }
+  @media (max-width:1023px) and (max-height:620px){
+    .acs-isi{font-size:12.5px;line-height:1.42}
+    .acs-title{font-size:16px}
+  }
+  /* HP kecil (±320×568): kartu teks dipadatkan supaya panggung cukup tinggi
+     untuk teks visual ±10 px */
+  @media (max-width:380px) and (max-height:640px){
+    .acs-body{gap:8px}
+    .acs-text{padding:8px 11px;gap:2px;border-radius:14px}
+    .acs-title{font-size:14.5px}
+    .acs-focus{font-size:11.5px;line-height:1.3}
+    .acs-isi{font-size:11.5px;line-height:1.36}
+  }
+  @media (min-aspect-ratio:3/2) and (max-height:560px){
+    .acs-text{overflow:auto;padding:12px 14px}
+    .acs-kicker,.acs-cue{display:none}
+  }
+
+  /* ---------- 2. Panggung ---------- */
+  .acs-stage{
+    position:relative;margin:0;min-height:0;min-width:0;overflow:hidden;isolation:isolate;
+    border-radius:22px;border:1px solid var(--acs-panggung-garis);box-shadow:var(--acs-panggung-bayang);
+    background:var(--acs-langit-2);-webkit-user-select:none;user-select:none;
+  }
+  @media (max-width:620px){.acs-stage{border-radius:18px}}
+  .acs-langit{position:absolute;inset:0;background:linear-gradient(180deg,var(--acs-langit-1) 0%,var(--acs-langit-2) 58%,var(--acs-langit-3) 100%)}
+  .acs-s1 .acs-langit,.acs-s3 .acs-langit,.acs-s4 .acs-langit{background:linear-gradient(180deg,var(--acs-studio-1) 0%,var(--acs-studio-2) 62%,var(--acs-studio-3) 100%)}
+  .acs-s5 .acs-langit{background:linear-gradient(180deg,var(--acs-senja-1) 0%,var(--acs-senja-2) 55%,var(--acs-senja-3) 100%)}
+  .acs-s6 .acs-langit{background:linear-gradient(180deg,var(--acs-sore-1) 0%,var(--acs-sore-2) 58%,var(--acs-sore-3) 100%)}
+  /* tiga lapis parallax bertumpuk: <div> pembungkus (digerakkan kamera) berisi <svg>;
+     panggung yang memotong, bukan tiap svg */
+  /* contain size+layout: batas relayout — perubahan transform di dalam SVG tidak memicu
+     layout seluruh layar player tiap frame (tanpa contain:paint agar isi tidak terpotong) */
+  .acs-kam{position:absolute;inset:0;contain:size layout style}
+  .acs-rig{position:absolute;inset:0;width:100%;height:100%;display:block;overflow:visible}
+  .acs-vignette{position:absolute;inset:0;pointer-events:none;background:var(--acs-vignette)}
+  .acs-rig .psg-k{width:120px;height:240px;overflow:visible}
+
+  /* gradien */
+  .acs-st-cahaya{stop-color:var(--acs-cahaya)}
+  .acs-st-bayang{stop-color:var(--acs-bayang)}
+  .acs-st-halo{stop-color:var(--acs-halo)}
+  .acs-st-sapu{stop-color:var(--acs-sapu)}
+
+  /* teks visual — ukuran dalam unit SVG; minimal 17 unit (±10 px di HP terkecil) */
+  .acs-rig text{text-anchor:middle;font-family:inherit;font-weight:850;letter-spacing:.02em}
+  .acs-rig text[text-anchor="start"]{text-anchor:start}
+  .acs-f17{font-size:17px}.acs-f18{font-size:18px}.acs-f20{font-size:20px}
+  .acs-f22{font-size:22px;font-weight:950}.acs-f24{font-size:24px;font-weight:950}.acs-f28{font-size:28px;font-weight:950}
+  /* landscape sangat pendek (tinggi ≤ 380 px): panggung hanya ±200 px, teks terkecil
+     dinaikkan agar tetap ≥ 10 px di layar */
+  @media (min-aspect-ratio:3/2) and (max-height:380px){.acs-f17{font-size:19.5px}.acs-f18{font-size:20px}}
+  .acs-judul{fill:var(--acs-teks-1);font-weight:950;letter-spacing:.06em}
+  .acs-teks-1{fill:var(--acs-teks-1);font-weight:950}
+  .acs-teks-2{fill:var(--acs-teks-2);letter-spacing:.06em}
+  .acs-teks-aksen{fill:var(--acs-teks-aksen);font-weight:950}
+  .acs-teks-emas{fill:var(--acs-teks-emas);font-weight:950}
+  .acs-teks-biru{fill:var(--acs-teks-biru);font-weight:950}
+  .acs-teks-t1{fill:var(--acs-teks-t1);font-weight:950;letter-spacing:.05em}
+  .acs-teks-t2{fill:var(--acs-teks-t2);font-weight:950;letter-spacing:.05em}
+  .acs-teks-t3{fill:var(--acs-teks-emas);font-weight:950;letter-spacing:.04em}
+
+  /* kartu & garis */
+  .acs-kartu{fill:var(--acs-kartu);stroke:var(--acs-kartu-garis);stroke-width:1.5}
+  .acs-kartu-tujuan,.acs-kartu-chip,.acs-kartu-ringan{fill:var(--acs-kartu-emas);stroke:var(--acs-kartu-emas-garis)}
+  .acs-kartu-cicilan{stroke-width:2}
+  .acs-garis{fill:none;stroke-dasharray:1;stroke-dashoffset:0;stroke-linecap:butt}
+  .acs-penunjuk{stroke:var(--acs-garis);stroke-width:1.6}
+  .acs-titik{fill:var(--acs-titik)}
+  .acs-berkas{stroke:var(--acs-busur);stroke-width:3}
+
+  /* material pseudo-3D: tiga bidang terlihat */
+  .acs-m-alas .acs-sisi-atas{fill:var(--acs-alas-atas)}.acs-m-alas .acs-sisi-kiri{fill:var(--acs-alas-kiri)}.acs-m-alas .acs-sisi-kanan{fill:var(--acs-alas-kanan)}
+  .acs-m-t1 .acs-sisi-atas{fill:var(--acs-t1-atas)}.acs-m-t1 .acs-sisi-kiri{fill:var(--acs-t1-kiri)}.acs-m-t1 .acs-sisi-kanan{fill:var(--acs-t1-kanan)}
+  .acs-m-t2 .acs-sisi-atas{fill:var(--acs-t2-atas)}.acs-m-t2 .acs-sisi-kiri{fill:var(--acs-t2-kiri)}.acs-m-t2 .acs-sisi-kanan{fill:var(--acs-t2-kanan)}
+  .acs-m-emas .acs-sisi-atas{fill:var(--acs-emas-atas)}.acs-m-emas .acs-sisi-kiri{fill:var(--acs-emas-kiri)}.acs-m-emas .acs-sisi-kanan{fill:var(--acs-emas-kanan)}.acs-m-emas .acs-sisi-belakang{fill:var(--acs-emas-belakang)}
+  .acs-m-fondasi .acs-sisi-atas{fill:var(--acs-fondasi-atas)}.acs-m-fondasi .acs-sisi-kiri{fill:var(--acs-fondasi-kiri)}.acs-m-fondasi .acs-sisi-kanan{fill:var(--acs-fondasi-kanan)}
+  .acs-m-maket path{stroke:var(--acs-maket-garis);stroke-width:.8;stroke-linejoin:round}
+  .acs-m-maket .acs-sisi-atas{fill:var(--acs-maket-atas)}.acs-m-maket .acs-sisi-kiri{fill:var(--acs-maket-kiri)}.acs-m-maket .acs-sisi-kanan{fill:var(--acs-maket-kanan)}.acs-m-maket .acs-sisi-belakang{fill:var(--acs-maket-belakang)}
+  .acs-m-emas path{stroke:rgba(140,90,20,.25);stroke-width:.8;stroke-linejoin:round}
+  .acs-m-kaca path{stroke:var(--acs-kaca-garis);stroke-width:1;stroke-linejoin:round}
+  .acs-m-kaca .acs-sisi-atas{fill:var(--acs-kaca-atas)}.acs-m-kaca .acs-sisi-kiri{fill:var(--acs-kaca-kiri)}.acs-m-kaca .acs-sisi-kanan{fill:var(--acs-kaca-kanan)}.acs-m-kaca .acs-sisi-belakang{fill:var(--acs-kaca-belakang)}
+  .acs-m-hantu path{fill:none;stroke:var(--acs-hantu);stroke-width:1.3;stroke-dasharray:4 3;stroke-linejoin:round}
+  .acs-m-miniatur .acs-sisi-atas{fill:var(--acs-dinding-kiri)}.acs-m-miniatur .acs-sisi-kiri{fill:var(--acs-dinding-kiri)}.acs-m-miniatur .acs-sisi-kanan{fill:var(--acs-dinding-kanan)}
+
+  /* scene 1 */
+  .acs-lantai-cincin{fill:none;stroke:var(--acs-lantai-cincin);stroke-width:1.4}
+  .acs-bokeh circle{fill:var(--acs-cahaya)}
+
+  /* dunia luar ruang */
+  .acs-matahari{fill:var(--acs-matahari)}
+  .acs-awan ellipse{fill:var(--acs-awan)}
+  .acs-kota rect{fill:var(--acs-kota)}
+  .acs-bukit-1{fill:var(--acs-bukit-1)}.acs-bukit-2{fill:var(--acs-bukit-2)}
+  .acs-tanah{fill:var(--acs-tanah)}
+  .acs-pohon circle{fill:var(--acs-pohon)}.acs-pohon path{stroke:var(--acs-batang);stroke-width:5;stroke-linecap:round}
+
+  /* rumah */
+  .acs-lahan{fill:var(--acs-lahan)}
+  .acs-lahan-garis{fill:none;stroke:var(--acs-lahan-garis);stroke-width:1.6;stroke-dasharray:1;stroke-dashoffset:0}
+  .acs-patok path{stroke:var(--acs-patok);stroke-width:3;stroke-linecap:round}
+  .acs-rangka{fill:none;stroke:var(--acs-rangka);stroke-width:2.2;stroke-linejoin:round;stroke-dasharray:1;stroke-dashoffset:0}
+  .acs-m-dinding-kiri{fill:var(--acs-dinding-kiri)}.acs-m-dinding-kanan{fill:var(--acs-dinding-kanan)}.acs-m-pelana{fill:var(--acs-pelana)}
+  .acs-m-atap-depan{fill:var(--acs-atap-depan)}.acs-m-atap-belakang{fill:var(--acs-atap-belakang)}
+  .acs-jendela{fill:var(--acs-jendela)}
+  .acs-jendela-nyala{fill:var(--acs-jendela-nyala)}
+  .acs-pintu{fill:var(--acs-pintu)}
+  .acs-kilau-rumah path{fill:var(--acs-emas)}
+
+  /* maket & jalur */
+  .acs-lantai-grid{fill:none;stroke:var(--acs-lantai-garis);stroke-width:1}
+  .acs-siluet{fill:none;stroke:var(--acs-garis);stroke-width:2;stroke-dasharray:5 4}
+  .acs-jalur-garis{fill:none;stroke:var(--acs-garis);stroke-width:3;stroke-linecap:butt;stroke-dasharray:1;stroke-dashoffset:0}
+  .acs-tanda{stroke:var(--acs-garis);stroke-width:2;stroke-linecap:round}
+  .acs-koin-sisi{fill:var(--acs-emas-kanan)}.acs-koin-atas{fill:var(--acs-emas-atas);stroke:var(--acs-emas-kanan);stroke-width:1}
+
+  /* scene 5: kristal (metafora abstrak penciptaan aset) */
+  .acs-kr-1{fill:var(--acs-kr-1)}.acs-kr-2{fill:var(--acs-kr-2)}.acs-kr-3{fill:var(--acs-kr-3)}
+  .acs-kr-4{fill:var(--acs-kr-4)}.acs-kr-5{fill:var(--acs-kr-5)}.acs-kr-6{fill:var(--acs-kr-6)}
+  .acs-kr-tepi{fill:none;stroke:var(--acs-kr-tepi);stroke-width:1.2;stroke-linejoin:round}
+  .acs-alas-atas{fill:var(--acs-alas-kristal-atas)}.acs-alas-sisi{fill:var(--acs-alas-kristal-sisi)}
+  .acs-partikel{fill:var(--acs-partikel)}
+  .acs-busur{fill:none;stroke:var(--acs-busur);stroke-width:2;stroke-dasharray:1;stroke-dashoffset:0}
+  .acs-cincin ellipse{fill:none;stroke:var(--acs-cincin);stroke-width:1.5}
+  .acs-bintang circle{fill:var(--acs-bintang)}
+
+  /* scene 6 */
+  .acs-jejak-cahaya{fill:none;stroke:var(--acs-busur);stroke-width:3.2;stroke-linecap:butt;stroke-dasharray:1;stroke-dashoffset:0}
+
+  /* keadaan akhir tersembunyi (hanya tampil selama animasi) */
+  .acs-hantu,.acs-sapu,.acs-kilat,.acs-rangka,.acs-kilau-rumah,.acs-siluet,.acs-koin,.acs-partikel{opacity:0}
+}
