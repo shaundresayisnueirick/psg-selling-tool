@@ -50,8 +50,18 @@ const JS_DIIZINKAN = {
   }],
   'src/core.js': [{
     dari: '385c5f77851f6b5b5c94b6e3bf6d65d3df77faef9b21a1c9cd4aa137c1833c7c',
-    ke: 'aaac3ba87630cba4212b98dbbba97b74855c6af0b4e2c80757a732dd0e705051',
-    alasan: 'Profil dengan kelanjutan untuk alur Sales Idea → Mari Kita Hitung: konteks {source, topic, target} hanya di memori (tanpa profileId, tanpa storage key baru), dipasang lewat InsuranceHubCustomerProfile.bukaUntuk(). cpApply (titik akhir Simpan/Gunakan) lanjut ke target konteks dan mengangkat PROFILE dari riwayat; tanpa konteks tetap bukaLayar(\'PRODUK\'). bukaLayar dan tombol btnProfil membersihkan konteks saat meninggalkan Profil. Banner + tombol Buat Profil Baru (mekanisme Kosongkan form) dibuat hanya saat ada konteks. Penyimpanan profil, Financial Triangle, dan alur Dashboard tidak berubah. Perbaikan Edit Profil: cpFillForm membaca komponen pensiun dari p.snapshot.pensiun (jalur yang ditulis cpFormValue dan dibaca kalkulator Dana Pensiun), bukan p.snapshot.snapshot.pensiun yang tidak pernah ada — sebelumnya Edit → Simpan menimpa keenam komponen dengan 0.',
+    ke: '4438e05b5a8802a3409dbaa4d594acf038440178d2d50d108bac9e4b8c170a00',
+    alasan: 'Profil dengan kelanjutan untuk alur Sales Idea → Mari Kita Hitung: konteks {source, topic, target} hanya di memori (tanpa profileId, tanpa storage key baru), dipasang lewat InsuranceHubCustomerProfile.bukaUntuk(). cpApply (titik akhir Simpan/Gunakan) lanjut ke target konteks dan mengangkat PROFILE dari riwayat; tanpa konteks tetap bukaLayar(\'PRODUK\'). bukaLayar dan tombol btnProfil membersihkan konteks saat meninggalkan Profil. Banner + tombol Buat Profil Baru (mekanisme Kosongkan form) dibuat hanya saat ada konteks. Penyimpanan profil, Financial Triangle, dan alur Dashboard tidak berubah. Perbaikan Edit Profil: cpFillForm membaca komponen pensiun dari p.snapshot.pensiun (jalur yang ditulis cpFormValue dan dibaca kalkulator Dana Pensiun), bukan p.snapshot.snapshot.pensiun yang tidak pernah ada — sebelumnya Edit → Simpan menimpa keenam komponen dengan 0. Form Profil dikosongkan (cpFillForm({})) sesudah Simpan berhasil dan saat Batal edit, supaya profil baru tidak mewarisi data non-identitas profil lain; rekaman tersimpan tidak disentuh.',
+  }],
+  'src/app.js': [{
+    dari: '34593519c233710ed358d93f3392c048f3b6614be086daef8f0f50dffcf69164',
+    ke: 'f671c1d5aea3bda76d0c9b8486784d318ee26107d175a8d5e56da6ef387d2856',
+    alasan: 'Input komponen Kebutuhan Dana Pensiun (dk_*) dirender tanpa atribut value dari DP_KOMPONEN.awal (sisa angka demo Rp19 juta). Kalkulator memang mulai kosong (dNilai 0) dan hanya diisi dari profil aktif; angka demo sebelumnya sempat tampil di DOM sampai layar DP dibuka. Tidak ada rumus yang berubah.',
+  }],
+  'src/aktivitas-ui.js': [{
+    dari: 'f79804459cb8b93f3ebbfa4380299a2f4bca485155cf79c844aa703d31aba0cf',
+    ke: 'b5d89aa3053620d5d50412694f300f375036d3977917c99b422b250a78eca9ef',
+    alasan: 'Janji temu → Profil prospek (profil baru): form Profil dikosongkan dulu lewat cpFillForm({}) sebelum nama dan HP prospek diisi, supaya prospek tidak mewarisi isian profil lain (mis. profil yang tadi diedit lalu ditinggalkan).',
   }],
   'src/sales-idea.js': [{
     dari: 'dfd143970d9e79bc8ec46687724748da98147b9ae78985619a71c83c7a0c747f',

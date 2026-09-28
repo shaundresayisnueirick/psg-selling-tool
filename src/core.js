@@ -460,6 +460,9 @@ function cpSave() {
   el('cpStatusBar').textContent = 'Profil tersimpan di perangkat ini. Siap dipakai offline.';
   if (el('cpSimpan')) el('cpSimpan').textContent = 'Simpan profil';
   if (el('cpReset')) el('cpReset').textContent = 'Kosongkan form';
+  /* Form kembali bersih: isian profil yang baru disimpan tidak boleh
+     terbawa ke profil baru berikutnya. */
+  cpFillForm({});
   cpRender(); cpApply(record);
 }
 function cpEdit(id) {
@@ -632,8 +635,9 @@ function cpInit() {
   el('cpReset').addEventListener('click', () => {
     const editing = el('cpStatusBar').dataset.editId;
     if (editing) {
-      const original = cpRead().find(x => x.id === editing);
-      if (original) cpFillForm(original);
+      /* Sesudah batal, form kembali ke mode profil baru, jadi harus bersih
+         dari data profil yang tadi diedit. Data tersimpan tidak disentuh. */
+      cpFillForm({});
       el('cpStatusBar').dataset.editId='';
       el('cpStatusBar').textContent='Edit dibatalkan. Data tersimpan tetap tidak berubah.';
       el('cpSimpan').textContent='Simpan profil';

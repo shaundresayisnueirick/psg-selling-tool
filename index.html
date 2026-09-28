@@ -197,7 +197,9 @@ el.addEventListener('pointerdown',function(){tutup(true);});})();</script>
     <p class="catatan">&copy; 2026 PSG Selling Tools • Internal Use Only • <span id="psgVersiApp"></span></p>
   </section>
 
-  <section class="layar" id="layarProfile">
+  <!-- tanpa-simpan: form Profil tidak dipulihkan Isian Terakhir, supaya profil
+       baru tidak mewarisi isian profil lain. -->
+  <section class="layar tanpa-simpan" id="layarProfile">
     <div class="kop">
       <h2>Profil Nasabah</h2>
       <p>Isi sekali, lalu gunakan di seluruh kalkulator Insurance Hub.</p>
@@ -1522,7 +1524,9 @@ el.addEventListener('pointerdown',function(){tutup(true);});})();</script>
   </section>
 
   <!-- ===== Kebutuhan Dana Pensiun ===== -->
-  <section class="layar" id="layarDP">
+  <!-- tanpa-simpan: isian kebutuhan pensiun hanya datang dari profil aktif,
+       tidak dipulihkan Isian Terakhir (termasuk saat tanpa profil). -->
+  <section class="layar tanpa-simpan" id="layarDP">
     <div class="blok">
       <h2>Data prospek</h2>
       <div class="baris satu">

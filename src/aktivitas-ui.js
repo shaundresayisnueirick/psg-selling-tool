@@ -951,7 +951,9 @@
         const tombol = document.querySelector('[data-cp-edit="' + sudahAda.id + '"]');
         if (tombol) { tombol.click(); return; }
       }
-      // Profil baru: isi nama dan nomor HP, sisanya dilengkapi agen.
+      // Profil baru: isi nama dan nomor HP, sisanya dilengkapi agen. Form
+      // dikosongkan dulu supaya tidak mewarisi isian profil lain.
+      if (typeof cpFillForm === 'function') cpFillForm({});
       const nama = el('cpNama'), hp = el('cpHP');
       if (nama) nama.value = janji.nama || '';
       if (hp) hp.value = A.rapikanHp(janji.hp || '');
