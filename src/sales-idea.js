@@ -71,6 +71,21 @@
     {n:6,title:'Aset baru untuk anak',focus:'ASET Rp5 MILIAR → WARISAN',body:'Inti percakapan: bagaimana seseorang yang sudah mapan dapat membangun aset baru yang nantinya dapat dipersiapkan sebagai warisan untuk anak.',scene:'inheritance'}
   ];
 
+  const singapuraSteps = [
+    {n:1,title:'Pak Leo dan keluarganya',focus:'Rp15 JUTA / BULAN • Rp180 JUTA / TAHUN',body:'Pekerja keras, berprestasi, dan sangat bertanggung jawab kepada keluarganya.'},
+    {n:2,title:'Panggilan dari atasan',focus:'EKSPANSI KE SINGAPURA',body:'Perusahaan sedang melakukan ekspansi ke Singapura, dan atasan ingin Leo menangani project ini.'},
+    {n:3,title:'Kesempatan besar',focus:'Rp15 JUTA → Rp30–50 JUTA / BULAN • 2–3× PENGHASILAN',body:'Tanggung jawabnya lebih besar. Penghasilannya juga meningkat, hampir dua sampai tiga kali lipat.'},
+    {n:4,title:'Berangkat ke Singapura',focus:'INDONESIA → SINGAPURA',body:'Leo berangkat untuk memulai pekerjaan barunya di Singapura.'},
+    {n:5,title:'Satu tahun',focus:'LEO → PENGHASILAN → KELUARGA',body:'Leo tidak bisa pulang setiap hari. Tapi setiap bulan, penghasilannya tetap sampai ke rumah.'},
+    {n:6,title:'Dua tahun',focus:'TAHUN 1 → TAHUN 2',body:'Selama Leo masih bisa bekerja, penghasilannya tetap bisa dikirim untuk kebutuhan keluarganya.'},
+    {n:7,title:'Sebuah pertanyaan',focus:'BAGAIMANA KALAU LEO TIDAK BISA LAGI BEKERJA?',body:'Keluarga tidak hanya membutuhkan kita pulang ke rumah, tetapi juga penghasilan kita untuk kebutuhan sehari-hari.'},
+    {n:8,title:'Panggilan yang berbeda',focus:'PEKERJAAN YANG TIDAK PERNAH SELESAI',body:'Bagaimana kalau suatu hari bukan perusahaan yang memanggil Leo, tetapi Tuhan Yang Maha Kuasa?'},
+    {n:9,title:'Penghasilan berhenti',focus:'SIAPA YANG MEMBAWA PULANG PENGHASILAN?',body:'Kalau Leo sudah tidak bisa bekerja, siapa yang akan membawa pulang penghasilan untuk keluarganya?'},
+    {n:10,title:'Kebutuhan keluarga tetap berjalan',focus:'PENGHASILAN → KEBUTUHAN → PROTEKSI → DITERUSKAN',body:'Mempersiapkan masa depan keluarga bukan hanya tentang meninggalkan uang, tetapi memastikan kebutuhan keluarga tetap bisa berjalan.'},
+    {n:11,title:'Pertanyaan untuk kita',focus:'SIAPA YANG MEMBAWA PULANG PENGHASILAN ITU?',body:'Kita tidak pernah tahu apa yang akan terjadi besok. Kalau suatu hari kita tidak bisa lagi bekerja, siapa yang akan membawa pulang penghasilan itu untuk keluarga?'},
+    {n:12,title:'Lanjutkan percakapan',focus:'MARI KITA HITUNG → ANALISIS KEBUTUHAN',body:'Hitung bersama kebutuhan keluarga nasabah, atau kembali ke pilihan Sales Idea lain.'}
+  ];
+
   let current = 0;
   let mode = 'jari';
   const $ = id => document.getElementById(id);
@@ -91,7 +106,7 @@
   function closeSalesIdea(){if(pemutar)pemutar.berhenti();document.body.classList.remove('si-modal-open');if(window.bukaLayar)window.bukaLayar('PRODUK');}
   function openSalesIdea(modeName){mode=modeName;current=0;document.body.classList.add('si-modal-open');render();}
   function salesIdeaHeader(title,subtitle){return `<div class="si-presentation-topbar"><button type="button" class="si-back-hub" data-si-hub>← Sales Idea</button><div class="si-presentation-brand"><span>PSG</span><b>${title}</b><small>${subtitle}</small></div><button type="button" class="si-close" data-si-close aria-label="Tutup Sales Idea">✕</button></div>`;}
-  function renderHub(root){root.innerHTML=`<div class="si-hub"><div class="si-hub-head"><div><span class="si-eyebrow">PSG • PRESENTATION TOOLS</span><h2>Sales Idea</h2><p>Pilih satu Sales Idea. Materinya akan dibuka sebagai layar presentasi penuh agar visual dapat ditunjukkan langsung kepada prospek.</p></div><button type="button" class="si-close si-close-hub" data-si-close>✕ Tutup</button></div><div class="si-choice-grid"><button type="button" class="si-choice-card" data-si-choice="jari"><div class="si-choice-visual fingers-choice">🖐️</div><div><span>SALES IDEA 01</span><h3>10 Jari</h3><p>5 ujung risiko + 5 pertanyaan untuk membangun kesadaran.</p></div><strong>Mulai presentasi →</strong></button><button type="button" class="si-choice-card" data-si-choice="basket"><div class="si-choice-visual basket-choice">🧺</div><div><span>SALES IDEA 02</span><h3>Keranjang Kehidupan</h3><p>Visual beban kehidupan, keluarga, proteksi, dan uang.</p></div><strong>Mulai presentasi →</strong></button><button type="button" class="si-choice-card" data-si-choice="education"><div class="si-choice-visual education-choice">🎓</div><div><span>SALES IDEA 03</span><h3>Education Planning</h3><p>Tujuan pendidikan, inflasi, mulai lebih awal, dan proteksi.</p></div><strong>Mulai presentasi →</strong></button><button type="button" class="si-choice-card" data-si-choice="retirement"><div class="si-choice-visual retirement-choice">⌛</div><div><span>SALES IDEA 04</span><h3>Retirement Planning</h3><p>Risiko hidup terlalu lama, kebutuhan aset, compounding, dan proteksi.</p></div><strong>Mulai presentasi →</strong></button><button type="button" class="si-choice-card" data-si-choice="asset"><div class="si-choice-visual asset-choice">🏠</div><div><span>SALES IDEA 05</span><h3>Asset Creation</h3><p>Mengubah rencana aset menjadi pembahasan warisan untuk anak.</p></div><strong>Mulai presentasi →</strong></button></div><div class="si-hub-note">Layar presentasi menampilkan visual dan highlight inti. Tidak ada script dialog agen–prospek.</div></div>`;}
+  function renderHub(root){root.innerHTML=`<div class="si-hub"><div class="si-hub-head"><div><span class="si-eyebrow">PSG • PRESENTATION TOOLS</span><h2>Sales Idea</h2><p>Pilih satu Sales Idea. Materinya akan dibuka sebagai layar presentasi penuh agar visual dapat ditunjukkan langsung kepada prospek.</p></div><button type="button" class="si-close si-close-hub" data-si-close>✕ Tutup</button></div><div class="si-choice-grid"><button type="button" class="si-choice-card" data-si-choice="jari"><div class="si-choice-visual fingers-choice">🖐️</div><div><span>SALES IDEA 01</span><h3>10 Jari</h3><p>5 ujung risiko + 5 pertanyaan untuk membangun kesadaran.</p></div><strong>Mulai presentasi →</strong></button><button type="button" class="si-choice-card" data-si-choice="basket"><div class="si-choice-visual basket-choice">🧺</div><div><span>SALES IDEA 02</span><h3>Keranjang Kehidupan</h3><p>Visual beban kehidupan, keluarga, proteksi, dan uang.</p></div><strong>Mulai presentasi →</strong></button><button type="button" class="si-choice-card" data-si-choice="education"><div class="si-choice-visual education-choice">🎓</div><div><span>SALES IDEA 03</span><h3>Education Planning</h3><p>Tujuan pendidikan, inflasi, mulai lebih awal, dan proteksi.</p></div><strong>Mulai presentasi →</strong></button><button type="button" class="si-choice-card" data-si-choice="retirement"><div class="si-choice-visual retirement-choice">⌛</div><div><span>SALES IDEA 04</span><h3>Retirement Planning</h3><p>Risiko hidup terlalu lama, kebutuhan aset, compounding, dan proteksi.</p></div><strong>Mulai presentasi →</strong></button><button type="button" class="si-choice-card" data-si-choice="asset"><div class="si-choice-visual asset-choice">🏠</div><div><span>SALES IDEA 05</span><h3>Asset Creation</h3><p>Mengubah rencana aset menjadi pembahasan warisan untuk anak.</p></div><strong>Mulai presentasi →</strong></button><button type="button" class="si-choice-card" data-si-choice="singapura"><div class="si-choice-visual singapura-choice">✈️</div><div><span>SALES IDEA 06</span><h3>Bekerja di Singapura</h3><p>Penghasilan yang terus membantu keluarga — dan siapa yang membawanya pulang bila suatu hari berhenti.</p></div><strong>Mulai presentasi →</strong></button></div><div class="si-hub-note">Layar presentasi menampilkan visual dan highlight inti. Tidak ada script dialog agen–prospek.</div></div>`;}
   function renderIsi(root){if(mode==='jari')renderFinger(root);else if(mode==='alasan')renderReasons(root);else if(mode==='basket')renderBasket(root);else if(mode==='education')renderEducation(root);else if(mode==='retirement')renderRetirement(root);else if(mode==='asset')renderAssetCreation(root);}
   function render(){
     const root=$('salesIdeaContent');if(!root)return;document.body.classList.add('si-modal-open');
@@ -106,7 +121,7 @@
      masuk yang ringan dan mengendalikan animasi CSS yang sudah ada. */
   const SCENE_VISUAL='.si-hands,.kb-visual-card,.ep-visual-card,.rp-visual-card,.ac-visual-card,.si-reason-progress';
   const SCENE_TEKS='.si-presentation-card,.kb-presentation-card,.ep-presentation-card,.rp-presentation-card,.ac-presentation-card';
-  function jumlahLangkah(m){return (m==='basket'||m==='education')?10:((m==='retirement'||m==='asset')?6:(m==='alasan'?3:13));}
+  function jumlahLangkah(m){return m==='singapura'?singapuraSteps.length:((m==='basket'||m==='education')?10:((m==='retirement'||m==='asset')?6:(m==='alasan'?3:13)));}
   function animasiMasuk(tl,stage){
     tl.add(stage.querySelector(SCENE_VISUAL),[{opacity:0,transform:'translateY(16px) scale(.985)'},{opacity:1,transform:'none'}],{duration:700});
     tl.add(stage.querySelector(SCENE_TEKS),[{opacity:0,transform:'translateY(12px)'},{opacity:1,transform:'none'}],{duration:560,delay:260});
@@ -121,6 +136,8 @@
     if(m==='education'&&window.PSGEducationStory)return window.PSGEducationStory.adegan({langkah:educationSteps,header:salesIdeaHeader('Education Planning','Visual storytelling tentang tujuan pendidikan anak'),padaLangkah:i=>{current=i;}});
     // Asset Creation: cerita interaktif (src/sales-idea-asset.js), data tetap assetCreationSteps.
     if(m==='asset'&&window.PSGAssetStory)return window.PSGAssetStory.adegan({langkah:assetCreationSteps,header:salesIdeaHeader('Asset Creation','Visual sederhana untuk membuka percakapan aset dan warisan'),padaLangkah:i=>{current=i;}});
+    // Bekerja di Singapura: cerita interaktif (src/sales-idea-singapura.js), data tetap singapuraSteps.
+    if(m==='singapura'){return window.PSGSingapuraStory?window.PSGSingapuraStory.adegan({langkah:singapuraSteps,header:salesIdeaHeader('Bekerja di Singapura','Penghasilan yang terus membantu keluarga'),padaLangkah:i=>{current=i;}}):[];}
     // 10 Jari: cerita tangan interaktif (src/sales-idea-jari.js), 9 langkah — BAB 1 (5 risiko satu scene), BAB 2 (5 pertanyaan), BAB 3 (3 alasan, renderer lama). Data tetap fingers & reasons.
     if(m==='jari'&&window.PSGJariStory)return window.PSGJariStory.adegan({langkah:fingers,teks:teksJari,header:salesIdeaHeader('10 Jari','Visual 5 produk + 5 pertanyaan + 3 alasan'),padaLangkah:i=>{current=i;},alasan:{jumlah:reasons.length,render:(root,k)=>{current=10+k;renderIsi(root);},animate:animasiMasuk}});
     for(let i=0;i<jumlahLangkah(m);i++){
@@ -360,7 +377,7 @@
   }
   function prev(){if(pemutar&&mode!=='hub'){pemutar.back();return;}if(current>0){current--;render();}}
   function reset(){current=0;mode='hub';render();}
-  function setMode(nextMode){if(['jari','basket','education','retirement','asset','alasan'].includes(nextMode)){mode=nextMode;current=0;render();}else if(nextMode==='hub'){mode='hub';current=0;render();}}
+  function setMode(nextMode){if(['jari','basket','education','retirement','asset','singapura','alasan'].includes(nextMode)){mode=nextMode;current=0;render();}else if(nextMode==='hub'){mode='hub';current=0;render();}}
 
   function init(){
     const btn=$('btnSalesIdea');

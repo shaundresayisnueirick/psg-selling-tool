@@ -13,7 +13,7 @@
    - Hanya jawaban yang benar-benar berhasil (status 200) yang disimpan,
      sehingga halaman error tidak pernah ikut tersimpan. */
 
-const VERSI = 'insurance-hub-v110.0.0';
+const VERSI = 'insurance-hub-v111.0.0';
 
 /* Semua berkas inti ikut disimpan sejak pemasangan, supaya aplikasi tetap
    utuh walaupun kunjungan pertama terputus di tengah jalan.
@@ -39,6 +39,7 @@ const BERKAS = [
   './src/sales-idea-jari.css?v=107',
   './src/sales-idea-asset.css?v=109',
   './src/sales-idea-lanjut.css?v=110',
+  './src/sales-idea-singapura.css?v=111',
   './src/cetak-besar.css',
   './src/access-gate.js',
   './src/theme-switcher.js',
@@ -99,6 +100,7 @@ const BERKAS = [
   './src/sales-idea-jari.js?v=107',
   './src/sales-idea-asset.js?v=109',
   './src/sales-idea-lanjut.js?v=110',
+  './src/sales-idea-singapura.js?v=111',
   './assets/logo-psg.png',
   './assets/logo-psg-terang.png',
   './icons/ikon-192.png',

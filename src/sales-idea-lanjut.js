@@ -12,7 +12,8 @@
    Sesudah profil dipilih atau disimpan, aplikasi lanjut ke target:
      10 Jari → SEGITIGA (Financial Triangle; Leo tetap default dan
                profil dipilih lewat dropdown yang sudah ada),
-     Keranjang → NEEDS, Education → PDK, Retirement → DP, Asset → R2.
+     Keranjang → NEEDS, Education → PDK, Retirement → DP, Asset → R2,
+     Bekerja di Singapura → NEEDS (Analisis Kebutuhan).
    Konteks tidak membawa profileId dan hanya ada di memori.
    Bahas Topik Lain kembali ke pilihan Sales Idea.
 
@@ -29,7 +30,8 @@
     basket: { topic: 'keranjang', target: 'NEEDS' },
     education: { topic: 'education', target: 'PDK' },
     retirement: { topic: 'retirement', target: 'DP' },
-    asset: { topic: 'asset', target: 'R2' }
+    asset: { topic: 'asset', target: 'R2' },
+    singapura: { topic: 'bekerja_singapura', target: 'NEEDS' }
   };
 
   var root = null, kartu = null;
