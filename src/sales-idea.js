@@ -72,18 +72,14 @@
   ];
 
   const singapuraSteps = [
-    {n:1,title:'Pak Leo dan keluarganya',focus:'Rp15 JUTA / BULAN • Rp180 JUTA / TAHUN',body:'Pekerja keras, berprestasi, dan sangat bertanggung jawab kepada keluarganya.'},
-    {n:2,title:'Panggilan dari atasan',focus:'EKSPANSI KE SINGAPURA',body:'Perusahaan sedang melakukan ekspansi ke Singapura, dan atasan ingin Leo menangani project ini.'},
-    {n:3,title:'Kesempatan besar',focus:'Rp15 JUTA → Rp30–50 JUTA / BULAN • 2–3× PENGHASILAN',body:'Tanggung jawabnya lebih besar. Penghasilannya juga meningkat, hampir dua sampai tiga kali lipat.'},
-    {n:4,title:'Berangkat ke Singapura',focus:'INDONESIA → SINGAPURA',body:'Leo berangkat untuk memulai pekerjaan barunya di Singapura.'},
-    {n:5,title:'Satu tahun',focus:'LEO → PENGHASILAN → KELUARGA',body:'Leo tidak bisa pulang setiap hari. Tapi setiap bulan, penghasilannya tetap sampai ke rumah.'},
-    {n:6,title:'Dua tahun',focus:'TAHUN 1 → TAHUN 2',body:'Selama Leo masih bisa bekerja, penghasilannya tetap bisa dikirim untuk kebutuhan keluarganya.'},
-    {n:7,title:'Sebuah pertanyaan',focus:'BAGAIMANA KALAU LEO TIDAK BISA LAGI BEKERJA?',body:'Keluarga tidak hanya membutuhkan kita pulang ke rumah, tetapi juga penghasilan kita untuk kebutuhan sehari-hari.'},
-    {n:8,title:'Panggilan yang berbeda',focus:'PEKERJAAN YANG TIDAK PERNAH SELESAI',body:'Bagaimana kalau suatu hari bukan perusahaan yang memanggil Leo, tetapi Tuhan Yang Maha Kuasa?'},
-    {n:9,title:'Penghasilan berhenti',focus:'SIAPA YANG MEMBAWA PULANG PENGHASILAN?',body:'Kalau Leo sudah tidak bisa bekerja, siapa yang akan membawa pulang penghasilan untuk keluarganya?'},
-    {n:10,title:'Kebutuhan keluarga tetap berjalan',focus:'PENGHASILAN → KEBUTUHAN → PROTEKSI → DITERUSKAN',body:'Mempersiapkan masa depan keluarga bukan hanya tentang meninggalkan uang, tetapi memastikan kebutuhan keluarga tetap bisa berjalan.'},
-    {n:11,title:'Pertanyaan untuk kita',focus:'SIAPA YANG MEMBAWA PULANG PENGHASILAN ITU?',body:'Kita tidak pernah tahu apa yang akan terjadi besok. Kalau suatu hari kita tidak bisa lagi bekerja, siapa yang akan membawa pulang penghasilan itu untuk keluarga?'},
-    {n:12,title:'Lanjutkan percakapan',focus:'MARI KITA HITUNG → ANALISIS KEBUTUHAN',body:'Hitung bersama kebutuhan keluarga nasabah, atau kembali ke pilihan Sales Idea lain.'}
+    {n:1,title:'Leo di Indonesia',focus:'Rp15 JUTA / BULAN',body:'Setiap hari Leo bekerja di Indonesia untuk memenuhi kebutuhan istri dan anaknya.'},
+    {n:2,title:'Kesempatan dari atasan',focus:'EKSPANSI KE SINGAPURA',body:'Atasan menawarkan proyek di Singapura. Setelah memikirkan keluarganya, Leo menjawab: "Baik, Pak. Saya bersedia."'},
+    {n:3,title:'Babak baru',focus:'INDONESIA → SINGAPURA',body:'Istri dan anaknya tetap tinggal di Indonesia, sementara Leo berangkat bekerja di Singapura.'},
+    {n:4,title:'Penghasilan berubah',focus:'Rp15 JUTA → Rp30–50 JUTA / BULAN • 2–3×',body:'Sekitar dua sampai tiga kali lipat: ruang untuk membantu keluarga, menyiapkan masa depan, dan membangun aset.'},
+    {n:5,title:'Waktu terus berjalan',focus:'TAHUN 1 → TAHUN 2',body:'Setiap bulan penghasilan Leo mengalir ke rumah. Anaknya tumbuh, dan tanggung jawabnya ikut bertambah.'},
+    {n:6,title:'Bagaimana jika…',focus:'PENGHASILAN BERHENTI',body:'Sebuah risiko membuat penghasilan Leo terhenti, sementara keluarganya masih menjalani hari seperti biasa.'},
+    {n:7,title:'Kebutuhan tidak ikut berhenti',focus:'PENGHASILAN BERHENTI vs KEBUTUHAN TETAP BERJALAN',body:'Rumah, pendidikan, kebutuhan sehari-hari, dan masa depan tetap berjalan. Perlindungan menjadi jembatan.'},
+    {n:8,title:'Alasan yang sama',focus:'MARI KITA HITUNG',body:'Sudah cukupkah rencana kita untuk melindungi keluarga?'}
   ];
 
   let current = 0;
