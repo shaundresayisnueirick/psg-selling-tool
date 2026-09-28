@@ -635,9 +635,8 @@ function cpInit() {
   el('cpReset').addEventListener('click', () => {
     const editing = el('cpStatusBar').dataset.editId;
     if (editing) {
-      /* Sesudah batal, form kembali ke mode profil baru, jadi harus bersih
-         dari data profil yang tadi diedit. Data tersimpan tidak disentuh. */
-      cpFillForm({});
+      const original = cpRead().find(x => x.id === editing);
+      if (original) cpFillForm(original);
       el('cpStatusBar').dataset.editId='';
       el('cpStatusBar').textContent='Edit dibatalkan. Data tersimpan tetap tidak berubah.';
       el('cpSimpan').textContent='Simpan profil';

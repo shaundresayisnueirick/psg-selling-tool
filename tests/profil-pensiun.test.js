@@ -12,9 +12,12 @@
    C. profil dengan data pensiun → Dana Pensiun terisi otomatis
    D. pindah profil B → A → B → data selalu mengikuti profil aktif
    E. tanpa profil aktif → Dana Pensiun kosong, juga sesudah muat ulang
-   F. Edit → Simpan → keenam komponen pensiun utuh (p.snapshot.pensiun)
-   G. Edit satu komponen → hanya komponen itu yang berubah
-   H. Batal edit → data tersimpan utuh, form kembali bersih
+   F. Edit → tanpa perubahan → Batal → data asli profil tetap tampil
+   G. Edit → ubah komponen pensiun → Batal → perubahan tidak tersimpan dan
+      data asli profil yang diedit kembali (bukan data profil lain atau
+      Isian Terakhir; profil aktif tidak berubah)
+   H. Edit → ubah data → Simpan → tersimpan benar (p.snapshot.pensiun utuh,
+      hanya kolom yang diubah berubah, lengkap saat dibuka kembali)
    I. Edit cepat (< 340 ms, sebelum jadwal Isian Terakhir) → tidak ada data
       profil lain yang masuk ke form maupun ke rekaman
    J. angka bawaan lama Rp19 juta tidak muncul di kalkulator maupun profil
@@ -248,37 +251,67 @@ const tanamIsianLama = (pg, kunci, layar, isian) => pg.evaluate(([ki, kunci, lay
   A = await profil(pg, 'Bapak A');
   cek(sama(A.snapshot.pensiun, NOL), '[D] rekaman A tetap tanpa data pensiun', A.snapshot.pensiun);
 
-  /* ---------- F. Edit → Simpan ---------- */
+  /* ---------- F. Edit → tanpa perubahan → Batal ---------- */
   const idB = await idOf(pg, 'Bapak B');
+  const idA = await idOf(pg, 'Bapak A');
+  const aktifSekarang = () => pg.evaluate((k) => localStorage.getItem(k), K_AKTIF);
   await buka(pg, 'PROFILE');
   cek(await edit(pg, idB) === idB, '[F] Edit membuka profil B');
   const formEditB = await formProfil(pg);
   cek(sama(await pensiunForm(pg), PENSIUN), '[F] form Edit menampilkan keenam komponen pensiun B', await pensiunForm(pg));
+  await klik(pg, '#cpReset'); await pg.waitForTimeout(JEDA_PULIH);
+  f = await formProfil(pg);
+  cek(sama(f, formEditB), '[F] Batal tanpa perubahan: data asli B tetap tampil', beda(formEditB, f));
+  cek(sama(tanpaWaktu(await profil(pg, 'Bapak B')), tanpaWaktu(B0)), '[F] rekaman B tidak berubah');
+  cek(await aktifSekarang() === idB, '[F] profil aktif tidak berubah');
+  cek(await pg.evaluate(() => document.getElementById('cpStatusBar').dataset.editId || '') === '', '[F] mode edit berakhir');
+
+  /* ---------- H. Edit → ubah data → Simpan ---------- */
+  await buka(pg, 'PROFILE');
+  await edit(pg, idB);
   await simpan(pg);
   let B = await profil(pg, 'Bapak B');
-  cek(sama(tanpaWaktu(B), tanpaWaktu(B0)), '[F] Edit → Simpan tanpa perubahan: rekaman B utuh', beda(tanpaWaktu(B0), tanpaWaktu(B)));
+  cek(sama(tanpaWaktu(B), tanpaWaktu(B0)), '[H] Edit → Simpan tanpa perubahan: rekaman B utuh', beda(tanpaWaktu(B0), tanpaWaktu(B)));
   await klik(pg, '#btnProfil'); await pg.waitForTimeout(JEDA_PULIH);
-  cek(sama(await formProfil(pg), bersih), '[F] sesudah Simpan perubahan, form Profil bersih', beda(bersih, await formProfil(pg)));
-
-  /* ---------- G. ubah satu komponen ---------- */
+  cek(sama(await formProfil(pg), bersih), '[A] sesudah Simpan perubahan, form Profil bersih', beda(bersih, await formProfil(pg)));
   await edit(pg, idB);
   await isi(pg, 'cpDPHobi', '2.400.000');
   await simpan(pg);
   B = await profil(pg, 'Bapak B');
-  const harapG = tanpaWaktu(B0); harapG.snapshot.pensiun.hobi = 2400000;
-  cek(sama(tanpaWaktu(B), harapG), '[G] hanya Hobi yang berubah', beda(harapG, tanpaWaktu(B)));
+  const harapH = tanpaWaktu(B0); harapH.snapshot.pensiun.hobi = 2400000;
+  cek(sama(tanpaWaktu(B), harapH), '[H] ubah Hobi → Simpan: hanya Hobi yang berubah', beda(harapH, tanpaWaktu(B)));
   const B1 = B;
-
-  /* ---------- H. Batal edit ---------- */
+  const formEditB1 = Object.assign({}, formEditB, { cpDPHobi: '2.400.000' });
+  await muatUlang(pg);
   await buka(pg, 'PROFILE');
   await edit(pg, idB);
-  await isi(pg, 'cpDPRutin', '1.000'); await isi(pg, 'cpPekerjaan', 'Diubah');
-  await klik(pg, '#cpReset'); await pg.waitForTimeout(300);
-  B = await profil(pg, 'Bapak B');
-  cek(sama(tanpaWaktu(B), tanpaWaktu(B1)), '[H] Batal edit tidak mengubah rekaman B', beda(tanpaWaktu(B1), tanpaWaktu(B)));
   f = await formProfil(pg);
-  cek(sama(f, bersih), '[H] sesudah Batal edit, form bersih (mode profil baru)', beda(bersih, f));
-  cek(await pg.evaluate(() => document.getElementById('cpStatusBar').dataset.editId || '') === '', '[H] mode edit berakhir');
+  cek(sama(f, formEditB1), '[H] muat ulang → Edit: data B lengkap dengan Hobi baru', beda(formEditB1, f));
+  await klik(pg, '#cpReset'); await pg.waitForTimeout(300);
+
+  /* ---------- G. Edit → ubah satu komponen → Batal ---------- */
+  /* Profil aktif A dan Isian Terakhir berisi angka penanda milik A: Batal
+     harus mengembalikan data asli B, bukan data profil lain atau isian lama. */
+  const penanda = {};
+  Object.keys(DATA_B).forEach((id) => { penanda[id] = /Dob$/.test(id) ? '1999-09-09' : (id === 'cpStatus' ? 'Cerai' : (id === 'cpHealth' ? 'ADA' : (/^(cpPekerjaan|cpHP|cpPasangan|cpCatatan|cpAyah|cpIbu)$/.test(id) ? 'BOCOR' : '9.999.000'))); });
+  await gunakan(pg, 'Bapak A');
+  await tanamIsianLama(pg, idA, 'layarProfile', penanda);
+  await buka(pg, 'PROFILE');
+  await edit(pg, idB);
+  await isi(pg, 'cpDPRutin', '1.000');
+  await klik(pg, '#cpReset'); await pg.waitForTimeout(JEDA_PULIH);
+  f = await formProfil(pg);
+  cek(sama(f, formEditB1), '[G] ubah Rutin → Batal: data asli B kembali', beda(formEditB1, f));
+  cek(sama(tanpaWaktu(await profil(pg, 'Bapak B')), tanpaWaktu(B1)), '[G] perubahan Rutin tidak tersimpan', beda(tanpaWaktu(B1), tanpaWaktu(await profil(pg, 'Bapak B'))));
+  cek(await aktifSekarang() === idA, '[G] profil aktif tetap A');
+  await edit(pg, idB);
+  await isi(pg, 'cpDPLiburan', '7.000.000'); await isi(pg, 'cpPekerjaan', 'Diubah'); await isi(pg, 'cpAset', '1.000');
+  await klik(pg, '#cpReset'); await pg.waitForTimeout(JEDA_PULIH);
+  f = await formProfil(pg);
+  cek(sama(f, formEditB1), '[G] ubah beberapa kolom → Batal: semua kembali ke data asli B', beda(formEditB1, f));
+  cek(sama(tanpaWaktu(await profil(pg, 'Bapak B')), tanpaWaktu(B1)), '[G] rekaman B tetap');
+  cek(sama(tanpaWaktu(await profil(pg, 'Bapak A')), tanpaWaktu(A)), '[G] rekaman A tidak berubah');
+  await gunakan(pg, 'Bapak B');
 
   /* ---------- A. sesudah muat ulang, dengan isian lama di Isian Terakhir ---------- */
   await tanamIsianLama(pg, idB, 'layarProfile', DATA_B);
@@ -324,9 +357,6 @@ const tanamIsianLama = (pg, kunci, layar, isian) => pg.evaluate(([ki, kunci, lay
   const formEditZ = await formProfil(pg);
   await klik(pg, '#cpReset'); await pg.waitForTimeout(200);
   await gunakan(pg, 'Bapak A');
-  const idA = await idOf(pg, 'Bapak A');
-  const penanda = {};
-  Object.keys(DATA_B).forEach((id) => { penanda[id] = /Dob$/.test(id) ? '1999-09-09' : (id === 'cpStatus' ? 'Cerai' : (id === 'cpHealth' ? 'ADA' : (/^(cpPekerjaan|cpHP|cpPasangan|cpCatatan|cpAyah|cpIbu)$/.test(id) ? 'BOCOR' : '9.999.000'))); });
   await tanamIsianLama(pg, idA, 'layarProfile', penanda);
   await muatUlang(pg);
   await pg.evaluate(() => window.bukaLayar('PROFILE'));
