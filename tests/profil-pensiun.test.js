@@ -21,6 +21,10 @@
    I. Edit cepat (< 340 ms, sebelum jadwal Isian Terakhir) → tidak ada data
       profil lain yang masuk ke form maupun ke rekaman
    J. angka bawaan lama Rp19 juta tidak muncul di kalkulator maupun profil
+   K. sesudah Batal edit form berisi data asli profil (mode edit selesai);
+      "+ Buat Profil Baru" (pintu Sales Idea) dan "Kosongkan form" (pintu
+      Dashboard) selalu mengosongkan form, sehingga profil baru yang disimpan
+      sesudahnya tidak membawa data profil yang tadi diedit
 
    Playwright tidak menjadi dependensi repo: dipakai dari instalasi global
    (NODE_PATH) bila tersedia. Keluar 0 = lulus, 1 = gagal, 2 = dilewati. */
@@ -411,6 +415,54 @@ const tanamIsianLama = (pg, kunci, layar, isian) => pg.evaluate(([ki, kunci, lay
   cek(!dp.tampil.some((v) => AWAL_LAMA.includes(v)), '[J] tanpa profil, bawaan lama tidak muncul', dp.tampil);
   semuaError.push(...bE.errors);
   await ctxE.close();
+
+  /* ---------- K. Batal edit lalu profil baru, lewat dua pintu masuk ---------- */
+  const ctxK = await konteks();
+  const bK = await bukaApp(ctxK, url);
+  const kp = bK.pg;
+  const bersihK = await formProfil(kp);
+  const DATA_BUDI = Object.assign({}, DATA_B, { cpPekerjaan: 'Direktur' });
+  await profilBaru(kp, 'Budi', '1970-01-01', DATA_BUDI);
+  const Budi0 = await profil(kp, 'Budi');
+  const idBudi = Budi0.id;
+  const modeEdit = () => kp.evaluate(() => ({ edit: document.getElementById('cpStatusBar').dataset.editId || '',
+    simpan: document.getElementById('cpSimpan').textContent, reset: document.getElementById('cpReset').textContent }));
+  for (const pintu of ['Sales Idea', 'Dashboard']) {
+    if (pintu === 'Sales Idea') {
+      await kp.evaluate(() => window.InsuranceHubCustomerProfile.bukaUntuk({ source: 'sales_idea', topic: 'retirement', target: 'DP' }));
+    } else {
+      await klik(kp, '#btnProfil');
+    }
+    await kp.waitForTimeout(JEDA_PULIH);
+    await edit(kp, idBudi);
+    const formEditBudi = await formProfil(kp);
+    await klik(kp, '#cpReset'); await kp.waitForTimeout(300);
+    f = await formProfil(kp);
+    let m = await modeEdit();
+    cek(sama(f, formEditBudi) && m.edit === '' && m.simpan === 'Simpan profil',
+      '[K1] ' + pintu + ': Edit Budi → Batal → data Budi kembali, mode edit selesai', { beda: beda(formEditBudi, f), mode: m });
+    await edit(kp, idBudi);
+    await isi(kp, 'cpDPRutin', '1.000'); await isi(kp, 'cpDPHobi', '9.000.000');
+    await klik(kp, '#cpReset'); await kp.waitForTimeout(300);
+    const Budi = await profil(kp, 'Budi');
+    cek(sama(tanpaWaktu(Budi), tanpaWaktu(Budi0)) && sama(await formProfil(kp), formEditBudi),
+      '[K4] ' + pintu + ': ubah pensiun → Batal → pensiun Budi tidak berubah', Budi.snapshot.pensiun);
+    const tombol = pintu === 'Sales Idea' ? '#cpBuatBaru' : '#cpReset';
+    const label = await kp.evaluate((s) => { const n = document.querySelector(s); return n && n.offsetParent !== null ? n.textContent : null; }, tombol);
+    cek(label === (pintu === 'Sales Idea' ? '+ Buat Profil Baru' : 'Kosongkan form'), '[K2] ' + pintu + ': tombol profil baru tersedia sesudah Batal', label);
+    await klik(kp, tombol); await kp.waitForTimeout(300);
+    f = await formProfil(kp);
+    m = await modeEdit();
+    cek(sama(f, bersihK) && m.edit === '', '[K2] ' + pintu + ': "' + label + '" → form bersih, mode profil baru', beda(bersihK, f));
+    const namaBaru = 'Andi ' + pintu;
+    await isi(kp, 'cpNama', namaBaru); await isi(kp, 'cpTgl', '1992-02-02');
+    await simpan(kp);
+    const Andi = await profil(kp, namaBaru);
+    cek(Andi && !isiNonIdentitas(Andi).length, '[K3] ' + pintu + ': ' + namaBaru + ' tersimpan tanpa data Budi', Andi && isiNonIdentitas(Andi));
+    cek(sama(tanpaWaktu(await profil(kp, 'Budi')), tanpaWaktu(Budi0)), '[K3] ' + pintu + ': rekaman Budi tetap');
+  }
+  semuaError.push(...bK.errors);
+  await ctxK.close();
 
   /* ---------- profil lama tanpa snapshot.pensiun ---------- */
   const ctxL = await konteks();
