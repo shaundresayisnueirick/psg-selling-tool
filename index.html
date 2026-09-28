@@ -23,6 +23,7 @@
 <link rel="stylesheet" href="src/sales-idea-jari.css?v=107">
 <link rel="stylesheet" href="src/sales-idea-asset.css?v=109">
 <link rel="stylesheet" href="src/sales-idea-lanjut.css?v=110">
+<link rel="stylesheet" href="src/sales-idea-singapura.css?v=112">
 <script src="src/access-gate.js"></script>
 <script>/* Tema dipasang sebelum CSS dilukis supaya tidak ada kedipan terang saat
    agen memakai tema Dark. Sengaja inline dan sesingkat mungkin. */
@@ -197,7 +198,9 @@ el.addEventListener('pointerdown',function(){tutup(true);});})();</script>
     <p class="catatan">&copy; 2026 PSG Selling Tools • Internal Use Only • <span id="psgVersiApp"></span></p>
   </section>
 
-  <section class="layar" id="layarProfile">
+  <!-- tanpa-simpan: form Profil tidak dipulihkan Isian Terakhir, supaya profil
+       baru tidak mewarisi isian profil lain. -->
+  <section class="layar tanpa-simpan" id="layarProfile">
     <div class="kop">
       <h2>Profil Nasabah</h2>
       <p>Isi sekali, lalu gunakan di seluruh kalkulator Insurance Hub.</p>
@@ -1522,7 +1525,9 @@ el.addEventListener('pointerdown',function(){tutup(true);});})();</script>
   </section>
 
   <!-- ===== Kebutuhan Dana Pensiun ===== -->
-  <section class="layar" id="layarDP">
+  <!-- tanpa-simpan: isian kebutuhan pensiun hanya datang dari profil aktif,
+       tidak dipulihkan Isian Terakhir (termasuk saat tanpa profil). -->
+  <section class="layar tanpa-simpan" id="layarDP">
     <div class="blok">
       <h2>Data prospek</h2>
       <div class="baris satu">
@@ -2368,5 +2373,6 @@ el.addEventListener('pointerdown',function(){tutup(true);});})();</script>
 <script src="src/sales-idea-jari.js?v=107"></script>
 <script src="src/sales-idea-asset.js?v=109"></script>
 <script src="src/sales-idea-lanjut.js?v=110"></script>
+<script src="src/sales-idea-singapura.js?v=112"></script>
 </body>
 </html>

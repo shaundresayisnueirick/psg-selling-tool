@@ -2416,7 +2416,7 @@ el('dTumbuh').innerHTML  = [0, 3, 4, 5, 6, 7, 8].map(v =>
 el('dKomponen').innerHTML = DP_KOMPONEN.map(k =>
   '<div class="baris satu"><div><label for="dk_' + k.id + '">' + k.label + '</label>'
   + '<input id="dk_' + k.id + '" data-k="' + k.id + '" type="text" inputmode="numeric"'
-  + ' autocomplete="off" value="' + k.awal.toLocaleString('id-ID') + '"></div></div>').join('');
+  + ' autocomplete="off"></div></div>').join('');
 
 function dAngkaRapi(kotak, simpan) {
   const n = bAngka(kotak.value);

@@ -1,0 +1,401 @@
+/* =====================================================================
+   SALES IDEA — BEKERJA DI SINGAPURA (interactive story, V2)
+   ---------------------------------------------------------------------
+   Pasangan src/sales-idea-singapura.js. Hanya layar.
+   0. Token — terang: siang/senja hangat; gelap: dunia sinematik redup.
+      Semua warna visual lewat token (tidak ada warna literal di markup
+      SVG), jadi ganti tema tidak mengulang scene.
+   1. Tata letak satu layar (pola yang sama dengan Asset Creation).
+   2. Panggung, material isometrik (3 nada per bidang), tokoh, label.
+   ===================================================================== */
+@media screen{
+
+  /* ---------- 0. Token ---------- */
+  .sgs{
+    /* langit, laut, suasana */
+    --sgs-pagi-1:#b9dcf5;--sgs-pagi-2:#e6f2fa;--sgs-pagi-3:#fbf5e8;
+    --sgs-senja-1:#f2a877;--sgs-senja-2:#f8cf9f;--sgs-senja-3:#fce4c6;
+    --sgs-malam-1:#0f1a33;--sgs-malam-2:#2b3a60;
+    --sgs-laut-1:#cdeaf8;--sgs-laut-2:#9fd0ea;--sgs-ombak:rgba(255,255,255,.65);
+    --sgs-kl-1:#cfe6f7;--sgs-kl-2:#f3f8fc;
+    --sgs-ovl-hangat:rgba(255,138,64,.16);--sgs-ovl-malam:rgba(10,20,46,.56);--sgs-ovl-dingin:rgba(38,66,112,.34);
+    --sgs-ovl-emas:rgba(255,196,96,.2);--sgs-redup:rgba(14,20,34,.62);
+    --sgs-bayang:rgba(22,30,44,.34);--sgs-hangat:rgba(255,188,96,.55);--sgs-cahaya:rgba(255,226,150,.95);--sgs-dingin:rgba(120,160,220,.5);
+    --sgs-matahari:#fff1bf;--sgs-awan:rgba(255,255,255,.9);--sgs-awan-tipis:rgba(255,255,255,.55);
+    --sgs-kota-jauh:#d3e0ec;--sgs-kota-dekat:#bccde0;
+    /* material: a = atas, l = kiri, r = kanan */
+    --m-tanah-a:#cfe3a6;--m-tanah-l:#bf9468;--m-tanah-r:#a27954;
+    --m-pulau-a:#d5e6ae;--m-pulau-l:#ead6a6;--m-pulau-r:#d6ba86;
+    --m-dinding-a:#f7ebd6;--m-dinding-l:#f3e2c6;--m-dinding-r:#dec6a2;
+    --m-pondasi-a:#ddd6c9;--m-pondasi-l:#d2c9b9;--m-pondasi-r:#bcb19f;
+    --m-atap-l:#d8744f;--m-atap-r:#b95a3c;--m-atap-garis:rgba(96,32,14,.28);--m-atap-tepi:#8f4430;
+    --m-kaca-a:#e8eff7;--m-kaca-l:#bcd1e5;--m-kaca-r:#93adc9;--m-kisi:rgba(255,255,255,.55);
+    --m-beton-a:#eff2f5;--m-beton-l:#d9dfe6;--m-beton-r:#c1c9d3;
+    --m-kota-a:#f0f3f7;--m-kota-l:#d3dbe5;--m-kota-r:#b6c2d1;
+    --m-kota2-a:#e3e9f0;--m-kota2-l:#c6d1dd;--m-kota2-r:#a9b7c8;
+    --m-meja-a:#d8b28b;--m-meja-l:#c39c74;--m-meja-r:#a8805a;
+    --m-mejag-a:#8d6d54;--m-mejag-l:#7a5c46;--m-mejag-r:#624837;
+    --m-kursi-a:#46526a;--m-kursi-l:#3a455a;--m-kursi-r:#2e3748;
+    --m-pot-a:#cdbba4;--m-pot-l:#bba68c;--m-pot-r:#a08c74;
+    --m-rak-a:#bd9d7a;--m-rak-l:#ab8b68;--m-rak-r:#917354;
+    --m-lantai-a:#f1e8dc;--m-lantai-l:#dccfbf;--m-lantai-r:#c8baa8;
+    --m-lantaisg-a:#e6dfd7;--m-lantaisg-l:#d1c7bc;--m-lantaisg-r:#bbafa1;
+    --m-emas-a:#ffe49c;--m-emas-l:#f6c552;--m-emas-r:#dba12e;
+    --m-emas2-a:#fff4d2;--m-emas2-l:#f9e3a4;--m-emas2-r:#eecb7c;
+    --m-laptop-a:#cdd2da;--m-laptop-l:#b1b7c1;--m-laptop-r:#9299a5;
+    /* permukaan */
+    --sgs-jalan:#939ca7;--sgs-marka:#f6f6f2;--sgs-trotoar:#dcdfdb;
+    --sgs-lobi-lantai:#efe9e0;--sgs-lobi-r:#e1e6ec;--sgs-lobi-l:#edf0f4;
+    --sgs-kaca-depan:rgba(176,208,234,.3);--sgs-kaca-rangka:rgba(96,118,146,.6);
+    --sgs-jendela:#5d7593;--sgs-nyala:#ffd98a;--sgs-pintu:#8a5a3c;
+    --sgs-laptop-layar:#2d3440;--sgs-laptop-cahaya:#a4d6ff;
+    --sgs-dinding-l:#f4efe7;--sgs-dinding-r:#e8e1d6;--sgs-latar-ruang:#efe9e1;--sgs-latar-malam:#1a2336;
+    --sgs-jendela-gedung:#aebfd3;--sgs-cakrawala:rgba(78,94,122,.55);--sgs-cakrawala-ikon:rgba(58,70,94,.72);
+    --sgs-daun:#86b56b;--sgs-daun-g:#63964f;--sgs-daun-t:#a9d08a;--sgs-batang:#8a6448;
+    --sgs-tiang:#5b6573;--sgs-lampu:#ffe7a3;
+    /* garis penghasilan */
+    --sgs-emas:#e0a12a;--sgs-emas-halo:rgba(255,196,86,.4);--sgs-abu:#a1a9b4;--sgs-denyut:#ffe08a;
+    /* teks & label */
+    --sgs-teks-1:#1f2733;--sgs-teks-2:#4b5563;--sgs-teks-emas:#8a5a05;--sgs-teks-aksen:#a60101;--sgs-teks-abu:#5f6773;--sgs-teks-hangat:#a8490f;
+    --sgs-pil:#ffffff;--sgs-pil-garis:#e0e5eb;--sgs-pil-emas:#fff4d6;--sgs-pil-emas-garis:#e8c778;--sgs-merah:#a60101;--sgs-biru:#1f5d99;
+    --sgs-pil-abu:#eef0f3;--sgs-pil-abu-garis:#c9d0d8;--sgs-pil-hangat:#fff1e2;--sgs-pil-hangat-garis:#efb57f;
+    --sgs-ikon:#e0a12a;--sgs-ikon-garis:#bf8414;--sgs-ikon-lingkar:#ffffff;--sgs-ikon-hangat:#e0783a;
+    --sgs-bdr-merah:#d7263d;--sgs-bdr-putih:#ffffff;--sgs-bdr-tepi:rgba(30,40,60,.25);
+    --sgs-panggung-garis:#e5ebef;--sgs-panggung-bayang:0 18px 40px rgba(30,50,70,.08);--sgs-vignette:none;
+    --sgs-aksen-teks:#a60101;--sgs-emas-kbs:#c8912e;--sgs-halo:rgba(255,255,255,.78);
+    /* tokoh (kulit & rambut dipakai bersama) */
+    --ak-kulit:#e3b08a;--ak-kulit-g:#c9926b;--ak-rambut:#2a211d;--ak-sepatu:#1d1f24;--ak-kemeja:#f7f7f7;--ak-dasi:#a60101;--ak-mata:#2a211d;--ak-garis:#5a3b2c;
+  }
+  [data-theme="dark"] .sgs{
+    --sgs-pagi-1:#1d3352;--sgs-pagi-2:#2c4462;--sgs-pagi-3:#3d4e63;
+    --sgs-senja-1:#5a2f3b;--sgs-senja-2:#8a4c3c;--sgs-senja-3:#a9654a;
+    --sgs-malam-1:#060b18;--sgs-malam-2:#16213d;
+    --sgs-laut-1:#12294a;--sgs-laut-2:#0b1c36;--sgs-ombak:rgba(160,200,255,.22);
+    --sgs-kl-1:#23395a;--sgs-kl-2:#34496a;
+    --sgs-ovl-hangat:rgba(255,120,50,.12);--sgs-ovl-malam:rgba(2,6,18,.6);--sgs-ovl-dingin:rgba(20,40,80,.4);
+    --sgs-ovl-emas:rgba(255,180,80,.14);--sgs-redup:rgba(0,3,10,.6);
+    --sgs-bayang:rgba(0,0,0,.5);--sgs-hangat:rgba(255,170,80,.45);--sgs-cahaya:rgba(255,214,140,.9);--sgs-dingin:rgba(90,130,200,.45);
+    --sgs-matahari:#ffe2a0;--sgs-awan:rgba(210,225,245,.3);--sgs-awan-tipis:rgba(200,215,240,.18);
+    --sgs-kota-jauh:#243650;--sgs-kota-dekat:#2d4262;
+    --m-tanah-a:#4e6a3e;--m-tanah-l:#5a4331;--m-tanah-r:#453325;
+    --m-pulau-a:#4f6a40;--m-pulau-l:#6b5a3e;--m-pulau-r:#54462f;
+    --m-dinding-a:#6f6356;--m-dinding-l:#62574c;--m-dinding-r:#4c443c;
+    --m-pondasi-a:#4a4640;--m-pondasi-l:#403c37;--m-pondasi-r:#34312d;
+    --m-atap-l:#9a4f37;--m-atap-r:#7c3d2a;--m-atap-garis:rgba(0,0,0,.3);--m-atap-tepi:#5c2c1e;
+    --m-kaca-a:#3a4d68;--m-kaca-l:#2f4260;--m-kaca-r:#23344e;--m-kisi:rgba(170,200,240,.28);
+    --m-beton-a:#4a5566;--m-beton-l:#3d4758;--m-beton-r:#313a48;
+    --m-kota-a:#46546a;--m-kota-l:#384559;--m-kota-r:#2b3647;
+    --m-kota2-a:#3d4a5f;--m-kota2-l:#313d50;--m-kota2-r:#263041;
+    --m-meja-a:#7a5e46;--m-meja-l:#6a513c;--m-meja-r:#553f2e;
+    --m-mejag-a:#5c4838;--m-mejag-l:#4d3c2f;--m-mejag-r:#3c2e24;
+    --m-kursi-a:#3a465c;--m-kursi-l:#2f394c;--m-kursi-r:#252d3c;
+    --m-pot-a:#6d6152;--m-pot-l:#5d5246;--m-pot-r:#4a4138;
+    --m-rak-a:#6e5a44;--m-rak-l:#5f4d3a;--m-rak-r:#4b3d2e;
+    --m-lantai-a:#3c3a3a;--m-lantai-l:#333131;--m-lantai-r:#282727;
+    --m-lantaisg-a:#343540;--m-lantaisg-l:#2b2c35;--m-lantaisg-r:#22232b;
+    --m-emas-a:#ffdc85;--m-emas-l:#e8b547;--m-emas-r:#c28a24;
+    --m-emas2-a:#8a7440;--m-emas2-l:#76633a;--m-emas2-r:#5f4f2e;
+    --m-laptop-a:#8a919d;--m-laptop-l:#747b87;--m-laptop-r:#5f6570;
+    --sgs-jalan:#3b4350;--sgs-marka:#a9b0ba;--sgs-trotoar:#4a525c;
+    --sgs-lobi-lantai:#3e3b37;--sgs-lobi-r:#333b48;--sgs-lobi-l:#3b4452;
+    --sgs-kaca-depan:rgba(110,150,200,.18);--sgs-kaca-rangka:rgba(160,185,220,.45);
+    --sgs-jendela:#26344a;--sgs-nyala:#ffcf7a;--sgs-pintu:#5e3d29;
+    --sgs-laptop-layar:#141a24;--sgs-laptop-cahaya:#6fb6ff;
+    --sgs-dinding-l:#2b2f38;--sgs-dinding-r:#23262e;--sgs-latar-ruang:#1d2027;--sgs-latar-malam:#0c1220;
+    --sgs-jendela-gedung:#34496a;--sgs-cakrawala:rgba(20,28,46,.8);--sgs-cakrawala-ikon:rgba(12,18,32,.88);
+    --sgs-daun:#4f7d45;--sgs-daun-g:#3b6437;--sgs-daun-t:#679655;--sgs-batang:#5c4331;
+    --sgs-tiang:#8a93a0;--sgs-lampu:#ffd98a;
+    --sgs-emas:#f0b848;--sgs-emas-halo:rgba(255,190,80,.32);--sgs-abu:#6f7886;--sgs-denyut:#ffe08a;
+    --sgs-teks-1:#eef2f8;--sgs-teks-2:#c4cbd7;--sgs-teks-emas:#f3c96e;--sgs-teks-aksen:#ff8a80;--sgs-teks-abu:#b3bac5;--sgs-teks-hangat:#ffb27a;
+    --sgs-pil:#172134;--sgs-pil-garis:rgba(255,255,255,.14);--sgs-pil-emas:rgba(62,46,18,.94);--sgs-pil-emas-garis:rgba(240,192,96,.6);--sgs-merah:#b3261e;--sgs-biru:#2f6fb3;
+    --sgs-pil-abu:rgba(40,46,58,.94);--sgs-pil-abu-garis:rgba(255,255,255,.18);--sgs-pil-hangat:rgba(70,38,20,.94);--sgs-pil-hangat-garis:rgba(255,170,110,.5);
+    --sgs-ikon:#f0b848;--sgs-ikon-garis:#d49a2c;--sgs-ikon-lingkar:#172134;--sgs-ikon-hangat:#ff9a5a;
+    --sgs-bdr-merah:#d7263d;--sgs-bdr-putih:#f4f4f4;--sgs-bdr-tepi:rgba(255,255,255,.25);
+    --sgs-panggung-garis:rgba(255,255,255,.07);--sgs-panggung-bayang:0 24px 60px rgba(0,0,0,.55);
+    --sgs-vignette:radial-gradient(120% 95% at 50% 42%,transparent 55%,rgba(0,0,0,.45) 100%);
+    --sgs-aksen-teks:var(--brand);--sgs-emas-kbs:#f0c060;--sgs-halo:rgba(4,8,18,.6);
+    --ak-kulit:#d6a07a;--ak-kulit-g:#b98560;--ak-kemeja:#e9ecf0;--ak-garis:#3a2519;
+  }
+
+  /* ---------- 1. Tata letak satu layar ---------- */
+  #layarSalesIdea.aktif .si-content.sip-fit > .sgs{flex:1 1 auto}
+  .sgs{min-height:0;width:100%;max-width:1500px;margin:0 auto;display:grid;grid-template-rows:auto minmax(0,1fr);gap:10px}
+  .sgs-body{min-height:0;display:grid;grid-template-rows:minmax(0,1fr) auto;gap:12px}
+  @media (min-width:1024px),(min-aspect-ratio:3/2) and (max-height:560px){
+    .sgs-body{grid-template-rows:minmax(0,1fr);grid-template-columns:minmax(0,1fr) clamp(260px,27vw,380px);gap:18px}
+  }
+  #layarSalesIdea .sgs > .si-presentation-topbar{
+    display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;align-items:center;gap:10px;
+    min-height:56px;max-width:none;margin:0;padding:6px 0;
+  }
+  #layarSalesIdea .sgs > .si-presentation-topbar .si-back-hub{grid-column:1;grid-row:1}
+  #layarSalesIdea .sgs > .si-presentation-topbar .si-presentation-brand{grid-column:2;grid-row:1;min-width:0;justify-content:center;text-align:center}
+  /* tombol Narasi: komponen & gaya dari Keranjang, warna aksen cerita ini */
+  #layarSalesIdea .sgs > .si-presentation-topbar .kbs-suara{grid-column:3;grid-row:1;--kbs-aksen-teks:var(--sgs-aksen-teks);--kbs-emas:var(--sgs-emas-kbs)}
+  #layarSalesIdea .sgs > .si-presentation-topbar .si-close{grid-column:4;grid-row:1}
+  @media (max-width:620px){
+    #layarSalesIdea .sgs > .si-presentation-topbar{min-height:50px;padding:3px 0;gap:6px}
+    #layarSalesIdea .sgs > .si-presentation-topbar .si-back-hub{padding:0 8px 0 0}
+    #layarSalesIdea .sgs > .si-presentation-topbar .si-presentation-brand{flex-wrap:nowrap;overflow:hidden}
+    #layarSalesIdea .sgs > .si-presentation-topbar .si-presentation-brand b{font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    #layarSalesIdea .sgs > .si-presentation-topbar .si-presentation-brand small{display:none}
+  }
+  @media (max-width:380px){
+    #layarSalesIdea .sgs > .si-presentation-topbar .si-presentation-brand span{display:none}
+  }
+  @media (min-aspect-ratio:3/2) and (max-height:420px){
+    #layarSalesIdea .sgs > .si-presentation-topbar{min-height:46px;padding:1px 0;gap:8px}
+    #layarSalesIdea .sgs > .si-presentation-topbar .si-presentation-brand small{display:none}
+    #layarSalesIdea .sgs > .si-presentation-topbar .si-presentation-brand b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  }
+  .sgs-text{min-width:0;min-height:0;display:grid;gap:6px;align-content:start;padding:14px 16px;border:1px solid var(--border);border-radius:18px;background:var(--surface);box-shadow:var(--shadow-sm)}
+  .sgs-kicker{font-size:10.5px;font-weight:900;letter-spacing:.12em;color:var(--sgs-aksen-teks)}
+  .sgs-title{margin:0;font-size:clamp(17px,2.1vw,26px);line-height:1.2;letter-spacing:-.015em;color:var(--text)}
+  .sgs-focus{margin:0;font-size:clamp(12.5px,1.25vw,16px);line-height:1.35;font-weight:900;letter-spacing:.02em;color:var(--sgs-aksen-teks);overflow-wrap:anywhere}
+  .sgs-isi{margin:0;font-size:clamp(13px,1.12vw,15px);line-height:1.5;color:var(--text-2)}
+  .sgs-cue{display:flex;gap:10px;margin:4px 0 0;padding:10px 12px;border-radius:12px;background:var(--surface-2);border:1px solid var(--border)}
+  .sgs-cue > span{font-size:17px;flex:none;line-height:1.2}
+  .sgs-cue b{font-size:11.5px;color:var(--text-2)}
+  .sgs-cue p{margin:2px 0 0;font-size:11.5px;line-height:1.45;color:var(--text-3)}
+  @media (min-width:1024px),(min-aspect-ratio:3/2) and (max-height:560px){
+    .sgs-text{align-content:center;padding:20px 22px;gap:10px}
+  }
+  @media (max-width:1023px) and (max-height:760px){
+    .sgs-kicker,.sgs-cue{display:none}
+    .sgs-text{padding:11px 14px;gap:4px}
+  }
+  @media (max-width:1023px) and (max-height:620px){
+    .sgs-isi{font-size:12.5px;line-height:1.42}
+    .sgs-title{font-size:16px}
+  }
+  @media (max-width:380px) and (max-height:640px){
+    .sgs-body{gap:8px}
+    .sgs-text{padding:8px 11px;gap:2px;border-radius:14px}
+    .sgs-title{font-size:14.5px}
+    .sgs-focus{font-size:11.5px;line-height:1.3}
+    .sgs-isi{font-size:11.5px;line-height:1.36}
+  }
+  @media (min-aspect-ratio:3/2) and (max-height:560px){
+    .sgs-text{overflow:auto;padding:12px 14px}
+    .sgs-kicker,.sgs-cue{display:none}
+  }
+
+  /* ---------- 2. Panggung ---------- */
+  .sgs-stage{
+    position:relative;margin:0;min-height:0;min-width:0;overflow:hidden;isolation:isolate;
+    border-radius:22px;border:1px solid var(--sgs-panggung-garis);box-shadow:var(--sgs-panggung-bayang);
+    background:var(--sgs-latar-ruang);-webkit-user-select:none;user-select:none;
+  }
+  @media (max-width:620px){.sgs-stage{border-radius:18px}}
+  .sgs-rig{position:absolute;inset:0;width:100%;height:100%;display:block;overflow:hidden}
+  .sgs-vignette{position:absolute;inset:0;pointer-events:none;background:var(--sgs-vignette)}
+
+  /* gradien */
+  .sgs-st-pagi-1{stop-color:var(--sgs-pagi-1)}.sgs-st-pagi-2{stop-color:var(--sgs-pagi-2)}.sgs-st-pagi-3{stop-color:var(--sgs-pagi-3)}
+  .sgs-st-senja-1{stop-color:var(--sgs-senja-1)}.sgs-st-senja-2{stop-color:var(--sgs-senja-2)}.sgs-st-senja-3{stop-color:var(--sgs-senja-3)}
+  .sgs-st-malam-1{stop-color:var(--sgs-malam-1)}.sgs-st-malam-2{stop-color:var(--sgs-malam-2)}
+  .sgs-st-laut-1{stop-color:var(--sgs-laut-1)}.sgs-st-laut-2{stop-color:var(--sgs-laut-2)}
+  .sgs-st-emas-1{stop-color:var(--m-emas-a)}.sgs-st-emas-2{stop-color:var(--m-emas-r)}
+  .sgs-st-kl-1{stop-color:var(--sgs-kl-1)}.sgs-st-kl-2{stop-color:var(--sgs-kl-2)}
+  .sgs-st-bayang{stop-color:var(--sgs-bayang)}.sgs-st-hangat{stop-color:var(--sgs-hangat)}.sgs-st-cahaya{stop-color:var(--sgs-cahaya)}.sgs-st-dingin{stop-color:var(--sgs-dingin)}
+
+  /* teks visual — ukuran dalam unit SVG */
+  .sgs-rig text{text-anchor:middle;font-family:inherit;font-weight:850;letter-spacing:.02em}
+  .sgs-rig text[text-anchor="start"]{text-anchor:start}
+  .sgs-f14{font-size:15px}.sgs-f15{font-size:15px;font-weight:950}.sgs-f16{font-size:16px;font-weight:950}
+  .sgs-teks-1{fill:var(--sgs-teks-1);font-weight:950}
+  .sgs-teks-2{fill:var(--sgs-teks-2);letter-spacing:.08em}
+  .sgs-teks-emas{fill:var(--sgs-teks-emas);font-weight:950}
+  .sgs-teks-aksen{fill:var(--sgs-teks-aksen);font-weight:950}
+  .sgs-teks-putih{fill:#fff;font-weight:950;letter-spacing:.06em}
+  .sgs-teks-abu{fill:var(--sgs-teks-abu);font-weight:950;letter-spacing:.05em}
+  .sgs-teks-hangat{fill:var(--sgs-teks-hangat);font-weight:950;letter-spacing:.04em}
+  .sgs-teks-tv{font-size:10px;fill:#cfd8e3;letter-spacing:.12em}
+  .sgs-label-dunia text{paint-order:stroke;stroke:var(--sgs-halo);stroke-width:3.5px;stroke-linejoin:round}
+  .sgs-teks-tanya{font-size:20px;font-weight:950;fill:var(--sgs-emas)}
+
+  /* langit, laut, suasana */
+  .sgs-langit-pagi{fill:url(#sgsPagi)}
+  .sgs-langit-senja,.sgs-langit-fajar{fill:url(#sgsSenja)}
+  .sgs-langit-fajar{opacity:.85}
+  .sgs-ovl-hangat{fill:var(--sgs-ovl-hangat);pointer-events:none}
+  .sgs-ovl-malam{fill:var(--sgs-ovl-malam);pointer-events:none}
+  .sgs-ovl-dingin{fill:var(--sgs-ovl-dingin);pointer-events:none}
+  .sgs-ovl-emas{fill:var(--sgs-ovl-emas);pointer-events:none}
+  .sgs-redup-ruang{fill:var(--sgs-redup);pointer-events:none}
+  .sgs-laut{pointer-events:none}
+  .sgs-ombak{fill:none;stroke:var(--sgs-ombak);stroke-width:1.4;stroke-linecap:round}
+  .sgs-mh{fill:var(--sgs-matahari)}
+  .sgs-awan{fill:var(--sgs-awan)}
+  .sgs-awan-tipis{fill:var(--sgs-awan-tipis)}
+  .sgs-kota-jauh rect{fill:var(--sgs-kota-jauh)}
+  .sgs-kota-dekat rect{fill:var(--sgs-kota-dekat)}
+  .sgs-latar-ruang{fill:var(--sgs-latar-ruang)}
+  .sgs-latar-malam{fill:var(--sgs-latar-malam)}
+
+  /* material isometrik */
+  .sgs-m-tanah-a{fill:var(--m-tanah-a)}.sgs-m-tanah-l{fill:var(--m-tanah-l)}.sgs-m-tanah-r{fill:var(--m-tanah-r)}
+  .sgs-m-pulau-a{fill:var(--m-pulau-a)}.sgs-m-pulau-l{fill:var(--m-pulau-l)}.sgs-m-pulau-r{fill:var(--m-pulau-r)}
+  .sgs-m-dinding-a{fill:var(--m-dinding-a)}.sgs-m-dinding-l{fill:var(--m-dinding-l)}.sgs-m-dinding-r{fill:var(--m-dinding-r)}
+  .sgs-m-pondasi-a{fill:var(--m-pondasi-a)}.sgs-m-pondasi-l{fill:var(--m-pondasi-l)}.sgs-m-pondasi-r{fill:var(--m-pondasi-r)}
+  .sgs-m-atap-l{fill:var(--m-atap-l)}.sgs-m-atap-r{fill:var(--m-atap-r)}
+  .sgs-atap-garis{fill:none;stroke:var(--m-atap-garis);stroke-width:1.2}
+  .sgs-atap-tepi{fill:none;stroke:var(--m-atap-tepi);stroke-width:1.6;stroke-linejoin:round}
+  .sgs-m-kaca-a{fill:var(--m-kaca-a)}.sgs-m-kaca-l{fill:var(--m-kaca-l)}.sgs-m-kaca-r{fill:var(--m-kaca-r)}
+  .sgs-kisi{fill:none;stroke:var(--m-kisi);stroke-width:1}
+  .sgs-m-beton-a{fill:var(--m-beton-a)}.sgs-m-beton-l{fill:var(--m-beton-l)}.sgs-m-beton-r{fill:var(--m-beton-r)}
+  .sgs-m-kota-a{fill:var(--m-kota-a)}.sgs-m-kota-l{fill:var(--m-kota-l)}.sgs-m-kota-r{fill:var(--m-kota-r)}
+  .sgs-m-kota2-a{fill:var(--m-kota2-a)}.sgs-m-kota2-l{fill:var(--m-kota2-l)}.sgs-m-kota2-r{fill:var(--m-kota2-r)}
+  .sgs-m-meja-a{fill:var(--m-meja-a)}.sgs-m-meja-l{fill:var(--m-meja-l)}.sgs-m-meja-r{fill:var(--m-meja-r)}
+  .sgs-m-meja-gelap-a{fill:var(--m-mejag-a)}.sgs-m-meja-gelap-l{fill:var(--m-mejag-l)}.sgs-m-meja-gelap-r{fill:var(--m-mejag-r)}
+  .sgs-m-kursi-a{fill:var(--m-kursi-a)}.sgs-m-kursi-l{fill:var(--m-kursi-l)}.sgs-m-kursi-r{fill:var(--m-kursi-r)}
+  .sgs-m-pot-a{fill:var(--m-pot-a)}.sgs-m-pot-l{fill:var(--m-pot-l)}.sgs-m-pot-r{fill:var(--m-pot-r)}
+  .sgs-m-rak-a{fill:var(--m-rak-a)}.sgs-m-rak-l{fill:var(--m-rak-l)}.sgs-m-rak-r{fill:var(--m-rak-r)}
+  .sgs-m-lantai-ruang-a{fill:var(--m-lantai-a)}.sgs-m-lantai-ruang-l{fill:var(--m-lantai-l)}.sgs-m-lantai-ruang-r{fill:var(--m-lantai-r)}
+  .sgs-m-lantai-sg-a{fill:var(--m-lantaisg-a)}.sgs-m-lantai-sg-l{fill:var(--m-lantaisg-l)}.sgs-m-lantai-sg-r{fill:var(--m-lantaisg-r)}
+  .sgs-m-emas-a{fill:var(--m-emas-a)}.sgs-m-emas-l{fill:var(--m-emas-l)}.sgs-m-emas-r{fill:var(--m-emas-r)}
+  .sgs-m-emas2-a{fill:var(--m-emas2-a)}.sgs-m-emas2-l{fill:var(--m-emas2-l)}.sgs-m-emas2-r{fill:var(--m-emas2-r)}
+  .sgs-m-laptop-a{fill:var(--m-laptop-a)}.sgs-m-laptop-l{fill:var(--m-laptop-l)}.sgs-m-laptop-r{fill:var(--m-laptop-r)}
+
+  /* permukaan & benda */
+  .sgs-jalan{fill:var(--sgs-jalan)}
+  .sgs-marka{fill:none;stroke:var(--sgs-marka);stroke-width:1.6;stroke-linecap:round}
+  .sgs-trotoar{fill:var(--sgs-trotoar)}
+  .sgs-rumput{fill:none}
+  .sgs-lobi-lantai{fill:var(--sgs-lobi-lantai)}
+  .sgs-lobi-dinding-r{fill:var(--sgs-lobi-r)}
+  .sgs-lobi-dinding-l{fill:var(--sgs-lobi-l)}
+  .sgs-kaca-depan{fill:var(--sgs-kaca-depan);stroke:var(--sgs-kaca-rangka);stroke-width:1}
+  .sgs-kaca-rangka{fill:none;stroke:var(--sgs-kaca-rangka);stroke-width:1.4}
+  .sgs-jendela{fill:var(--sgs-jendela)}
+  .sgs-jendela-nyala{fill:var(--sgs-nyala)}
+  .sgs-pintu{fill:var(--sgs-pintu)}
+  .sgs-laptop-layar{fill:var(--sgs-laptop-layar)}
+  .sgs-laptop-cahaya{fill:var(--sgs-laptop-cahaya)}
+  .sgs-laptop-alas{fill:var(--m-laptop-a)}
+  .sgs-laptop-tutup-b{fill:var(--m-laptop-l);stroke:var(--m-laptop-r);stroke-width:.8}
+  .sgs-laptop-logo{fill:var(--m-laptop-a)}
+  .sgs-laptop-sinar{pointer-events:none}
+  .sgs-dinding-l{fill:var(--sgs-dinding-l)}
+  .sgs-dinding-r{fill:var(--sgs-dinding-r)}
+  .sgs-jendela-kota{fill:url(#sgsKacaLangit)}
+  .sgs-jendela-gedung{fill:var(--sgs-jendela-gedung)}
+  .sgs-jendela-bingkai{fill:none;stroke:var(--m-beton-l);stroke-width:2.2}
+  .sgs-rak-isi{fill:var(--m-pot-a)}
+  .sgs-layar-tv{fill:#1f2733;stroke:#3a4556;stroke-width:1.5}
+  .sgs-layar-titik{fill:#ffcf6a}
+  .sgs-layar-busur{fill:none;stroke:#ffcf6a;stroke-width:2;stroke-dasharray:1 1;stroke-linecap:round}
+  .sgs-map-kertas{fill:#ffffff;opacity:.9}
+  .sgs-daun{fill:var(--sgs-daun)}.sgs-daun-g{fill:var(--sgs-daun-g)}.sgs-daun-t{fill:var(--sgs-daun-t)}
+  .sgs-batang{fill:var(--sgs-batang)}
+  .sgs-bayang-isi{fill:url(#sgsBayang)}
+  .sgs-tiang{fill:none;stroke:var(--sgs-tiang);stroke-width:1.8;stroke-linecap:round}
+  .sgs-lampu-jalan{fill:var(--sgs-lampu)}
+  .sgs-kap-lampu{fill:var(--m-kursi-a)}
+  .sgs-lampu-gedung,.sgs-jendela-leo-isi,.sgs-cakrawala-lampu{fill:var(--sgs-nyala)}
+  .sgs-kaca-senja{fill:url(#sgsSenja)}
+  .sgs-kaca-malam{fill:url(#sgsMalam)}
+  .sgs-cakrawala{fill:var(--sgs-cakrawala)}
+  .sgs-cakrawala-ikon{fill:var(--sgs-cakrawala-ikon)}
+  .sgs-jam{fill:#fbfbfb;stroke:var(--m-kursi-l);stroke-width:1.6}
+  .sgs-jarum{fill:none;stroke:#2d3440;stroke-width:1.6;stroke-linecap:round}
+  .sgs-jarum-pos{transform-origin:0 0}
+  .sgs-jam-pusat{fill:var(--sgs-merah)}
+  .sgs-kal-badan{fill:var(--sgs-pil);stroke:var(--sgs-pil-garis);stroke-width:1.5}
+  .sgs-kal-atas{fill:var(--sgs-merah)}
+  .sgs-kal-garis{fill:none;stroke:var(--sgs-pil-garis);stroke-width:1.6}
+  .sgs-koper{fill:var(--sgs-merah)}
+  .sgs-koper-tali{fill:none;stroke:#5b1a1a;stroke-width:1.6}
+  .sgs-hp{fill:#1f2733}
+  .sgs-hp-layar{fill:var(--sgs-laptop-cahaya)}
+  .sgs-buku-kecil{fill:#3f7fc1}
+  .sgs-uap{fill:none;stroke:rgba(255,255,255,.85);stroke-width:2;stroke-linecap:round}
+  .sgs-rumah-hangat,.sgs-foto-cahaya,.sgs-sorot-foto,.sgs-cahaya-lampu{pointer-events:none}
+  .sgs-sorot-foto{opacity:1}
+  .sgs-blok-rentang{opacity:.62}
+
+  /* foto keluarga */
+  .sgs-foto-bingkai{fill:#6b4a32}
+  .sgs-foto-langit{fill:var(--sgs-kl-1)}
+  .sgs-foto-kilap{fill:rgba(255,255,255,.1)}
+
+  /* peta & pesawat */
+  .sgs-pin{fill:var(--sgs-merah);stroke:#fff;stroke-width:2}
+  .sgs-pin-gel{fill:none;stroke:var(--sgs-merah);stroke-width:2;opacity:.5}
+  .sgs-rute-titik{fill:none;stroke:rgba(90,110,140,.45);stroke-width:2;stroke-dasharray:3 6;stroke-linecap:round}
+  .sgs-pesawat-badan{fill:#1f2733}
+  .sgs-pesawat-sayap{fill:#4b5563}
+  .sgs-pesawat-kaca{fill:#a4d6ff}
+  [data-theme="dark"] .sgs .sgs-pesawat-badan{fill:#eef2f8}
+  [data-theme="dark"] .sgs .sgs-pesawat-sayap{fill:#c4cbd7}
+  .sgs-bayang-pesawat .sgs-bayang-isi{fill:var(--sgs-bayang)}
+
+  /* garis penghasilan */
+  .sgs-garis-emas{fill:none;stroke:var(--sgs-emas);stroke-width:3.4;stroke-linecap:round;stroke-dasharray:1 1}
+  .sgs-garis-emas-halo{fill:none;stroke:var(--sgs-emas-halo);stroke-width:10;stroke-linecap:round;stroke-dasharray:1 1}
+  .sgs-garis-emas.sgs-tebal{stroke-width:5.4}
+  .sgs-garis-emas-halo.sgs-tebal{stroke-width:15}
+  .sgs-garis-abu{fill:none;stroke:var(--sgs-abu);stroke-width:3.4;stroke-linecap:round;stroke-dasharray:1 1}
+  .sgs-garis-tipis{fill:none;stroke:var(--sgs-emas);stroke-width:1.8;stroke-linecap:round;stroke-dasharray:1 1;opacity:.75}
+  .sgs-denyut{fill:var(--sgs-denyut)}
+  .sgs-denyut-halo{fill:var(--sgs-emas-halo)}
+
+  /* label & gelembung */
+  .sgs-pil{fill:var(--sgs-pil);stroke:var(--sgs-pil-garis);stroke-width:1.4}
+  .sgs-pil-emas{fill:var(--sgs-pil-emas);stroke:var(--sgs-pil-emas-garis);stroke-width:1.6}
+  .sgs-pil-merah{fill:var(--sgs-merah)}
+  .sgs-pil-biru{fill:var(--sgs-biru)}
+  .sgs-pil-abu{fill:var(--sgs-pil-abu);stroke:var(--sgs-pil-abu-garis);stroke-width:1.4}
+  .sgs-pil-hangat{fill:var(--sgs-pil-hangat);stroke:var(--sgs-pil-hangat-garis);stroke-width:1.6}
+  .sgs-gel,.sgs-gel-ekor{fill:var(--sgs-pil);stroke:var(--sgs-pil-garis);stroke-width:1.4;stroke-linejoin:round}
+  .sgs-gel-teks{fill:var(--sgs-teks-1);font-weight:900}
+  .sgs-bdr-merah{fill:var(--sgs-bdr-merah)}
+  .sgs-bdr-putih{fill:var(--sgs-bdr-putih)}
+  .sgs-bdr-tepi{fill:var(--sgs-bdr-tepi)}
+  .sgs-ik-lingkar{fill:var(--sgs-ikon-lingkar);stroke:var(--sgs-pil-emas-garis);stroke-width:2}
+  .sgs-ik-isi{fill:var(--sgs-ikon)}
+  .sgs-ik-garis{fill:none;stroke:var(--sgs-ikon-garis);stroke-width:1.8;stroke-linecap:round}
+  .sgs-ik-lubang{fill:var(--sgs-ikon-lingkar)}
+  .sgs-ik-lubang-g{fill:none;stroke:var(--sgs-ikon-lingkar);stroke-width:1.4}
+  .sgs-ikon-hangat .sgs-ik-lingkar{stroke:var(--sgs-pil-hangat-garis)}
+  .sgs-ikon-hangat .sgs-ik-isi,.sgs-chip-hangat .sgs-ik-isi{fill:var(--sgs-ikon-hangat)}
+  .sgs-chip-kotak{fill:var(--sgs-pil-hangat);stroke:var(--sgs-pil-hangat-garis);stroke-width:1.6}
+  .sgs-chip-hangat .sgs-ik-lubang{fill:var(--sgs-pil-hangat)}
+  .sgs-chip-hangat .sgs-ik-lubang-g{stroke:var(--sgs-pil-hangat)}
+  .sgs-chip-hangat .sgs-ik-garis{stroke:var(--sgs-ikon-hangat)}
+  .sgs-chip-teks{fill:var(--sgs-teks-hangat);font-weight:950;letter-spacing:.04em}
+  .sgs-lencana-isi{fill:var(--sgs-merah);stroke:#fff;stroke-width:2}
+  .sgs-lencana-teks{fill:#fff;font-size:14px;font-weight:950}
+  .sgs-perisai{fill:var(--sgs-biru);stroke:#fff;stroke-width:2.4;stroke-linejoin:round}
+  .sgs-perisai-garis{fill:none;stroke:#fff;stroke-width:3.2;stroke-linecap:round;stroke-linejoin:round}
+  .sgs-perisai-putus{fill:rgba(255,255,255,.08);stroke:var(--sgs-emas);stroke-width:2.4;stroke-dasharray:5 4;stroke-linejoin:round}
+  .sgs-telp-kartu{fill:var(--sgs-pil);stroke:var(--sgs-pil-garis);stroke-width:1.5}
+  .sgs-telp-layar{fill:var(--sgs-pil-hangat)}
+
+  /* tokoh */
+  .sgs-ak-leo{--ak-atas:#253b66;--ak-atas-g:#1b2d52;--ak-bawah:#22345a;--ak-bawah-g:#192844}
+  .sgs-ak-bos{--ak-atas:#737d89;--ak-atas-g:#5d6671;--ak-bawah:#626b77;--ak-bawah-g:#4f5760;--ak-rambut:#d9dcdf}
+  .sgs-ak-istri{--ak-atas:#d97a93;--ak-atas-g:#bf6179;--ak-bawah:#4b506c;--ak-bawah-g:#3c4059}
+  .sgs-ak-anak,.sgs-ak-anakBesar{--ak-seragam:#fbfbfb;--ak-seragam-g:#dfe3e9;--ak-bawah:#c62828;--ak-bawah-g:#a51f1f}
+  .sgs-ak .ak-atas{fill:var(--ak-atas)}.sgs-ak .ak-atas-g{fill:var(--ak-atas-g)}
+  .sgs-ak .ak-bawah{fill:var(--ak-bawah)}.sgs-ak .ak-bawah-g{fill:var(--ak-bawah-g)}
+  .sgs-ak .ak-seragam{fill:var(--ak-seragam)}.sgs-ak .ak-seragam-g{fill:var(--ak-seragam-g)}
+  .sgs-ak .ak-kulit{fill:var(--ak-kulit)}.sgs-ak .ak-kulit-g{fill:var(--ak-kulit-g)}
+  .sgs-ak .ak-rambut{fill:var(--ak-rambut)}
+  .sgs-ak .ak-sepatu{fill:var(--ak-sepatu)}
+  .sgs-ak .ak-kemeja{fill:var(--ak-kemeja)}
+  .sgs-ak .ak-dasi{fill:var(--ak-dasi)}
+  .sgs-ak .ak-kerah{fill:none;stroke:var(--ak-atas-g);stroke-width:1.1;stroke-linejoin:round}
+  .sgs-ak .ak-kerah-putih{fill:#ffffff;stroke:#cfd5dc;stroke-width:.6}
+  .sgs-ak .ak-kancing{fill:var(--ak-atas-g)}
+  .sgs-ak .ak-sabuk{fill:#2a211d}
+  .sgs-ak .ak-kaos-kaki{fill:#f4f4f4}
+  .sgs-ak .ak-mata{fill:var(--ak-mata)}
+  .sgs-ak .ak-garis{fill:none;stroke:var(--ak-garis);stroke-width:1.1;stroke-linecap:round}
+  .sgs-ak .ak-pipi{fill:#e98b8b;opacity:.35}
+  .sgs-ak .ak-kacamata{fill:rgba(220,235,250,.25);stroke:#2d3440;stroke-width:.9}
+  .sgs-ak .ak-bayang{fill:url(#sgsBayang)}
+
+  /* kartu hub */
+  .si-choice-card[data-si-choice="singapura"] .si-choice-visual{background:linear-gradient(145deg,#eef6ff,#fff3ec)}
+}

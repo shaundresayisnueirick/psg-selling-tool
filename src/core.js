@@ -337,7 +337,7 @@ function cpFillForm(p) {
   el('cpStatus').value = p.status || 'Belum menikah';
   el('cpJK').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', b.dataset.nilai === (p.jk || 'PRIA')));
   const s=p.snapshot||{}; cpSetRp('cpPengeluaran',s.pengeluaran||0); cpSetRp('cpAset',s.aset||0); cpSetRp('cpUtang',s.utang||0); cpSetRp('cpKPR',s.kpr||0); cpSetRp('cpDanaDarurat',s.danaDarurat||0); cpSetRp('cpUPJiwa',s.upJiwa||0); cpSetRp('cpUPCI',s.upCI||0);
-  const dp=(s.snapshot&&s.snapshot.pensiun)||{}; cpSetRp('cpDPRutin',dp.rutin||0); cpSetRp('cpDPLiburan',dp.liburan||0); cpSetRp('cpDPHobi',dp.hobi||0); cpSetRp('cpDPKeluarga',dp.keluarga||0); cpSetRp('cpDPSehat',dp.sehat||0); cpSetRp('cpDPLain',dp.lain||0);
+  const dp=s.pensiun||{}; cpSetRp('cpDPRutin',dp.rutin||0); cpSetRp('cpDPLiburan',dp.liburan||0); cpSetRp('cpDPHobi',dp.hobi||0); cpSetRp('cpDPKeluarga',dp.keluarga||0); cpSetRp('cpDPSehat',dp.sehat||0); cpSetRp('cpDPLain',dp.lain||0);
   if(el('cpHealth')) el('cpHealth').value=s.kesehatan||'BELUM'; cpChildrenFill(p.children||[]);
   const fixedIds=new Set(['self','spouse','father','mother']);
   const extras=(Array.isArray(p.family)?p.family:[]).filter(x=>x && !fixedIds.has(x.id) && !/^child-\d+$/.test(String(x.id||'')) && x.nama);
@@ -460,6 +460,9 @@ function cpSave() {
   el('cpStatusBar').textContent = 'Profil tersimpan di perangkat ini. Siap dipakai offline.';
   if (el('cpSimpan')) el('cpSimpan').textContent = 'Simpan profil';
   if (el('cpReset')) el('cpReset').textContent = 'Kosongkan form';
+  /* Form kembali bersih: isian profil yang baru disimpan tidak boleh
+     terbawa ke profil baru berikutnya. */
+  cpFillForm({});
   cpRender(); cpApply(record);
 }
 function cpEdit(id) {

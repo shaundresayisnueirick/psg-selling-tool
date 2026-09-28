@@ -71,6 +71,17 @@
     {n:6,title:'Aset baru untuk anak',focus:'ASET Rp5 MILIAR → WARISAN',body:'Inti percakapan: bagaimana seseorang yang sudah mapan dapat membangun aset baru yang nantinya dapat dipersiapkan sebagai warisan untuk anak.',scene:'inheritance'}
   ];
 
+  const singapuraSteps = [
+    {n:1,title:'Leo di Indonesia',focus:'Rp15 JUTA / BULAN',body:'Setiap hari Leo bekerja di Indonesia untuk memenuhi kebutuhan istri dan anaknya.'},
+    {n:2,title:'Kesempatan dari atasan',focus:'EKSPANSI KE SINGAPURA',body:'Atasan menawarkan proyek di Singapura. Setelah memikirkan keluarganya, Leo menjawab: "Baik, Pak. Saya bersedia."'},
+    {n:3,title:'Babak baru',focus:'INDONESIA → SINGAPURA',body:'Istri dan anaknya tetap tinggal di Indonesia, sementara Leo berangkat bekerja di Singapura.'},
+    {n:4,title:'Penghasilan berubah',focus:'Rp15 JUTA → Rp30–50 JUTA / BULAN • 2–3×',body:'Sekitar dua sampai tiga kali lipat: ruang untuk membantu keluarga, menyiapkan masa depan, dan membangun aset.'},
+    {n:5,title:'Waktu terus berjalan',focus:'TAHUN 1 → TAHUN 2',body:'Setiap bulan penghasilan Leo mengalir ke rumah. Anaknya tumbuh, dan tanggung jawabnya ikut bertambah.'},
+    {n:6,title:'Bagaimana jika…',focus:'PENGHASILAN BERHENTI',body:'Sebuah risiko membuat penghasilan Leo terhenti, sementara keluarganya masih menjalani hari seperti biasa.'},
+    {n:7,title:'Kebutuhan tidak ikut berhenti',focus:'PENGHASILAN BERHENTI vs KEBUTUHAN TETAP BERJALAN',body:'Rumah, pendidikan, kebutuhan sehari-hari, dan masa depan tetap berjalan. Perlindungan menjadi jembatan.'},
+    {n:8,title:'Alasan yang sama',focus:'MARI KITA HITUNG',body:'Sudah cukupkah rencana kita untuk melindungi keluarga?'}
+  ];
+
   let current = 0;
   let mode = 'jari';
   const $ = id => document.getElementById(id);
@@ -91,7 +102,7 @@
   function closeSalesIdea(){if(pemutar)pemutar.berhenti();document.body.classList.remove('si-modal-open');if(window.bukaLayar)window.bukaLayar('PRODUK');}
   function openSalesIdea(modeName){mode=modeName;current=0;document.body.classList.add('si-modal-open');render();}
   function salesIdeaHeader(title,subtitle){return `<div class="si-presentation-topbar"><button type="button" class="si-back-hub" data-si-hub>← Sales Idea</button><div class="si-presentation-brand"><span>PSG</span><b>${title}</b><small>${subtitle}</small></div><button type="button" class="si-close" data-si-close aria-label="Tutup Sales Idea">✕</button></div>`;}
-  function renderHub(root){root.innerHTML=`<div class="si-hub"><div class="si-hub-head"><div><span class="si-eyebrow">PSG • PRESENTATION TOOLS</span><h2>Sales Idea</h2><p>Pilih satu Sales Idea. Materinya akan dibuka sebagai layar presentasi penuh agar visual dapat ditunjukkan langsung kepada prospek.</p></div><button type="button" class="si-close si-close-hub" data-si-close>✕ Tutup</button></div><div class="si-choice-grid"><button type="button" class="si-choice-card" data-si-choice="jari"><div class="si-choice-visual fingers-choice">🖐️</div><div><span>SALES IDEA 01</span><h3>10 Jari</h3><p>5 ujung risiko + 5 pertanyaan untuk membangun kesadaran.</p></div><strong>Mulai presentasi →</strong></button><button type="button" class="si-choice-card" data-si-choice="basket"><div class="si-choice-visual basket-choice">🧺</div><div><span>SALES IDEA 02</span><h3>Keranjang Kehidupan</h3><p>Visual beban kehidupan, keluarga, proteksi, dan uang.</p></div><strong>Mulai presentasi →</strong></button><button type="button" class="si-choice-card" data-si-choice="education"><div class="si-choice-visual education-choice">🎓</div><div><span>SALES IDEA 03</span><h3>Education Planning</h3><p>Tujuan pendidikan, inflasi, mulai lebih awal, dan proteksi.</p></div><strong>Mulai presentasi →</strong></button><button type="button" class="si-choice-card" data-si-choice="retirement"><div class="si-choice-visual retirement-choice">⌛</div><div><span>SALES IDEA 04</span><h3>Retirement Planning</h3><p>Risiko hidup terlalu lama, kebutuhan aset, compounding, dan proteksi.</p></div><strong>Mulai presentasi →</strong></button><button type="button" class="si-choice-card" data-si-choice="asset"><div class="si-choice-visual asset-choice">🏠</div><div><span>SALES IDEA 05</span><h3>Asset Creation</h3><p>Mengubah rencana aset menjadi pembahasan warisan untuk anak.</p></div><strong>Mulai presentasi →</strong></button></div><div class="si-hub-note">Layar presentasi menampilkan visual dan highlight inti. Tidak ada script dialog agen–prospek.</div></div>`;}
+  function renderHub(root){root.innerHTML=`<div class="si-hub"><div class="si-hub-head"><div><span class="si-eyebrow">PSG • PRESENTATION TOOLS</span><h2>Sales Idea</h2><p>Pilih satu Sales Idea. Materinya akan dibuka sebagai layar presentasi penuh agar visual dapat ditunjukkan langsung kepada prospek.</p></div><button type="button" class="si-close si-close-hub" data-si-close>✕ Tutup</button></div><div class="si-choice-grid"><button type="button" class="si-choice-card" data-si-choice="jari"><div class="si-choice-visual fingers-choice">🖐️</div><div><span>SALES IDEA 01</span><h3>10 Jari</h3><p>5 ujung risiko + 5 pertanyaan untuk membangun kesadaran.</p></div><strong>Mulai presentasi →</strong></button><button type="button" class="si-choice-card" data-si-choice="basket"><div class="si-choice-visual basket-choice">🧺</div><div><span>SALES IDEA 02</span><h3>Keranjang Kehidupan</h3><p>Visual beban kehidupan, keluarga, proteksi, dan uang.</p></div><strong>Mulai presentasi →</strong></button><button type="button" class="si-choice-card" data-si-choice="education"><div class="si-choice-visual education-choice">🎓</div><div><span>SALES IDEA 03</span><h3>Education Planning</h3><p>Tujuan pendidikan, inflasi, mulai lebih awal, dan proteksi.</p></div><strong>Mulai presentasi →</strong></button><button type="button" class="si-choice-card" data-si-choice="retirement"><div class="si-choice-visual retirement-choice">⌛</div><div><span>SALES IDEA 04</span><h3>Retirement Planning</h3><p>Risiko hidup terlalu lama, kebutuhan aset, compounding, dan proteksi.</p></div><strong>Mulai presentasi →</strong></button><button type="button" class="si-choice-card" data-si-choice="asset"><div class="si-choice-visual asset-choice">🏠</div><div><span>SALES IDEA 05</span><h3>Asset Creation</h3><p>Mengubah rencana aset menjadi pembahasan warisan untuk anak.</p></div><strong>Mulai presentasi →</strong></button><button type="button" class="si-choice-card" data-si-choice="singapura"><div class="si-choice-visual singapura-choice">✈️</div><div><span>SALES IDEA 06</span><h3>Bekerja di Singapura</h3><p>Penghasilan yang terus membantu keluarga — dan siapa yang membawanya pulang bila suatu hari berhenti.</p></div><strong>Mulai presentasi →</strong></button></div><div class="si-hub-note">Layar presentasi menampilkan visual dan highlight inti. Tidak ada script dialog agen–prospek.</div></div>`;}
   function renderIsi(root){if(mode==='jari')renderFinger(root);else if(mode==='alasan')renderReasons(root);else if(mode==='basket')renderBasket(root);else if(mode==='education')renderEducation(root);else if(mode==='retirement')renderRetirement(root);else if(mode==='asset')renderAssetCreation(root);}
   function render(){
     const root=$('salesIdeaContent');if(!root)return;document.body.classList.add('si-modal-open');
@@ -106,7 +117,7 @@
      masuk yang ringan dan mengendalikan animasi CSS yang sudah ada. */
   const SCENE_VISUAL='.si-hands,.kb-visual-card,.ep-visual-card,.rp-visual-card,.ac-visual-card,.si-reason-progress';
   const SCENE_TEKS='.si-presentation-card,.kb-presentation-card,.ep-presentation-card,.rp-presentation-card,.ac-presentation-card';
-  function jumlahLangkah(m){return (m==='basket'||m==='education')?10:((m==='retirement'||m==='asset')?6:(m==='alasan'?3:13));}
+  function jumlahLangkah(m){return m==='singapura'?singapuraSteps.length:((m==='basket'||m==='education')?10:((m==='retirement'||m==='asset')?6:(m==='alasan'?3:13)));}
   function animasiMasuk(tl,stage){
     tl.add(stage.querySelector(SCENE_VISUAL),[{opacity:0,transform:'translateY(16px) scale(.985)'},{opacity:1,transform:'none'}],{duration:700});
     tl.add(stage.querySelector(SCENE_TEKS),[{opacity:0,transform:'translateY(12px)'},{opacity:1,transform:'none'}],{duration:560,delay:260});
@@ -121,6 +132,8 @@
     if(m==='education'&&window.PSGEducationStory)return window.PSGEducationStory.adegan({langkah:educationSteps,header:salesIdeaHeader('Education Planning','Visual storytelling tentang tujuan pendidikan anak'),padaLangkah:i=>{current=i;}});
     // Asset Creation: cerita interaktif (src/sales-idea-asset.js), data tetap assetCreationSteps.
     if(m==='asset'&&window.PSGAssetStory)return window.PSGAssetStory.adegan({langkah:assetCreationSteps,header:salesIdeaHeader('Asset Creation','Visual sederhana untuk membuka percakapan aset dan warisan'),padaLangkah:i=>{current=i;}});
+    // Bekerja di Singapura: cerita interaktif (src/sales-idea-singapura.js), data tetap singapuraSteps.
+    if(m==='singapura'){return window.PSGSingapuraStory?window.PSGSingapuraStory.adegan({langkah:singapuraSteps,header:salesIdeaHeader('Bekerja di Singapura','Penghasilan yang terus membantu keluarga'),padaLangkah:i=>{current=i;}}):[];}
     // 10 Jari: cerita tangan interaktif (src/sales-idea-jari.js), 9 langkah — BAB 1 (5 risiko satu scene), BAB 2 (5 pertanyaan), BAB 3 (3 alasan, renderer lama). Data tetap fingers & reasons.
     if(m==='jari'&&window.PSGJariStory)return window.PSGJariStory.adegan({langkah:fingers,teks:teksJari,header:salesIdeaHeader('10 Jari','Visual 5 produk + 5 pertanyaan + 3 alasan'),padaLangkah:i=>{current=i;},alasan:{jumlah:reasons.length,render:(root,k)=>{current=10+k;renderIsi(root);},animate:animasiMasuk}});
     for(let i=0;i<jumlahLangkah(m);i++){
@@ -360,7 +373,7 @@
   }
   function prev(){if(pemutar&&mode!=='hub'){pemutar.back();return;}if(current>0){current--;render();}}
   function reset(){current=0;mode='hub';render();}
-  function setMode(nextMode){if(['jari','basket','education','retirement','asset','alasan'].includes(nextMode)){mode=nextMode;current=0;render();}else if(nextMode==='hub'){mode='hub';current=0;render();}}
+  function setMode(nextMode){if(['jari','basket','education','retirement','asset','singapura','alasan'].includes(nextMode)){mode=nextMode;current=0;render();}else if(nextMode==='hub'){mode='hub';current=0;render();}}
 
   function init(){
     const btn=$('btnSalesIdea');
