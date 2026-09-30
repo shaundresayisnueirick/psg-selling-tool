@@ -48,6 +48,11 @@
    segmen terakhir. data-ketuk pada node scene memberi tahu narator
    ketukan mana yang sudah mulai.
 
+   Suara: rekaman voice Bian (MP3), bukan suara browser. Klip tiap
+   segmen dibaca dari PSGSingapuraAudio (sales-idea-singapura-audio.js)
+   dan diputar narator bersama saat ketukan segmennya dimulai; animasi
+   tetap menjadi jam utama.
+
    API: PSGSingapuraStory.adegan({ langkah, header, padaLangkah })
    ============================================================ */
 (function () {
@@ -1286,13 +1291,26 @@
     };
   }
 
+  /* Klip rekaman per segmen (kunci "SNN-MM" = scene NN, segmen MM).
+     Singapura selalu memakai rekaman: segmen tanpa klip tetap sunyi dan
+     tidak pernah dibacakan suara browser. */
+  function rekaman() {
+    var A = window.PSGSingapuraAudio || {}, seg = A.segmen || {};
+    return {
+      folder: A.folder || '',
+      klip: NARASI.map(function (sc, i) {
+        return sc.map(function (_, j) { return seg['S0' + (i + 1) + '-0' + (j + 1)] || []; });
+      })
+    };
+  }
+
   var N = null;
   function adegan(opsi) {
     var o = opsi || {};
     var langkah = Array.isArray(o.langkah) ? o.langkah : [];
     N = window.PSGNarasi || null;
     if (N) {
-      N.daftar('.sgs', 'data-sgs', NARASI);
+      N.daftar('.sgs', 'data-sgs', NARASI, rekaman());
       N.pasang();
       o = Object.assign({}, o, { header: N.tombol(o.header || '') });
     }

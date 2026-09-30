@@ -7,8 +7,13 @@
    A. registri: hub 6 kartu, Sales Idea 06 membuka 8 scene (8 langkah).
    B. naskah: 27 segmen, persis versi yang disetujui; frasa & angka wajib
       terucap sebagai kata; pertanyaan risiko hanya sekali; klimaks & penutup.
-   C. narasi diucapkan lewat narator bersama (PSGNarasi, id-ID) kalimat demi
-      kalimat sesuai naskah; tidak ada ucapan bertumpuk; PAUSE menghentikan.
+   C. narasi rekaman (voice Bian, MP3): manifest 27 segmen (S05-03 dua klip,
+      13 berkas, tanpa tumpang tindih); tiap klip diputar sesuai start/end
+      tanpa melewati batas (bagian di luar klip tidak pernah terdengar);
+      PLAY/PAUSE/RESUME (lanjut dari posisi)/NEXT/BACK/REPLAY/CLOSE, Narasi
+      ON/OFF, gerak dikurangi, berkas gagal → sunyi, offline; satu elemen
+      audio; speechSynthesis tidak pernah dipakai untuk Singapura; play()
+      dari luar engine (tombol media/headset) tanpa klip aktif tidak berbunyi.
    D. kontrol pemutar: OPEN diam, PLAY, PAUSE, RESUME tanpa ulang, NEXT,
       BACK, REPLAY, CLOSE bersih (animasi & suara berhenti).
    E. CTA: kartu akhir sesudah scene 8 → Profil (target NEEDS) → Analisis
@@ -75,7 +80,7 @@ const NASKAH = [
 const pecah = (t) => (String(t).match(/[^.!?]+[.!?]+/g) || [t]).map((x) => x.trim()).filter(Boolean);
 
 const TYPES = { html: 'text/html; charset=utf-8', js: 'application/javascript', css: 'text/css', png: 'image/png',
-  svg: 'image/svg+xml', webmanifest: 'application/manifest+json', json: 'application/json', txt: 'text/plain' };
+  svg: 'image/svg+xml', webmanifest: 'application/manifest+json', json: 'application/json', txt: 'text/plain', mp3: 'audio/mpeg' };
 function serve(root) {
   return new Promise((res) => {
     const srv = http.createServer((q, r) => {
@@ -109,6 +114,47 @@ function mockTTS() {
   Object.defineProperty(window, 'speechSynthesis', { value: ss, configurable: true });
 }
 
+/* pengamat rekaman: tiap frame membaca PSGNarasi.rekaman() dan mencatat
+   klip yang berbunyi (waktu pertama & terakhir terdengar, posisi berhenti);
+   window.__laju mempercepat audio; jumlah elemen Audio dihitung.
+   Waktu mulai klip diambil dari sisi engine: posisi & waktu saat engine
+   memanggil play() (mulai, tPlay). Sampel frame pertama (awal, t0) bisa
+   terlambat dibaca bila frame Chromium headless tertunda, jadi tidak
+   dipakai sebagai satu-satunya patokan waktu mulai. */
+function pantauRekaman() {
+  window.__rek = { klip: [], aktif: null, nAudio: 0, play: null };
+  const A = window.Audio;
+  window.Audio = function (s) { window.__rek.nAudio++; const e = new A(s); window.__rek.el = e; return e; };
+  window.Audio.prototype = A.prototype;
+  const play = HTMLMediaElement.prototype.play;
+  HTMLMediaElement.prototype.play = function () {
+    if (window.__laju) this.playbackRate = window.__laju;
+    const N = window.PSGNarasi, R = window.__rek;
+    if (this === R.el && N && N.rekaman) {
+      const r = N.rekaman();
+      if (r.berkas) R.play = { key: r.adegan + '|' + r.segmen + '|' + r.klip + '|' + r.berkas, pos: Math.round(this.currentTime * 1000) / 1000, t: performance.now(), laju: this.playbackRate };
+    }
+    return play.call(this);
+  };
+  (function loop() {
+    const N = window.PSGNarasi;
+    if (N && N.rekaman) {
+      const r = N.rekaman(), R = window.__rek, a = R.aktif;
+      if (r.main) {
+        const key = r.adegan + '|' + r.segmen + '|' + r.klip + '|' + r.berkas;
+        if (!a || a.key !== key) {
+          const p = R.play && R.play.key === key ? R.play : null;
+          const x = { key, adegan: r.adegan, segmen: r.segmen, klip: r.klip, berkas: r.berkas, awal: r.waktu, akhir: r.waktu, t0: performance.now(), t1: performance.now(),
+            mulai: p ? p.pos : null, tPlay: p ? p.t : null, laju: p ? p.laju : null };
+          R.klip.push(x); R.aktif = x;
+        }
+        else { a.akhir = Math.max(a.akhir, r.waktu); a.t1 = performance.now(); }
+      } else if (a) { if (!a.berhenti && r.berkas === '' && r.waktu > 0) a.berhenti = r.waktu; R.aktif = null; }
+    }
+    requestAnimationFrame(loop);
+  })();
+}
+
 let gagal = 0;
 function cek(ok, label, info) {
   console.log((ok ? '  OK   ' : '  GAGAL') + ' ' + label + (!ok && info !== undefined ? ' — ' + (typeof info === 'string' ? info : JSON.stringify(info)) : ''));
@@ -125,9 +171,13 @@ function cek(ok, label, info) {
     o = o || {};
     const ctx = await br.newContext(Object.assign({ viewport: { width: 1366, height: 768 } }, o.ctx || {}));
     const pg = await ctx.newPage();
-    pg.on('pageerror', (e) => errs.push(e.message));
-    pg.on('console', (m) => { if (m.type() === 'error') errs.push(m.text()); });
+    if (!o.tanpaLog) {
+      pg.on('pageerror', (e) => errs.push(e.message));
+      pg.on('console', (m) => { if (m.type() === 'error') errs.push(m.text()); });
+    }
+    if (o.rute) await o.rute(pg);
     await pg.addInitScript(mockTTS);
+    await pg.addInitScript(pantauRekaman);
     await pg.addInitScript((t) => { try { sessionStorage.setItem('insuranceHub.access.v3', 'ok'); localStorage.setItem('insuranceHub.theme.v3', t); } catch (_) {} }, o.tema || 'original');
     await pg.goto(URL);
     await pg.waitForTimeout(500);
@@ -207,35 +257,230 @@ function cek(ok, label, info) {
     await ctx.close();
   }
 
-  /* ---------- C. narasi diucapkan ---------- */
-  console.log('[C] Narasi diucapkan per scene');
+  /* ---------- C. narasi rekaman (voice Bian) ---------- */
+  console.log('[C] Narasi rekaman (MP3 voice Bian)');
+  const ID = (n, j) => 'S0' + n + '-0' + j;
+  const rek = (pg) => pg.evaluate(() => window.PSGNarasi.rekaman());
+  const ucapTTS = (pg) => pg.evaluate(() => window.__tts.log.filter((x) => x.t === 'mulai').length);
+  const tungguMain = (pg, n, ms) => tunggu(pg, (a) => { const r = window.PSGNarasi.rekaman(); return r.main && (!a || r.adegan === a); }, ms || 8000, n);
+  /* periksa klip yang terdengar untuk satu scene terhadap manifest */
+  const periksaKlip = (M, n, klip, tolAkhir, tolAwal, label) => {
+    const harap = NASKAH[n - 1].flatMap((_, j) => (M.segmen[ID(n, j + 1)] || []).map((c, k) => Object.assign({ segmen: j + 1, klip: k + 1 }, c)));
+    const dengar = klip.filter((x) => x.adegan === n);
+    const urut = dengar.map((x) => x.segmen + '.' + x.klip + ':' + x.berkas).join(' ');
+    const ok1 = urut === harap.map((c) => c.segmen + '.' + c.klip + ':' + c.audio).join(' ');
+    const buruk = [];
+    dengar.forEach((x, i) => {
+      const c = harap[i]; if (!c) return;
+      const henti = x.berhenti != null ? x.berhenti : x.akhir;
+      /* waktu mulai = posisi saat engine memanggil play(); klip tanpa catatan play() engine = gagal */
+      if (x.mulai == null) buruk.push(ID(n, c.segmen) + ' tanpa catatan play() dari engine');
+      else if (x.mulai < c.start - 0.02 || x.mulai > c.start + tolAwal) buruk.push(ID(n, c.segmen) + ' mulai ' + x.mulai);
+      /* bacaan frame pertama harus sesuai waktu nyata sejak play(): audio tidak
+         pernah di depan start, dan tidak lebih maju dari yang mungkin diputar */
+      if (x.mulai != null) {
+        const batas = Math.round((x.mulai + ((x.t0 - x.tPlay) / 1000) * x.laju + 0.02) * 1000) / 1000;
+        if (x.awal < c.start - 0.02 || x.awal > batas) buruk.push(ID(n, c.segmen) + ' bacaan pertama ' + x.awal + ' tidak sesuai waktu sejak play() (maks ' + batas + ')');
+      }
+      if (x.akhir > c.end + tolAkhir || henti > c.end + tolAkhir) buruk.push(ID(n, c.segmen) + ' melewati akhir ' + c.end + ' → ' + Math.max(x.akhir, henti));
+      if (henti < c.end - 0.3) buruk.push(ID(n, c.segmen) + ' berhenti terlalu awal ' + henti + ' < ' + c.end);
+    });
+    cek(ok1 && !buruk.length, label + 'scene ' + n + ': ' + harap.length + ' klip berurutan sesuai manifest, tanpa melewati batas', { urut, harap: harap.length, buruk });
+    return dengar;
+  };
   if (ikut('C')) {
-    const { ctx, pg } = await buka({ cepat: 8 });
-    await bukaSG(pg);
-    for (let n = 1; n <= 8; n++) {
-      await pg.evaluate(() => { window.__tts.log = []; window.__tts.tumpang = 0; });
-      if (n === 1) await klik(pg, '#siPlay'); else await pg.keyboard.press('ArrowRight');
-      const harap = NASKAH[n - 1].flatMap(pecah);
-      const ok = await tunggu(pg, (h) => window.__tts.log.filter((x) => x.t === 'akhir').length >= h, 120000, harap.length);
-      const log = await pg.evaluate(() => window.__tts.log);
-      const diucap = log.filter((x) => x.t === 'mulai').map((x) => x.x);
-      const lang = [...new Set(log.filter((x) => x.t === 'mulai').map((x) => x.lang))];
-      cek(ok !== false && JSON.stringify(diucap.slice(0, harap.length)) === JSON.stringify(harap) && lang.join() === 'id-ID', 'scene ' + n + ': ' + harap.length + ' kalimat diucapkan berurutan (id-ID)', { diucap: diucap.length, harap: harap.length, lang });
-      const tumpang = await pg.evaluate(() => window.__tts.tumpang);
-      cek(tumpang === 0, 'scene ' + n + ': tidak ada ucapan bertumpuk', tumpang);
+    /* C1. manifest */
+    {
+      const { ctx, pg } = await buka();
+      const M = await pg.evaluate(() => window.PSGSingapuraAudio);
+      const kunci = Object.keys(M.segmen);
+      const harapKunci = NASKAH.flatMap((sc, i) => sc.map((_, j) => ID(i + 1, j + 1)));
+      cek(kunci.length === 27 && JSON.stringify(kunci) === JSON.stringify(harapKunci), '27 segmen punya manifest (tanpa kurang/lebih/duplikat)', kunci.length);
+      const klip = kunci.flatMap((k) => M.segmen[k].map((c) => Object.assign({ k }, c)));
+      cek(kunci.every((k) => Array.isArray(M.segmen[k]) && M.segmen[k].length >= 1) && M.segmen['S05-03'].length === 2 &&
+        M.segmen['S05-03'][0].audio === 'S05-01.mp3' && M.segmen['S05-03'][1].audio === 'S05-02.mp3', 'tiap segmen larik klip; S05-03 = 2 klip (S05-01.mp3 lalu S05-02.mp3)');
+      const berkas = [...new Set(klip.map((c) => c.audio))].sort();
+      cek(berkas.length === 13 && berkas.join() === 'S01-01.mp3,S01-02.mp3,S01-03.mp3,S02-01.mp3,S02-02.mp3,S05-01.mp3,S05-02.mp3,S06-01.mp3,S06-02.mp3,S07-01.mp3,S07-02.mp3,S08-01.mp3,S08-02.mp3', 'manifest memakai tepat 13 berkas', berkas);
+      const per = {}; klip.forEach((c) => (per[c.audio] = per[c.audio] || []).push(c));
+      const tumpang = Object.values(per).flatMap((cs) => cs.sort((a, b) => a.start - b.start).filter((c, i) => c.start >= c.end || (i && c.start < cs[i - 1].end - 1e-9)).map((c) => c.k));
+      cek(tumpang.length === 0, 'klip dalam satu berkas tidak tumpang tindih (start < end)', tumpang);
+      const dur = await pg.evaluate(async (M) => {
+        const out = {};
+        for (const f of [...new Set(Object.values(M.segmen).flat().map((c) => c.audio))]) {
+          const r = await fetch(M.folder + f); if (!r.ok) { out[f] = -r.status; continue; }
+          const b = await new OfflineAudioContext(1, 44100, 44100).decodeAudioData(await r.arrayBuffer()); out[f] = b.duration;
+        }
+        return out;
+      }, M);
+      const kurang = Object.entries(per).filter(([f, cs]) => !(dur[f] > 0) || Math.max(...cs.map((c) => c.end)) > dur[f] + 0.01).map(([f]) => f + ':' + dur[f]);
+      cek(kurang.length === 0, '13 berkas ada, dapat di-decode, dan durasinya mencakup semua klip', kurang);
+      await ctx.close();
     }
-    await ctx.close();
-    /* PAUSE menghentikan suara */
-    const b = await buka();
-    await bukaSG(b.pg); await klik(b.pg, '#siPlay');
-    await tunggu(b.pg, () => window.__tts.log.some((x) => x.t === 'mulai'), 10000);
-    await klik(b.pg, '#siPlay'); await b.pg.waitForTimeout(400);
-    const n0 = await b.pg.evaluate(() => window.__tts.log.filter((x) => x.t === 'mulai').length);
-    await b.pg.waitForTimeout(1200);
-    const n1 = await b.pg.evaluate(() => window.__tts.log.filter((x) => x.t === 'mulai').length);
-    const bicara = await b.pg.evaluate(() => window.speechSynthesis.speaking);
-    cek(n1 === n0 && !bicara, 'PAUSE: narasi berhenti, tidak ada kalimat baru', { n0, n1, bicara });
-    await b.ctx.close();
+
+    /* C2. seluruh cerita (animasi & audio 4×): urutan & batas tiap klip */
+    {
+      const { ctx, pg } = await buka({ cepat: 4 });
+      const M = await pg.evaluate(() => window.PSGSingapuraAudio);
+      await pg.evaluate(() => { window.__laju = 4; });
+      await bukaSG(pg);
+      await pg.click('#siPlay');
+      for (let n = 1; n <= 8; n++) {
+        if (n > 1) await pg.keyboard.press('ArrowRight');
+        const jml = NASKAH[n - 1].reduce((a, _, j) => a + (M.segmen[ID(n, j + 1)] || []).length, 0);
+        await tunggu(pg, (a) => { const R = window.__rek; return R.klip.filter((x) => x.adegan === a[0]).length >= a[1] && !window.PSGNarasi.rekaman().main; }, 120000, [n, jml]);
+        await pg.waitForTimeout(150);
+        periksaKlip(M, n, await pg.evaluate(() => window.__rek.klip), 0.12, 0.3, '4×: ');
+      }
+      const x = await pg.evaluate(() => ({ nAudio: window.__rek.nAudio }));
+      cek(x.nAudio === 1, 'satu elemen audio dipakai ulang (tidak ada audio tumpang tindih)', x);
+      cek(await ucapTTS(pg) === 0, 'speechSynthesis tidak dipakai untuk Singapura', await ucapTTS(pg));
+      await ctx.close();
+    }
+
+    /* C3. presisi batas pada kecepatan normal: scene 4 (3 batas dalam satu berkas,
+       jeda terpendek 335 md) dan scene 5 (S05-03 dua berkas) */
+    {
+      const { ctx, pg } = await buka();
+      const M = await pg.evaluate(() => window.PSGSingapuraAudio);
+      await bukaSG(pg);
+      for (const n of [4, 5]) {
+        await keScene(pg, n);
+        const s = await st(pg); if (s.status !== 'berputar') await pg.click('#siPlay');
+        const jml = NASKAH[n - 1].reduce((a, _, j) => a + (M.segmen[ID(n, j + 1)] || []).length, 0);
+        await tunggu(pg, (a) => window.__rek.klip.filter((x) => x.adegan === a[0]).length >= a[1] && !window.PSGNarasi.rekaman().main, 90000, [n, jml]);
+        await pg.waitForTimeout(150);
+        const d = periksaKlip(M, n, await pg.evaluate(() => window.__rek.klip), 0.04, 0.12, '1×: ');
+        if (n === 5) {
+          const a = d.find((x) => x.segmen === 3 && x.klip === 1), b = d.find((x) => x.segmen === 3 && x.klip === 2);
+          /* klip 2 dianggap mulai saat engine memanggil play() */
+          const celah = a && b && b.tPlay != null ? (b.tPlay - a.t1) / 1000 : null;
+          cek(a && b && b.berkas === 'S05-02.mp3' && b.akhir <= 4.855 + 0.04 && celah != null && celah < 0.5, 'S05-03: klip 1 (S05-01.mp3) lalu klip 2 (S05-02.mp3), pergantian ±' + (celah == null ? '?' : celah.toFixed(2)) + ' dtk, narasi tambahan S05-02.mp3 tidak terdengar', { a, b });
+        }
+      }
+      cek(await ucapTTS(pg) === 0, '1×: speechSynthesis tidak dipakai', await ucapTTS(pg));
+      await ctx.close();
+    }
+
+    /* C4. kontrol pemutar dengan audio (klik nyata) */
+    for (const mob of [false, true]) {
+      const lbl = mob ? 'HP' : 'desktop';
+      const { ctx, pg } = await buka(mob ? { ctx: { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true } } : {});
+      await bukaSG(pg);
+      const r0 = await rek(pg);
+      cek(!r0.main, lbl + ': OPEN tanpa audio', r0);
+      await pg.click('#siPlay');
+      const main = await tungguMain(pg, 1, 8000); await pg.waitForTimeout(700);
+      const r1 = await rek(pg);
+      cek(main && r1.berkas === 'S01-01.mp3' && r1.segmen === 1 && r1.waktu > 0, lbl + ': PLAY → animasi + audio S01-01', r1);
+      await pg.click('#siPlay'); await pg.waitForTimeout(250); const r2 = await rek(pg); await pg.waitForTimeout(700); const r3 = await rek(pg); const sp = await st(pg);
+      cek(!r2.main && !r3.main && r3.waktu === r2.waktu && sp.status === 'jeda', lbl + ': PAUSE → audio jeda, posisi tersimpan', [r2, r3, sp.status]);
+      await pg.click('#siPlay'); await tungguMain(pg, 1, 3000); await pg.waitForTimeout(300); const r4 = await rek(pg);
+      cek(r4.main && r4.waktu >= r2.waktu - 0.02 && r4.waktu < r2.waktu + 1.2, lbl + ': RESUME → lanjut dari posisi (tidak mulai dari 0)', [r2.waktu, r4.waktu]);
+      await pg.click('#siNext'); await pg.waitForTimeout(120); const r5 = await rek(pg);
+      await tungguMain(pg, 2, 8000); const r6 = await rek(pg);
+      cek(!(r5.main && r5.adegan === 1) && r6.adegan === 2 && r6.berkas === 'S01-02.mp3' && r6.waktu < 1.5, lbl + ': NEXT → audio lama berhenti, S01-02 dari awal', [r5, r6]);
+      await pg.click('#siPrev'); await tungguMain(pg, 1, 8000); const r7 = await rek(pg);
+      cek(r7.adegan === 1 && r7.berkas === 'S01-01.mp3' && r7.waktu < 1.5, lbl + ': BACK → S01-01 dari awal', r7);
+      await pg.click('#siNext'); await tungguMain(pg, 2, 8000); await pg.click('#siReplay'); await tungguMain(pg, 1, 8000); const r8 = await rek(pg);
+      cek(r8.adegan === 1 && r8.segmen === 1 && r8.waktu < 1.5, lbl + ': REPLAY → scene 1 segmen 1 dari awal', r8);
+      await pg.click('.sgs [data-kbs-suara]'); await pg.waitForTimeout(250); const r9 = await rek(pg); await pg.waitForTimeout(1200); const r10 = await rek(pg); const s10 = await st(pg);
+      cek(!r9.main && !r10.main && s10.status === 'berputar', lbl + ': Narasi OFF → audio diam, animasi tetap berjalan', [r9, r10, s10.status]);
+      await pg.click('.sgs [data-kbs-suara]'); const on = await tungguMain(pg, 1, 3000); const r11 = await rek(pg);
+      cek(on && r11.waktu >= r10.waktu - 0.02, lbl + ': Narasi ON → audio lanjut', [r10.waktu, r11]);
+      await pg.click('#layarSalesIdea .si-close'); await pg.waitForTimeout(300); const r12 = await rek(pg); await pg.waitForTimeout(1000); const r13 = await rek(pg);
+      cek(!r12.main && !r13.main && r13.waktu === 0, lbl + ': CLOSE → audio berhenti, posisi direset, tidak ada suara tersisa', [r12, r13]);
+      const nA = await pg.evaluate(() => window.__rek.nAudio);
+      cek(nA === 1 && await ucapTTS(pg) === 0, lbl + ': satu elemen audio, tanpa speechSynthesis', { nA, tts: await ucapTTS(pg) });
+      await ctx.close();
+    }
+
+    /* C5. gerak dikurangi: PLAY tetap memutar cerita + audio */
+    {
+      const { ctx, pg } = await buka({ ctx: { reducedMotion: 'reduce' } });
+      await bukaSG(pg); await pg.click('#siPlay');
+      const main = await tungguMain(pg, 1, 8000); const r = await rek(pg); const s = await st(pg);
+      cek(main && r.berkas === 'S01-01.mp3' && s.status === 'berputar', 'gerak dikurangi: PLAY tetap memutar animasi + audio', [r, s.status]);
+      await ctx.close();
+    }
+
+    /* C6. berkas gagal dimuat: animasi jalan, sunyi, tanpa suara browser */
+    {
+      const { ctx, pg } = await buka({ tanpaLog: true, ctx: { serviceWorkers: 'block' }, rute: (p) => p.route('**/S01-01.mp3', (r) => r.fulfill({ status: 404, body: '' })) });
+      const perr = []; pg.on('pageerror', (e) => perr.push(e.message));
+      await bukaSG(pg); await pg.click('#siPlay'); await pg.waitForTimeout(4500);
+      const r = await rek(pg), s = await st(pg);
+      cek(!perr.length && s.status === 'berputar' && s.t > 3000 && !r.main && await ucapTTS(pg) === 0, 'berkas gagal: tanpa crash, animasi jalan, segmen sunyi, tanpa suara browser', { perr, s, r });
+      await ctx.close();
+    }
+
+    /* C8. keamanan pemutaran dari luar engine (tombol media, headset, keyboard):
+       play() pada elemen audio tanpa klip aktif tidak boleh menghasilkan suara */
+    {
+      const luar = async (pg) => {
+        await pg.evaluate(() => {
+          const el = window.__rek.el; window.__luar = { bunyi: 0, t0: el.currentTime };
+          const p = el.play(); if (p && p.catch) p.catch(() => {});
+          const t1 = performance.now();
+          (function amati() { if (!el.paused && !el.muted && el.volume > 0) window.__luar.bunyi++; if (performance.now() - t1 < 900) requestAnimationFrame(amati); })();
+        });
+        await pg.waitForTimeout(1000);
+        return pg.evaluate(() => { const el = window.__rek.el; return { bunyi: window.__luar.bunyi, paused: el.paused, muted: el.muted, maju: Math.round((el.currentTime - window.__luar.t0) * 1000) / 1000, sumber: !!el.getAttribute('src') }; });
+      };
+      const aman = (x) => x.bunyi === 0 && x.paused && Math.abs(x.maju) < 0.05;
+      const { ctx, pg } = await buka();
+      await bukaSG(pg); await pg.click('#siPlay');
+      /* E1: sesudah engine berhenti di akhir klip S01-01 */
+      await tunggu(pg, () => { const r = window.PSGNarasi.rekaman(); return !r.main && r.waktu >= 10.2; }, 30000);
+      const e1 = await luar(pg);
+      cek(aman(e1) && (await rek(pg)).waktu < 10.3, 'E1: sesudah END klip, play() dari luar engine tidak berbunyi dan tidak lanjut ke kalimat berikutnya', e1);
+      /* E3: NEXT/BACK tetap normal sesudah percobaan dari luar */
+      await pg.click('#siNext'); const n1 = await tungguMain(pg, 2, 8000); const rn = await rek(pg);
+      await pg.click('#siPrev'); const b1 = await tungguMain(pg, 1, 8000); const rb = await rek(pg);
+      cek(n1 && rn.berkas === 'S01-02.mp3' && b1 && rb.berkas === 'S01-01.mp3' && rb.waktu < 1.5, 'E3: NEXT/BACK sesudahnya tetap memutar klip baru dengan normal', [rn, rb]);
+      /* E4: PAUSE → (percobaan dari luar ditolak) → RESUME lewat tombol PWA */
+      await pg.waitForTimeout(600);
+      await pg.click('#siPlay'); await pg.waitForTimeout(250); const rp = await rek(pg);
+      const e4 = await luar(pg);
+      await pg.click('#siPlay'); const lanjut = await tungguMain(pg, 1, 3000); await pg.waitForTimeout(300); const rr = await rek(pg);
+      cek(aman(e4) && lanjut && rr.waktu >= rp.waktu - 0.02 && rr.waktu < rp.waktu + 1.2, 'E4: saat PAUSE play() dari luar ditolak; RESUME lewat tombol PWA tetap lanjut dari posisi', { e4, rp: rp.waktu, rr: rr.waktu });
+      /* E5: Narasi OFF */
+      await pg.click('.sgs [data-kbs-suara]'); await pg.waitForTimeout(250);
+      const e5 = await luar(pg); const s5 = await st(pg);
+      cek(aman(e5) && s5.status === 'berputar', 'E5: Narasi OFF — play() dari luar tidak berbunyi, animasi tetap berjalan', { e5, status: s5.status });
+      await pg.click('.sgs [data-kbs-suara]'); const on = await tungguMain(pg, 1, 3000);
+      cek(on, 'E5: Narasi ON sesudahnya tetap memutar audio lewat engine');
+      /* E2: CLOSE */
+      await pg.click('#layarSalesIdea .si-close'); await pg.waitForTimeout(300);
+      const e2 = await luar(pg);
+      cek(aman(e2) && !e2.sumber, 'E2: sesudah CLOSE sumber audio dilepas; play() dari luar tidak berbunyi', e2);
+      await ctx.close();
+      /* E6: keluar dari Singapura ke hub Sales Idea */
+      const c6 = await buka();
+      await bukaSG(c6.pg); await c6.pg.click('#siPlay'); await tungguMain(c6.pg, 1, 8000);
+      await c6.pg.click('[data-si-hub]'); await c6.pg.waitForTimeout(300);
+      const e6 = await luar(c6.pg); const h6 = await c6.pg.evaluate(() => window.SalesIdea10Jari.keadaan().mode);
+      cek(aman(e6) && !e6.sumber && h6 === 'hub', 'E6: keluar ke hub Sales Idea — sumber dilepas; play() dari luar tidak berbunyi', { e6, h6 });
+      /* E7: Sales Idea lain tetap memakai speechSynthesis */
+      await c6.pg.evaluate(() => { window.__tts.log = []; document.querySelector('[data-si-choice="basket"]').click(); });
+      await c6.pg.waitForTimeout(400); await c6.pg.click('#siPlay');
+      const ucap = await tunggu(c6.pg, () => window.__tts.log.some((x) => x.t === 'mulai'), 8000);
+      const e7 = await c6.pg.evaluate(() => ({ lang: [...new Set(window.__tts.log.filter((x) => x.t === 'mulai').map((x) => x.lang))].join(), audio: window.PSGNarasi.rekaman().main, el: window.__rek.el ? { paused: window.__rek.el.paused, sumber: !!window.__rek.el.getAttribute('src') } : null }));
+      cek(ucap && e7.lang === 'id-ID' && !e7.audio && (!e7.el || (e7.el.paused && !e7.el.sumber)), 'E7: Keranjang tetap dinarasikan speechSynthesis (id-ID), elemen audio Singapura diam', e7);
+      await c6.ctx.close();
+    }
+
+    /* C7. offline: 13 berkas di cache service worker, audio tetap berbunyi */
+    {
+      const { ctx, pg } = await buka();
+      await pg.evaluate(() => navigator.serviceWorker.ready);
+      const penuh = await tunggu(pg, async () => { const k = await caches.keys(); if (!k.length) return false; const c = await caches.open(k[k.length - 1]); const u = (await c.keys()).map((r) => r.url); return u.filter((x) => /\/assets\/narasi\/singapore\/S\d\d-\d\d\.mp3$/.test(x)).length === 13; }, 30000);
+      cek(penuh, 'cache service worker berisi 13 berkas rekaman');
+      await ctx.setOffline(true); await pg.reload(); await pg.waitForTimeout(600);
+      await bukaSG(pg); await pg.click('#siPlay');
+      const main = await tungguMain(pg, 1, 8000); const r = await rek(pg);
+      cek(main && r.berkas === 'S01-01.mp3', 'offline: audio S01-01 berbunyi dari cache', r);
+      await ctx.setOffline(false); await ctx.close();
+    }
   }
 
   /* ---------- D. kontrol pemutar ---------- */
@@ -264,9 +509,9 @@ function cek(ok, label, info) {
       await pg.keyboard.press(' '); await pg.waitForTimeout(150); cek((await st(pg)).status === 'berputar', 'keyboard spasi: resume');
     }
     await klik(pg, '#layarSalesIdea .si-close'); await pg.waitForTimeout(300);
-    const z = await pg.evaluate(() => ({ aktif: document.getElementById('layarSalesIdea').classList.contains('aktif'), bicara: window.speechSynthesis.speaking,
+    const z = await pg.evaluate(() => ({ aktif: document.getElementById('layarSalesIdea').classList.contains('aktif'), bicara: window.speechSynthesis.speaking, audio: window.PSGNarasi.rekaman().main,
       jalan: document.getAnimations().filter((a) => a.playState === 'running' && a.effect && a.effect.target && document.getElementById('salesIdeaContent').contains(a.effect.target)).length }));
-    cek(!z.aktif && z.jalan === 0 && !z.bicara, lbl + ': CLOSE bersih (animasi & suara berhenti)', z);
+    cek(!z.aktif && z.jalan === 0 && !z.bicara && !z.audio, lbl + ': CLOSE bersih (animasi & suara berhenti)', z);
     await ctx.close();
   }
 

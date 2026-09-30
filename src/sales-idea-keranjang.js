@@ -628,7 +628,9 @@
      daftar(selektorScene, atributNomor, naskah) + tombol() + pasang().
      Naskah scene boleh berupa larik segmen: segmen ke-j baru diucapkan
      bila node scene ber-data-ketuk ≥ j+1 (ketukan visual sudah mulai) dan
-     segmen sebelumnya tuntas — narasi mengikuti gambar, tidak terpotong. */
+     segmen sebelumnya tuntas — narasi mengikuti gambar, tidak terpotong.
+     Sumber yang didaftarkan dengan data rekaman (argumen ke-4 daftar())
+     memakai MP3, bukan Web Speech: lihat "narasi rekaman" di bawah. */
   var NARASI = [
     'Setiap keluarga memiliki keranjang kehidupannya sendiri. Di dalamnya ada berbagai kebutuhan dan tanggung jawab yang harus kita bawa bersama sepanjang perjalanan hidup.',
     'Sebagian beban mungkin terasa kecil. Sebagian lainnya jauh lebih berat. Dan sering kali, semakin panjang perjalanan hidup, semakin banyak pula tanggung jawab yang harus kita siapkan.',
@@ -642,8 +644,178 @@
     'Karena tujuan akhirnya bukan sekadar memiliki perlindungan. Tujuannya adalah memastikan keluarga tetap memiliki kemampuan untuk melanjutkan kehidupannya, bahkan ketika perjalanan tidak berjalan seperti yang kita harapkan.'
   ];
   var SUMBER = [{ sel: '.kbs', attr: 'data-kbs', teks: NARASI }];
-  var suara = { nyala: true, terpasang: false, root: null, stage: null, node: null, basi: null, aktif: false, kalimat: [], butuh: [], gerbang: false, moKetuk: null, idx: 0, mulai: false, bicara: false, tertunda: false, gen: 0, jeda: 0 };
+  var suara = { nyala: true, terpasang: false, root: null, stage: null, node: null, basi: null, aktif: false, kalimat: [], butuh: [], gerbang: false, moKetuk: null, idx: 0, mulai: false, bicara: false, tertunda: false, gen: 0, jeda: 0, klip: null, folder: '', adegan: 0 };
   function adaTTS() { return typeof window.speechSynthesis !== 'undefined' && typeof window.SpeechSynthesisUtterance === 'function'; }
+
+  /* ---------------- narasi rekaman (MP3) ----------------
+     Sumber dengan data rekaman { folder, klip } tidak pernah memakai
+     speechSynthesis. Satuannya segmen: klip[n-1][j] = larik klip
+     { audio, start, end } (detik) untuk segmen j scene n, diputar
+     berurutan saat gerbang ketukannya terbuka — aturan yang sama dengan
+     TTS, jadi animasi tetap menjadi jam utama. Satu elemen <audio>
+     dipakai ulang. Berkas diambil sekali lewat fetch (ikut cache service
+     worker, jadi bisa offline) lalu diputar dari blob: seek tepat, tanpa
+     Range request. Akhir klip dijaga timer lalu requestAnimationFrame
+     (timeupdate terlalu jarang untuk batas antar-kalimat). PAUSE/RESUME
+     melanjutkan dari posisi yang sama. Berkas yang gagal → segmen itu
+     sunyi (animasi tetap jalan); tidak pernah jatuh ke suara browser. */
+  var SUNYI = 'data:audio/wav;base64,UklGRsQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YaAAAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA';
+  var rekaman = { el: null, blob: {}, gagal: {}, simpan: null, aktif: null, gen: 0, izin: 0, diam: null, timer: 0, raf: 0, kunci: false };
+  function adaRekaman() { return typeof window.Audio === 'function' && typeof window.fetch === 'function' && !!(window.URL && URL.createObjectURL); }
+  function rekamanDiPanggung() {
+    return !!(suara.stage && SUMBER.some(function (s) { return s.rekaman && suara.stage.querySelector(s.sel); }));
+  }
+  /* Pemutaran sah = klip aktif milik generasi engine yang sedang berjalan.
+     Di luar itu elemen dibisukan dan setiap play() dari luar engine
+     (tombol media, headset, keyboard, notifikasi) langsung dijeda. */
+  function pemutaranSah() { return !!(rekaman.aktif && rekaman.izin && rekaman.izin === rekaman.gen); }
+  function tolakDariLuar() {
+    var el = rekaman.el;
+    if (!el || pemutaranSah() || el.getAttribute('src') === SUNYI) return;
+    el.muted = true;
+    try { el.pause(); } catch (e) {}
+    /* posisi kembali ke titik diam terakhir: keadaan engine tidak bergeser */
+    if (rekaman.diam != null && el.getAttribute('data-sumber')) { try { el.currentTime = rekaman.diam; } catch (e) {} }
+  }
+  function elemenRekaman() {
+    if (!rekaman.el) {
+      rekaman.el = new window.Audio();
+      rekaman.el.preload = 'auto';
+      rekaman.el.muted = true;
+      rekaman.el.addEventListener('play', tolakDariLuar);
+      rekaman.el.addEventListener('playing', tolakDariLuar);
+      /* tombol media sistem: hanya boleh melanjutkan klip yang sedang diputar engine */
+      try {
+        if (navigator.mediaSession && navigator.mediaSession.setActionHandler) {
+          navigator.mediaSession.setActionHandler('play', function () {
+            if (pemutaranSah()) { var p = rekaman.el.play(); if (p && p.catch) p.catch(function () {}); }
+          });
+        }
+      } catch (e) {}
+    }
+    return rekaman.el;
+  }
+  /* jeda dulu, baru bisu: urutan ini menjaga posisi berhenti tetap tepat */
+  function bisukan() {
+    rekaman.izin = 0;
+    var el = rekaman.el;
+    if (!el) return;
+    try { el.pause(); } catch (e) {}
+    el.muted = true;
+    rekaman.diam = el.getAttribute('data-sumber') ? el.currentTime : null;
+  }
+  /* berkas → URL blob, sekali per sesi; kegagalan tidak disimpan (bisa dicoba lagi) */
+  function muatBerkas(src) {
+    if (!rekaman.blob[src]) {
+      rekaman.blob[src] = window.fetch(src)
+        .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.blob(); })
+        .then(function (b) { return URL.createObjectURL(b); });
+      rekaman.blob[src].catch(function () { delete rekaman.blob[src]; });
+    }
+    return rekaman.blob[src];
+  }
+  function siapkanBerkas(daftar, folder) {
+    daftar.forEach(function (klip) { (klip || []).forEach(function (c) { muatBerkas(folder + c.audio).catch(function () {}); }); });
+  }
+  function catatGagal(src, e) {
+    if (rekaman.gagal[src]) return;
+    rekaman.gagal[src] = true;
+    try { console.warn('[PSGNarasi] rekaman tidak dapat diputar, segmen dibiarkan sunyi: ' + src + (e && e.message ? ' (' + e.message + ')' : '')); } catch (x) {}
+  }
+  function hentikanJaga() {
+    clearTimeout(rekaman.timer); rekaman.timer = 0;
+    if (rekaman.raf) { cancelAnimationFrame(rekaman.raf); rekaman.raf = 0; }
+  }
+  /* hentikan rekaman; posisi segmen yang sedang berjalan disimpan untuk RESUME */
+  function hentikanRekaman() {
+    rekaman.gen++;
+    hentikanJaga();
+    var el = rekaman.el, a = rekaman.aktif;
+    if (el) el.onended = null;
+    bisukan();
+    /* posisi dibaca sesudah jeda (paling tepat) untuk RESUME */
+    if (a) rekaman.simpan = { node: a.node, idx: a.idx, k: a.k, t: a.jalan && el ? el.currentTime : a.mulai };
+    rekaman.aktif = null;
+  }
+  /* lupakan posisi (scene berganti, layar ditutup, kembali ke siap) */
+  function lupakanRekaman() {
+    rekaman.simpan = null;
+    if (rekaman.el && rekaman.el.getAttribute('data-sumber')) { try { rekaman.el.currentTime = 0; rekaman.diam = 0; } catch (e) {} }
+  }
+  /* keluar dari cerita berekaman (CLOSE / kembali ke hub): lepaskan sumber
+     audio, jadi tidak ada yang bisa diputar lagi dari luar engine */
+  function lepasRekaman() {
+    lupakanRekaman();
+    var el = rekaman.el;
+    if (!el || !el.getAttribute('data-sumber')) return;
+    bisukan();
+    el.removeAttribute('data-sumber');
+    el.removeAttribute('src');
+    try { el.load(); } catch (e) {}
+  }
+  /* putar klip-klip satu segmen berurutan; selesai() dipanggil sekali saat
+     semua klip tuntas atau saat rekaman gagal (segmen itu sunyi) */
+  function putarSegmen(klip, folder, selesai) {
+    var g = ++rekaman.gen, k = 0, dari = null, s = rekaman.simpan;
+    hentikanJaga();
+    if (s && s.node === suara.node && s.idx === suara.idx) { k = s.k; dari = s.t; }
+    rekaman.simpan = null;
+    function tuntas() { if (g !== rekaman.gen) return; rekaman.aktif = null; bisukan(); selesai(); }
+    function gagal(src, e) { if (g !== rekaman.gen) return; catatGagal(src, e); rekaman.aktif = null; bisukan(); selesai(); }
+    function berikut() {
+      if (g !== rekaman.gen) return;
+      var c = klip[k];
+      if (!c) { tuntas(); return; }
+      var mulai = dari != null ? dari : c.start;
+      dari = null;
+      if (mulai >= c.end - 0.02) { k++; berikut(); return; }
+      var src = folder + c.audio;
+      rekaman.aktif = { node: suara.node, idx: suara.idx, k: k, mulai: mulai, jalan: false, berkas: c.audio };
+      muatBerkas(src).then(function (url) {
+        if (g !== rekaman.gen) return;
+        var el = elemenRekaman();
+        /* jaga akhir klip: timer kasar, lalu tiap frame di 250 md terakhir */
+        function jaga() {
+          if (g !== rekaman.gen) return;
+          hentikanJaga();
+          var sisa = c.end - el.currentTime;
+          if (sisa <= 0.012 || el.ended) {
+            el.onended = null;
+            bisukan();
+            k++; berikut(); return;
+          }
+          if (sisa > 0.25) rekaman.timer = setTimeout(jaga, (sisa - 0.2) * 1000 / (el.playbackRate || 1));
+          else rekaman.raf = requestAnimationFrame(jaga);
+        }
+        function main() {
+          if (g !== rekaman.gen) return;
+          try { el.currentTime = mulai; } catch (e) {}
+          el.onended = jaga;
+          rekaman.izin = g;
+          el.muted = false;
+          var p;
+          try { p = el.play(); } catch (e) { gagal(src, e); return; }
+          if (rekaman.aktif) rekaman.aktif.jalan = true;
+          if (p && typeof p.then === 'function') p.then(jaga, function (e) { gagal(src, e); }); else jaga();
+        }
+        if (el.getAttribute('data-sumber') === url && el.readyState >= 1) { main(); return; }
+        var siap = function () { el.removeEventListener('error', rusak); main(); };
+        var rusak = function () { el.removeEventListener('loadedmetadata', siap); gagal(src, el.error); };
+        el.addEventListener('loadedmetadata', siap, { once: true });
+        el.addEventListener('error', rusak, { once: true });
+        el.setAttribute('data-sumber', url);
+        el.src = url;
+      }, function (e) { gagal(src, e); });
+    }
+    berikut();
+  }
+  /* keadaan rekaman (baca saja; untuk pengujian & pemeriksaan manual) */
+  function keadaanRekaman() {
+    var el = rekaman.el, a = rekaman.aktif;
+    return { adegan: a ? suara.adegan : 0, segmen: a ? a.idx + 1 : 0, klip: a ? a.k + 1 : 0, berkas: a ? a.berkas : '',
+      waktu: el && el.getAttribute('data-sumber') ? Math.round(el.currentTime * 1000) / 1000 : 0,
+      main: !!(el && a && a.jalan && !el.paused && !el.ended) };
+  }
   function pecahKalimat(t) {
     return (String(t).match(/[^.!?]+[.!?]+/g) || [t]).map(function (x) { return x.trim(); }).filter(Boolean);
   }
@@ -663,12 +835,15 @@
     suara.bicara = false;
     clearTimeout(suara.jeda);
     if (adaTTS()) { try { window.speechSynthesis.cancel(); } catch (e) {} }
+    hentikanRekaman();
     tandaiSuara();
   }
   function ucapkan() {
-    if (!adaTTS() || !suara.nyala) return;
+    var rek = !!suara.klip;
+    if (!suara.nyala || !(rek ? adaRekaman() : adaTTS())) return;
     var g = ++suara.gen;
-    try { window.speechSynthesis.cancel(); } catch (e) {}
+    if (rek) hentikanRekaman();
+    else { try { window.speechSynthesis.cancel(); } catch (e) {} }
     suara.bicara = true;
     suara.mulai = true;
     tandaiSuara();
@@ -677,6 +852,10 @@
       if (suara.idx >= suara.kalimat.length) { suara.bicara = false; tandaiSuara(); return; }
       /* segmen berikutnya menunggu ketukan visualnya */
       if ((suara.butuh[suara.idx] || 0) > ketukSekarang()) { suara.bicara = false; tandaiSuara(); return; }
+      if (rek) {
+        putarSegmen(suara.klip[suara.idx] || [], suara.folder, function () { if (g !== suara.gen) return; suara.idx++; lanjut(); });
+        return;
+      }
       var u = new window.SpeechSynthesisUtterance(suara.kalimat[suara.idx]);
       u.lang = 'id-ID';
       var v = suaraIndonesia();
@@ -704,19 +883,33 @@
     if (node && node === suara.basi) node = null;
     if (!aktif || !node) {
       if (suara.node || suara.bicara) { diamkan(); suara.node = null; }
+      lepasRekaman();
       if (suara.moKetuk) suara.moKetuk.disconnect();
       return;
     }
     if (node !== suara.node) {
       diamkan();
+      lupakanRekaman();
       suara.node = node;
-      var isi = sumber.teks[(+node.getAttribute(sumber.attr) || 1) - 1] || '';
+      suara.adegan = +node.getAttribute(sumber.attr) || 1;
+      var isi = sumber.teks[suara.adegan - 1] || '';
       suara.gerbang = Array.isArray(isi);
       suara.kalimat = [];
       suara.butuh = [];
-      (suara.gerbang ? isi : [isi]).forEach(function (seg, j) {
-        pecahKalimat(seg).forEach(function (k) { suara.kalimat.push(k); suara.butuh.push(suara.gerbang ? j + 1 : 0); });
-      });
+      suara.klip = sumber.rekaman ? [] : null;
+      suara.folder = sumber.rekaman ? (sumber.rekaman.folder || '') : '';
+      if (sumber.rekaman) {
+        /* rekaman: satu satuan = satu segmen beserta klip-klipnya */
+        var klipAdegan = (sumber.rekaman.klip || [])[suara.adegan - 1] || [];
+        (suara.gerbang ? isi : [isi]).forEach(function (seg, j) {
+          suara.kalimat.push(seg); suara.butuh.push(suara.gerbang ? j + 1 : 0); suara.klip.push(klipAdegan[j] || []);
+        });
+        siapkanBerkas(suara.klip, suara.folder);
+      } else {
+        (suara.gerbang ? isi : [isi]).forEach(function (seg, j) {
+          pecahKalimat(seg).forEach(function (k) { suara.kalimat.push(k); suara.butuh.push(suara.gerbang ? j + 1 : 0); });
+        });
+      }
       if (suara.moKetuk) {
         suara.moKetuk.disconnect();
         if (suara.gerbang) suara.moKetuk.observe(node, { attributes: true, attributeFilter: ['data-ketuk'] });
@@ -730,7 +923,7 @@
       if (suara.nyala && !suara.bicara && !document.hidden && suara.idx < suara.kalimat.length) ucapkan();
     } else if (status === 'jeda' || status === 'siap') {
       if (suara.bicara) diamkan();
-      if (status === 'siap') { suara.idx = 0; suara.mulai = false; }
+      if (status === 'siap') { suara.idx = 0; suara.mulai = false; lupakanRekaman(); }
     }
     /* 'selesai': narasi yang masih berjalan dibiarkan sampai tuntas;
        narasi bersegmen yang sedang menunggu ketukan dilanjutkan */
@@ -739,7 +932,7 @@
     tandaiSuara();
   }
   function tandaiSuara() {
-    var ada = adaTTS();
+    var ada = adaTTS() || (adaRekaman() && rekamanDiPanggung());
     semua(document, '[data-kbs-suara]').forEach(function (b) {
       b.disabled = !ada;
       b.setAttribute('aria-pressed', ada && suara.nyala ? 'true' : 'false');
@@ -782,6 +975,23 @@
       }
     });
     window.addEventListener('pagehide', diamkan);
+    /* iPhone/iPad: elemen audio harus pernah diputar dari gestur pengguna
+       agar segmen berikutnya boleh berbunyi tanpa ketukan baru. Dibuka
+       sekali (bunyi sunyi) pada gestur pertama saat rekaman ada di panggung. */
+    var bukaKunci = function () {
+      if (rekaman.kunci || !adaRekaman() || !rekamanDiPanggung()) return;
+      rekaman.kunci = true;
+      var el = elemenRekaman();
+      if (el.getAttribute('data-sumber')) return;
+      var tutup = function () { if (!el.getAttribute('data-sumber')) { el.muted = true; try { el.pause(); } catch (e) {} } };
+      try {
+        el.src = SUNYI;
+        el.muted = false;   /* data SUNYI tidak berbunyi; tanpa bisu agar iOS menganggapnya putar sungguhan */
+        var p = el.play();
+        if (p && typeof p.then === 'function') p.then(tutup, tutup); else tutup();
+      } catch (e) { tutup(); }
+    };
+    ['pointerdown', 'touchend', 'keydown'].forEach(function (t) { document.addEventListener(t, bukaKunci, true); });
   }
   var IKON_SUARA = '<svg class="kbs-suara-ikon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">' +
     '<path class="kbs-suara-badan" d="M4 9.5h3.2L12 5.6v12.8l-4.8-3.9H4z"/>' +
@@ -796,14 +1006,18 @@
     return i === -1 ? header : header.slice(0, i) + tombolSuara() + header.slice(i);
   }
   window.PSGNarasi = {
-    daftar: function (sel, attr, teks) {
+    /* rekaman (opsional): { folder, klip } — klip[n-1][j] = larik klip
+       { audio, start, end } segmen j scene n; sumber ini memakai MP3 */
+    daftar: function (sel, attr, teks, rekaman) {
       if (SUMBER.some(function (s) { return s.sel === sel; })) return;
-      SUMBER.push({ sel: sel, attr: attr, teks: teks });
+      SUMBER.push({ sel: sel, attr: attr, teks: teks, rekaman: rekaman || null });
+      if (rekaman && adaRekaman()) (rekaman.klip || []).forEach(function (adegan) { siapkanBerkas(adegan || [], rekaman.folder || ''); });
     },
     pasang: pasangSuara,
     tombol: sisipTombolSuara,
     tombolHtml: tombolSuara,
-    tandai: tandaiSuara
+    tandai: tandaiSuara,
+    rekaman: keadaanRekaman
   };
 
   function adegan(opsi) {

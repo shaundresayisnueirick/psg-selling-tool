@@ -10,10 +10,12 @@
    - Kode program (src/*.js dan styles.css) : jaringan dulu juga, supaya kode
      tidak pernah tertinggal versi dibanding halamannya.
    - Gambar (assets, icons) : cache dulu supaya cepat, diperbarui diam-diam.
+   - Rekaman narasi (assets/narasi/*.mp3) : cache saja, tanpa unduh ulang
+     diam-diam (berkas besar yang tidak berubah tanpa kenaikan VERSI).
    - Hanya jawaban yang benar-benar berhasil (status 200) yang disimpan,
      sehingga halaman error tidak pernah ikut tersimpan. */
 
-const VERSI = 'insurance-hub-v112.0.0';
+const VERSI = 'insurance-hub-v114.0.0';
 
 /* Semua berkas inti ikut disimpan sejak pemasangan, supaya aplikasi tetap
    utuh walaupun kunjungan pertama terputus di tengah jalan.
@@ -95,19 +97,34 @@ const BERKAS = [
   './src/sales-idea-player.js?v=107',
   './src/psg-karakter.js?v=107',
   './src/sales-idea-retirement.js?v=107',
-  './src/sales-idea-keranjang.js?v=107',
+  './src/sales-idea-keranjang.js?v=114',
   './src/sales-idea-education.js?v=108',
   './src/sales-idea-jari.js?v=107',
   './src/sales-idea-asset.js?v=109',
   './src/sales-idea-lanjut.js?v=110',
-  './src/sales-idea-singapura.js?v=112',
+  './src/sales-idea-singapura-audio.js?v=114',
+  './src/sales-idea-singapura.js?v=114',
   './assets/logo-psg.png',
   './assets/logo-psg-terang.png',
   './icons/ikon-192.png',
   './icons/ikon-512.png',
   './icons/ikon-192-maskable.png',
   './icons/ikon-512-maskable.png',
-  './icons/ikon-apple-180.png'
+  './icons/ikon-apple-180.png',
+  /* rekaman narasi Bekerja di Singapura (voice Bian): hanya 13 berkas yang dipakai */
+  './assets/narasi/singapore/S01-01.mp3',
+  './assets/narasi/singapore/S01-02.mp3',
+  './assets/narasi/singapore/S01-03.mp3',
+  './assets/narasi/singapore/S02-01.mp3',
+  './assets/narasi/singapore/S02-02.mp3',
+  './assets/narasi/singapore/S05-01.mp3',
+  './assets/narasi/singapore/S05-02.mp3',
+  './assets/narasi/singapore/S06-01.mp3',
+  './assets/narasi/singapore/S06-02.mp3',
+  './assets/narasi/singapore/S07-01.mp3',
+  './assets/narasi/singapore/S07-02.mp3',
+  './assets/narasi/singapore/S08-01.mp3',
+  './assets/narasi/singapore/S08-02.mp3'
 ];
 
 self.addEventListener('install', e => {
@@ -168,9 +185,13 @@ self.addEventListener('fetch', e => {
     return;
   }
 
+  // Rekaman narasi: berkas besar yang tetap sama, cukup dari cache (tanpa unduh ulang).
+  const rekaman = url.pathname.indexOf('/assets/narasi/') !== -1;
+
   // Gambar dan ikon: tampilkan dari cache (cepat), perbarui di latar belakang.
   e.respondWith(
     caches.match(req).then(tersimpan => {
+      if (tersimpan && rekaman) return tersimpan;
       const dariJaringan = fetch(req)
         .then(res => {
           if (bolehDisimpan(res)) {
