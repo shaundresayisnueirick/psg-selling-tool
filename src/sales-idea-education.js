@@ -959,7 +959,7 @@
     var langkah = Array.isArray(o.langkah) ? o.langkah : [];
     N = window.PSGNarasi || null;
     if (N) {
-      N.daftar('.eps', 'data-eps', NARASI);
+      N.daftar('.eps', 'data-eps', NARASI, N.rekamanDari ? N.rekamanDari(window.PSGEducationAudio, NARASI) : null);
       N.pasang();
       o = Object.assign({}, o, { header: N.tombol(o.header || '') });
     }

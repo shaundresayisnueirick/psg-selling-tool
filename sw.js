@@ -10,12 +10,12 @@
    - Kode program (src/*.js dan styles.css) : jaringan dulu juga, supaya kode
      tidak pernah tertinggal versi dibanding halamannya.
    - Gambar (assets, icons) : cache dulu supaya cepat, diperbarui diam-diam.
-   - Rekaman narasi (assets/narasi/*.mp3) : cache saja, tanpa unduh ulang
+   - Rekaman narasi (assets/narasi/<cerita>/*.mp3) : cache saja, tanpa unduh ulang
      diam-diam (berkas besar yang tidak berubah tanpa kenaikan VERSI).
    - Hanya jawaban yang benar-benar berhasil (status 200) yang disimpan,
      sehingga halaman error tidak pernah ikut tersimpan. */
 
-const VERSI = 'insurance-hub-v114.0.0';
+const VERSI = 'insurance-hub-v116.0.0';
 
 /* Semua berkas inti ikut disimpan sejak pemasangan, supaya aplikasi tetap
    utuh walaupun kunjungan pertama terputus di tengah jalan.
@@ -96,11 +96,17 @@ const BERKAS = [
   './src/cetak-orientasi.js',
   './src/sales-idea-player.js?v=107',
   './src/psg-karakter.js?v=107',
-  './src/sales-idea-retirement.js?v=107',
-  './src/sales-idea-keranjang.js?v=114',
-  './src/sales-idea-education.js?v=108',
-  './src/sales-idea-jari.js?v=107',
-  './src/sales-idea-asset.js?v=109',
+  './src/sales-idea-retirement-audio.js?v=115',
+  './src/sales-idea-retirement.js?v=115',
+  './src/sales-idea-keranjang-audio.js?v=115',
+  './src/sales-idea-keranjang.js?v=115',
+  './src/sales-idea-education-audio.js?v=115',
+  './src/sales-idea-education.js?v=115',
+  './src/sales-idea-jari-audio.js?v=116',
+  './src/sales-idea-jari-alasan-audio.js?v=116',
+  './src/sales-idea-jari.js?v=116',
+  './src/sales-idea-asset-audio.js?v=116',
+  './src/sales-idea-asset.js?v=116',
   './src/sales-idea-lanjut.js?v=110',
   './src/sales-idea-singapura-audio.js?v=114',
   './src/sales-idea-singapura.js?v=114',
@@ -124,7 +130,85 @@ const BERKAS = [
   './assets/narasi/singapore/S07-01.mp3',
   './assets/narasi/singapore/S07-02.mp3',
   './assets/narasi/singapore/S08-01.mp3',
-  './assets/narasi/singapore/S08-02.mp3'
+  './assets/narasi/singapore/S08-02.mp3',
+  /* rekaman narasi Retirement Planning (voice Bian): 6 berkas */
+  './assets/narasi/retirement/retirement-S01-01.mp3',
+  './assets/narasi/retirement/retirement-S02-01.mp3',
+  './assets/narasi/retirement/retirement-S03-01.mp3',
+  './assets/narasi/retirement/retirement-S04-01.mp3',
+  './assets/narasi/retirement/retirement-S05-01.mp3',
+  './assets/narasi/retirement/retirement-S06-01.mp3',
+  /* rekaman narasi Keranjang Kehidupan (voice Bian): 10 berkas */
+  './assets/narasi/keranjang/keranjang-S01-01.mp3',
+  './assets/narasi/keranjang/keranjang-S02-01.mp3',
+  './assets/narasi/keranjang/keranjang-S03-01.mp3',
+  './assets/narasi/keranjang/keranjang-S04-01.mp3',
+  './assets/narasi/keranjang/keranjang-S05-01.mp3',
+  './assets/narasi/keranjang/keranjang-S06-01.mp3',
+  './assets/narasi/keranjang/keranjang-S07-01.mp3',
+  './assets/narasi/keranjang/keranjang-S08-01.mp3',
+  './assets/narasi/keranjang/keranjang-S09-01.mp3',
+  './assets/narasi/keranjang/keranjang-S10-01.mp3',
+  /* rekaman narasi Education Planning (voice Bian): 27 berkas */
+  './assets/narasi/education/education-S01-01.mp3',
+  './assets/narasi/education/education-S01-02.mp3',
+  './assets/narasi/education/education-S01-03.mp3',
+  './assets/narasi/education/education-S02-01.mp3',
+  './assets/narasi/education/education-S02-02.mp3',
+  './assets/narasi/education/education-S02-03.mp3',
+  './assets/narasi/education/education-S03-01.mp3',
+  './assets/narasi/education/education-S03-02.mp3',
+  './assets/narasi/education/education-S03-03.mp3',
+  './assets/narasi/education/education-S04-01.mp3',
+  './assets/narasi/education/education-S04-02.mp3',
+  './assets/narasi/education/education-S05-01.mp3',
+  './assets/narasi/education/education-S05-02.mp3',
+  './assets/narasi/education/education-S05-03.mp3',
+  './assets/narasi/education/education-S06-01.mp3',
+  './assets/narasi/education/education-S06-02.mp3',
+  './assets/narasi/education/education-S06-03.mp3',
+  './assets/narasi/education/education-S07-01.mp3',
+  './assets/narasi/education/education-S07-02.mp3',
+  './assets/narasi/education/education-S08-01.mp3',
+  './assets/narasi/education/education-S08-02.mp3',
+  './assets/narasi/education/education-S09-01.mp3',
+  './assets/narasi/education/education-S09-02.mp3',
+  './assets/narasi/education/education-S09-03.mp3',
+  './assets/narasi/education/education-S09-04.mp3',
+  './assets/narasi/education/education-S10-01.mp3',
+  './assets/narasi/education/education-S10-02.mp3',
+  /* rekaman narasi 10 Jari (BAB 1–2) (voice Bian): 12 berkas */
+  './assets/narasi/jari/jari-S01-01.mp3',
+  './assets/narasi/jari/jari-S01-02.mp3',
+  './assets/narasi/jari/jari-S01-03.mp3',
+  './assets/narasi/jari/jari-S01-04.mp3',
+  './assets/narasi/jari/jari-S01-05.mp3',
+  './assets/narasi/jari/jari-S01-06.mp3',
+  './assets/narasi/jari/jari-S01-07.mp3',
+  './assets/narasi/jari/jari-S02-01.mp3',
+  './assets/narasi/jari/jari-S03-01.mp3',
+  './assets/narasi/jari/jari-S04-01.mp3',
+  './assets/narasi/jari/jari-S05-01.mp3',
+  './assets/narasi/jari/jari-S06-01.mp3',
+  /* rekaman narasi 10 Jari (BAB 3: 3 alasan) (voice Bian): 3 berkas */
+  './assets/narasi/jari-alasan/jari-alasan-S01-01.mp3',
+  './assets/narasi/jari-alasan/jari-alasan-S02-01.mp3',
+  './assets/narasi/jari-alasan/jari-alasan-S03-01.mp3',
+  /* rekaman narasi Asset Creation (voice Bian): 14 berkas */
+  './assets/narasi/asset/asset-S01-01.mp3',
+  './assets/narasi/asset/asset-S01-02.mp3',
+  './assets/narasi/asset/asset-S01-03.mp3',
+  './assets/narasi/asset/asset-S02-01.mp3',
+  './assets/narasi/asset/asset-S02-02.mp3',
+  './assets/narasi/asset/asset-S03-01.mp3',
+  './assets/narasi/asset/asset-S03-02.mp3',
+  './assets/narasi/asset/asset-S04-01.mp3',
+  './assets/narasi/asset/asset-S04-02.mp3',
+  './assets/narasi/asset/asset-S05-01.mp3',
+  './assets/narasi/asset/asset-S05-02.mp3',
+  './assets/narasi/asset/asset-S05-03.mp3',
+  './assets/narasi/asset/asset-S06-01.mp3',
+  './assets/narasi/asset/asset-S06-02.mp3'
 ];
 
 self.addEventListener('install', e => {

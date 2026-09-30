@@ -511,7 +511,7 @@
     var langkah = Array.isArray(o.langkah) ? o.langkah : [];
     N = window.PSGNarasi || null;
     if (N) {
-      N.daftar('.rps', 'data-rps', NARASI);
+      N.daftar('.rps', 'data-rps', NARASI, N.rekamanDari ? N.rekamanDari(window.PSGRetirementAudio, NARASI) : null);
       N.pasang();
       o = Object.assign({}, o, { header: N.tombol(o.header || '') });
     }

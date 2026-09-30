@@ -53,15 +53,28 @@
     'Pertanyaan kelima: kalau ingin mendapatkan uang besar, maunya pakai kantong sendiri atau kantong orang lain?'
   ];
   var NARASI_ALASAN = [
-    'Alasan pertama adalah bukti nyata. Bukti itu sudah banyak di sekitar kita. Kita sering mendengar teman, keluarga, kenalan, atau tokoh publik mengalami sakit berat atau musibah dan membutuhkan bantuan. Artinya, risiko itu bukan sekadar teori.',
+    'Alasan kenapa orang memiliki asuransi.\n\nPertama adalah bukti nyata. Bukti itu sudah banyak di sekitar kita. Kita sering mendengar teman, keluarga, kenalan, atau tokoh publik mengalami sakit berat atau musibah dan membutuhkan bantuan. Artinya, risiko itu bukan sekadar teori.',
     'Alasan kedua: tidak ada pilihan. Ketika risiko besar terjadi, dana besar tetap harus tersedia. Menabung membutuhkan waktu, sementara musibah tidak menunggu dana terkumpul. Kalau musibah datang sebelum dana cukup, kita bisa terpaksa meminjam, meminta bantuan, atau menjual harta. Jadi pertanyaannya: bagaimana menyiapkan dana besar sebelum risiko terjadi?',
     'Alasan ketiga adalah cinta keluarga. Asuransi dapat diposisikan sebagai salah satu bentuk persiapan, agar keluarga tetap memiliki dukungan finansial ketika kita sudah tidak ada. Kita tentu ingin membahagiakan anak. Pertanyaannya: kita ingin membahagiakan anak selama seumur hidup kita, atau seumur hidup anak kita? Kalau punya kesempatan menyayangi dan membahagiakan anak, kita bisa mempersiapkannya sejak sekarang.'
   ];
+  /* Rekaman narasi (manifest voice Bian, bila dimuat): lama satu segmen
+     dalam md + jeda kecil, dipakai sebagai batas minimum timeline supaya
+     visual tidak selesai sebelum narasinya selesai. 0 = tanpa rekaman. */
+  var JEDA_REKAMAN = 300;
+  function lamaRekaman(manifest, id) {
+    var klip = manifest && manifest.segmen && manifest.segmen[id];
+    if (!klip || !klip.length) return 0;
+    return Math.round(klip.reduce(function (t, c) { return t + (c.end - c.start); }, 0) * 1000) + JEDA_REKAMAN;
+  }
   /* Ketukan BAB 1: durasi tiap ketukan mengikuti perkiraan lama narasinya
-     (±70 md per huruf pada kecepatan 0,96) plus jeda, minimal 4,5 detik. */
+     (±70 md per huruf pada kecepatan 0,96) plus jeda, minimal 4,5 detik,
+     dan tidak lebih pendek dari rekaman segmennya. */
   var KETUK = (function () {
     var mulai = [], t = 0;
-    NARASI_BAB1.forEach(function (seg) { mulai.push(t); t += Math.max(4500, Math.round(seg.length * 70) + 900); });
+    NARASI_BAB1.forEach(function (seg, j) {
+      mulai.push(t);
+      t += Math.max(4500, Math.round(seg.length * 70) + 900, lamaRekaman(window.PSGJariAudio, 'S01-' + (j < 9 ? '0' : '') + (j + 1)));
+    });
     return { mulai: mulai, akhir: t };
   })();
 
@@ -383,8 +396,8 @@
     if (langkah.length < 10) return [];
     N = window.PSGNarasi || null;
     if (N) {
-      N.daftar('.jps', 'data-jps', NARASI_JARI);
-      N.daftar('[data-jps-alasan]', 'data-jps-alasan', NARASI_ALASAN);
+      N.daftar('.jps', 'data-jps', NARASI_JARI, N.rekamanDari ? N.rekamanDari(window.PSGJariAudio, NARASI_JARI) : null);
+      N.daftar('[data-jps-alasan]', 'data-jps-alasan', NARASI_ALASAN, N.rekamanDari ? N.rekamanDari(window.PSGJariAlasanAudio, NARASI_ALASAN) : null);
       N.pasang();
       o.header = N.tombol(o.header || '');
     }
@@ -413,7 +426,13 @@
             id: 'jari-alasan-' + (k + 1),
             siapDi: 'akhir',
             render: function (stage) { a.render(stage, k); tandaiAlasan(stage, k); },
-            animate: a.animate
+            /* alasan 1 (teks final dengan kalimat pembuka): jam scene minimal
+               selama rekamannya, supaya timeline tidak selesai sebelum narasi */
+            animate: k === 0 ? function (tl, stage) {
+              if (typeof a.animate === 'function') a.animate(tl, stage);
+              var kartu = satu(stage, '[data-jps-alasan]'), ms = lamaRekaman(window.PSGJariAlasanAudio, 'S01-01');
+              if (kartu && ms) tl.add(kartu, [], { duration: ms });
+            } : a.animate
           });
         })(k);
       }

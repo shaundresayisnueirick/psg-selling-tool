@@ -460,12 +460,12 @@ function cek(ok, label, info) {
       await c6.pg.click('[data-si-hub]'); await c6.pg.waitForTimeout(300);
       const e6 = await luar(c6.pg); const h6 = await c6.pg.evaluate(() => window.SalesIdea10Jari.keadaan().mode);
       cek(aman(e6) && !e6.sumber && h6 === 'hub', 'E6: keluar ke hub Sales Idea — sumber dilepas; play() dari luar tidak berbunyi', { e6, h6 });
-      /* E7: Sales Idea lain tetap memakai speechSynthesis */
-      await c6.pg.evaluate(() => { window.__tts.log = []; document.querySelector('[data-si-choice="basket"]').click(); });
+      /* E7: Sales Idea lain tidak mewarisi audio Singapura (Keranjang memutar rekamannya sendiri) */
+      await c6.pg.evaluate(() => { window.__tts.log = []; window.__rek.klip = []; document.querySelector('[data-si-choice="basket"]').click(); });
       await c6.pg.waitForTimeout(400); await c6.pg.click('#siPlay');
-      const ucap = await tunggu(c6.pg, () => window.__tts.log.some((x) => x.t === 'mulai'), 8000);
-      const e7 = await c6.pg.evaluate(() => ({ lang: [...new Set(window.__tts.log.filter((x) => x.t === 'mulai').map((x) => x.lang))].join(), audio: window.PSGNarasi.rekaman().main, el: window.__rek.el ? { paused: window.__rek.el.paused, sumber: !!window.__rek.el.getAttribute('src') } : null }));
-      cek(ucap && e7.lang === 'id-ID' && !e7.audio && (!e7.el || (e7.el.paused && !e7.el.sumber)), 'E7: Keranjang tetap dinarasikan speechSynthesis (id-ID), elemen audio Singapura diam', e7);
+      const ucap = await tungguMain(c6.pg, 1, 8000); await c6.pg.waitForTimeout(400);
+      const e7 = await c6.pg.evaluate(() => ({ tts: window.__tts.log.filter((x) => x.t === 'mulai').length, r: window.PSGNarasi.rekaman(), klip: window.__rek.klip.map((x) => x.berkas) }));
+      cek(ucap && e7.tts === 0 && e7.r.berkas === 'keranjang-S01-01.mp3' && e7.klip.length > 0 && e7.klip.every((b) => /^keranjang-/.test(b)), 'E7: Keranjang memutar rekamannya sendiri (keranjang-S01-01.mp3), tanpa klip Singapura, tanpa speechSynthesis', e7);
       await c6.ctx.close();
     }
 

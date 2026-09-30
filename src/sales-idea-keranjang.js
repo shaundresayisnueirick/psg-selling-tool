@@ -717,6 +717,16 @@
   function siapkanBerkas(daftar, folder) {
     daftar.forEach(function (klip) { (klip || []).forEach(function (c) { muatBerkas(folder + c.audio).catch(function () {}); }); });
   }
+  /* manifest audio { folder, segmen: { 'SNN-MM': [klip] } } → { folder, klip }
+     mengikuti bentuk naskah (scene string = satu segmen); null bila manifest
+     tidak dimuat, sehingga narasi kembali ke suara browser */
+  function rekamanDari(manifest, teks) {
+    if (!manifest || !manifest.segmen || !Array.isArray(teks)) return null;
+    var dua = function (n) { return (n < 10 ? '0' : '') + n; };
+    return { folder: manifest.folder || '', klip: teks.map(function (isi, i) {
+      return (Array.isArray(isi) ? isi : [isi]).map(function (_, j) { return manifest.segmen['S' + dua(i + 1) + '-' + dua(j + 1)] || []; });
+    }) };
+  }
   function catatGagal(src, e) {
     if (rekaman.gagal[src]) return;
     rekaman.gagal[src] = true;
@@ -1017,13 +1027,23 @@
     tombol: sisipTombolSuara,
     tombolHtml: tombolSuara,
     tandai: tandaiSuara,
-    rekaman: keadaanRekaman
+    rekaman: keadaanRekaman,
+    rekamanDari: rekamanDari
   };
+
+  /* narasi Keranjang: rekaman voice Bian bila manifestnya dimuat */
+  function pasangRekamanKeranjang() {
+    var s = SUMBER[0];
+    if (s.rekaman) return;
+    s.rekaman = rekamanDari(window.PSGKeranjangAudio, NARASI);
+    if (s.rekaman && adaRekaman()) s.rekaman.klip.forEach(function (a) { siapkanBerkas(a || [], s.rekaman.folder); });
+  }
 
   function adegan(opsi) {
     var o = opsi || {};
     var langkah = Array.isArray(o.langkah) ? o.langkah : [];
     pasangSuara();
+    pasangRekamanKeranjang();
     return langkah.map(function (step, i) {
       var n = i + 1;
       return {

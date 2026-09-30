@@ -28,8 +28,9 @@
 
    Narasi: narator bersama (window.PSGNarasi). Naskah tiap scene
    berupa segmen; tiap segmen punya satu ketukan visual. Durasi
-   ketukan = maks(kebutuhan gerak, perkiraan lama narasi segmennya),
-   jadi timeline tetap berputar selama narasi berjalan dan PAUSE /
+   ketukan = maks(kebutuhan gerak, perkiraan lama narasi segmennya,
+   lama rekamannya bila ada), jadi timeline tetap berputar selama
+   narasi berjalan dan PAUSE /
    RESUME berlaku sepanjang narasi. data-ketuk pada node scene memberi
    tahu narator ketukan mana yang sudah mulai.
 
@@ -69,9 +70,9 @@
     ['Pilihan kedua, tanpa uang muka. Seluruh 5 miliar rupiah perlu dibiayai.',
       'Dengan ilustrasi bunga 7 persen selama 20 tahun, cicilannya sekitar 39,5 juta rupiah per bulan.'],
     ['Materi juga memperkenalkan pilihan ketiga: pendekatan yang berbeda untuk menciptakan aset baru, dengan beban bulanan yang lebih ringan.',
-      'Contoh dalam materi menyebut sekitar 6 juta rupiah per bulan, dengan target aset 5 miliar rupiah.',
+      'Contoh dalam materi menyebut sekitar Rp6 juta per bulan dicicil selama 20 tahun dengan target aset Rp5 miliar.',
       'Angka ini adalah contoh dari materi dengan mekanisme yang berbeda, dan bukan simulasi KPR dengan asumsi yang sama.'],
-    ['Jadi, inti percakapannya: bagaimana seseorang yang sudah mapan dapat membangun aset baru.',
+    ['Jadi, inti percakapannya, bagaimana seseorang dapat membangun aset baru dan menyiapkan warisan dengan cara lebih simpel, ringan, dan pasti.',
       'Aset baru ini nantinya dapat dipersiapkan sebagai warisan untuk anak.']
   ];
 
@@ -97,6 +98,16 @@
     return Math.round(diucapkan(t).length * MD_HURUF) + kalimat * JEDA_KALIMAT;
   }
   function lamaSegmen(t) { return lamaBicara(t) + JEDA_SEGMEN; }
+  /* Rekaman narasi (manifest voice Bian, bila dimuat): lama segmen SNN-MM
+     dalam md + jeda kecil, dipakai sebagai batas minimum ketukan supaya
+     visual tidak berpindah sebelum narasinya selesai. 0 = tanpa rekaman. */
+  var JEDA_REKAMAN = 300;
+  function lamaRekaman(n, j) {
+    var dua = function (x) { return (x < 10 ? '0' : '') + x; };
+    var m = window.PSGAssetAudio, klip = m && m.segmen && m.segmen['S' + dua(n) + '-' + dua(j)];
+    if (!klip || !klip.length) return 0;
+    return Math.round(klip.reduce(function (t, c) { return t + (c.end - c.start); }, 0) * 1000) + JEDA_REKAMAN;
+  }
 
   /* ---------------- utilitas ---------------- */
   function esc(s) {
@@ -825,7 +836,7 @@
   function ketukan(n) {
     var sc = S[n] ? n : 1, naskah = NARASI[sc - 1] || [], vis = S[sc].ketuk || [], B = [], D = [], t = 0;
     naskah.forEach(function (seg, j) {
-      var d = Math.max(vis[j] || 0, lamaSegmen(seg));
+      var d = Math.max(vis[j] || 0, lamaSegmen(seg), lamaRekaman(sc, j + 1));
       B.push(t); D.push(d); t += d;
     });
     return {
@@ -844,7 +855,7 @@
     var langkah = Array.isArray(o.langkah) ? o.langkah : [];
     N = window.PSGNarasi || null;
     if (N) {
-      N.daftar('.acs', 'data-acs', NARASI);
+      N.daftar('.acs', 'data-acs', NARASI, N.rekamanDari ? N.rekamanDari(window.PSGAssetAudio, NARASI) : null);
       N.pasang();
       o = Object.assign({}, o, { header: N.tombol(o.header || '') });
     }
