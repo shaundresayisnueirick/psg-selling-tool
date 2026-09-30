@@ -251,12 +251,13 @@
     return '<g class="sgs-kursi">' + balok(o, u + 6 * s, v + 6 * s, 4 * s, 4 * s, 12 * s, 'kursi') + balok(o, u, v, 16 * s, 16 * s, 3 * s, 'kursi', 12 * s) +
       balok(o, u, v + 13 * s, 16 * s, 3 * s, 18 * s, 'kursi', 15 * s) + '</g>';
   }
-  /* laptop di meja: alas + bagian belakang layar (menghadap pemakai di belakang meja) + cahaya layar */
+  /* laptop di meja untuk pemakai di belakang meja: engsel & tutup di tepi depan (v),
+     alas/keyboard mengarah ke pemakai (v..v+12); penonton melihat bagian belakang layar + cahaya layar */
   function laptop(o, u, v, z, kls) {
-    var c = P(o, u + 11, v + 10, z + 18);
+    var c = P(o, u + 11, v + 2, z + 18);
     return '<g class="sgs-laptop ' + (kls || '') + '">' + poli(bidZ(o, z + 0.3, u, u + 22, v, v + 12), 'sgs-laptop-alas') +
       '<ellipse class="sgs-laptop-sinar" cx="' + f(c[0]) + '" cy="' + f(c[1]) + '" rx="20" ry="14" fill="url(#sgsDingin)"/>' +
-      poli(bidV(o, v + 12, u, u + 22, z, z + 15), 'sgs-laptop-tutup-b') + '<circle class="sgs-laptop-logo" cx="' + f(P(o, u + 11, v + 12, z + 8)[0]) + '" cy="' + f(P(o, u + 11, v + 12, z + 8)[1]) + '" r="1.6"/></g>';
+      poli(bidV(o, v, u, u + 22, z, z + 15), 'sgs-laptop-tutup-b') + '<circle class="sgs-laptop-logo" cx="' + f(P(o, u + 11, v, z + 8)[0]) + '" cy="' + f(P(o, u + 11, v, z + 8)[1]) + '" r="1.6"/></g>';
   }
 
   /* ---------------- teks & label ---------------- */
