@@ -4,12 +4,13 @@ Alat developer, **bukan** bagian runtime PWA: tidak dimuat `index.html` / `sw.js
 dan tidak mengubah berkas production. Cerita: **Asset Creation** (`asset` 16:9 dan
 `asset-portrait` 9:16 untuk HP),
 **Retirement Planning** (`retirement` 16:9 dan `retirement-portrait` 9:16 untuk HP),
-dan **Keranjang Kehidupan** (`basket` 16:9 dan `basket-portrait` 9:16 untuk HP).
+**Keranjang Kehidupan** (`basket` 16:9 dan `basket-portrait` 9:16 untuk HP),
+dan **Education Planning** (`education` 16:9 dan `education-portrait` 9:16 untuk HP).
 
 ```sh
-node tools/video/render-video.mjs --cerita asset|asset-portrait|retirement|retirement-portrait|basket|basket-portrait --out <folder-di-luar-repo>
+node tools/video/render-video.mjs --cerita asset|asset-portrait|retirement|retirement-portrait|basket|basket-portrait|education|education-portrait --out <folder-di-luar-repo>
 node tools/video/render-video.mjs --cek <folder>/<cerita>.json   # render masih segar?
-node tests/sales-idea-video.test.js [--cerita asset|asset-portrait|retirement|retirement-portrait|basket|basket-portrait] [--hasil <folder>]
+node tests/sales-idea-video.test.js [--cerita asset|asset-portrait|retirement|retirement-portrait|basket|basket-portrait|education|education-portrait] [--hasil <folder>]
 ```
 
 Opsi: `--fps 30` (bawaan), `--jeda-scene <md>` (bawaan 0 = tanpa timing baru),
@@ -24,9 +25,11 @@ render: `assets/video/asset-terang.mp4`, `asset-gelap.mp4`,
 `asset-terang-portrait.mp4`, `asset-gelap-portrait.mp4`,
 `retirement-terang.mp4`, `retirement-gelap.mp4`, `retirement-terang-portrait.mp4`,
 `retirement-gelap-portrait.mp4`, `basket-terang.mp4`,
-`basket-gelap.mp4`, `basket-terang-portrait.mp4`, dan `basket-gelap-portrait.mp4`.
+`basket-gelap.mp4`, `basket-terang-portrait.mp4`, `basket-gelap-portrait.mp4`,
+`education-terang.mp4`, `education-gelap.mp4`, `education-terang-portrait.mp4`, dan
+`education-gelap-portrait.mp4`.
 
-## 9:16 untuk HP (`basket-portrait`, `retirement-portrait`, `asset-portrait`)
+## 9:16 untuk HP (`basket-portrait`, `retirement-portrait`, `asset-portrait`, `education-portrait`)
 
 Halaman render 360×640 px CSS dengan skala piksel 2 → video 720×1280: tata letak
 responsif PWA versi ponsel (panggung di atas, teks di bawah), bukan video 16:9 yang
@@ -49,6 +52,12 @@ panggung mengisi sisa; viewBox panggung dipaskan `paskan()` sehingga seluruh are
 inti tetap terlihat). Padding bawah kartu teks dibuat lebih besar sebagai zona
 watermark, karena baris terakhir S2 memanjang hampir selebar kartu; logo & watermark
 sama dengan Retirement.
+
+`education-portrait` memakai pola `asset-portrait` (CSS, logo & watermark sama). Khusus
+S6, baris chip setoran di kartu teks disembunyikan: angka yang sama sudah tampil di label
+panggung dan di teks isi, dan tanpa itu panggung S6 menyusut ke ±240 px CSS (label
+panggung ±8 px). Durasi Education mengikuti timeline PWA (perkiraan 80 md/huruf, lebih
+panjang dari rekaman di semua scene), jadi tiap scene berakhir dengan jeda tanpa suara.
 
 ## `--cek`: render masih segar?
 

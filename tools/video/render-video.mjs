@@ -4,10 +4,10 @@
    ------------------------------------------------------------
    Bukan bagian runtime PWA: tidak dimuat index.html / sw.js dan tidak
    mengubah berkas production. Cerita: Asset Creation, Retirement Planning,
-   dan Keranjang Kehidupan (16:9; 9:16 untuk HP: asset-portrait,
-   retirement-portrait, basket-portrait).
+   Keranjang Kehidupan, dan Education Planning (16:9; 9:16 untuk HP:
+   asset-portrait, retirement-portrait, basket-portrait, education-portrait).
 
-     node tools/video/render-video.mjs --cerita asset|asset-portrait|retirement|retirement-portrait|basket|basket-portrait [--out <folder>]
+     node tools/video/render-video.mjs --cerita asset|asset-portrait|retirement|retirement-portrait|basket|basket-portrait|education|education-portrait [--out <folder>]
           [--fps 30] [--jeda-scene 0] [--ffmpeg <path>] [--tanpa-encode]
      node tools/video/render-video.mjs --cek <folder>/asset.json
 
@@ -89,6 +89,18 @@ const CERITA = {
     input: ['index.html', 'src/styles.css', 'src/branding.css', 'src/sales-idea-player.js', 'src/sales-idea-player.css',
       'src/sales-idea.js', 'src/sales-idea-keranjang.js', 'src/psg-karakter.js', 'src/psg-karakter.css',
       'src/sales-idea-retirement.js', 'src/sales-idea-retirement.css', 'src/sales-idea-retirement-audio.js'],
+    css: [
+      '#layarSalesIdea .si-footer{display:none!important}',
+      '#layarSalesIdea .si-back-hub,#layarSalesIdea .si-close,#layarSalesIdea [data-kbs-suara]{visibility:hidden!important}',
+      '#layarSalesIdea .sil-kartu{display:none!important}'
+    ].join('\n')
+  },
+  education: {
+    judul: 'Education Planning', pilih: 'education', sel: '.eps', attr: 'data-eps', jumlah: 10,
+    manifest: 'src/sales-idea-education-audio.js', glob: 'PSGEducationAudio',
+    input: ['index.html', 'src/styles.css', 'src/branding.css', 'src/sales-idea-player.js', 'src/sales-idea-player.css',
+      'src/sales-idea.js', 'src/sales-idea-keranjang.js', 'src/psg-karakter.js', 'src/psg-karakter.css',
+      'src/sales-idea-education.js', 'src/sales-idea-education.css', 'src/sales-idea-education-audio.js'],
     css: [
       '#layarSalesIdea .si-footer{display:none!important}',
       '#layarSalesIdea .si-back-hub,#layarSalesIdea .si-close,#layarSalesIdea [data-kbs-suara]{visibility:hidden!important}',
@@ -190,6 +202,35 @@ CERITA['asset-portrait'] = Object.assign({}, CERITA.asset, {
   ].join('\n'),
   /* sama dengan retirement-portrait; watermark diukur tidak menyentuh teks yang
      terlihat di 6 scene, termasuk saat teks masuk */
+  branding: {
+    logo: 'assets/logo-psg.png', logoTinggi: 44, logoKanan: 24, logoAtas: 26,
+    watermarkLebar: 116, watermarkOpasitas: 0.06, watermarkKanan: 40, watermarkBawah: 34
+  }
+});
+
+/* Education Planning 9:16 (720×1280) untuk HP: pola asset-portrait (panel teks mengikuti
+   isi, panggung mengisi sisa layar, padding bawah kartu = zona watermark). Khusus S6:
+   baris chip setoran di kartu teks disembunyikan — angka yang sama sudah tampil di
+   label panggung dan di teks isi — agar panggung S6 tidak menyusut ke ±240 px (label
+   panggung ±8 px). Scene, timing, narasi, dan audio sama dengan 16:9. */
+CERITA['education-portrait'] = Object.assign({}, CERITA.education, {
+  judul: 'Education Planning (9:16)',
+  layar: { lebar: 360, tinggi: 640, skala: 2 },
+  css: CERITA.education.css + '\n' + [
+    '#layarSalesIdea .eps > .si-presentation-topbar .si-back-hub,#layarSalesIdea .eps > .si-presentation-topbar .si-close,#layarSalesIdea .eps > .si-presentation-topbar [data-kbs-suara]{display:none!important}',
+    '#layarSalesIdea .eps > .si-presentation-topbar{grid-template-columns:minmax(0,1fr)!important;min-height:48px!important}',
+    '#layarSalesIdea .eps > .si-presentation-topbar .si-presentation-brand{grid-column:1!important}',
+    '#layarSalesIdea .eps > .si-presentation-topbar .si-presentation-brand span{display:inline-flex!important}',
+    '#layarSalesIdea .eps > .si-presentation-topbar .si-presentation-brand b{font-size:17px!important}',
+    '#layarSalesIdea .eps-body{grid-template-rows:minmax(0,1fr) auto!important;grid-template-columns:minmax(0,1fr)!important;gap:12px!important}',
+    '#layarSalesIdea .eps-text{align-content:center!important;padding:16px 20px 40px!important;gap:10px!important}',
+    '#layarSalesIdea .eps-title{font-size:22px!important;line-height:1.2!important}',
+    '#layarSalesIdea .eps-focus{font-size:15px!important;line-height:1.35!important}',
+    '#layarSalesIdea .eps-isi{font-size:16.5px!important;line-height:1.5!important}',
+    '#layarSalesIdea .eps[data-eps="6"] .eps-chip-row{display:none!important}'
+  ].join('\n'),
+  /* sama dengan asset-portrait; watermark diukur tidak menyentuh teks yang terlihat
+     di 10 scene, termasuk saat teks masuk */
   branding: {
     logo: 'assets/logo-psg.png', logoTinggi: 44, logoKanan: 24, logoAtas: 26,
     watermarkLebar: 116, watermarkOpasitas: 0.06, watermarkKanan: 40, watermarkBawah: 34

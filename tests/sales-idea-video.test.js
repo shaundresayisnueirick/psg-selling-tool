@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 /* Pre-render video Sales Idea (tools/video/render-video.mjs) — cerita
-   Asset Creation (bawaan), Retirement Planning, dan Keranjang Kehidupan
-   (16:9 `retirement` / `basket`; 9:16 `asset-portrait` / `retirement-portrait` /
-   `basket-portrait`).
+   Asset Creation (bawaan), Retirement Planning, Keranjang Kehidupan, dan
+   Education Planning (16:9 `retirement` / `basket` / `education`; 9:16
+   `asset-portrait` / `retirement-portrait` / `basket-portrait` / `education-portrait`).
 
-     node tests/sales-idea-video.test.js [--cerita asset|asset-portrait|retirement|retirement-portrait|basket|basket-portrait] [--hasil <folder>] [--out <folder>]
+     node tests/sales-idea-video.test.js [--cerita asset|asset-portrait|retirement|retirement-portrait|basket|basket-portrait|education|education-portrait] [--hasil <folder>] [--out <folder>]
 
    Tanpa --hasil: cerita di-render ke folder di luar repo (bawaan: folder
    sementara sistem), lalu hasilnya diperiksa. Dengan --hasil: hanya
@@ -72,7 +72,9 @@ const HARAP = {
   retirement: { manifest: 'src/sales-idea-retirement-audio.js', glob: 'PSGRetirementAudio', scene: 6, segmen: 6, totalMin: 115000, totalMaks: 135000, kira: '≈ 125 dtk' },
   'retirement-portrait': { manifest: 'src/sales-idea-retirement-audio.js', glob: 'PSGRetirementAudio', scene: 6, segmen: 6, totalMin: 115000, totalMaks: 135000, kira: '≈ 125 dtk', lebar: 720, tinggi: 1280 },
   basket: { manifest: 'src/sales-idea-keranjang-audio.js', glob: 'PSGKeranjangAudio', scene: 10, segmen: 10, totalMin: 115000, totalMaks: 135000, kira: '≈ 126 dtk' },
-  'basket-portrait': { manifest: 'src/sales-idea-keranjang-audio.js', glob: 'PSGKeranjangAudio', scene: 10, segmen: 10, totalMin: 115000, totalMaks: 135000, kira: '≈ 126 dtk', lebar: 720, tinggi: 1280 }
+  'basket-portrait': { manifest: 'src/sales-idea-keranjang-audio.js', glob: 'PSGKeranjangAudio', scene: 10, segmen: 10, totalMin: 115000, totalMaks: 135000, kira: '≈ 126 dtk', lebar: 720, tinggi: 1280 },
+  education: { manifest: 'src/sales-idea-education-audio.js', glob: 'PSGEducationAudio', scene: 10, segmen: 27, totalMin: 225000, totalMaks: 250000, kira: '≈ 237 dtk' },
+  'education-portrait': { manifest: 'src/sales-idea-education-audio.js', glob: 'PSGEducationAudio', scene: 10, segmen: 27, totalMin: 225000, totalMaks: 250000, kira: '≈ 237 dtk', lebar: 720, tinggi: 1280 }
 }[K];
 if (!HARAP) { console.log('cerita tidak dikenal: ' + K); process.exit(1); }
 const LB = HARAP.lebar || 1280, TG = HARAP.tinggi || 720, UK = LB + '×' + TG;
@@ -83,7 +85,9 @@ const MP4_RESMI = ['assets/video/asset-terang.mp4', 'assets/video/asset-gelap.mp
   'assets/video/retirement-terang.mp4', 'assets/video/retirement-gelap.mp4',
   'assets/video/retirement-terang-portrait.mp4', 'assets/video/retirement-gelap-portrait.mp4',
   'assets/video/basket-terang.mp4', 'assets/video/basket-gelap.mp4',
-  'assets/video/basket-terang-portrait.mp4', 'assets/video/basket-gelap-portrait.mp4'];
+  'assets/video/basket-terang-portrait.mp4', 'assets/video/basket-gelap-portrait.mp4',
+  'assets/video/education-terang.mp4', 'assets/video/education-gelap.mp4',
+  'assets/video/education-terang-portrait.mp4', 'assets/video/education-gelap-portrait.mp4'];
 const bukanResmi = (berkas) => berkas.filter((f) => !MP4_RESMI.includes(f));
 
 let gagal = 0;

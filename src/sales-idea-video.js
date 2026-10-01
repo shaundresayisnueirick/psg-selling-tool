@@ -1,6 +1,6 @@
 /* ============================================================
    Sales Idea → "⬇ Download Video" (Asset Creation, Retirement Planning,
-   Keranjang Kehidupan)
+   Keranjang Kehidupan, Education Planning)
    ------------------------------------------------------------
    Tombol unduh video pre-render (assets/video/<cerita>-terang.mp4 atau
    <cerita>-gelap.mp4, menurut tema aktif saat tombol diklik; cerita yang punya
@@ -11,7 +11,7 @@
    scene; ia hanya membaca:
      - status pemutar : atribut data-sip-status pada #layarSalesIdea
      - scene aktif    : node scene cerita (.acs[data-acs], .rps[data-rps],
-                        .kbs[data-kbs])
+                        .kbs[data-kbs], .eps[data-eps])
                         di panggung + SalesIdea10Jari.keadaan()
      - jam scene      : animasi berhingga terpanjang di panggung saat scene
                         mulai berputar (ujungnya = durasi timeline scene)
@@ -68,6 +68,16 @@
       potret: {
         video: { terang: 'assets/video/basket-terang-portrait.mp4', gelap: 'assets/video/basket-gelap-portrait.mp4' },
         nama: { terang: 'PSG-Basket-Light-Portrait.mp4', gelap: 'PSG-Basket-Dark-Portrait.mp4' }
+      }
+    },
+    education: {
+      sel: '.eps', attr: 'data-eps',
+      video: { terang: 'assets/video/education-terang.mp4', gelap: 'assets/video/education-gelap.mp4' },
+      nama: { terang: 'PSG-Education-Light.mp4', gelap: 'PSG-Education-Dark.mp4' },
+      /* 9:16 (720×1280) untuk smartphone */
+      potret: {
+        video: { terang: 'assets/video/education-terang-portrait.mp4', gelap: 'assets/video/education-gelap-portrait.mp4' },
+        nama: { terang: 'PSG-Education-Light-Portrait.mp4', gelap: 'PSG-Education-Dark-Portrait.mp4' }
       }
     }
   };
