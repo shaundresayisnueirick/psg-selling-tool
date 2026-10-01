@@ -93,6 +93,37 @@
     if (window.PSGKarakter) window.PSGKarakter.ganti(tl, satu(stage, sel), bagian, urutan, d);
   }
 
+  /* ---------------- waktu narasi ----------------
+     ucap(n, kata, cadangan): md sejak scene n mulai saat `kata` diucapkan,
+     supaya visual muncul mengikuti narasi (pola yang sama dengan Asset).
+     Posisi kata pada naskah scene (angka dieja; koma +6 huruf, titik +10
+     huruf) × lama rekaman voice Bian, sesudah jeda awal narator (80 md) dan
+     awal suara (150 md). Dikalibrasi terhadap jeda bicara rekaman: galat
+     rata-rata ±0,2 dtk. Tanpa rekaman: 75 md/huruf. Kata tidak ditemukan →
+     `cadangan` (waktu lama). */
+  var EJA = ['nol', 'satu', 'dua', 'tiga', 'empat', 'lima', 'enam', 'tujuh', 'delapan', 'sembilan', 'sepuluh', 'sebelas'];
+  function terbilang(x) {
+    if (x < 12) return EJA[x];
+    if (x < 20) return EJA[x - 10] + ' belas';
+    if (x < 100) return EJA[Math.floor(x / 10)] + ' puluh' + (x % 10 ? ' ' + EJA[x % 10] : '');
+    return String(x);
+  }
+  function bobot(t) {
+    t = String(t).replace(/\d+/g, function (a) { return terbilang(+a); });
+    return t.length + 6 * (t.match(/[,:;]/g) || []).length + 10 * (t.match(/[.?!]/g) || []).length;
+  }
+  function lamaNarasi(n) {
+    var m = window.PSGRetirementAudio, k = m && m.segmen && m.segmen['S0' + n + '-01'];
+    if (k && k.length) return Math.round(k.reduce(function (t, c) { return t + (c.end - c.start); }, 0) * 1000);
+    return Math.round(bobot(NARASI[n - 1] || '') * 75);
+  }
+  var JEDA_UCAP = 80, AWAL_SUARA = 150;
+  function ucap(n, kata, cadangan) {
+    var teks = NARASI[n - 1] || '', i = n ? teks.indexOf(kata) : -1;
+    if (i < 0) return cadangan;
+    return Math.round(JEDA_UCAP + AWAL_SUARA + (lamaNarasi(n) - AWAL_SUARA) * bobot(teks.slice(0, i)) / bobot(teks));
+  }
+
   /* ---------------- dunia (lapisan latar) ---------------- */
   var KOTA = (function () {
     var b = [[0, 70, 38], [40, 96, 30], [74, 58, 34], [112, 120, 26], [142, 84, 40], [186, 104, 30], [220, 64, 36],
@@ -215,7 +246,7 @@
     },
     dunia: { kota: 'redup', alam: 'redup' },
     kelas: 'rps-panorama',
-    animate: function (tl, st) {
+    animate: function (tl, st, n) {
       kamera(tl, st, 'scale(1.08) translateY(1.5%)', 1600);
       var ak = satu(st, '.rps-aktor-1');
       jejak(tl, ak, [[0, { opacity: 0, transform: 'translateX(-24cqw)' }], [260, { opacity: 1 }], [1500, { transform: 'none' }, 'cubic-bezier(.3,.1,.3,1)']]);
@@ -226,17 +257,21 @@
         letup(tl, el.querySelector('.rps-tahap-titik'), t, 420);
         muncul(tl, el.querySelector('.rps-tahap-label'), t + 90, 420, 'translateY(7px)');
       });
+      /* tiap risiko muncul saat disebut; fokus saat "Di sini kita fokus" */
+      var sebut = ['meninggal terlalu cepat', 'hidup terlalu lama', 'disabilitas'];
+      var F = ucap(n, 'Di sini kita fokus', 3900);
       semua(st, '.rps-risiko').forEach(function (el, i) {
-        var t = 2500 + i * 170;
+        var t = Math.min(ucap(n, sebut[i], 2500 + i * 170), F - 520);
         var f = [[t, { opacity: 0, transform: 'translateY(-18px) scale(.94)' }], [t + 520, { opacity: 1, transform: 'none' }]];
-        if (el.classList.contains('rps-fokus')) f.push([3900, { transform: 'none' }], [4400, { transform: 'scale(1.08)' }, PEGAS]);
-        else f.push([3900, { opacity: 1 }], [4400, { opacity: .42 }]);
+        if (el.classList.contains('rps-fokus')) f.push([F, { transform: 'none' }], [F + 500, { transform: 'scale(1.08)' }, PEGAS]);
+        else f.push([F, { opacity: 1 }], [F + 500, { opacity: .42 }]);
         jejak(tl, el, f);
       });
-      jejak(tl, satu(st, '.rps-fokus .rps-cincin'), [[3950, { opacity: 0, transform: 'scale(.85)' }], [4500, { opacity: 1, transform: 'none' }]]);
-      gambarGaris(tl, satu(st, '.rps-sorot'), 4150, 800);
-      jejak(tl, satu(st, '.rps-jalur-cahaya'), [[4450, { opacity: 0 }], [5000, { opacity: 1 }]]);
-      muncul(tl, satu(st, '.rps-catatan-1'), 4800, 560);
+      jejak(tl, satu(st, '.rps-fokus .rps-cincin'), [[F + 50, { opacity: 0, transform: 'scale(.85)' }], [F + 600, { opacity: 1, transform: 'none' }]]);
+      gambarGaris(tl, satu(st, '.rps-sorot'), F + 250, 800);
+      muncul(tl, satu(st, '.rps-catatan-1'), Math.max(F + 900, ucap(n, 'risiko hidup terlalu lama', 4800)), 560);
+      var C = Math.max(F + 1500, ucap(n, 'Kebutuhan hidup', 4450));
+      jejak(tl, satu(st, '.rps-jalur-cahaya'), [[C, { opacity: 0 }], [C + 550, { opacity: 1 }]]);
       tl.loop(satu(st, '.rps-fokus .rps-denyut'), [{ opacity: 1 }, { opacity: .45 }, { opacity: 1 }], { duration: 2800 });
     }
   };
@@ -266,7 +301,7 @@
         '<div class="rps-catatan rps-catatan-2">Penghasilan saat bekerja perlu menopang dua fase.</div>';
     },
     dunia: {},
-    animate: function (tl, st) {
+    animate: function (tl, st, n) {
       jejak(tl, satu(st, '.rps-sekat'), [[0, { transform: 'scaleY(0)', opacity: 0 }], [700, { transform: 'none', opacity: 1 }]]);
       jejak(tl, satu(st, '.rps-panel-kiri'), [[150, { opacity: 0, transform: 'perspective(900px) translateX(6cqw) rotateY(24deg)' }], [1150, { opacity: 1, transform: 'none' }]]);
       jejak(tl, satu(st, '.rps-panel-kanan'), [[150, { opacity: 0, transform: 'perspective(900px) translateX(-6cqw) rotateY(-24deg)' }], [1150, { opacity: 1, transform: 'none' }]]);
@@ -278,18 +313,24 @@
         muncul(tl, kiri[i], 1500 + i * 360, 420, 'translateX(-8px)');
         muncul(tl, kanan[i], 1680 + i * 360, 420, 'translateX(8px)');
       }
-      jejak(tl, satu(st, '.rps-pg-a'), [[2700, { transform: 'scaleX(0)' }], [3300, { transform: 'none' }, 'cubic-bezier(.5,0,.3,1)']]);
-      jejak(tl, satu(st, '.rps-pg-b'), [[3300, { transform: 'scaleX(0)' }], [3900, { transform: 'none' }, 'cubic-bezier(.5,0,.3,1)']]);
-      letup(tl, satu(st, '.rps-umur-1'), 2600, 420);
-      letup(tl, satu(st, '.rps-umur-2'), 3200, 420);
-      letup(tl, satu(st, '.rps-umur-3'), 3800, 420);
-      muncul(tl, satu(st, '.rps-pg-label-a'), 3000, 420, 'translateY(6px)');
-      muncul(tl, satu(st, '.rps-pg-label-b'), 3600, 420, 'translateY(6px)');
-      letup(tl, satu(st, '.rps-kapsul'), 4100, 480);
-      semua(st, '.rps-alir-garis').forEach(function (el) { gambarGaris(tl, el, 4200, 900); });
-      semua(st, '.rps-alir-titik').forEach(function (el) { jejak(tl, el, [[4700, { opacity: 0 }], [5200, { opacity: 1 }]]); });
-      jejak(tl, satu(st, '.rps-panel-hangat'), [[4700, { opacity: 0 }], [5500, { opacity: 1 }]]);
-      muncul(tl, satu(st, '.rps-catatan-2'), 5100, 560);
+      /* usia muncul saat disebut; garis usia tumbuh menuju usia berikutnya */
+      var U1 = ucap(n, 'usia 25', 2600), U2 = Math.max(U1 + 700, ucap(n, 'usia 55', 3200)), U3 = Math.max(U2 + 700, ucap(n, 'usia 85', 3800));
+      jejak(tl, satu(st, '.rps-pg-a'), [[U2 - 500, { transform: 'scaleX(0)' }], [U2 + 100, { transform: 'none' }, 'cubic-bezier(.5,0,.3,1)']]);
+      jejak(tl, satu(st, '.rps-pg-b'), [[U3 - 500, { transform: 'scaleX(0)' }], [U3 + 100, { transform: 'none' }, 'cubic-bezier(.5,0,.3,1)']]);
+      letup(tl, satu(st, '.rps-umur-1'), U1, 420);
+      letup(tl, satu(st, '.rps-umur-2'), U2, 420);
+      letup(tl, satu(st, '.rps-umur-3'), U3, 420);
+      /* 30 tahun bekerja → membiayai (alur PERSIAPAN) → 30 tahun pensiun */
+      var A = Math.max(U3 + 600, ucap(n, '30 tahun masa bekerja', 3000));
+      var P = Math.max(A + 600, ucap(n, 'perlu membantu', 4100));
+      var B = Math.max(P + 900, ucap(n, '30 tahun masa pensiun', 3600));
+      muncul(tl, satu(st, '.rps-pg-label-a'), A, 420, 'translateY(6px)');
+      letup(tl, satu(st, '.rps-kapsul'), P, 480);
+      semua(st, '.rps-alir-garis').forEach(function (el) { gambarGaris(tl, el, P + 100, 900); });
+      semua(st, '.rps-alir-titik').forEach(function (el) { jejak(tl, el, [[P + 600, { opacity: 0 }], [P + 1100, { opacity: 1 }]]); });
+      muncul(tl, satu(st, '.rps-pg-label-b'), B, 420, 'translateY(6px)');
+      jejak(tl, satu(st, '.rps-panel-hangat'), [[B, { opacity: 0 }], [B + 800, { opacity: 1 }]]);
+      muncul(tl, satu(st, '.rps-catatan-2'), Math.max(B + 900, ucap(n, 'Penghasilan saat bekerja', 5100)), 560);
       alirAmbient(tl, st);
     }
   };
@@ -311,7 +352,7 @@
         '<div class="rps-catatan rps-catatan-3"><b>Belum bisa 50%?</b> Mulai dari yang realistis.</div>';
     },
     dunia: { kota: true },
-    animate: function (tl, st) {
+    animate: function (tl, st, n) {
       kamera(tl, st, 'scale(1.06) translateX(2%)', 1400);
       jejak(tl, satu(st, '.rps-kota'), [[0, { transform: 'translateX(3%)' }], [1800, { transform: 'none' }]]);
       jejak(tl, satu(st, '.rps-aktor-3'), [[0, { opacity: 0, transform: 'translateX(-14cqw)' }], [200, { opacity: 1 }], [1100, { transform: 'none' }]]);
@@ -324,17 +365,24 @@
           [t + 650, { opacity: 1, transform: 'translate(0,-9cqh) scale(1)' }, 'cubic-bezier(.3,.6,.3,1)'], [t + 820, { opacity: 0, transform: 'translate(0,-11cqh) scale(.7)' }]]);
       });
       jejak(tl, satu(st, '.rps-earn'), [[1500, { opacity: 0, transform: 'scale(.6)' }], [2000, { opacity: 1, transform: 'none' }, PEGAS]]);
-      semua(st, '.rps-alir-garis').forEach(function (el) { gambarGaris(tl, el, 2100, 900); });
-      semua(st, '.rps-alir-titik').forEach(function (el) { jejak(tl, el, [[2300, { opacity: 0 }], [2700, { opacity: 1 }]]); });
-      semua(st, '.rps-wadah').forEach(function (el, i) { muncul(tl, el, 1900 + i * 150, 520, 'translateY(12px)'); });
-      semua(st, '.rps-isi-air').forEach(function (el) {
-        jejak(tl, el, [[2750, { transform: 'scaleY(0)' }], [3700, { transform: 'none' }, 'cubic-bezier(.4,0,.2,1)']]);
+      /* alur & wadah saat ilustrasi dimulai; SAVE lalu SPEND terisi saat disebut */
+      var M = Math.max(2100, ucap(n, 'Materi ini', 2100));
+      semua(st, '.rps-alir-garis').forEach(function (el) { gambarGaris(tl, el, M, 900); });
+      semua(st, '.rps-alir-titik').forEach(function (el) { jejak(tl, el, [[M + 200, { opacity: 0 }], [M + 600, { opacity: 1 }]]); });
+      semua(st, '.rps-wadah').forEach(function (el, i) { muncul(tl, el, M - 200 + i * 150, 520, 'translateY(12px)'); });
+      var SV = Math.max(M + 700, ucap(n, 'menyisihkan 50 persen penghasilan', 2750));
+      var SP = Math.max(SV + 900, ucap(n, '50 persen sisanya', 2750));
+      var isi = semua(st, '.rps-isi-air'), chip = semua(st, '.rps-wadah-chip');
+      [SP, SV].forEach(function (t, i) {
+        if (isi[i]) jejak(tl, isi[i], [[t, { transform: 'scaleY(0)' }], [t + 950, { transform: 'none' }, 'cubic-bezier(.4,0,.2,1)']]);
+        if (chip[i]) letup(tl, chip[i], t + 850, 420);
       });
-      semua(st, '.rps-wadah-chip').forEach(function (el, i) { letup(tl, el, 3600 + i * 120, 420); });
-      jejak(tl, satu(st, '.rps-gelas-sinar'), [[3900, { opacity: 0 }], [4500, { opacity: 1 }]]);
-      semua(st, '.rps-masa-depan').forEach(function (el) { gambarGaris(tl, el, 4000, 700); });
-      jejak(tl, satu(st, '.rps-cakrawala'), [[4100, { opacity: 0 }], [4900, { opacity: 1 }]]);
-      muncul(tl, satu(st, '.rps-catatan-3'), 4700, 600, 'translateY(12px)');
+      jejak(tl, satu(st, '.rps-gelas-sinar'), [[SV + 1150, { opacity: 0 }], [SV + 1750, { opacity: 1 }]]);
+      semua(st, '.rps-masa-depan').forEach(function (el) { gambarGaris(tl, el, SV + 1250, 700); });
+      var K = Math.max(SP + 1300, ucap(n, 'Kalau saat ini', 4700));
+      muncul(tl, satu(st, '.rps-catatan-3'), K, 600, 'translateY(12px)');
+      var Z = Math.max(K + 700, ucap(n, 'Mulailah', 4100));
+      jejak(tl, satu(st, '.rps-cakrawala'), [[Z, { opacity: 0 }], [Z + 800, { opacity: 1 }]]);
       alirAmbient(tl, st);
     }
   };
@@ -353,35 +401,42 @@
         '<i class="rps-redam"></i>';
     },
     dunia: { kota: true, alam: true, senja: true, matahari: true },
-    animate: function (tl, st) {
+    animate: function (tl, st, n) {
       kamera(tl, st, 'scale(1.05)', 1200);
+      /* gaya hidup hari ini saat "10 juta"; pensiun saat "Kebutuhan saat pensiun" */
+      var K0 = ucap(n, '10 juta', 700);
+      var X = Math.max(K0 + 700, ucap(n, 'Kebutuhan saat pensiun', 2050)), G = X - 2050;
       var ak = '.rps-aktor-4';
-      ganti(tl, st, ak, 'o', [[0, 'kerja'], [2700, 'santai']], 700);
-      jejak(tl, satu(st, ak + ' .k-tas'), [[0, { opacity: 1 }], [2500, { opacity: 1 }], [2900, { opacity: 0 }]]);
+      ganti(tl, st, ak, 'o', [[0, 'kerja'], [2700 + G, 'santai']], 700);
+      jejak(tl, satu(st, ak + ' .k-tas'), [[0, { opacity: 1 }], [2500 + G, { opacity: 1 }], [2900 + G, { opacity: 0 }]]);
       muncul(tl, satu(st, ak), 0, 700, 'translateY(3%)');
-      /* penghasilan kerja mengalir ke gaya hidup hari ini */
+      /* penghasilan kerja mengalir ke gaya hidup hari ini (laju tetap) sampai pensiun */
       muncul(tl, satu(st, '.rps-kerja-label'), 150, 500, 'translateX(-8px)');
       jejak(tl, satu(st, '.rps-kerja-isi'), [[300, { transform: 'scaleX(0)' }], [1100, { transform: 'none' }]]);
-      jejak(tl, satu(st, '.rps-kerja-alir'), [[500, { opacity: 0, backgroundPositionX: '0px' }], [900, { opacity: 1 }], [2000, { opacity: 1, backgroundPositionX: '48px' }, 'linear'], [2250, { opacity: 0, backgroundPositionX: '54px' }, 'ease-out']]);
+      var px = Math.round(48 * (X - 900) / 1100);
+      jejak(tl, satu(st, '.rps-kerja-alir'), [[500, { opacity: 0, backgroundPositionX: '0px' }], [900, { opacity: 1 }], [X - 50, { opacity: 1, backgroundPositionX: px + 'px' }, 'linear'], [X + 200, { opacity: 0, backgroundPositionX: (px + 6) + 'px' }, 'ease-out']]);
       /* momen pensiun: penghasilan berhenti */
-      jejak(tl, satu(st, '.rps-silang'), [[2050, { opacity: 0, transform: 'scale(1.8) rotate(-20deg)' }], [2400, { opacity: 1, transform: 'none' }, PEGAS]]);
-      jejak(tl, satu(st, '.rps-kerja-garis'), [[2100, { opacity: 1 }], [2500, { opacity: .38 }]]);
-      jejak(tl, satu(st, '.rps-redam'), [[2050, { opacity: 0 }], [2350, { opacity: 1 }], [3300, { opacity: 0 }]]);
+      jejak(tl, satu(st, '.rps-silang'), [[2050 + G, { opacity: 0, transform: 'scale(1.8) rotate(-20deg)' }], [2400 + G, { opacity: 1, transform: 'none' }, PEGAS]]);
+      jejak(tl, satu(st, '.rps-kerja-garis'), [[2100 + G, { opacity: 1 }], [2500 + G, { opacity: .38 }]]);
+      jejak(tl, satu(st, '.rps-redam'), [[2050 + G, { opacity: 0 }], [2350 + G, { opacity: 1 }], [3300 + G, { opacity: 0 }]]);
       /* lingkungan kerja → pensiun */
-      jejak(tl, satu(st, '.rps-kota'), [[2400, { opacity: 1, transform: 'none' }], [3600, { opacity: 0, transform: 'translateX(-6%)' }, 'cubic-bezier(.5,0,.3,1)']]);
-      jejak(tl, satu(st, '.rps-alam'), [[2400, { opacity: 0, transform: 'translateX(6%)' }], [3600, { opacity: 1, transform: 'none' }, 'cubic-bezier(.3,0,.2,1)']]);
-      jejak(tl, satu(st, '.rps-langit-senja'), [[2400, { opacity: 0 }], [3800, { opacity: 1 }]]);
-      jejak(tl, satu(st, '.rps-matahari'), [[2600, { opacity: 0, transform: 'translateY(18%)' }], [4000, { opacity: 1, transform: 'none' }]]);
-      /* kebutuhan tetap ada */
-      jejak(tl, satu(st, '.rps-kartu-kini'), [[700, { opacity: 0, transform: 'perspective(700px) rotateX(-28deg) translateY(10px)' }], [1300, { opacity: 1, transform: 'none' }], [3350, { transform: 'none' }], [3600, { transform: 'scale(1.05)' }], [3900, { transform: 'none' }]]);
-      jejak(tl, satu(st, '.rps-panah-4'), [[3600, { transform: 'scaleX(0)' }], [4000, { transform: 'none' }]]);
-      jejak(tl, satu(st, '.rps-kartu-nanti'), [[3900, { opacity: 0, transform: 'perspective(700px) rotateY(-30deg) translateX(10px)' }], [4400, { opacity: 1, transform: 'none' }]]);
-      letup(tl, satu(st, '.rps-tanya'), 4300, 500);
-      /* dana pensiun mulai menopang kehidupan */
-      jejak(tl, satu(st, '.rps-dana-garis'), [[4400, { transform: 'scaleX(0)' }], [5300, { transform: 'none' }, 'cubic-bezier(.5,0,.3,1)']]);
-      muncul(tl, satu(st, '.rps-dana-label'), 4450, 450, 'translateY(6px)');
-      muncul(tl, satu(st, '.rps-dana-hidup'), 5150, 450, 'translateX(-8px)');
-      muncul(tl, satu(st, '.rps-target'), 5300, 600, 'translateY(10px)');
+      jejak(tl, satu(st, '.rps-kota'), [[2400 + G, { opacity: 1, transform: 'none' }], [3600 + G, { opacity: 0, transform: 'translateX(-6%)' }, 'cubic-bezier(.5,0,.3,1)']]);
+      jejak(tl, satu(st, '.rps-alam'), [[2400 + G, { opacity: 0, transform: 'translateX(6%)' }], [3600 + G, { opacity: 1, transform: 'none' }, 'cubic-bezier(.3,0,.2,1)']]);
+      jejak(tl, satu(st, '.rps-langit-senja'), [[2400 + G, { opacity: 0 }], [3800 + G, { opacity: 1 }]]);
+      jejak(tl, satu(st, '.rps-matahari'), [[2600 + G, { opacity: 0, transform: 'translateY(18%)' }], [4000 + G, { opacity: 1, transform: 'none' }]]);
+      /* kebutuhan tetap ada: "tidak otomatis sama" → kartu pensiun bertanda tanya */
+      var P = Math.max(X + 1300, ucap(n, 'tidak otomatis', 3350));
+      jejak(tl, satu(st, '.rps-kartu-kini'), [[K0, { opacity: 0, transform: 'perspective(700px) rotateX(-28deg) translateY(10px)' }], [K0 + 600, { opacity: 1, transform: 'none' }], [P, { transform: 'none' }], [P + 250, { transform: 'scale(1.05)' }], [P + 550, { transform: 'none' }]]);
+      jejak(tl, satu(st, '.rps-panah-4'), [[P + 250, { transform: 'scaleX(0)' }], [P + 650, { transform: 'none' }]]);
+      jejak(tl, satu(st, '.rps-kartu-nanti'), [[P + 550, { opacity: 0, transform: 'perspective(700px) rotateY(-30deg) translateX(10px)' }], [P + 1050, { opacity: 1, transform: 'none' }]]);
+      letup(tl, satu(st, '.rps-tanya'), P + 950, 500);
+      /* target dihitung; dana pensiun menopang kehidupan */
+      var T = Math.max(P + 1500, ucap(n, 'Targetnya', 5300));
+      muncul(tl, satu(st, '.rps-target'), T, 600, 'translateY(10px)');
+      var D = Math.max(T + 900, ucap(n, 'waktu, inflasi', 4400));
+      jejak(tl, satu(st, '.rps-dana-garis'), [[D, { transform: 'scaleX(0)' }], [D + 900, { transform: 'none' }, 'cubic-bezier(.5,0,.3,1)']]);
+      muncul(tl, satu(st, '.rps-dana-label'), D + 50, 450, 'translateY(6px)');
+      muncul(tl, satu(st, '.rps-dana-hidup'), D + 750, 450, 'translateX(-8px)');
     }
   };
   /* ================= SCENE 5 — waktu berjalan ================= */
@@ -409,19 +464,22 @@
           tokoh({ usia: 'senior', pakaian: 'kerja', kacamata: true }) + '</div>';
     },
     dunia: { alam: 'redup', senja: true },
-    animate: function (tl, st) {
-      var T0 = 900, T1 = 4900, D = T1 - T0;
-      semua(st, '.rps-chip').forEach(function (el, i) { muncul(tl, el, 100 + i * 170, 480, 'translateY(-10px)'); });
+    animate: function (tl, st, n) {
+      /* perjalanan 25 → 55 mengikuti narasi: mulai di "Efek bunga berbunga",
+         sampai di "sekitar 1 miliar"; langkah tetap ±400 md */
+      var T0 = ucap(n, 'Efek bunga berbunga', 900), T1 = Math.max(T0 + 4000, ucap(n, 'sekitar 1 miliar', 4900)), D = T1 - T0;
+      var sebut = ['1 juta rupiah', 'selama 30 tahun', '6 persen'];
+      semua(st, '.rps-chip').forEach(function (el, i) { muncul(tl, el, ucap(n, sebut[i], 100 + i * 170), 480, 'translateY(-10px)'); });
       jejak(tl, satu(st, '.rps-garis-dasar'), [[200, { transform: 'scaleX(0)' }], [900, { transform: 'none' }]]);
       semua(st, '.rps-tik').forEach(function (el, i) {
         var t = T0 + (D * i) / 6;
         jejak(tl, el, [[Math.max(0, t - 350), { opacity: .35 }], [t, { opacity: 1 }]]);
       });
-      muncul(tl, satu(st, '.rps-tik-kata-a'), 500, 450, 'translateY(6px)');
+      muncul(tl, satu(st, '.rps-tik-kata-a'), Math.max(500, T0 - 400), 450, 'translateY(6px)');
       /* tokoh berjalan 25 → 55; kurva tumbuh mengikuti posisinya */
       var ak = satu(st, '.rps-aktor-5');
       jejak(tl, ak, [[0, { opacity: 0, transform: 'translateX(-74cqw)' }], [300, { opacity: 1 }], [T0, { transform: 'translateX(-74cqw)' }], [T1, { transform: 'none' }, 'linear']]);
-      jalan(tl, st, '.rps-aktor-5', T0, D, 10);
+      jalan(tl, st, '.rps-aktor-5', T0, D, Math.max(10, Math.round(D / 400)));
       jejak(tl, satu(st, '.rps-kurva'), [[T0, { clipPath: 'inset(0 88% 0 0)' }], [T1, { clipPath: 'inset(0 0% 0 0)' }, 'linear']]);
       /* umur berganti; tokoh menua halus */
       semua(st, '.rps-usia span').forEach(function (el, i) {
@@ -439,7 +497,8 @@
       jejak(tl, satu(st, '.rps-alam'), [[T0, { transform: 'translateX(4%)' }], [T1, { transform: 'none' }, 'linear']]);
       /* akibat: waktu + hasil */
       jejak(tl, satu(st, '.rps-ujung'), [[T1 - 100, { opacity: 0, transform: 'scale(.3)' }], [T1 + 450, { opacity: 1, transform: 'none' }, PEGAS]]);
-      muncul(tl, satu(st, '.rps-rumus'), T1 + 150, 600, 'translateY(10px)');
+      /* hasil (dengan keterangan ilustrasinya) saat "1 miliar"; rumus saat "Pesannya" */
+      muncul(tl, satu(st, '.rps-rumus'), Math.max(T1 + 1200, ucap(n, 'Pesannya', T1 + 150)), 600, 'translateY(10px)');
       muncul(tl, satu(st, '.rps-hasil'), T1 + 350, 650, 'translateY(10px) scale(.96)');
       muncul(tl, satu(st, '.rps-tik-kata-b'), T1, 450, 'translateY(6px)');
       tl.loop(satu(st, '.rps-ujung .rps-denyut'), [{ transform: 'none', opacity: 1 }, { transform: 'scale(1.25)', opacity: .55 }, { transform: 'none', opacity: 1 }], { duration: 2600 });
@@ -461,13 +520,14 @@
     },
     dunia: { kota: true, alam: true, senja: true, matahari: true },
     kelas: 'rps-panorama',
-    animate: function (tl, st) {
-      var J0 = 300, J1 = 4000, D = J1 - J0;
+    animate: function (tl, st, n) {
+      /* perjalanan hidup sepanjang kalimat "tiga hal …"; sampai di "dan proteksi" */
+      var J0 = 300, J1 = Math.max(4000, ucap(n, 'dan proteksi', 4000)), D = J1 - J0;
       jejak(tl, satu(st, '.rps-cam'), [[0, { transform: 'scale(1.22) translate(14%, 4%)' }], [J0, { transform: 'scale(1.22) translate(14%, 4%)' }], [J1 + 300, { transform: 'none' }, 'cubic-bezier(.45,.05,.3,1)']]);
       jejak(tl, satu(st, '.rps-kota'), [[J0, { transform: 'translateX(4%)' }], [J1, { transform: 'none' }, 'linear']]);
       jejak(tl, satu(st, '.rps-alam'), [[J0, { transform: 'translateX(-3%)' }], [J1, { transform: 'none' }, 'linear']]);
       jejak(tl, satu(st, '.rps-aktor-6'), [[0, { transform: 'translateX(-78cqw)' }], [J0, { transform: 'translateX(-78cqw)' }], [J1, { transform: 'none' }, 'cubic-bezier(.35,0,.45,1)']]);
-      jalan(tl, st, '.rps-aktor-6', J0, D, 12);
+      jalan(tl, st, '.rps-aktor-6', J0, D, Math.max(12, Math.round(D / 308)));
       ganti(tl, st, '.rps-aktor-6', 'o', [[0, 'muda'], [J0 + D * .2, 'kerja'], [J0 + D * .7, 'santai']], 500);
       ganti(tl, st, '.rps-aktor-6', 'h', [[0, 'muda'], [J0 + D * .55, 'tua']], 800);
       jejak(tl, satu(st, '.rps-aktor-6 .k-kacamata'), [[J0 + D * .6, { opacity: 0 }], [J0 + D * .6 + 400, { opacity: 1 }]]);
@@ -479,13 +539,17 @@
         var t = J0 + D * [0.01, .24, .5, .75, .99][i];
         jejak(tl, el.querySelector('.rps-tahap-titik'), [[Math.max(0, t - 120), { transform: 'scale(.7)', opacity: .5 }], [t + 250, { transform: 'none', opacity: 1 }, PEGAS]]);
       });
-      letup(tl, satu(st, '.rps-suar-1'), J0 + D * .18, 520);
-      letup(tl, satu(st, '.rps-suar-2'), J0 + D * .5, 520);
-      gambarGaris(tl, satu(st, '.rps-kubah'), J0 + D * .62, 1300);
-      jejak(tl, satu(st, '.rps-perisai'), [[J0 + D * .9, { opacity: 0, transform: 'translateY(8px) scale(.8)' }], [J1 + 500, { opacity: 1, transform: 'none' }, PEGAS]]);
-      jejak(tl, satu(st, '.rps-hangat'), [[J1 - 300, { opacity: 0, transform: 'scale(.5)' }], [J1 + 800, { opacity: 1, transform: 'none' }]]);
+      /* tiga hal muncul saat disebut, sesudah tokoh melewati posisinya */
+      letup(tl, satu(st, '.rps-suar-1'), Math.max(J0 + D * .18, ucap(n, 'mulai lebih awal', J0 + D * .18)), 520);
+      letup(tl, satu(st, '.rps-suar-2'), Math.max(J0 + D * .5, ucap(n, 'memanfaatkan efek', J0 + D * .5)), 520);
+      gambarGaris(tl, satu(st, '.rps-kubah'), Math.max(J0 + D * .62, ucap(n, 'dan proteksi', J0 + D * .62)), 1300);
+      var PR = Math.max(J0 + D * .9, ucap(n, 'Lalu siapkan proteksi', J0 + D * .9));
+      jejak(tl, satu(st, '.rps-perisai'), [[PR, { opacity: 0, transform: 'translateY(8px) scale(.8)' }], [PR + 870, { opacity: 1, transform: 'none' }, PEGAS]]);
+      var H = Math.max(J1 - 300, ucap(n, 'agar rencana', J1 - 300));
+      jejak(tl, satu(st, '.rps-hangat'), [[H, { opacity: 0, transform: 'scale(.5)' }], [H + 1100, { opacity: 1, transform: 'none' }]]);
       jejak(tl, satu(st, '.rps-jalur-cahaya'), [[J1, { opacity: 0 }], [J1 + 700, { opacity: 1 }]]);
-      jejak(tl, satu(st, '.rps-pesan'), [[J1 + 500, { opacity: 0, transform: 'translateY(14px)', filter: 'blur(6px)' }], [J1 + 1400, { opacity: 1, transform: 'none', filter: 'blur(0px)' }]]);
+      var PS = Math.max(J1 + 500, ucap(n, 'Bangun dana', J1 + 500));
+      jejak(tl, satu(st, '.rps-pesan'), [[PS, { opacity: 0, transform: 'translateY(14px)', filter: 'blur(6px)' }], [PS + 900, { opacity: 1, transform: 'none', filter: 'blur(0px)' }]]);
       tl.loop(satu(st, '.rps-hangat .rps-denyut'), [{ opacity: 1 }, { opacity: .7 }, { opacity: 1 }], { duration: 3600 });
     }
   };
@@ -529,7 +593,7 @@
         },
         animate: function (tl, stage) {
           animasiTeks(tl, stage);
-          if (sc) sc.animate(tl, stage);
+          if (sc) sc.animate(tl, stage, n);
         }
       };
     });

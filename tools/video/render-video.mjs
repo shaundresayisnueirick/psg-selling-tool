@@ -3,9 +3,11 @@
    Prototype pre-render video Sales Idea (alat developer).
    ------------------------------------------------------------
    Bukan bagian runtime PWA: tidak dimuat index.html / sw.js dan tidak
-   mengubah berkas production. Prototype ini hanya untuk Asset Creation.
+   mengubah berkas production. Cerita: Asset Creation, Retirement Planning,
+   Keranjang Kehidupan, dan Education Planning (16:9; 9:16 untuk HP:
+   asset-portrait, retirement-portrait, basket-portrait, education-portrait).
 
-     node tools/video/render-video.mjs --cerita asset [--out <folder>]
+     node tools/video/render-video.mjs --cerita asset|asset-portrait|retirement|retirement-portrait|basket|basket-portrait|education|education-portrait [--out <folder>]
           [--fps 30] [--jeda-scene 0] [--ffmpeg <path>] [--tanpa-encode]
      node tools/video/render-video.mjs --cek <folder>/asset.json
 
@@ -24,7 +26,7 @@
       akhir audio) + --jeda-scene (bawaan 0 = tidak ada timing baru).
    3. Capture (konteks browser B, segar): frame f → waktu t = f / fps;
       scene aktif di-seek MAJU ke τ = t − awal scene (animasi ambient
-      ikut ke τ). Seek mundur ditolak. Frame = PNG 1280×720.
+      ikut ke τ). Seek mundur ditolak. Frame = PNG 1280×720 (9:16: 720×1280).
    4. Audio: klip MP3 manifest di-decode Chromium (48 kHz) dan
       ditempatkan pada jadwal → WAV PCM 16-bit mono.
    5. Encode MP4 H.264 + AAC dengan ffmpeg (libx264 + aac) bila ada.
@@ -53,6 +55,16 @@ import { fileURLToPath } from 'node:url';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const ALAT = path.relative(ROOT, fileURLToPath(import.meta.url));
 const VERSI_FORMAT = 1;
+/* Versi mesin render = cara capture (seek maju per frame), jadwal audio, dan
+   encode. Naikkan bila salah satunya berubah sehingga render lama tidak lagi
+   setara. --cek membandingkan versi ini dan parameter render efektif cerita
+   (lihat parameterBerubah), bukan hash berkas alat: menambah konfigurasi
+   cerita lain tidak membuat render lama usang. Metadata tanpa field 'mesin' /
+   'enkode' dibuat oleh mesin 1 dengan encode ENKODE_MESIN1. */
+const MESIN = 1;
+const ENKODE_V = ['-c:v', 'libx264', '-preset', 'medium', '-crf', '20', '-pix_fmt', 'yuv420p'];
+const ENKODE_A = ['-c:a', 'aac', '-b:a', '128k'];
+const ENKODE_MESIN1 = '-c:v libx264 -preset medium -crf 20 -pix_fmt yuv420p -c:a aac -b:a 128k';
 
 /* ---------------- cerita yang didukung ---------------- */
 const CERITA = {
@@ -70,14 +82,166 @@ const CERITA = {
       '#layarSalesIdea .acs-cue{display:none!important}',
       '#layarSalesIdea .sil-kartu{display:none!important}'
     ].join('\n')
+  },
+  retirement: {
+    judul: 'Retirement Planning', pilih: 'retirement', sel: '.rps', attr: 'data-rps', jumlah: 6,
+    manifest: 'src/sales-idea-retirement-audio.js', glob: 'PSGRetirementAudio',
+    input: ['index.html', 'src/styles.css', 'src/branding.css', 'src/sales-idea-player.js', 'src/sales-idea-player.css',
+      'src/sales-idea.js', 'src/sales-idea-keranjang.js', 'src/psg-karakter.js', 'src/psg-karakter.css',
+      'src/sales-idea-retirement.js', 'src/sales-idea-retirement.css', 'src/sales-idea-retirement-audio.js'],
+    css: [
+      '#layarSalesIdea .si-footer{display:none!important}',
+      '#layarSalesIdea .si-back-hub,#layarSalesIdea .si-close,#layarSalesIdea [data-kbs-suara]{visibility:hidden!important}',
+      '#layarSalesIdea .sil-kartu{display:none!important}'
+    ].join('\n')
+  },
+  education: {
+    judul: 'Education Planning', pilih: 'education', sel: '.eps', attr: 'data-eps', jumlah: 10,
+    manifest: 'src/sales-idea-education-audio.js', glob: 'PSGEducationAudio',
+    input: ['index.html', 'src/styles.css', 'src/branding.css', 'src/sales-idea-player.js', 'src/sales-idea-player.css',
+      'src/sales-idea.js', 'src/sales-idea-keranjang.js', 'src/psg-karakter.js', 'src/psg-karakter.css',
+      'src/sales-idea-education.js', 'src/sales-idea-education.css', 'src/sales-idea-education-audio.js'],
+    css: [
+      '#layarSalesIdea .si-footer{display:none!important}',
+      '#layarSalesIdea .si-back-hub,#layarSalesIdea .si-close,#layarSalesIdea [data-kbs-suara]{visibility:hidden!important}',
+      '#layarSalesIdea .sil-kartu{display:none!important}'
+    ].join('\n')
+  },
+  /* Keranjang Kehidupan: scene & narator ada di berkas yang sama (src/sales-idea-keranjang.js) */
+  basket: {
+    judul: 'Keranjang Kehidupan', pilih: 'basket', sel: '.kbs', attr: 'data-kbs', jumlah: 10,
+    manifest: 'src/sales-idea-keranjang-audio.js', glob: 'PSGKeranjangAudio',
+    input: ['index.html', 'src/styles.css', 'src/branding.css', 'src/sales-idea-player.js', 'src/sales-idea-player.css',
+      'src/sales-idea.js', 'src/sales-idea-keranjang.js', 'src/psg-karakter.js', 'src/psg-karakter.css',
+      'src/sales-idea-keranjang.css', 'src/sales-idea-keranjang-audio.js'],
+    css: [
+      '#layarSalesIdea .si-footer{display:none!important}',
+      '#layarSalesIdea .si-back-hub,#layarSalesIdea .si-close,#layarSalesIdea [data-kbs-suara]{visibility:hidden!important}',
+      '#layarSalesIdea .sil-kartu{display:none!important}'
+    ].join('\n')
   }
 };
+/* Keranjang Kehidupan 9:16 (720×1280) untuk HP: halaman render 360×640 px CSS dengan
+   skala piksel 2, yaitu tata letak responsif PWA versi ponsel (panggung di atas,
+   teks di bawah) — bukan video 16:9 yang diputar, dipotong, atau diperkecil.
+   Scene, timing, narasi, dan audio sama dengan 16:9. CSS tambahan hanya untuk
+   halaman render: tombol yang disembunyikan dikeluarkan dari tata letak (judul
+   tidak terpotong), panggung ±1,08:1 agar zoom kamera tidak memotong label/tag di
+   tepi kiri-kanan, dan teks diperbesar agar terbaca di HP. */
+CERITA['basket-portrait'] = Object.assign({}, CERITA.basket, {
+  judul: 'Keranjang Kehidupan (9:16)',
+  layar: { lebar: 360, tinggi: 640, skala: 2 },
+  css: CERITA.basket.css + '\n' + [
+    '#layarSalesIdea .kbs > .si-presentation-topbar .si-back-hub,#layarSalesIdea .kbs > .si-presentation-topbar .si-close,#layarSalesIdea .kbs > .si-presentation-topbar [data-kbs-suara]{display:none!important}',
+    '#layarSalesIdea .kbs > .si-presentation-topbar{grid-template-columns:minmax(0,1fr)!important;min-height:48px!important}',
+    '#layarSalesIdea .kbs > .si-presentation-topbar .si-presentation-brand{grid-column:1!important}',
+    '#layarSalesIdea .kbs > .si-presentation-topbar .si-presentation-brand span{display:inline-flex!important}',
+    '#layarSalesIdea .kbs > .si-presentation-topbar .si-presentation-brand b{font-size:17px!important}',
+    '#layarSalesIdea .kbs-body{grid-template-rows:310px minmax(0,1fr)!important;grid-template-columns:minmax(0,1fr)!important;gap:12px!important}',
+    '#layarSalesIdea .kbs-text{align-content:center!important;padding:18px 20px!important;gap:10px!important}',
+    '#layarSalesIdea .kbs-title{font-size:24px!important;line-height:1.2!important}',
+    '#layarSalesIdea .kbs-focus{font-size:16px!important;line-height:1.35!important}',
+    '#layarSalesIdea .kbs-isi{font-size:17.5px!important;line-height:1.5!important}'
+  ].join('\n'),
+  /* logo kanan atas sejajar judul; watermark tipis di kanan bawah panel teks, diukur
+     agar ≥ 6 px dari semua baris teks di 10 scene (panel potret hampir penuh teks) */
+  branding: {
+    logo: 'assets/logo-psg.png', logoTinggi: 44, logoKanan: 24, logoAtas: 26,
+    watermarkLebar: 120, watermarkOpasitas: 0.06, watermarkKanan: 40, watermarkBawah: 36
+  }
+});
+
+/* Retirement Planning 9:16 (720×1280) untuk HP: pola yang sama dengan basket-portrait
+   (halaman 360×640 px CSS, skala 2 = tata letak responsif PWA versi ponsel). Panel
+   teks mengikuti tinggi isinya dan panggung mengisi sisa layar (seperti PWA ponsel),
+   karena panggung Retirement responsif (posisi %, huruf cqmin): panggung yang
+   dipendekkan ke tinggi tetap membuat tokoh menutupi teks kartu S2. Scene, timing,
+   narasi, dan audio sama dengan 16:9. */
+CERITA['retirement-portrait'] = Object.assign({}, CERITA.retirement, {
+  judul: 'Retirement Planning (9:16)',
+  layar: { lebar: 360, tinggi: 640, skala: 2 },
+  css: CERITA.retirement.css + '\n' + [
+    '#layarSalesIdea .rps > .si-presentation-topbar .si-back-hub,#layarSalesIdea .rps > .si-presentation-topbar .si-close,#layarSalesIdea .rps > .si-presentation-topbar [data-kbs-suara]{display:none!important}',
+    '#layarSalesIdea .rps > .si-presentation-topbar{grid-template-columns:minmax(0,1fr)!important;min-height:48px!important}',
+    '#layarSalesIdea .rps > .si-presentation-topbar .si-presentation-brand{grid-column:1!important}',
+    '#layarSalesIdea .rps > .si-presentation-topbar .si-presentation-brand span{display:inline-flex!important}',
+    '#layarSalesIdea .rps > .si-presentation-topbar .si-presentation-brand b{font-size:17px!important}',
+    '#layarSalesIdea .rps-body{grid-template-rows:minmax(0,1fr) auto!important;grid-template-columns:minmax(0,1fr)!important;gap:12px!important}',
+    '#layarSalesIdea .rps-text{align-content:center!important;padding:16px 20px!important;gap:10px!important}',
+    '#layarSalesIdea .rps-title{font-size:22px!important;line-height:1.2!important}',
+    '#layarSalesIdea .rps-focus{font-size:15px!important;line-height:1.35!important}',
+    '#layarSalesIdea .rps-isi{font-size:16.5px!important;line-height:1.5!important}'
+  ].join('\n'),
+  /* logo sama dengan basket-portrait; watermark diukur agar tidak menyentuh teks
+     yang terlihat di 6 scene, termasuk saat teks masuk (panel penuh teks) */
+  branding: {
+    logo: 'assets/logo-psg.png', logoTinggi: 44, logoKanan: 24, logoAtas: 26,
+    watermarkLebar: 116, watermarkOpasitas: 0.06, watermarkKanan: 40, watermarkBawah: 34
+  }
+});
+
+/* Asset Creation 9:16 (720×1280) untuk HP: pola yang sama dengan retirement-portrait
+   (halaman 360×640 px CSS, skala 2; panel teks mengikuti isinya, panggung mengisi
+   sisa layar dan memaskan viewBox-nya sendiri lewat paskan()). Padding bawah kartu
+   teks menjadi zona watermark: baris terakhir S2 memanjang hampir selebar kartu.
+   Scene, timing, narasi, dan audio sama dengan 16:9. */
+CERITA['asset-portrait'] = Object.assign({}, CERITA.asset, {
+  judul: 'Asset Creation (9:16)',
+  layar: { lebar: 360, tinggi: 640, skala: 2 },
+  css: CERITA.asset.css + '\n' + [
+    '#layarSalesIdea .acs > .si-presentation-topbar .si-back-hub,#layarSalesIdea .acs > .si-presentation-topbar .si-close,#layarSalesIdea .acs > .si-presentation-topbar [data-kbs-suara]{display:none!important}',
+    '#layarSalesIdea .acs > .si-presentation-topbar{grid-template-columns:minmax(0,1fr)!important;min-height:48px!important}',
+    '#layarSalesIdea .acs > .si-presentation-topbar .si-presentation-brand{grid-column:1!important}',
+    '#layarSalesIdea .acs > .si-presentation-topbar .si-presentation-brand span{display:inline-flex!important}',
+    '#layarSalesIdea .acs > .si-presentation-topbar .si-presentation-brand b{font-size:17px!important}',
+    '#layarSalesIdea .acs-body{grid-template-rows:minmax(0,1fr) auto!important;grid-template-columns:minmax(0,1fr)!important;gap:12px!important}',
+    '#layarSalesIdea .acs-text{align-content:center!important;padding:16px 20px 40px!important;gap:10px!important}',
+    '#layarSalesIdea .acs-title{font-size:22px!important;line-height:1.2!important}',
+    '#layarSalesIdea .acs-focus{font-size:15px!important;line-height:1.35!important}',
+    '#layarSalesIdea .acs-isi{font-size:16.5px!important;line-height:1.5!important}'
+  ].join('\n'),
+  /* sama dengan retirement-portrait; watermark diukur tidak menyentuh teks yang
+     terlihat di 6 scene, termasuk saat teks masuk */
+  branding: {
+    logo: 'assets/logo-psg.png', logoTinggi: 44, logoKanan: 24, logoAtas: 26,
+    watermarkLebar: 116, watermarkOpasitas: 0.06, watermarkKanan: 40, watermarkBawah: 34
+  }
+});
+
+/* Education Planning 9:16 (720×1280) untuk HP: pola asset-portrait (panel teks mengikuti
+   isi, panggung mengisi sisa layar, padding bawah kartu = zona watermark). Khusus S6:
+   baris chip setoran di kartu teks disembunyikan — angka yang sama sudah tampil di
+   label panggung dan di teks isi — agar panggung S6 tidak menyusut ke ±240 px (label
+   panggung ±8 px). Scene, timing, narasi, dan audio sama dengan 16:9. */
+CERITA['education-portrait'] = Object.assign({}, CERITA.education, {
+  judul: 'Education Planning (9:16)',
+  layar: { lebar: 360, tinggi: 640, skala: 2 },
+  css: CERITA.education.css + '\n' + [
+    '#layarSalesIdea .eps > .si-presentation-topbar .si-back-hub,#layarSalesIdea .eps > .si-presentation-topbar .si-close,#layarSalesIdea .eps > .si-presentation-topbar [data-kbs-suara]{display:none!important}',
+    '#layarSalesIdea .eps > .si-presentation-topbar{grid-template-columns:minmax(0,1fr)!important;min-height:48px!important}',
+    '#layarSalesIdea .eps > .si-presentation-topbar .si-presentation-brand{grid-column:1!important}',
+    '#layarSalesIdea .eps > .si-presentation-topbar .si-presentation-brand span{display:inline-flex!important}',
+    '#layarSalesIdea .eps > .si-presentation-topbar .si-presentation-brand b{font-size:17px!important}',
+    '#layarSalesIdea .eps-body{grid-template-rows:minmax(0,1fr) auto!important;grid-template-columns:minmax(0,1fr)!important;gap:12px!important}',
+    '#layarSalesIdea .eps-text{align-content:center!important;padding:16px 20px 40px!important;gap:10px!important}',
+    '#layarSalesIdea .eps-title{font-size:22px!important;line-height:1.2!important}',
+    '#layarSalesIdea .eps-focus{font-size:15px!important;line-height:1.35!important}',
+    '#layarSalesIdea .eps-isi{font-size:16.5px!important;line-height:1.5!important}',
+    '#layarSalesIdea .eps[data-eps="6"] .eps-chip-row{display:none!important}'
+  ].join('\n'),
+  /* sama dengan asset-portrait; watermark diukur tidak menyentuh teks yang terlihat
+     di 10 scene, termasuk saat teks masuk */
+  branding: {
+    logo: 'assets/logo-psg.png', logoTinggi: 44, logoKanan: 24, logoAtas: 26,
+    watermarkLebar: 116, watermarkOpasitas: 0.06, watermarkKanan: 40, watermarkBawah: 34
+  }
+});
 
 /* ---------------- argumen ---------------- */
 const args = process.argv.slice(2);
 const arg = (k, d) => { const i = args.indexOf(k); return i >= 0 ? args[i + 1] : d; };
 const FPS = +arg('--fps', 30);
-const LEBAR = 1280, TINGGI = 720, SR = 48000;
+const SR = 48000;
 const JEDA_SCENE = +arg('--jeda-scene', 0);
 const TANPA_ENCODE = args.includes('--tanpa-encode');
 /* --branding: logo PSG kecil (kanan atas, slot bar judul yang kosong di
@@ -88,10 +252,11 @@ const TANPA_ENCODE = args.includes('--tanpa-encode');
    sama dengan tombol tema (insuranceHub.theme.v3); bawaan terang (Original) */
 const TEMA = arg('--tema', 'terang');
 if (TEMA !== 'terang' && TEMA !== 'gelap') { console.error('--tema harus terang atau gelap'); process.exit(1); }
-const BRANDING = args.includes('--branding') ? {
+/* branding video 16:9 (LOCKED); cerita boleh membawa branding sendiri untuk kanvas lain */
+const BRANDING_16X9 = {
   logo: 'assets/logo-psg.png', logoTinggi: 40, logoKanan: 28, logoAtas: 8,
   watermarkLebar: 240, watermarkOpasitas: 0.06, watermarkKanan: 44, watermarkBawah: 28
-} : null;
+};
 /* masukan ffmpeg: 0 = frame PNG, 1 = WAV, 2 = logo (skala menjaga rasio) */
 function filterBranding(b) {
   return '[2:v]format=rgba,split=2[l1][l2];' +
@@ -141,20 +306,60 @@ function hashInput(c, manifest, branding) {
   return h;
 }
 
-/* ---------------- --cek: render usang? ---------------- */
+/* ---------------- --cek: render usang? ----------------
+   Usang bila (a) salah satu input berubah — sumber scene/CSS/pemutar/narator,
+   manifest & MP3 audio, logo branding — atau (b) parameter render efektif
+   cerita itu berbeda: CSS halaman render, ukuran halaman & skala piksel,
+   resolusi, jumlah scene, jeda narator, manifest, branding (nilai + filter
+   ffmpeg), encode, versi mesin. Hash berkas alat tetap dicatat; bila hanya itu
+   yang berbeda (mis. konfigurasi cerita lain bertambah), render tidak usang —
+   perubahannya dilaporkan. */
+const KUNCI_BRANDING = ['logo', 'logoTinggi', 'logoKanan', 'logoAtas', 'watermarkLebar', 'watermarkOpasitas', 'watermarkKanan', 'watermarkBawah', 'filter'];
+const ambil = (o, k) => (o ? Object.fromEntries(k.map((x) => [x, o[x]])) : null);
+const enkodeKini = () => ENKODE_V.concat(ENKODE_A).join(' ');
+function parameterBerubah(meta, c) {
+  const layar = c.layar || { lebar: 1280, tinggi: 720, skala: 1 };
+  const b = meta.branding ? (c.branding || BRANDING_16X9) : null;
+  const aud = meta.aturanAudio || {};
+  const sama = (x, y) => JSON.stringify(x) === JSON.stringify(y);
+  return [
+    ['CSS halaman render', sama(meta.renderCss, c.css)],
+    /* metadata lama tanpa 'halaman': ukuran keluaran (resolusi) tetap dibandingkan */
+    ['ukuran halaman / skala piksel', !meta.halaman || sama(meta.halaman, layar)],
+    ['resolusi video', sama(meta.resolusi, { lebar: layar.lebar * layar.skala, tinggi: layar.tinggi * layar.skala })],
+    ['jumlah scene', (meta.scene || []).length === c.jumlah],
+    ['manifest audio', aud.manifest === c.manifest],
+    ['jeda awal narator', aud.jedaAwalNaratorMd === jedaNarator()],
+    ['branding', sama(ambil(meta.branding, KUNCI_BRANDING), b && ambil(Object.assign({ filter: filterBranding(b) }, b), KUNCI_BRANDING))],
+    ['parameter encode', (meta.enkode || ENKODE_MESIN1) === enkodeKini()],
+    ['versi mesin render', (meta.mesin || 1) === MESIN]
+  ].filter((x) => !x[1]).map((x) => x[0]);
+}
 if (arg('--cek')) {
   const meta = JSON.parse(fs.readFileSync(arg('--cek'), 'utf8'));
   const c = CERITA[meta.cerita];
+  if (!c) { log('USANG — cerita ' + meta.cerita + ' tidak lagi dikenal alat'); process.exit(3); }
   const kini = hashInput(c, bacaManifest(c), meta.branding);
   const beda = Object.keys({ ...kini, ...meta.input }).filter((f) => kini[f] !== meta.input[f]);
-  if (beda.length) { log('USANG — input berubah sejak render:'); beda.forEach((f) => log('  ' + f)); process.exit(3); }
-  log('SEGAR — semua ' + Object.keys(kini).length + ' input sama dengan saat render.');
+  const bedaInput = beda.filter((f) => f !== ALAT), bedaParam = parameterBerubah(meta, c);
+  if (bedaInput.length || bedaParam.length) {
+    log('USANG — berubah sejak render:');
+    bedaInput.forEach((f) => log('  input: ' + f));
+    bedaParam.forEach((x) => log('  parameter: ' + x));
+    process.exit(3);
+  }
+  log('SEGAR — ' + (Object.keys(kini).length - 1) + ' input dan parameter render efektif sama dengan saat render.' +
+    (beda.includes(ALAT) ? ' (Berkas ' + ALAT + ' berubah sejak render, tetapi versi mesin & parameter efektif cerita ini sama.)' : ''));
   process.exit(0);
 }
 
 const KUNCI = arg('--cerita');
 const C = CERITA[KUNCI];
 if (!C) { console.error('Cerita belum didukung prototype: ' + KUNCI + ' (tersedia: ' + Object.keys(CERITA).join(', ') + ')'); process.exit(1); }
+/* halaman render: ukuran px CSS + skala piksel; video = (lebar × skala) × (tinggi × skala) */
+const LAYAR = C.layar || { lebar: 1280, tinggi: 720, skala: 1 };
+const LEBAR = LAYAR.lebar * LAYAR.skala, TINGGI = LAYAR.tinggi * LAYAR.skala;
+const BRANDING = args.includes('--branding') ? (C.branding || BRANDING_16X9) : null;
 const OUT = path.resolve(arg('--out', path.join(os.tmpdir(), 'psg-video-render')));
 if (!path.relative(ROOT, OUT).startsWith('..') && !path.isAbsolute(path.relative(ROOT, OUT))) {
   console.error('Folder output harus di luar repo (render tidak boleh masuk Git): ' + OUT); process.exit(1);
@@ -230,7 +435,7 @@ async function tunggu(pg, fn, arg2, ms) {
   throw new Error('menunggu terlalu lama: ' + fn.toString().slice(0, 80));
 }
 async function bukaHalaman(br, url) {
-  const ctx = await br.newContext({ viewport: { width: LEBAR, height: TINGGI }, deviceScaleFactor: 1, colorScheme: TEMA === 'gelap' ? 'dark' : 'light', reducedMotion: 'no-preference', serviceWorkers: 'block' });
+  const ctx = await br.newContext({ viewport: { width: LAYAR.lebar, height: LAYAR.tinggi }, deviceScaleFactor: LAYAR.skala, colorScheme: TEMA === 'gelap' ? 'dark' : 'light', reducedMotion: 'no-preference', serviceWorkers: 'block' });
   const pg = await ctx.newPage();
   const galat = [];
   pg.on('pageerror', (e) => galat.push(e.message));
@@ -394,8 +599,8 @@ async function capture(br, url, jadwal, an, ff, wav) {
     enc = spawn(ff.bin, ['-hide_banner', '-loglevel', 'error', '-y',
       '-f', 'image2pipe', '-framerate', String(FPS), '-c:v', 'png', '-i', 'pipe:0',
       '-i', path.join(OUT, wav.berkas)].concat(peta, [
-      '-c:v', 'libx264', '-preset', 'medium', '-crf', '20', '-pix_fmt', 'yuv420p', '-r', String(FPS),
-      '-c:a', 'aac', '-b:a', '128k', '-ar', String(SR), '-movflags', '+faststart',
+      ...ENKODE_V, '-r', String(FPS),
+      ...ENKODE_A, '-ar', String(SR), '-movflags', '+faststart',
       '-t', (jadwal.totalMd / 1000).toFixed(3), mp4]), { stdio: ['pipe', 'ignore', 'pipe'] });
     enc.stderr.on('data', (d) => { encGalat += d; });
     encSelesai = new Promise((res) => enc.on('close', res));
@@ -433,7 +638,7 @@ async function capture(br, url, jadwal, an, ff, wav) {
         const node = document.querySelector('#salesIdeaContent ' + sel);
         return [+node.getAttribute(attr), +node.getAttribute('data-ketuk')];
       }, [tau, C.sel, C.attr]);
-      const png = await pg.screenshot({ clip: { x: 0, y: 0, width: LEBAR, height: TINGGI }, type: 'png' });
+      const png = await pg.screenshot({ clip: { x: 0, y: 0, width: LAYAR.lebar, height: LAYAR.tinggi }, type: 'png' });
       frame.push([f, st[0], +tau.toFixed(3), st[1], sha1(png).slice(0, 16)]);
       if (k === 0) fs.writeFileSync(path.join(folderFrame, KUNCI + '-S' + dua(s.n) + '-awal.png'), png);
       if (k === s.frame.jumlah - 1) fs.writeFileSync(path.join(folderFrame, KUNCI + '-S' + dua(s.n) + '-akhir.png'), png);
@@ -465,8 +670,10 @@ async function lembarKontak(br, jadwal) {
   const ctx = await br.newContext({ viewport: { width: 700, height: 200 } });
   const pg = await ctx.newPage();
   const gambar = jadwal.scene.map((s) => ['awal', 'akhir'].map((x) => 'data:image/png;base64,' + fs.readFileSync(path.join(OUT, 'frame', KUNCI + '-S' + dua(s.n) + '-' + x + '.png')).toString('base64')));
-  const b64 = await pg.evaluate(async (gambar) => {
-    const w = 320, h = 180, pad = 24, cv = document.createElement('canvas');
+  /* ubin sisi terpanjang 320 px: 16:9 → 320×180, 9:16 → 180×320 */
+  const ubin = [Math.round(320 * LEBAR / Math.max(LEBAR, TINGGI)), Math.round(320 * TINGGI / Math.max(LEBAR, TINGGI))];
+  const b64 = await pg.evaluate(async ([gambar, ubin]) => {
+    const [w, h] = ubin, pad = 24, cv = document.createElement('canvas');
     cv.width = 2 * w + 3 * 8; cv.height = gambar.length * (h + pad) + 8;
     const g = cv.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, cv.width, cv.height);
     g.font = '13px sans-serif'; g.fillStyle = '#333';
@@ -479,7 +686,7 @@ async function lembarKontak(br, jadwal) {
       }
     }
     return cv.toDataURL('image/png').split(',')[1];
-  }, gambar);
+  }, [gambar, ubin]);
   await ctx.close();
   fs.writeFileSync(path.join(OUT, KUNCI + '-lembar-frame.png'), Buffer.from(b64, 'base64'));
 }
@@ -556,7 +763,8 @@ function validasi(jadwal, cap, audio) {
       : { berkas: null, status: 'terblokir', alasan: 'tidak ada ffmpeg dengan libx264 + aac + muxer mp4', diperiksa: ff.diperiksa };
     const meta = {
       versiFormat: VERSI_FORMAT, alat: ALAT, cerita: KUNCI, judul: C.judul, dibuat: new Date().toISOString(),
-      chromium: an.versi, tema: TEMA, resolusi: { lebar: LEBAR, tinggi: TINGGI }, fps: FPS, jedaSceneMd: JEDA_SCENE,
+      chromium: an.versi, tema: TEMA, resolusi: { lebar: LEBAR, tinggi: TINGGI }, halaman: LAYAR, fps: FPS, jedaSceneMd: JEDA_SCENE,
+      mesin: MESIN, enkode: enkodeKini(),
       aturanAudio: { jedaAwalNaratorMd: jedaMulai, sumber: 'src/sales-idea-keranjang.js (PSGNarasi: suara.jeda = setTimeout(lanjut, ' + jedaMulai + '))', manifest: C.manifest, versiManifest: manifest.versi || null },
       renderCss: C.css,
       branding: BRANDING ? Object.assign({ filter: filterBranding(BRANDING), diterapkan: !!(ff.pakai && !TANPA_ENCODE) }, BRANDING) : null,

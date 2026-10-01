@@ -1,13 +1,18 @@
 /* ============================================================
-   Sales Idea → "⬇ Download Video" (pilot: Asset Creation saja)
+   Sales Idea → "⬇ Download Video" (Asset Creation, Retirement Planning,
+   Keranjang Kehidupan, Education Planning)
    ------------------------------------------------------------
-   Tombol unduh video pre-render (assets/video/asset-terang.mp4 atau
-   asset-gelap.mp4, menurut tema aktif saat tombol diklik) baru tampil
-   sesudah presentasi Asset ditonton UTUH, dari awal sampai akhir, secara
+   Tombol unduh video pre-render (assets/video/<cerita>-terang.mp4 atau
+   <cerita>-gelap.mp4, menurut tema aktif saat tombol diklik; cerita yang punya
+   versi 9:16 memberi <cerita>-<tema>-portrait.mp4 kepada smartphone — lihat
+   kelasPerangkat()) baru tampil
+   sesudah presentasi ditonton UTUH, dari awal sampai akhir, secara
    normal di sesi ini. Modul ini tidak mengubah pemutar, narator, maupun
    scene; ia hanya membaca:
      - status pemutar : atribut data-sip-status pada #layarSalesIdea
-     - scene aktif    : node .acs[data-acs] di panggung + SalesIdea10Jari.keadaan()
+     - scene aktif    : node scene cerita (.acs[data-acs], .rps[data-rps],
+                        .kbs[data-kbs], .eps[data-eps])
+                        di panggung + SalesIdea10Jari.keadaan()
      - jam scene      : animasi berhingga terpanjang di panggung saat scene
                         mulai berputar (ujungnya = durasi timeline scene)
    Satu putaran:
@@ -25,7 +30,7 @@
    keyboard pemutar dicatat (hanya dibaca) untuk membedakannya.
    Putaran gugur hanya bisa diganti putaran baru dari scene 1. Scene
    terakhir selesai dalam putaran sah → tombol tampil dan tetap tampil
-   sampai keluar dari Asset atau halaman dimuat ulang (status hanya di
+   sampai keluar dari cerita itu atau halaman dimuat ulang (status hanya di
    memori, tidak disimpan).
    Ini gerbang tampilan, bukan pengaman berkas: video tetap bisa diunduh
    langsung lewat URL-nya.
@@ -38,7 +43,42 @@
     asset: {
       sel: '.acs', attr: 'data-acs',
       video: { terang: 'assets/video/asset-terang.mp4', gelap: 'assets/video/asset-gelap.mp4' },
-      nama: { terang: 'PSG-Asset-Light.mp4', gelap: 'PSG-Asset-Dark.mp4' }
+      nama: { terang: 'PSG-Asset-Light.mp4', gelap: 'PSG-Asset-Dark.mp4' },
+      /* 9:16 (720×1280) untuk smartphone */
+      potret: {
+        video: { terang: 'assets/video/asset-terang-portrait.mp4', gelap: 'assets/video/asset-gelap-portrait.mp4' },
+        nama: { terang: 'PSG-Asset-Light-Portrait.mp4', gelap: 'PSG-Asset-Dark-Portrait.mp4' }
+      }
+    },
+    retirement: {
+      sel: '.rps', attr: 'data-rps',
+      video: { terang: 'assets/video/retirement-terang.mp4', gelap: 'assets/video/retirement-gelap.mp4' },
+      nama: { terang: 'PSG-Retirement-Light.mp4', gelap: 'PSG-Retirement-Dark.mp4' },
+      /* 9:16 (720×1280) untuk smartphone */
+      potret: {
+        video: { terang: 'assets/video/retirement-terang-portrait.mp4', gelap: 'assets/video/retirement-gelap-portrait.mp4' },
+        nama: { terang: 'PSG-Retirement-Light-Portrait.mp4', gelap: 'PSG-Retirement-Dark-Portrait.mp4' }
+      }
+    },
+    basket: {
+      sel: '.kbs', attr: 'data-kbs',
+      video: { terang: 'assets/video/basket-terang.mp4', gelap: 'assets/video/basket-gelap.mp4' },
+      nama: { terang: 'PSG-Basket-Light.mp4', gelap: 'PSG-Basket-Dark.mp4' },
+      /* 9:16 (720×1280) untuk smartphone */
+      potret: {
+        video: { terang: 'assets/video/basket-terang-portrait.mp4', gelap: 'assets/video/basket-gelap-portrait.mp4' },
+        nama: { terang: 'PSG-Basket-Light-Portrait.mp4', gelap: 'PSG-Basket-Dark-Portrait.mp4' }
+      }
+    },
+    education: {
+      sel: '.eps', attr: 'data-eps',
+      video: { terang: 'assets/video/education-terang.mp4', gelap: 'assets/video/education-gelap.mp4' },
+      nama: { terang: 'PSG-Education-Light.mp4', gelap: 'PSG-Education-Dark.mp4' },
+      /* 9:16 (720×1280) untuk smartphone */
+      potret: {
+        video: { terang: 'assets/video/education-terang-portrait.mp4', gelap: 'assets/video/education-gelap-portrait.mp4' },
+        nama: { terang: 'PSG-Education-Light-Portrait.mp4', gelap: 'PSG-Education-Dark-Portrait.mp4' }
+      }
     }
   };
   var TOLERANSI_MULAI = 400;   /* md: jam scene saat terlihat mulai berputar */
@@ -85,6 +125,9 @@
     if (!d || !d.jam) return;
     var t = waktu(d.jam), w = sekarang();
     if (t === null) return;   /* scene sudah dibongkar pemutar */
+    /* di ujung scene currentTime bisa terbaca beberapa md melewati akhir lalu
+       dijepit ke akhir; tanpa batas ini terbaca sebagai jam mundur */
+    t = Math.min(t, d.durasi);
     var dA = t - d.a, dW = w - d.w;
     if (d.jam.playbackRate !== 1) gugur('laju animasi diubah');
     else if (dA < -1) gugur('jam scene mundur (seek)');
@@ -197,7 +240,7 @@
     tombol.className = 'sip-unduh';
     tombol.hidden = true;
     tombol.textContent = '⬇ Download Video';
-    /* dipanggil sebelum aksi bawaan tautan: tema yang berlaku tema saat klik */
+    /* dipanggil sebelum aksi bawaan tautan: perangkat & tema yang berlaku saat klik */
     tombol.addEventListener('click', arahkanUnduhan);
     meta.appendChild(tombol);
   }
@@ -205,11 +248,42 @@
   function temaAktif() {
     return document.documentElement.getAttribute('data-theme') === 'dark' ? 'gelap' : 'terang';
   }
+  /* Kelas perangkat, dibaca ulang setiap kali dipakai (tidak disimpan), hanya dari
+     kemampuan browser — tanpa daftar nama perangkat atau user-agent:
+       1. penunjuk utama presisi + hover (mouse/trackpad)      → 'desktop'
+       2. tidak ada layar sentuh sama sekali                    → 'desktop'
+       3. layar sentuh: sisi pendek LAYAR (screen, px CSS)
+          < 600 → 'smartphone', ≥ 600 → 'tablet'
+     Ambang 600 = batas "smallest width 600dp" Android untuk tablet: HP terbesar
+     ±430–480, tablet kecil ≥ 744, foldable terbuka ≥ 600, layar luar foldable
+     < 600. Sisi pendek screen tidak berubah saat diputar, jadi orientasi tidak
+     mengubah kelas (HP landscape tetap smartphone), dan tidak ikut mengecil saat
+     jendela/split-screen atau "situs desktop" (viewport melebar, screen tetap).
+     Viewport hanya cadangan bila screen tidak tersedia.
+     Konsekuensi aturan 1 (disengaja): perangkat sentuh yang penunjuk utamanya
+     mouse/trackpad (HP + mouse, mode desktop seperti DeX, tablet + trackpad)
+     diperlakukan sebagai desktop → 16:9. Hasil video: smartphone → 9:16;
+     tablet & desktop → 16:9. */
+  var AMBANG_TABLET = 600;
+  function cocok(q) { try { return !!(window.matchMedia && window.matchMedia(q).matches); } catch (e) { return false; } }
+  function kelasPerangkat() {
+    if (cocok('(pointer: fine)') && cocok('(hover: hover)')) return 'desktop';
+    var sentuh = (navigator.maxTouchPoints || 0) > 0 || cocok('(any-pointer: coarse)') || 'ontouchstart' in window;
+    if (!sentuh) return 'desktop';
+    var l = window.screen || {}, pendek = Math.min(+l.width || 0, +l.height || 0);
+    if (!pendek) pendek = Math.min(window.innerWidth || 0, window.innerHeight || 0);
+    return pendek && pendek < AMBANG_TABLET ? 'smartphone' : 'tablet';
+  }
+  /* berkas unduhan: smartphone → 9:16 bila cerita punya; selain itu 16:9; lalu tema */
+  function berkasUnduh(c) {
+    var t = temaAktif(), v = c.potret && kelasPerangkat() === 'smartphone' ? c.potret : c;
+    return { href: v.video[t], nama: v.nama[t] };
+  }
   function arahkanUnduhan() {
     if (!tombol || !sesi) return;
-    var t = temaAktif(), href = sesi.c.video[t], nama = sesi.c.nama[t];
-    if (tombol.getAttribute('href') !== href) tombol.setAttribute('href', href);
-    if (tombol.getAttribute('download') !== nama) tombol.setAttribute('download', nama);
+    var b = berkasUnduh(sesi.c);
+    if (tombol.getAttribute('href') !== b.href) tombol.setAttribute('href', b.href);
+    if (tombol.getAttribute('download') !== b.nama) tombol.setAttribute('download', b.nama);
   }
   function tampilkan() {
     if (!tombol) return;
@@ -250,7 +324,8 @@
         alasan: sesi ? sesi.alasan : '',
         adegan: sesi && sesi.putaran ? sesi.putaran.indeks + 1 : 0,
         total: sesi ? sesi.total : 0,
-        tombol: !!(tombol && !tombol.hidden)
+        tombol: !!(tombol && !tombol.hidden),
+        perangkat: kelasPerangkat()
       };
     }
   });
