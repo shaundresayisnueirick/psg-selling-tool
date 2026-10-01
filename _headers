@@ -2,7 +2,7 @@
   X-Robots-Tag: noindex, nofollow
   X-Content-Type-Options: nosniff
   X-Frame-Options: SAMEORIGIN
-  Referrer-Policy: no-referrer
+  Referrer-Policy: same-origin
 
 # Service worker dan halaman utama tidak boleh disimpan peramban.
 # Tanpa ini, HP bisa memakai sw.js lama sampai berjam-jam sehingga versi

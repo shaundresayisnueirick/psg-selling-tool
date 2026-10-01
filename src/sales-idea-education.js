@@ -43,8 +43,6 @@
   var RAD = Math.PI / 180;
 
   /* teks yang sudah tampil pada versi sebelumnya (renderEducation) */
-  var CUE = 'Tampilkan visual, beri jeda, lalu kembangkan percakapan berdasarkan respons prospek.';
-  var PEMANTIK = 'Visual menjadi pemantik. Agen menyampaikan pertanyaan dan penjelasan dengan gaya sendiri.';
   var CHIP_SETORAN = ['Usia 0 • Rp2,6 jt/bln', 'Usia 5 • Rp4,3 jt/bln', 'Usia 10 • Rp8,2 jt/bln'];
 
   /* Naskah narasi: satu larik segmen per scene, urutan = ketukan visual.
@@ -899,11 +897,9 @@
           '<div class="eps-langit"></div>' + isi + '<div class="eps-vignette"></div>' +
         '</figure>' +
         '<div class="eps-text">' +
-          '<span class="eps-kicker">FOKUS PRESENTASI • ' + n + '/10</span>' +
           '<h3 class="eps-title">' + esc(step.title) + '</h3>' +
           '<p class="eps-focus">' + esc(step.focus) + '</p>' +
           '<p class="eps-isi">' + esc(step.body) + '</p>' + chip +
-          '<div class="eps-cue"><span aria-hidden="true">💡</span><div><b>Panduan untuk agen</b><p>' + esc(CUE) + '</p><p>' + esc(PEMANTIK) + '</p></div></div>' +
         '</div>' +
       '</div></div>';
   }

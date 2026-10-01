@@ -44,7 +44,6 @@
   var PEGAS = 'cubic-bezier(.34,1.4,.5,1)';
   var JATUH = 'cubic-bezier(.55,0,.8,.45)';
 
-  /* teks panduan yang sudah tampil pada versi sebelumnya (renderAssetCreation) */
   /* teks alternatif panggung (role="img"): isi visual tiap scene */
   var ARIA = [
     'Piramida tiga tingkat dibangun dari bawah: income protection, asset protection, lalu asset creation di puncak yang disorot.',
@@ -54,7 +53,6 @@
     'Kristal cahaya di atas alas pada latar senja. Pilihan 3, mekanisme berbeda: sekitar Rp6 juta per bulan, target aset Rp5 miliar. Contoh materi, bukan simulasi KPR dengan asumsi yang sama.',
     'Miniatur rumah berpindah dari aset baru Rp5 miliar ke tangan orang tua lalu ke tangan anak: warisan untuk anak.'
   ];
-  var CUE = 'Tampilkan visual ini, lalu kembangkan pertanyaan sesuai kondisi prospek.';
 
   /* Naskah narasi: satu larik segmen per scene, urutan = ketukan visual.
      Hanya pesan dan angka dari materi; nominal ditulis "... rupiah" supaya
@@ -792,7 +790,6 @@
           '<h3 class="acs-title">' + esc(step.title) + '</h3>' +
           '<p class="acs-focus">' + esc(step.focus) + '</p>' +
           '<p class="acs-isi">' + esc(step.body) + '</p>' +
-          '<div class="acs-cue"><span aria-hidden="true">💡</span><div><b>Panduan untuk agen</b><p>' + esc(CUE) + '</p></div></div>' +
         '</div>' +
       '</div></div>';
   }

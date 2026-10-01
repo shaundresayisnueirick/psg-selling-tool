@@ -29,7 +29,6 @@
   var MQ = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
   /* legenda tangan pertanyaan lama (handHtml di sales-idea.js) */
   var TANYA = ['Kebal?', 'Bisa memilih?', 'Tahu kapan?', 'Butuh uang besar?', 'Kantong sendiri / orang lain?'];
-  var CUE = 'Gunakan visual ini sebagai alat bantu presentasi. Agen bebas mengembangkan percakapan sesuai respons prospek.';
 
   /* ---------------- narasi (Bahasa Indonesia) ----------------
      Dasar: dialog presenter & teks di data fingers/reasons (sales-idea.js).
@@ -264,8 +263,7 @@
           '<div class="jps-fokus-tumpuk"><p class="jps-focus jps-fk0">' + esc(judul.join(' • ').toUpperCase()) + '</p>' +
             produk.map(function (s, i) { return '<p class="jps-focus jps-fk' + (i + 1) + '" aria-hidden="true">' + esc(teksLangkah(o, i).focus || s.title) + '</p>'; }).join('') +
           '</div>' +
-          (inti ? '<div class="jps-inti"><b>Inti yang disampaikan</b><p>' + esc(inti) + '</p></div>' : '') +
-          '<p class="jps-cue">' + esc(CUE) + '</p>' +
+          (inti ? '<div class="jps-inti"><p>' + esc(inti) + '</p></div>' : '') +
         '</div>' +
       '</div></div>';
   }
@@ -282,10 +280,8 @@
           '<span class="jps-kicker">BAB 2 • JARI PERTANYAAN ' + esc(step.q) + ' • ' + n + ' / 10 JARI</span>' +
           '<h3 class="jps-title">' + esc(step.title) + '</h3>' +
           (t.focus ? '<p class="jps-focus">' + esc(t.focus) + '</p>' : '') +
-          '<p class="jps-isi">' + esc(step.body) + '</p>' +
-          (t.supporting ? '<div class="jps-inti"><b>Inti yang disampaikan</b><p>' + esc(t.supporting) + '</p></div>' : '') +
-          (q === 5 ? '<div class="jps-lanjut"><b>10 Jari selesai.</b><span>Lanjutkan ke 3 alasan untuk menambahkan unsur emosional.</span></div>' : '') +
-          '<p class="jps-cue">' + esc(CUE) + '</p>' +
+          (step.body ? '<p class="jps-isi">' + esc(step.body) + '</p>' : '') +
+          (t.supporting ? '<div class="jps-inti"><p>' + esc(t.supporting) + '</p></div>' : '') +
         '</div>' +
       '</div></div>';
   }

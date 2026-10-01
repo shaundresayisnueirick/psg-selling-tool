@@ -33,7 +33,6 @@
 
   var EASE = 'cubic-bezier(.22,.8,.26,1)';
   var PEGAS = 'cubic-bezier(.34,1.45,.5,1)';
-  var CUE = '💡 Tampilkan visual ini, lalu kembangkan pertanyaan sesuai kondisi prospek.';
   var TAHAP = ['USIA MUDA', 'MASA PRODUKTIF', 'PERSIAPAN', 'PENSIUN', 'MASA PENSIUN'];
 
   function esc(s) {
@@ -193,7 +192,6 @@
           '<h3 class="rps-title">' + esc(step.title) + '</h3>' +
           '<p class="rps-focus">' + esc(step.focus) + '</p>' +
           '<p class="rps-isi">' + esc(step.body) + '</p>' +
-          '<p class="rps-cue">' + CUE + '</p>' +
         '</div>' +
       '</div></div>';
   }

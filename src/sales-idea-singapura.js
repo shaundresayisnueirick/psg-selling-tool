@@ -75,7 +75,6 @@
     'Rumah keluarga Leo. Rumah, pendidikan, kebutuhan sehari-hari, dan masa depan tetap berjalan. Penghasilan berhenti, kebutuhan tetap berjalan. Perisai perlindungan menjadi jembatan ke rumah.',
     'Leo di Singapura menelepon keluarganya. Garis penghasilan kembali ke rumah; jendela-jendela lain ikut menyala. Kerangka perisai bergaris putus-putus: sudah cukupkah rencana kita?'
   ];
-  var CUE = 'Biarkan cerita berjalan, lalu tanyakan kondisi keluarga prospek dengan bahasa sehari-hari.';
 
   /* Naskah narasi final (disetujui): satu larik segmen per scene, urutan =
      ketukan visual. 27 segmen. Angka ditulis sebagai kata (tanpa digit,
@@ -1241,7 +1240,6 @@
           '<h3 class="sgs-title">' + esc(step.title) + '</h3>' +
           '<p class="sgs-focus">' + esc(step.focus) + '</p>' +
           '<p class="sgs-isi">' + esc(step.body) + '</p>' +
-          '<div class="sgs-cue"><span aria-hidden="true">💡</span><div><b>Panduan untuk agen</b><p>' + esc(CUE) + '</p></div></div>' +
         '</div>' +
       '</div></div>';
   }

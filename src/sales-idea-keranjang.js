@@ -13,7 +13,7 @@
 
    Sepuluh scene mengikuti 10 langkah basketSteps di sales-idea.js
    dengan urutan yang sama. Judul dan isi diambil dari data itu;
-   fokus, panduan agen, label batu (Makan … Investasi), dan label
+   fokus, label batu (Makan … Investasi), dan label
    pilar (PROTEKSI, UANG) memakai teks yang sudah tampil di versi
    sebelumnya. Tidak ada angka atau klaim baru.
 
@@ -54,11 +54,6 @@
     'BANGUN DUA PILAR',
     'PROTEKSI + UANG'
   ];
-  function panduan(i) {
-    return i === 9 ? 'Arahkan perhatian prospek pada dua pilar. Jelaskan makna proteksi dan uang dengan bahasa Anda sendiri.'
-      : i === 6 ? 'Biarkan visual risiko dan keluarga menjadi pemantik. Tidak perlu membaca narasi kata demi kata.'
-      : 'Tampilkan visual, berhenti sejenak, lalu kembangkan percakapan berdasarkan respons prospek.';
-  }
   var LABEL_BATU = ['Makan', 'Pendidikan', 'Kesehatan', 'Cicilan', 'Orang tua', 'Pensiun', 'Tabungan', 'Investasi'];
 
   function esc(s) {
@@ -427,11 +422,9 @@
           '<div class="kbs-langit"></div>' + rig(n) + '<div class="kbs-vignette"></div>' +
         '</figure>' +
         '<div class="kbs-text">' +
-          '<span class="kbs-kicker">FOKUS PRESENTASI • ' + n + '/10</span>' +
           '<h3 class="kbs-title">' + esc(step.title) + '</h3>' +
           '<p class="kbs-focus">' + esc(FOKUS[i] || '') + '</p>' +
           '<p class="kbs-isi">' + esc(step.body) + '</p>' +
-          '<div class="kbs-cue"><span aria-hidden="true">💡</span><div><b>Panduan untuk agen</b><p>' + esc(panduan(i)) + '</p></div></div>' +
         '</div>' +
       '</div></div>';
   }
