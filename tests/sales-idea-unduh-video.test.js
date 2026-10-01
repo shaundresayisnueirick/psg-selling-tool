@@ -49,7 +49,12 @@
               retirement-gelap-portrait.mp4), tablet (Dark → retirement-gelap.mp4;
               diputar + Original → retirement-terang.mp4), foldable terbuka
               (Original/Dark → retirement-terang/gelap.mp4).
-   PERANGKAT  untuk Basket DAN Retirement: kelas perangkat
+   ACS4–ACS6  sama untuk Asset Creation: HP (potret Original → unduhan
+              asset-terang-portrait.mp4; diputar + Dark → tetap
+              asset-gelap-portrait.mp4), tablet (Dark → asset-gelap.mp4;
+              diputar + Original → asset-terang.mp4), foldable terbuka
+              (Original/Dark → asset-terang/gelap.mp4).
+   PERANGKAT  untuk Asset, Basket, dan Retirement: kelas perangkat
               (PSGUnduhVideo.keadaan().perangkat) dan berkas
               yang dipilih SAAT KLIK pada 23 profil emulasi Chromium (HP
               Android/iPhone potret & landscape, HP diputar di halaman yang sama,
@@ -107,6 +112,10 @@ const VIDEO_RET = {
 const VIDEO_KBS = {
   terang: { href: 'assets/video/basket-terang.mp4', nama: 'PSG-Basket-Light.mp4' },
   gelap: { href: 'assets/video/basket-gelap.mp4', nama: 'PSG-Basket-Dark.mp4' }
+};
+const VIDEO_P = {
+  terang: { href: 'assets/video/asset-terang-portrait.mp4', nama: 'PSG-Asset-Light-Portrait.mp4' },
+  gelap: { href: 'assets/video/asset-gelap-portrait.mp4', nama: 'PSG-Asset-Dark-Portrait.mp4' }
 };
 const VIDEO_RET_P = {
   terang: { href: 'assets/video/retirement-terang-portrait.mp4', nama: 'PSG-Retirement-Light-Portrait.mp4' },
@@ -285,10 +294,11 @@ function serve() {
     }
     return '';
   }
-  /* Retirement di perangkat emulasi: ditonton utuh → unduhan V1 (tema awal); lalu
-     (opsional) diputar + tema diganti → klik memilih V2; unduhan dicocokkan SHA-256 */
+  /* Retirement / Asset (6 scene) di perangkat emulasi: ditonton utuh → unduhan V1
+     (tema awal); lalu (opsional) diputar + tema diganti → klik memilih V2; unduhan
+     dicocokkan SHA-256 */
   async function tontonUnduhPerangkat(o) {
-    const { ctx, pg, errs } = await buka(o.tema, 'retirement', o.profil);
+    const { ctx, pg, errs } = await buka(o.tema, o.kunci || 'retirement', o.profil);
     const jejak = { terlihat: false }, g = o.g;
     cek(g, (await uv(pg)).perangkat === o.kelas, o.ket + ' → kelas ' + o.kelas, await uv(pg));
     await klik(pg, 'siPlay');
@@ -629,7 +639,7 @@ function serve() {
     },
     PERANGKAT: async () => {
       const g = 'PERANGKAT KLASIFIKASI & PEMETAAN (EMULASI)';
-      for (const [kunci, VL, VP] of [['basket', VIDEO_KBS, VIDEO_KBS_P], ['retirement', VIDEO_RET, VIDEO_RET_P]])
+      for (const [kunci, VL, VP] of [['basket', VIDEO_KBS, VIDEO_KBS_P], ['retirement', VIDEO_RET, VIDEO_RET_P], ['asset', VIDEO, VIDEO_P]])
       for (const p of PROFIL) {
         const { ctx, pg, errs } = await buka(null, kunci, p.o);
         if (p.putar) { await pg.setViewportSize({ width: p.putar[0], height: p.putar[1] }); await pg.waitForTimeout(150); }
@@ -716,6 +726,12 @@ function serve() {
       V1: VIDEO_RET.gelap, putar: [820, 1180], V2: VIDEO_RET.terang, ket: 'tablet landscape → diputar ke potret (tetap Landscape)' }),
     RET6: () => tontonUnduhPerangkat({ g: 'RET6 RETIREMENT FOLDABLE TERBUKA (EMULASI)', profil: HP(884, 1104, 2.5), tema: null, kelas: 'tablet',
       V1: VIDEO_RET.terang, putar: null, V2: VIDEO_RET.gelap, ket: 'foldable terbuka 884×1104' }),
+    ACS4: () => tontonUnduhPerangkat({ g: 'ACS4 ASSET SMARTPHONE (EMULASI)', kunci: 'asset', profil: HP(412, 915, 2.625), tema: null, kelas: 'smartphone',
+      V1: VIDEO_P.terang, putar: [915, 412], V2: VIDEO_P.gelap, ket: 'HP potret → diputar ke landscape (tetap Portrait)' }),
+    ACS5: () => tontonUnduhPerangkat({ g: 'ACS5 ASSET TABLET (EMULASI)', kunci: 'asset', profil: HP(1180, 820, 2), tema: 'dark', kelas: 'tablet',
+      V1: VIDEO.gelap, putar: [820, 1180], V2: VIDEO.terang, ket: 'tablet landscape → diputar ke potret (tetap Landscape)' }),
+    ACS6: () => tontonUnduhPerangkat({ g: 'ACS6 ASSET FOLDABLE TERBUKA (EMULASI)', kunci: 'asset', profil: HP(884, 1104, 2.5), tema: null, kelas: 'tablet',
+      V1: VIDEO.terang, putar: null, V2: VIDEO.gelap, ket: 'foldable terbuka 884×1104' }),
     KBS3: async () => {
       const g = 'KBS3 KERANJANG NEXT SEBELUM SELESAI';
       const { ctx, pg, errs } = await buka(null, 'basket');
@@ -732,7 +748,7 @@ function serve() {
   const t0 = Date.now();
   const antre = Object.keys(SKENARIO).filter((k) => !BAGIAN || BAGIAN.includes(k));
   /* panjang dulu, pendek mengisi slot */
-  const urut = ['KBS1', 'KBS2', 'KBS4', 'KBS5', 'KBS6', '1', '2', 'RET1', 'RET2', 'RET4', 'RET5', 'RET6', '3', '4', '6', '7', '5', 'BACK1', 'MUNDUR', 'LAJU', 'PAKSA', 'PERANGKAT', 'RET3', 'KBS3'].filter((k) => antre.includes(k));
+  const urut = ['KBS1', 'KBS2', 'KBS4', 'KBS5', 'KBS6', '1', '2', 'RET1', 'RET2', 'RET4', 'RET5', 'RET6', 'ACS4', 'ACS5', 'ACS6', '3', '4', '6', '7', '5', 'BACK1', 'MUNDUR', 'LAJU', 'PAKSA', 'PERANGKAT', 'RET3', 'KBS3'].filter((k) => antre.includes(k));
   await Promise.all(Array.from({ length: Math.min(PARALEL, urut.length) }, async () => {
     while (urut.length) {
       const k = urut.shift();
@@ -761,7 +777,7 @@ function serve() {
     /* tanpa 404 statis: setiap video yang dirujuk modul ada di repo, dan sebaliknya */
     const modul = fs.readFileSync(path.join(ROOT, 'src/sales-idea-video.js'), 'utf8');
     const dirujuk = [...new Set(modul.match(/assets\/video\/[\w.-]+\.mp4/g) || [])].sort();
-    const harus = Object.values(VIDEO).concat(Object.values(VIDEO_RET), Object.values(VIDEO_RET_P), Object.values(VIDEO_KBS), Object.values(VIDEO_KBS_P)).map((v) => v.href).sort();
+    const harus = Object.values(VIDEO).concat(Object.values(VIDEO_P), Object.values(VIDEO_RET), Object.values(VIDEO_RET_P), Object.values(VIDEO_KBS), Object.values(VIDEO_KBS_P)).map((v) => v.href).sort();
     const ada = harus.map((h) => { const f = path.join(ROOT, h); return fs.existsSync(f) ? fs.statSync(f).size : 0; });
     cek('R REPO', JSON.stringify(dirujuk) === JSON.stringify(harus) && ada.every((n) => n > 0), 'video yang dirujuk modul = ' + harus.join(' + ') + ', semuanya ada di repo', { dirujuk, ukuran: ada });
   }

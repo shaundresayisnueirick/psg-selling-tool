@@ -43,7 +43,12 @@
     asset: {
       sel: '.acs', attr: 'data-acs',
       video: { terang: 'assets/video/asset-terang.mp4', gelap: 'assets/video/asset-gelap.mp4' },
-      nama: { terang: 'PSG-Asset-Light.mp4', gelap: 'PSG-Asset-Dark.mp4' }
+      nama: { terang: 'PSG-Asset-Light.mp4', gelap: 'PSG-Asset-Dark.mp4' },
+      /* 9:16 (720×1280) untuk smartphone */
+      potret: {
+        video: { terang: 'assets/video/asset-terang-portrait.mp4', gelap: 'assets/video/asset-gelap-portrait.mp4' },
+        nama: { terang: 'PSG-Asset-Light-Portrait.mp4', gelap: 'PSG-Asset-Dark-Portrait.mp4' }
+      }
     },
     retirement: {
       sel: '.rps', attr: 'data-rps',

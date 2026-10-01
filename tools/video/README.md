@@ -1,14 +1,15 @@
 # Pre-render video Sales Idea (prototype)
 
 Alat developer, **bukan** bagian runtime PWA: tidak dimuat `index.html` / `sw.js`
-dan tidak mengubah berkas production. Cerita: **Asset Creation** (`asset`),
+dan tidak mengubah berkas production. Cerita: **Asset Creation** (`asset` 16:9 dan
+`asset-portrait` 9:16 untuk HP),
 **Retirement Planning** (`retirement` 16:9 dan `retirement-portrait` 9:16 untuk HP),
 dan **Keranjang Kehidupan** (`basket` 16:9 dan `basket-portrait` 9:16 untuk HP).
 
 ```sh
-node tools/video/render-video.mjs --cerita asset|retirement|retirement-portrait|basket|basket-portrait --out <folder-di-luar-repo>
+node tools/video/render-video.mjs --cerita asset|asset-portrait|retirement|retirement-portrait|basket|basket-portrait --out <folder-di-luar-repo>
 node tools/video/render-video.mjs --cek <folder>/<cerita>.json   # render masih segar?
-node tests/sales-idea-video.test.js [--cerita asset|retirement|retirement-portrait|basket|basket-portrait] [--hasil <folder>]
+node tests/sales-idea-video.test.js [--cerita asset|asset-portrait|retirement|retirement-portrait|basket|basket-portrait] [--hasil <folder>]
 ```
 
 Opsi: `--fps 30` (bawaan), `--jeda-scene <md>` (bawaan 0 = tanpa timing baru),
@@ -20,11 +21,12 @@ bawaan terang (Original). Folder output wajib di luar repo; bawaan
 folder sementara sistem. Video/WAV/PNG hasil render tidak boleh masuk Git,
 kecuali MP4 resmi tombol Download Video yang disalin manual dari hasil
 render: `assets/video/asset-terang.mp4`, `asset-gelap.mp4`,
+`asset-terang-portrait.mp4`, `asset-gelap-portrait.mp4`,
 `retirement-terang.mp4`, `retirement-gelap.mp4`, `retirement-terang-portrait.mp4`,
 `retirement-gelap-portrait.mp4`, `basket-terang.mp4`,
 `basket-gelap.mp4`, `basket-terang-portrait.mp4`, dan `basket-gelap-portrait.mp4`.
 
-## 9:16 untuk HP (`basket-portrait`, `retirement-portrait`)
+## 9:16 untuk HP (`basket-portrait`, `retirement-portrait`, `asset-portrait`)
 
 Halaman render 360×640 px CSS dengan skala piksel 2 → video 720×1280: tata letak
 responsif PWA versi ponsel (panggung di atas, teks di bawah), bukan video 16:9 yang
@@ -41,6 +43,12 @@ responsif (posisi %, huruf `cqmin`), dan panggung bertinggi tetap yang pendek
 membuat tokoh menutupi teks kartu S2. Logo sama dengan Basket; watermark 116 px
 (opasitas 6%) diukur agar tidak menyentuh teks yang terlihat, termasuk saat teks
 masuk.
+
+`asset-portrait` mengikuti pola `retirement-portrait` (panel teks mengikuti isi,
+panggung mengisi sisa; viewBox panggung dipaskan `paskan()` sehingga seluruh area
+inti tetap terlihat). Padding bawah kartu teks dibuat lebih besar sebagai zona
+watermark, karena baris terakhir S2 memanjang hampir selebar kartu; logo & watermark
+sama dengan Retirement.
 
 ## `--cek`: render masih segar?
 
