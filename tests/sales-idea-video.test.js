@@ -1,23 +1,24 @@
 #!/usr/bin/env node
 /* Pre-render video Sales Idea (tools/video/render-video.mjs) — cerita
-   Asset Creation (bawaan) dan Retirement Planning.
+   Asset Creation (bawaan), Retirement Planning, dan Keranjang Kehidupan
+   (16:9 `basket` dan 9:16 `basket-portrait`).
 
-     node tests/sales-idea-video.test.js [--cerita asset|retirement] [--hasil <folder>] [--out <folder>]
+     node tests/sales-idea-video.test.js [--cerita asset|retirement|basket|basket-portrait] [--hasil <folder>] [--out <folder>]
 
    Tanpa --hasil: cerita di-render ke folder di luar repo (bawaan: folder
    sementara sistem), lalu hasilnya diperiksa. Dengan --hasil: hanya
    memeriksa render yang sudah ada di folder itu.
    Yang dijaga:
    F. frame: jumlah = ceil(total durasi × fps), berurutan tanpa celah;
-      6 scene (Asset & Retirement), tiap scene punya frame dan hanya
+      6 scene (Asset & Retirement) / 10 scene (Keranjang), tiap scene punya frame dan hanya
       menampilkan scene-nya;
       panjang scene = maks(durasi timeline, akhir audio) + jeda scene;
-      frame awal & akhir tiap scene tersimpan 1280×720 dan sama dengan
+      frame awal & akhir tiap scene tersimpan 1280×720 (9:16: 720×1280) dan sama dengan
       catatan frame; render hanya maju (τ naik, tidak ada seek turun).
    J. jadwal audio dihitung ulang di sini dari manifest production,
       ketukan scene, dan jeda awal narator (dibaca dari sumbernya) —
       harus sama dengan jadwal render; semua segmen manifest (Asset 14,
-      Retirement 6) masing-masing sekali; scene tanpa ketukan = 1 segmen;
+      Retirement 6, Keranjang 10) masing-masing sekali; scene tanpa ketukan = 1 segmen;
       tidak ada tumpang tindih; audio selesai di dalam scene.
    K. ketukan yang terlihat di frame = ketukan analisis (≤ 1 frame).
    S. sinkron: di WAV hasil render, tiap segmen ditemukan lewat korelasi
@@ -29,9 +30,12 @@
    R. repo: berkas yang dilacak Git tidak berubah, git status sama,
       tidak ada MP4/WAV/PNG render di repo selain MP4 resmi tombol
       Download Video (assets/video/asset-terang.mp4, asset-gelap.mp4,
-      retirement-terang.mp4, retirement-gelap.mp4),
+      retirement-terang.mp4, retirement-gelap.mp4, basket-terang.mp4,
+      basket-gelap.mp4, basket-terang-portrait.mp4, basket-gelap-portrait.mp4),
       output di luar repo; --cek menyatakan render segar dan mendeteksi
-      input yang berubah.
+      input yang berubah serta parameter render efektif yang berubah (CSS
+      halaman render, resolusi, branding, encode, versi mesin) — perubahan
+      berkas alat saja tidak membuat render usang.
 
    Playwright tidak menjadi dependensi repo: dipakai dari instalasi global
    (NODE_PATH) bila tersedia. Keluar 0 = lulus, 1 = gagal, 2 = dilewati. */
@@ -62,13 +66,18 @@ const K = args.includes('--cerita') ? args[args.indexOf('--cerita') + 1] : 'asse
 /* yang diharapkan per cerita (render dari kode production yang sama) */
 const HARAP = {
   asset: { manifest: 'src/sales-idea-asset-audio.js', glob: 'PSGAssetAudio', scene: 6, segmen: 14, totalMin: 120000, totalMaks: 140000, kira: '≈ 129 dtk' },
-  retirement: { manifest: 'src/sales-idea-retirement-audio.js', glob: 'PSGRetirementAudio', scene: 6, segmen: 6, totalMin: 115000, totalMaks: 135000, kira: '≈ 125 dtk' }
+  retirement: { manifest: 'src/sales-idea-retirement-audio.js', glob: 'PSGRetirementAudio', scene: 6, segmen: 6, totalMin: 115000, totalMaks: 135000, kira: '≈ 125 dtk' },
+  basket: { manifest: 'src/sales-idea-keranjang-audio.js', glob: 'PSGKeranjangAudio', scene: 10, segmen: 10, totalMin: 115000, totalMaks: 135000, kira: '≈ 126 dtk' },
+  'basket-portrait': { manifest: 'src/sales-idea-keranjang-audio.js', glob: 'PSGKeranjangAudio', scene: 10, segmen: 10, totalMin: 115000, totalMaks: 135000, kira: '≈ 126 dtk', lebar: 720, tinggi: 1280 }
 }[K];
 if (!HARAP) { console.log('cerita tidak dikenal: ' + K); process.exit(1); }
+const LB = HARAP.lebar || 1280, TG = HARAP.tinggi || 720, UK = LB + '×' + TG;
 const FRAME_MD = 1000 / 30;
 /* satu-satunya video yang boleh ada di repo: MP4 resmi tombol Download Video */
 const MP4_RESMI = ['assets/video/asset-terang.mp4', 'assets/video/asset-gelap.mp4',
-  'assets/video/retirement-terang.mp4', 'assets/video/retirement-gelap.mp4'];
+  'assets/video/retirement-terang.mp4', 'assets/video/retirement-gelap.mp4',
+  'assets/video/basket-terang.mp4', 'assets/video/basket-gelap.mp4',
+  'assets/video/basket-terang-portrait.mp4', 'assets/video/basket-gelap-portrait.mp4'];
 const bukanResmi = (berkas) => berkas.filter((f) => !MP4_RESMI.includes(f));
 
 let gagal = 0;
@@ -106,7 +115,7 @@ function ukuranPng(file) { const b = fs.readFileSync(file); return b.slice(1, 4)
   const frame = JSON.parse(fs.readFileSync(path.join(OUT, meta.frameLog), 'utf8')).frame;
 
   /* ---------- F. frame ---------- */
-  cek(meta.cerita === K && meta.resolusi.lebar === 1280 && meta.resolusi.tinggi === 720 && meta.fps === 30, 'F: cerita ' + K + ', 1280×720, 30 fps', [meta.cerita, meta.resolusi, meta.fps]);
+  cek(meta.cerita === K && meta.resolusi.lebar === LB && meta.resolusi.tinggi === TG && meta.fps === 30, 'F: cerita ' + K + ', ' + UK + ', 30 fps', [meta.cerita, meta.resolusi, meta.fps]);
   cek(meta.scene.length === HARAP.scene && meta.scene.every((s, i) => s.n === i + 1), 'F: ' + HARAP.scene + ' scene berurutan', meta.scene.map((s) => s.n));
   const total = meta.scene.reduce((t, s) => t + s.panjangMd, 0);
   cek(Math.abs(total - meta.totalMd) < 1e-6 && meta.totalMd > HARAP.totalMin && meta.totalMd < HARAP.totalMaks, 'F: total durasi = jumlah panjang scene (' + HARAP.kira + ')', meta.totalMd);
@@ -125,7 +134,7 @@ function ukuranPng(file) { const b = fs.readFileSync(file); return b.slice(1, 4)
       const f = path.join(OUT, 'frame', K + '-S' + dua(s.n) + '-' + x + '.png');
       const ada = fs.existsSync(f);
       const uk = ada ? ukuranPng(f) : null;
-      cek(ada && uk && uk[0] === 1280 && uk[1] === 720 && sha1(fs.readFileSync(f)).slice(0, 16) === fx[4], 'F: scene ' + s.n + ' frame ' + x + ' tersimpan 1280×720 = frame ' + fx[0] + ' di catatan', { ada, uk });
+      cek(ada && uk && uk[0] === LB && uk[1] === TG && sha1(fs.readFileSync(f)).slice(0, 16) === fx[4], 'F: scene ' + s.n + ' frame ' + x + ' tersimpan ' + UK + ' = frame ' + fx[0] + ' di catatan', { ada, uk });
     }
   }
   cek(awal === frame.length, 'F: semua frame milik salah satu scene', awal);
@@ -225,7 +234,7 @@ function ukuranPng(file) { const b = fs.readFileSync(file); return b.slice(1, 4)
     const pr = spawnSync('ffprobe', ['-v', 'error', '-show_entries', 'stream=codec_name,width,height,avg_frame_rate:format=duration', '-of', 'json', mp4], { encoding: 'utf8' });
     if (pr.status === 0) {
       const j = JSON.parse(pr.stdout), v = j.streams.find((s) => s.width), a = j.streams.find((s) => !s.width);
-      cek(v && v.codec_name === 'h264' && v.width === 1280 && v.height === 720 && v.avg_frame_rate === '30/1', 'V: video H.264 1280×720 30 fps', v);
+      cek(v && v.codec_name === 'h264' && v.width === LB && v.height === TG && v.avg_frame_rate === '30/1', 'V: video H.264 ' + UK + ' 30 fps', v);
       cek(a && a.codec_name === 'aac', 'V: audio AAC', a);
       cek(Math.abs(+j.format.duration * 1000 - meta.totalMd) <= 2 * FRAME_MD, 'V: durasi MP4 = total durasi (±2 frame)', j.format.duration);
     } else console.log('  info  ffprobe tidak ada — stream MP4 tidak diperiksa');
@@ -244,6 +253,22 @@ function ukuranPng(file) { const b = fs.readFileSync(file); return b.slice(1, 4)
   const c2 = spawnSync(process.execPath, [ALAT, '--cek', usang], { encoding: 'utf8' });
   fs.unlinkSync(usang);
   cek(c2.status === 3 && c2.stdout.includes(HARAP.manifest), 'R: --cek mendeteksi input berubah (render usang)', c2.status);
+  /* parameter render efektif (bukan hash berkas alat) juga menentukan usang */
+  const ubahParam = [
+    ['CSS halaman render', (m) => { m.renderCss += '\n/* uji */'; }],
+    ['resolusi video', (m) => { m.resolusi = { lebar: m.resolusi.lebar + 2, tinggi: m.resolusi.tinggi }; }],
+    ['branding', (m) => { if (m.branding) m.branding.watermarkLebar += 1; else m.branding = { logo: 'assets/logo-psg.png' }; }],
+    ['parameter encode', (m) => { m.enkode = '-c:v libx264 -crf 28'; }],
+    ['versi mesin render', (m) => { m.mesin = 999; }]
+  ];
+  ubahParam.forEach(([nama, ubah]) => {
+    const m3 = JSON.parse(JSON.stringify(meta)); ubah(m3);
+    const f3 = path.join(os.tmpdir(), 'psg-video-uji-param-' + process.pid + '.json');
+    fs.writeFileSync(f3, JSON.stringify(m3));
+    const c3 = spawnSync(process.execPath, [ALAT, '--cek', f3], { encoding: 'utf8' });
+    fs.unlinkSync(f3);
+    cek(c3.status === 3 && c3.stdout.includes('parameter: ' + nama), 'R: --cek mendeteksi parameter render berubah: ' + nama, (c3.stdout || '') + (c3.stderr || ''));
+  });
   const dilacak = bukanResmi(git(['ls-files', '*.mp4', '*.wav']).split('\n').filter(Boolean));
   cek(!dilacak.length, 'R: tidak ada MP4/WAV yang dilacak Git selain ' + MP4_RESMI.join(' & '), dilacak);
   const sesudah = jejakRepo();

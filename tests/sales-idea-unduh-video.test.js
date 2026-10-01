@@ -36,9 +36,36 @@
               unduhan PSG-Retirement-Dark.mp4 = berkas repo.
    RET3       Retirement: Next sebelum scene 1 selesai → tidak sah, tombol
               tersembunyi.
-   R          pemutar, narator, scene Asset, CSS Retirement, manifest audio,
-              service worker tidak berubah; index.html hanya +1 skrip; semua
-              berkas video yang dirujuk modul ada di repo.
+   KBS1       Keranjang Kehidupan (tema Original) 10 scene ditonton utuh →
+              tombol tampil (tidak pernah sebelumnya); href basket-terang.mp4,
+              unduhan PSG-Basket-Light.mp4 = berkas repo; ganti ke Dark lalu
+              klik → PSG-Basket-Dark.mp4.
+   KBS2       Keranjang (tema Dark) ditonton utuh → href basket-gelap.mp4,
+              unduhan PSG-Basket-Dark.mp4 = berkas repo.
+   KBS3       Keranjang: Next sebelum scene 1 selesai → tidak sah, tombol
+              tersembunyi.
+   PERANGKAT  kelas perangkat (PSGUnduhVideo.keadaan().perangkat) dan berkas
+              yang dipilih SAAT KLIK pada 23 profil emulasi Chromium (HP
+              Android/iPhone potret & landscape, HP diputar di halaman yang sama,
+              layar luar foldable, tablet potret & landscape, foldable terbuka,
+              laptop, desktop, layar lebar/ultrawide, layar sentuh besar, jendela
+              desktop sempit, HP "situs desktop", HP + mouse dan tablet +
+              trackpad → desktop) × tema Original/Dark: smartphone →
+              basket-<tema>-portrait.mp4, lainnya → basket-<tema>.mp4.
+              Hanya simulasi browser (screen, viewport, sentuh, pointer, hover) —
+              bukan perangkat fisik.
+   KBS4       HP Android potret (emulasi), tema Original: 10 scene ditonton utuh →
+              unduhan PSG-Basket-Light-Portrait.mp4 = basket-terang-portrait.mp4;
+              HP diputar ke landscape + ganti ke Dark lalu klik →
+              basket-gelap-portrait.mp4 (tetap portrait).
+   KBS5       tablet (emulasi) tema Dark: ditonton utuh → basket-gelap.mp4;
+              diputar ke potret + ganti ke Original → basket-terang.mp4.
+   KBS6       foldable terbuka / layar besar sentuh (emulasi) tema Original:
+              ditonton utuh → basket-terang.mp4; ganti ke Dark → basket-gelap.mp4.
+   R          pemutar, narator & naskah Keranjang, scene Asset, CSS Retirement
+              & Keranjang, manifest audio, service worker tidak berubah;
+              index.html hanya +1 skrip; semua berkas video yang dirujuk modul
+              ada di repo.
 
    Playwright tidak menjadi dependensi repo: dipakai dari instalasi global
    (NODE_PATH) bila tersedia. Keluar 0 = lulus, 1 = gagal, 2 = dilewati. */
@@ -71,8 +98,51 @@ const VIDEO_RET = {
   terang: { href: 'assets/video/retirement-terang.mp4', nama: 'PSG-Retirement-Light.mp4' },
   gelap: { href: 'assets/video/retirement-gelap.mp4', nama: 'PSG-Retirement-Dark.mp4' }
 };
-/* cerita yang diuji: pilihan di hub + node scene di panggung */
-const CER = { asset: { pilih: 'asset', sel: '.acs', attr: 'data-acs' }, retirement: { pilih: 'retirement', sel: '.rps', attr: 'data-rps' } };
+const VIDEO_KBS = {
+  terang: { href: 'assets/video/basket-terang.mp4', nama: 'PSG-Basket-Light.mp4' },
+  gelap: { href: 'assets/video/basket-gelap.mp4', nama: 'PSG-Basket-Dark.mp4' }
+};
+const VIDEO_KBS_P = {
+  terang: { href: 'assets/video/basket-terang-portrait.mp4', nama: 'PSG-Basket-Light-Portrait.mp4' },
+  gelap: { href: 'assets/video/basket-gelap-portrait.mp4', nama: 'PSG-Basket-Dark-Portrait.mp4' }
+};
+/* profil emulasi Chromium (px CSS). sentuh = isMobile + hasTouch (pointer coarse, tanpa hover);
+   tanpa sentuh = mouse (pointer fine + hover). putar = viewport diubah di halaman yang sama
+   (screen tetap, seperti iOS). Simulasi browser, bukan perangkat fisik. */
+const HP = (w, h, dpr) => ({ viewport: { width: w, height: h }, screen: { width: w, height: h }, deviceScaleFactor: dpr, isMobile: true, hasTouch: true });
+const PC = (w, h, vw, vh) => ({ viewport: { width: vw || w, height: vh || h }, screen: { width: w, height: h } });
+const PROFIL = [
+  { nama: 'HP Android potret 412×915', o: HP(412, 915, 2.625), kelas: 'smartphone' },
+  { nama: 'HP Android landscape 915×412', o: HP(915, 412, 2.625), kelas: 'smartphone' },
+  { nama: 'iPhone potret 390×844', o: HP(390, 844, 3), kelas: 'smartphone' },
+  { nama: 'iPhone diputar ke landscape (viewport 844×390, screen tetap)', o: HP(390, 844, 3), putar: [844, 390], kelas: 'smartphone' },
+  { nama: 'HP besar 430×932', o: HP(430, 932, 3), kelas: 'smartphone' },
+  { nama: 'HP "situs desktop" (viewport 980×2130, screen 412×915)', o: Object.assign(HP(412, 915, 2.625), { viewport: { width: 980, height: 2130 } }), kelas: 'smartphone' },
+  { nama: 'foldable tertutup / layar luar 344×882', o: HP(344, 882, 3), kelas: 'smartphone' },
+  { nama: 'tablet potret 820×1180', o: HP(820, 1180, 2), kelas: 'tablet' },
+  { nama: 'tablet landscape 1180×820', o: HP(1180, 820, 2), kelas: 'tablet' },
+  { nama: 'tablet diputar ke potret (viewport 820×1180, screen tetap)', o: HP(1180, 820, 2), putar: [820, 1180], kelas: 'tablet' },
+  { nama: 'tablet kecil potret 744×1133', o: HP(744, 1133, 2), kelas: 'tablet' },
+  { nama: 'tablet Android 800×1280', o: HP(800, 1280, 2), kelas: 'tablet' },
+  { nama: 'foldable terbuka potret 884×1104', o: HP(884, 1104, 2.5), kelas: 'tablet' },
+  { nama: 'foldable terbuka landscape 1104×884', o: HP(1104, 884, 2.5), kelas: 'tablet' },
+  { nama: 'layar sentuh besar tanpa mouse 1366×768 (mis. 2-in-1 mode tablet)', o: HP(1366, 768, 1), kelas: 'tablet' },
+  /* aturan 1: penunjuk utama mouse/trackpad + hover → desktop, walau layar kecil (konsekuensi yang disengaja) */
+  { nama: 'HP + mouse / mode desktop (screen 412×915, pointer presisi + hover)', o: PC(412, 915), kelas: 'desktop' },
+  { nama: 'tablet + trackpad (screen 820×1180, pointer presisi + hover)', o: PC(820, 1180), kelas: 'desktop' },
+  { nama: 'laptop 1366×768', o: PC(1366, 768), kelas: 'desktop' },
+  { nama: 'laptop 1440×900', o: PC(1440, 900), kelas: 'desktop' },
+  { nama: 'desktop 1920×1080', o: PC(1920, 1080), kelas: 'desktop' },
+  { nama: 'layar lebar 2560×1440', o: PC(2560, 1440), kelas: 'desktop' },
+  { nama: 'ultrawide 3440×1440', o: PC(3440, 1440), kelas: 'desktop' },
+  { nama: 'desktop, jendela sempit 400×800 (screen 1920×1080)', o: PC(1920, 1080, 400, 800), kelas: 'desktop' }
+];
+/* cerita yang diuji: pilihan di hub + node scene di panggung + jumlah scene */
+const CER = {
+  asset: { pilih: 'asset', sel: '.acs', attr: 'data-acs', jumlah: 6 },
+  retirement: { pilih: 'retirement', sel: '.rps', attr: 'data-rps', jumlah: 6 },
+  basket: { pilih: 'basket', sel: '.kbs', attr: 'data-kbs', jumlah: 10 }
+};
 
 const hasil = [];
 function cek(grup, ok, label, info) { hasil.push({ grup, ok: !!ok, label, info }); }
@@ -110,9 +180,9 @@ function serve() {
   }
   const bukaAsset = (pg) => bukaCerita(pg, CER.asset);
   const ceritaDi = new WeakMap();
-  async function buka(tema, kunci) {
+  async function buka(tema, kunci, profil) {
     const c = CER[kunci || 'asset'];
-    const ctx = await br.newContext({ viewport: { width: 1366, height: 768 }, acceptDownloads: true });
+    const ctx = await br.newContext(Object.assign({ viewport: { width: 1366, height: 768 }, acceptDownloads: true }, profil || {}));
     const pg = await ctx.newPage();
     const errs = [];
     pg.on('pageerror', (e) => errs.push(e.message));
@@ -140,6 +210,17 @@ function serve() {
     document.removeEventListener('click', tangkap);
     return { tema: document.documentElement.getAttribute('data-theme'), sebelumKlik, saatKlik };
   });
+  /* klik tombol (dispatch, aksi bawaan dicegah) → atribut yang berlaku SAAT klik */
+  const klikTangkap = (pg) => pg.evaluate(() => {
+    const a = document.querySelector('#layarSalesIdea .sip-unduh');
+    if (!a) return null;
+    let saatKlik = null;
+    const tangkap = (e) => { if (e.target === a) { saatKlik = { href: a.getAttribute('href'), unduh: a.getAttribute('download') }; e.preventDefault(); } };
+    document.addEventListener('click', tangkap);
+    a.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+    document.removeEventListener('click', tangkap);
+    return saatKlik;
+  });
   /* klik tombol sungguhan → unduhan; nama & isi dibandingkan dengan berkas repo */
   async function unduh(pg, tema, V) {
     const v = (V || VIDEO)[tema];
@@ -155,20 +236,27 @@ function serve() {
     return !!(b && !b.hidden && b.getClientRects().length && getComputedStyle(b).visibility !== 'hidden');
   });
   const klik = async (pg, id) => { await pg.click('#' + id); await pg.waitForTimeout(200); };
-  /* scene aktif ditonton sampai status 'selesai'; tombol yang terlihat sebelum itu dicatat */
+  /* scene aktif ditonton sampai status 'selesai'; tombol yang terlihat sebelum itu dicatat.
+     Status & tombol dibaca dalam satu evaluate: dibaca terpisah, scene terakhir bisa
+     selesai di antara keduanya dan tombol yang sah tercatat "terlihat sebelum selesai". */
   async function tonton(pg, jejak) {
     const t0 = Date.now();
     while (Date.now() - t0 < 70000) {
-      const s = await status(pg);
+      const [s, v] = await pg.evaluate(() => {
+        const b = document.querySelector('#layarSalesIdea .sip-unduh');
+        return [document.getElementById('layarSalesIdea').getAttribute('data-sip-status'),
+          !!(b && !b.hidden && b.getClientRects().length && getComputedStyle(b).visibility !== 'hidden')];
+      });
       if (s === 'selesai') return true;
-      if (jejak && await terlihat(pg)) jejak.terlihat = true;
+      if (jejak && v) jejak.terlihat = true;
       await pg.waitForTimeout(250);
     }
     return false;
   }
-  /* dari scene aktif (sudah berputar) sampai scene 6 selesai; jeda: { n: true } → pause/resume */
+  /* dari scene aktif (sudah berputar) sampai scene terakhir selesai; jeda: { n: true } → pause/resume */
   async function tontonSampaiAkhir(pg, dari, jejak, jeda) {
-    for (let n = dari; n <= 6; n++) {
+    const akhir = (ceritaDi.get(pg) || CER.asset).jumlah;
+    for (let n = dari; n <= akhir; n++) {
       if (await adegan(pg) !== n) return 'scene aktif ' + (await adegan(pg)) + ', diharapkan ' + n;
       if (jeda && jeda[n]) {
         await pg.waitForTimeout(2000);
@@ -180,7 +268,7 @@ function serve() {
         jeda.hasil.push({ n, lanjut: await status(pg) });
       }
       if (!(await tonton(pg, jejak))) return 'scene ' + n + ' tidak selesai';
-      if (n < 6) {
+      if (n < akhir) {
         if (jejak && await terlihat(pg)) jejak.terlihat = true;
         await klik(pg, 'siNext');
       }
@@ -459,13 +547,151 @@ function serve() {
       cek(g, k.status === 'tidak-sah' && /NEXT/.test(k.alasan) && !(await terlihat(pg)), 'Next sebelum scene 1 selesai → tidak sah, tombol tersembunyi', k);
       cek(g, !errs.length, 'tanpa error halaman', errs);
       await ctx.close();
+    },
+    KBS1: async () => {
+      const g = 'KBS1 KERANJANG ORIGINAL';
+      const { ctx, pg, errs } = await buka(null, 'basket');
+      const jejak = { terlihat: false };
+      const k0 = await uv(pg);
+      cek(g, (await temaHalaman(pg)) === 'original' && !(await terlihat(pg)) && k0.cerita === 'basket' && k0.status === 'belum', 'Keranjang dibuka (tema Original): tombol tersembunyi, status belum', k0);
+      await klik(pg, 'siPlay');
+      cek(g, (await uv(pg)).status === 'berjalan', 'Play scene 1 dari awal → putaran berjalan', await uv(pg));
+      const err = await tontonSampaiAkhir(pg, 1, jejak);
+      cek(g, !err, 'scene 1–10 ditonton sampai selesai, Next di antaranya', err);
+      cek(g, !jejak.terlihat, 'tombol tidak pernah terlihat sebelum scene 10 selesai');
+      await pg.waitForTimeout(300);
+      const k = await uv(pg);
+      cek(g, k.status === 'selesai' && k.total === 10 && k.tombol && (await terlihat(pg)), 'scene 10 selesai → completion sah, tombol tampil', k);
+      cek(g, JSON.stringify(await atributUnduh(pg)) === JSON.stringify({ href: VIDEO_KBS.terang.href, unduh: VIDEO_KBS.terang.nama }),
+        'tema Original: tombol mengarah ke ' + VIDEO_KBS.terang.href + ' (unduh sebagai ' + VIDEO_KBS.terang.nama + ')', await atributUnduh(pg));
+      const u1 = await unduh(pg, 'terang', VIDEO_KBS);
+      cek(g, u1.ok, 'klik (Original) → unduhan ' + VIDEO_KBS.terang.nama + ' (ukuran & SHA-256 = ' + VIDEO_KBS.terang.href + ')', u1);
+      const s1 = await gantiTemaLaluKlik(pg);
+      cek(g, s1.tema === 'dark' && s1.saatKlik && s1.saatKlik.href === VIDEO_KBS.gelap.href && s1.saatKlik.unduh === VIDEO_KBS.gelap.nama,
+        'ganti ke Dark lalu klik pada tick yang sama → ' + VIDEO_KBS.gelap.href + ' / ' + VIDEO_KBS.gelap.nama + ' (tema saat klik)', s1);
+      const u2 = await unduh(pg, 'gelap', VIDEO_KBS);
+      cek(g, u2.ok, 'klik (Dark) → unduhan ' + VIDEO_KBS.gelap.nama + ' (ukuran & SHA-256 = ' + VIDEO_KBS.gelap.href + ')', u2);
+      if (BUKTI) { fs.mkdirSync(BUKTI, { recursive: true }); await pg.screenshot({ path: path.join(BUKTI, 'unduh-basket-gelap.png') }); }
+      cek(g, !errs.length, 'tanpa error halaman', errs);
+      await ctx.close();
+    },
+    KBS2: async () => {
+      const g = 'KBS2 KERANJANG DARK';
+      const { ctx, pg, errs } = await buka('dark', 'basket');
+      cek(g, (await temaHalaman(pg)) === 'dark', 'Keranjang diputar dalam tema Dark', await temaHalaman(pg));
+      const jejak = { terlihat: false };
+      await klik(pg, 'siPlay');
+      const err = await tontonSampaiAkhir(pg, 1, jejak);
+      cek(g, !err && !jejak.terlihat, 'scene 1–10 ditonton sampai selesai; tombol tidak terlihat sebelumnya', err);
+      await pg.waitForTimeout(300);
+      const k = await uv(pg);
+      cek(g, k.status === 'selesai' && (await terlihat(pg)), 'completion sah → tombol tampil', k);
+      cek(g, JSON.stringify(await atributUnduh(pg)) === JSON.stringify({ href: VIDEO_KBS.gelap.href, unduh: VIDEO_KBS.gelap.nama }),
+        'tema Dark: tombol mengarah ke ' + VIDEO_KBS.gelap.href + ' (unduh sebagai ' + VIDEO_KBS.gelap.nama + ')', await atributUnduh(pg));
+      const u = await unduh(pg, 'gelap', VIDEO_KBS);
+      cek(g, u.ok, 'klik (Dark) → unduhan ' + VIDEO_KBS.gelap.nama + ' (ukuran & SHA-256 = ' + VIDEO_KBS.gelap.href + ')', u);
+      cek(g, !errs.length, 'tanpa error halaman', errs);
+      await ctx.close();
+    },
+    PERANGKAT: async () => {
+      const g = 'PERANGKAT KLASIFIKASI & PEMETAAN (EMULASI)';
+      for (const p of PROFIL) {
+        const { ctx, pg, errs } = await buka(null, 'basket', p.o);
+        if (p.putar) { await pg.setViewportSize({ width: p.putar[0], height: p.putar[1] }); await pg.waitForTimeout(150); }
+        const hasil = { kelas: (await uv(pg)).perangkat, tema: {} };
+        for (let i = 0; i < 2; i++) {
+          const tema = await temaHalaman(pg), k = await klikTangkap(pg);
+          hasil.tema[tema] = k;
+          if (i === 0) { await gantiTema(pg); await pg.waitForTimeout(50); }
+        }
+        const V = p.kelas === 'smartphone' ? VIDEO_KBS_P : VIDEO_KBS;
+        const benar = (t, v) => hasil.tema[t] && hasil.tema[t].href === v.href && hasil.tema[t].unduh === v.nama;
+        cek(g, hasil.kelas === p.kelas && benar('original', V.terang) && benar('dark', V.gelap) && !errs.length,
+          p.nama + ' → ' + p.kelas + ' → ' + (p.kelas === 'smartphone' ? 'Portrait' : 'Landscape') + ' (Original: ' + V.terang.href.split('/').pop() + ', Dark: ' + V.gelap.href.split('/').pop() + ')', Object.assign(hasil, { errs }));
+        await ctx.close();
+      }
+    },
+    KBS4: async () => {
+      const g = 'KBS4 KERANJANG SMARTPHONE (EMULASI)';
+      const { ctx, pg, errs } = await buka(null, 'basket', HP(412, 915, 2.625));
+      const jejak = { terlihat: false };
+      cek(g, (await uv(pg)).perangkat === 'smartphone' && (await temaHalaman(pg)) === 'original', 'HP potret, tema Original → kelas smartphone', await uv(pg));
+      await klik(pg, 'siPlay');
+      const err = await tontonSampaiAkhir(pg, 1, jejak);
+      cek(g, !err && !jejak.terlihat, 'scene 1–10 ditonton sampai selesai; tombol tidak terlihat sebelumnya', err);
+      await pg.waitForTimeout(300);
+      cek(g, (await uv(pg)).status === 'selesai' && (await terlihat(pg)), 'completion sah → tombol tampil', await uv(pg));
+      const u1 = await unduh(pg, 'terang', VIDEO_KBS_P);
+      cek(g, u1.ok, 'klik (HP potret, Original) → unduhan ' + VIDEO_KBS_P.terang.nama + ' (ukuran & SHA-256 = ' + VIDEO_KBS_P.terang.href + ')', u1);
+      await pg.setViewportSize({ width: 915, height: 412 });
+      await pg.waitForTimeout(300);
+      const s1 = await gantiTemaLaluKlik(pg);
+      cek(g, s1.tema === 'dark' && s1.saatKlik && s1.saatKlik.href === VIDEO_KBS_P.gelap.href && s1.saatKlik.unduh === VIDEO_KBS_P.gelap.nama,
+        'HP diputar ke landscape + ganti ke Dark lalu klik → tetap Portrait: ' + VIDEO_KBS_P.gelap.href, s1);
+      const u2 = await unduh(pg, 'gelap', VIDEO_KBS_P);
+      cek(g, u2.ok, 'klik (HP landscape, Dark) → unduhan ' + VIDEO_KBS_P.gelap.nama + ' (ukuran & SHA-256 = ' + VIDEO_KBS_P.gelap.href + ')', u2);
+      if (BUKTI) { fs.mkdirSync(BUKTI, { recursive: true }); await pg.screenshot({ path: path.join(BUKTI, 'unduh-basket-hp.png') }); }
+      cek(g, !errs.length, 'tanpa error halaman', errs);
+      await ctx.close();
+    },
+    KBS5: async () => {
+      const g = 'KBS5 KERANJANG TABLET (EMULASI)';
+      const { ctx, pg, errs } = await buka('dark', 'basket', HP(1180, 820, 2));
+      const jejak = { terlihat: false };
+      cek(g, (await uv(pg)).perangkat === 'tablet' && (await temaHalaman(pg)) === 'dark', 'tablet landscape, tema Dark → kelas tablet', await uv(pg));
+      await klik(pg, 'siPlay');
+      const err = await tontonSampaiAkhir(pg, 1, jejak);
+      cek(g, !err && !jejak.terlihat, 'scene 1–10 ditonton sampai selesai; tombol tidak terlihat sebelumnya', err);
+      await pg.waitForTimeout(300);
+      cek(g, (await uv(pg)).status === 'selesai' && (await terlihat(pg)), 'completion sah → tombol tampil', await uv(pg));
+      const u1 = await unduh(pg, 'gelap', VIDEO_KBS);
+      cek(g, u1.ok, 'klik (tablet, Dark) → unduhan ' + VIDEO_KBS.gelap.nama + ' (ukuran & SHA-256 = ' + VIDEO_KBS.gelap.href + ')', u1);
+      await pg.setViewportSize({ width: 820, height: 1180 });
+      await pg.waitForTimeout(300);
+      const s1 = await gantiTemaLaluKlik(pg);
+      cek(g, s1.tema === 'original' && s1.saatKlik && s1.saatKlik.href === VIDEO_KBS.terang.href && s1.saatKlik.unduh === VIDEO_KBS.terang.nama,
+        'tablet diputar ke potret + ganti ke Original lalu klik → tetap Landscape: ' + VIDEO_KBS.terang.href, s1);
+      const u2 = await unduh(pg, 'terang', VIDEO_KBS);
+      cek(g, u2.ok, 'klik (tablet potret, Original) → unduhan ' + VIDEO_KBS.terang.nama + ' (ukuran & SHA-256 = ' + VIDEO_KBS.terang.href + ')', u2);
+      cek(g, !errs.length, 'tanpa error halaman', errs);
+      await ctx.close();
+    },
+    KBS6: async () => {
+      const g = 'KBS6 KERANJANG FOLDABLE TERBUKA (EMULASI)';
+      const { ctx, pg, errs } = await buka(null, 'basket', HP(884, 1104, 2.5));
+      const jejak = { terlihat: false };
+      cek(g, (await uv(pg)).perangkat === 'tablet', 'foldable terbuka 884×1104 (sentuh) → kelas tablet / layar besar', await uv(pg));
+      await klik(pg, 'siPlay');
+      const err = await tontonSampaiAkhir(pg, 1, jejak);
+      cek(g, !err && !jejak.terlihat, 'scene 1–10 ditonton sampai selesai; tombol tidak terlihat sebelumnya', err);
+      await pg.waitForTimeout(300);
+      cek(g, (await uv(pg)).status === 'selesai' && (await terlihat(pg)), 'completion sah → tombol tampil', await uv(pg));
+      const u1 = await unduh(pg, 'terang', VIDEO_KBS);
+      cek(g, u1.ok, 'klik (foldable, Original) → unduhan ' + VIDEO_KBS.terang.nama + ' (ukuran & SHA-256 = ' + VIDEO_KBS.terang.href + ')', u1);
+      const s1 = await gantiTemaLaluKlik(pg);
+      cek(g, s1.tema === 'dark' && s1.saatKlik && s1.saatKlik.href === VIDEO_KBS.gelap.href, 'ganti ke Dark lalu klik → ' + VIDEO_KBS.gelap.href, s1);
+      const u2 = await unduh(pg, 'gelap', VIDEO_KBS);
+      cek(g, u2.ok, 'klik (foldable, Dark) → unduhan ' + VIDEO_KBS.gelap.nama + ' (ukuran & SHA-256 = ' + VIDEO_KBS.gelap.href + ')', u2);
+      cek(g, !errs.length, 'tanpa error halaman', errs);
+      await ctx.close();
+    },
+    KBS3: async () => {
+      const g = 'KBS3 KERANJANG NEXT SEBELUM SELESAI';
+      const { ctx, pg, errs } = await buka(null, 'basket');
+      await klik(pg, 'siPlay');
+      await pg.waitForTimeout(1500);
+      await klik(pg, 'siNext');
+      const k = await uv(pg);
+      cek(g, k.status === 'tidak-sah' && /NEXT/.test(k.alasan) && !(await terlihat(pg)), 'Next sebelum scene 1 selesai → tidak sah, tombol tersembunyi', k);
+      cek(g, !errs.length, 'tanpa error halaman', errs);
+      await ctx.close();
     }
   };
 
   const t0 = Date.now();
   const antre = Object.keys(SKENARIO).filter((k) => !BAGIAN || BAGIAN.includes(k));
   /* panjang dulu, pendek mengisi slot */
-  const urut = ['1', '2', 'RET1', 'RET2', '3', '4', '6', '7', '5', 'BACK1', 'MUNDUR', 'LAJU', 'PAKSA', 'RET3'].filter((k) => antre.includes(k));
+  const urut = ['KBS1', 'KBS2', 'KBS4', 'KBS5', 'KBS6', '1', '2', 'RET1', 'RET2', '3', '4', '6', '7', '5', 'BACK1', 'MUNDUR', 'LAJU', 'PAKSA', 'PERANGKAT', 'RET3', 'KBS3'].filter((k) => antre.includes(k));
   await Promise.all(Array.from({ length: Math.min(PARALEL, urut.length) }, async () => {
     while (urut.length) {
       const k = urut.shift();
@@ -476,19 +702,25 @@ function serve() {
 
   /* R. berkas yang tidak boleh berubah */
   if (!BAGIAN || BAGIAN.includes('R')) {
-    /* timing scene Retirement (src/sales-idea-retirement.js) boleh disesuaikan dengan narasi; desainnya (CSS) tidak */
-    const jaga = ['src/sales-idea-player.js', 'src/sales-idea-keranjang.js', 'src/sales-idea-asset.js', 'src/sales-idea-asset.css',
-      'src/sales-idea-retirement.css', 'src/sales-idea.js', 'sw.js', 'assets/narasi'];
+    /* timing scene Retirement (src/sales-idea-retirement.js) dan Keranjang (bagian koreografi
+       src/sales-idea-keranjang.js) boleh disesuaikan dengan narasi; desainnya (CSS) tidak */
+    const jaga = ['src/sales-idea-player.js', 'src/sales-idea-asset.js', 'src/sales-idea-asset.css',
+      'src/sales-idea-retirement.css', 'src/sales-idea-keranjang.css', 'src/sales-idea.js', 'sw.js', 'assets/narasi'];
     const audio = fs.readdirSync(path.join(ROOT, 'src')).filter((f) => /-audio\.js$/.test(f)).map((f) => 'src/' + f);
     const d = spawnSync('git', ['diff', '--name-only', 'HEAD', '--'].concat(jaga, audio), { cwd: ROOT, encoding: 'utf8' }).stdout.trim();
-    cek('R REPO', !d, 'pemutar, narator, scene Asset, CSS Retirement, manifest audio, service worker tidak berubah', d);
+    cek('R REPO', !d, 'pemutar, scene Asset, CSS Retirement & Keranjang, manifest audio, service worker tidak berubah', d);
+    /* narator bersama (PSGNarasi) + naskah NARASI Keranjang: dari penanda bagian narasi sampai akhir berkas, identik dengan HEAD */
+    const narator = (src) => { const i = src.indexOf('/* ---------------- narasi suara (Web Speech API)'); return i < 0 ? null : src.slice(i); };
+    const nKini = narator(fs.readFileSync(path.join(ROOT, 'src/sales-idea-keranjang.js'), 'utf8'));
+    const nHead = narator(spawnSync('git', ['show', 'HEAD:src/sales-idea-keranjang.js'], { cwd: ROOT, encoding: 'utf8', maxBuffer: 1 << 26 }).stdout);
+    cek('R REPO', nKini !== null && nKini === nHead, 'narator & naskah Keranjang (src/sales-idea-keranjang.js, bagian narasi) tidak berubah', { kini: nKini && nKini.length, head: nHead && nHead.length });
     const idx = spawnSync('git', ['diff', '-U0', 'HEAD', '--', 'index.html'], { cwd: ROOT, encoding: 'utf8' }).stdout;
     const tambah = idx.split('\n').filter((l) => /^\+[^+]/.test(l)), hapus = idx.split('\n').filter((l) => /^-[^-]/.test(l));
     cek('R REPO', hapus.length === 0 && tambah.length <= 1 && (tambah.length === 0 || /src\/sales-idea-video\.js/.test(tambah[0])), 'index.html: hanya +1 tag skrip sales-idea-video.js', { tambah, hapus });
     /* tanpa 404 statis: setiap video yang dirujuk modul ada di repo, dan sebaliknya */
     const modul = fs.readFileSync(path.join(ROOT, 'src/sales-idea-video.js'), 'utf8');
     const dirujuk = [...new Set(modul.match(/assets\/video\/[\w.-]+\.mp4/g) || [])].sort();
-    const harus = Object.values(VIDEO).concat(Object.values(VIDEO_RET)).map((v) => v.href).sort();
+    const harus = Object.values(VIDEO).concat(Object.values(VIDEO_RET), Object.values(VIDEO_KBS), Object.values(VIDEO_KBS_P)).map((v) => v.href).sort();
     const ada = harus.map((h) => { const f = path.join(ROOT, h); return fs.existsSync(f) ? fs.statSync(f).size : 0; });
     cek('R REPO', JSON.stringify(dirujuk) === JSON.stringify(harus) && ada.every((n) => n > 0), 'video yang dirujuk modul = ' + harus.join(' + ') + ', semuanya ada di repo', { dirujuk, ukuran: ada });
   }
