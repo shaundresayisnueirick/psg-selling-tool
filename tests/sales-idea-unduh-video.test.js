@@ -28,9 +28,17 @@
               (status 'selesai' dipaksa lewat atribut) → tidak sah.
    7 RELOAD   scene 1 utuh + scene 2 sebagian, muat ulang, lanjut dari
               scene 2 sampai akhir → tersembunyi.
-   R          pemutar, narator, scene & manifest Asset, service worker tidak
-              berubah; index.html hanya +1 skrip; kedua berkas video yang
-              dirujuk modul ada di repo.
+   RET1       Retirement (tema Original) ditonton utuh → tombol tampil
+              (tidak pernah sebelumnya); href retirement-terang.mp4, unduhan
+              PSG-Retirement-Light.mp4 = berkas repo; ganti ke Dark lalu klik →
+              PSG-Retirement-Dark.mp4.
+   RET2       Retirement (tema Dark) ditonton utuh → href retirement-gelap.mp4,
+              unduhan PSG-Retirement-Dark.mp4 = berkas repo.
+   RET3       Retirement: Next sebelum scene 1 selesai → tidak sah, tombol
+              tersembunyi.
+   R          pemutar, narator, scene Asset, CSS Retirement, manifest audio,
+              service worker tidak berubah; index.html hanya +1 skrip; semua
+              berkas video yang dirujuk modul ada di repo.
 
    Playwright tidak menjadi dependensi repo: dipakai dari instalasi global
    (NODE_PATH) bila tersedia. Keluar 0 = lulus, 1 = gagal, 2 = dilewati. */
@@ -59,6 +67,12 @@ const VIDEO = {
   terang: { href: 'assets/video/asset-terang.mp4', nama: 'PSG-Asset-Light.mp4' },
   gelap: { href: 'assets/video/asset-gelap.mp4', nama: 'PSG-Asset-Dark.mp4' }
 };
+const VIDEO_RET = {
+  terang: { href: 'assets/video/retirement-terang.mp4', nama: 'PSG-Retirement-Light.mp4' },
+  gelap: { href: 'assets/video/retirement-gelap.mp4', nama: 'PSG-Retirement-Dark.mp4' }
+};
+/* cerita yang diuji: pilihan di hub + node scene di panggung */
+const CER = { asset: { pilih: 'asset', sel: '.acs', attr: 'data-acs' }, retirement: { pilih: 'retirement', sel: '.rps', attr: 'data-rps' } };
 
 const hasil = [];
 function cek(grup, ok, label, info) { hasil.push({ grup, ok: !!ok, label, info }); }
@@ -84,17 +98,20 @@ function serve() {
   const br = await chromium.launch();
 
   const tunggu = async (pg, fn, a, ms) => { const t0 = Date.now(); while (Date.now() - t0 < (ms || 10000)) { if (await pg.evaluate(fn, a)) return true; await pg.waitForTimeout(80); } return false; };
-  async function bukaAsset(pg) {
+  async function bukaCerita(pg, c) {
     await tunggu(pg, () => !!document.getElementById('btnSalesIdea') && !!window.PSGUnduhVideo, null, 15000);
     for (let i = 0; i < 4; i++) {
       await pg.evaluate(() => document.getElementById('btnSalesIdea').click());
-      if (await tunggu(pg, () => !!document.querySelector('[data-si-choice="asset"]'), null, 3000)) break;
+      if (await tunggu(pg, (p) => !!document.querySelector('[data-si-choice="' + p + '"]'), c.pilih, 3000)) break;
     }
-    await pg.evaluate(() => document.querySelector('[data-si-choice="asset"]').click());
-    await tunggu(pg, () => !!document.querySelector('#salesIdeaContent .acs'), null, 10000);
+    await pg.evaluate((p) => document.querySelector('[data-si-choice="' + p + '"]').click(), c.pilih);
+    await tunggu(pg, (s) => !!document.querySelector('#salesIdeaContent ' + s), c.sel, 10000);
     await pg.waitForTimeout(250);
   }
-  async function buka(tema) {
+  const bukaAsset = (pg) => bukaCerita(pg, CER.asset);
+  const ceritaDi = new WeakMap();
+  async function buka(tema, kunci) {
+    const c = CER[kunci || 'asset'];
     const ctx = await br.newContext({ viewport: { width: 1366, height: 768 }, acceptDownloads: true });
     const pg = await ctx.newPage();
     const errs = [];
@@ -102,7 +119,8 @@ function serve() {
     await pg.addInitScript(() => { try { sessionStorage.setItem('insuranceHub.access.v3', 'ok'); } catch (_) {} });
     if (tema) await ctx.addInitScript((t) => { try { if (!sessionStorage.getItem('uji.tema')) { localStorage.setItem('insuranceHub.theme.v3', t); sessionStorage.setItem('uji.tema', t); } } catch (_) {} }, tema);
     await pg.goto(URL);
-    await bukaAsset(pg);
+    await bukaCerita(pg, c);
+    ceritaDi.set(pg, c);
     return { ctx, pg, errs };
   }
   const temaHalaman = (pg) => pg.evaluate(() => document.documentElement.getAttribute('data-theme'));
@@ -123,14 +141,15 @@ function serve() {
     return { tema: document.documentElement.getAttribute('data-theme'), sebelumKlik, saatKlik };
   });
   /* klik tombol sungguhan → unduhan; nama & isi dibandingkan dengan berkas repo */
-  async function unduh(pg, tema) {
+  async function unduh(pg, tema, V) {
+    const v = (V || VIDEO)[tema];
     const [dl] = await Promise.all([pg.waitForEvent('download', { timeout: 30000 }), pg.click('#layarSalesIdea .sip-unduh')]);
-    const isi = fs.readFileSync(await dl.path()), asli = fs.readFileSync(path.join(ROOT, VIDEO[tema].href));
-    return { ok: dl.suggestedFilename() === VIDEO[tema].nama && isi.length === asli.length && sha256(isi) === sha256(asli), nama: dl.suggestedFilename(), ukuran: isi.length };
+    const isi = fs.readFileSync(await dl.path()), asli = fs.readFileSync(path.join(ROOT, v.href));
+    return { ok: dl.suggestedFilename() === v.nama && isi.length === asli.length && sha256(isi) === sha256(asli), nama: dl.suggestedFilename(), ukuran: isi.length };
   }
   const status = (pg) => pg.evaluate(() => document.getElementById('layarSalesIdea').getAttribute('data-sip-status'));
   const uv = (pg) => pg.evaluate(() => window.PSGUnduhVideo.keadaan());
-  const adegan = (pg) => pg.evaluate(() => { const n = document.querySelector('#salesIdeaContent .acs'); return n ? +n.getAttribute('data-acs') : 0; });
+  const adegan = (pg) => { const c = ceritaDi.get(pg) || CER.asset; return pg.evaluate(([s, a]) => { const n = document.querySelector('#salesIdeaContent ' + s); return n ? +n.getAttribute(a) : 0; }, [c.sel, c.attr]); };
   const terlihat = (pg) => pg.evaluate(() => {
     const b = document.querySelector('#layarSalesIdea .sip-unduh');
     return !!(b && !b.hidden && b.getClientRects().length && getComputedStyle(b).visibility !== 'hidden');
@@ -384,13 +403,69 @@ function serve() {
       cek(g, !(await terlihat(pg)) && (await uv(pg)).status === 'tidak-sah', 'akhir cerita: tombol tetap tersembunyi', await uv(pg));
       cek(g, !errs.length, 'tanpa error halaman', errs);
       await ctx.close();
+    },
+    RET1: async () => {
+      const g = 'RET1 RETIREMENT ORIGINAL';
+      const { ctx, pg, errs } = await buka(null, 'retirement');
+      const jejak = { terlihat: false };
+      const k0 = await uv(pg);
+      cek(g, (await temaHalaman(pg)) === 'original' && !(await terlihat(pg)) && k0.cerita === 'retirement' && k0.status === 'belum', 'Retirement dibuka (tema Original): tombol tersembunyi, status belum', k0);
+      await klik(pg, 'siPlay');
+      cek(g, (await uv(pg)).status === 'berjalan', 'Play scene 1 dari awal → putaran berjalan', await uv(pg));
+      const err = await tontonSampaiAkhir(pg, 1, jejak);
+      cek(g, !err, 'scene 1–6 ditonton sampai selesai, Next di antaranya', err);
+      cek(g, !jejak.terlihat, 'tombol tidak pernah terlihat sebelum scene 6 selesai');
+      await pg.waitForTimeout(300);
+      const k = await uv(pg);
+      cek(g, k.status === 'selesai' && k.tombol && (await terlihat(pg)), 'scene 6 selesai → completion sah, tombol tampil', k);
+      cek(g, JSON.stringify(await atributUnduh(pg)) === JSON.stringify({ href: VIDEO_RET.terang.href, unduh: VIDEO_RET.terang.nama }),
+        'tema Original: tombol mengarah ke ' + VIDEO_RET.terang.href + ' (unduh sebagai ' + VIDEO_RET.terang.nama + ')', await atributUnduh(pg));
+      const u1 = await unduh(pg, 'terang', VIDEO_RET);
+      cek(g, u1.ok, 'klik (Original) → unduhan ' + VIDEO_RET.terang.nama + ' (ukuran & SHA-256 = ' + VIDEO_RET.terang.href + ')', u1);
+      const s1 = await gantiTemaLaluKlik(pg);
+      cek(g, s1.tema === 'dark' && s1.saatKlik && s1.saatKlik.href === VIDEO_RET.gelap.href && s1.saatKlik.unduh === VIDEO_RET.gelap.nama,
+        'ganti ke Dark lalu klik pada tick yang sama → ' + VIDEO_RET.gelap.href + ' / ' + VIDEO_RET.gelap.nama + ' (tema saat klik)', s1);
+      const u2 = await unduh(pg, 'gelap', VIDEO_RET);
+      cek(g, u2.ok, 'klik (Dark) → unduhan ' + VIDEO_RET.gelap.nama + ' (ukuran & SHA-256 = ' + VIDEO_RET.gelap.href + ')', u2);
+      if (BUKTI) { fs.mkdirSync(BUKTI, { recursive: true }); await pg.screenshot({ path: path.join(BUKTI, 'unduh-retirement-gelap.png') }); }
+      cek(g, !errs.length, 'tanpa error halaman', errs);
+      await ctx.close();
+    },
+    RET2: async () => {
+      const g = 'RET2 RETIREMENT DARK';
+      const { ctx, pg, errs } = await buka('dark', 'retirement');
+      cek(g, (await temaHalaman(pg)) === 'dark', 'Retirement diputar dalam tema Dark', await temaHalaman(pg));
+      const jejak = { terlihat: false };
+      await klik(pg, 'siPlay');
+      const err = await tontonSampaiAkhir(pg, 1, jejak);
+      cek(g, !err && !jejak.terlihat, 'scene 1–6 ditonton sampai selesai; tombol tidak terlihat sebelumnya', err);
+      await pg.waitForTimeout(300);
+      const k = await uv(pg);
+      cek(g, k.status === 'selesai' && (await terlihat(pg)), 'completion sah → tombol tampil', k);
+      cek(g, JSON.stringify(await atributUnduh(pg)) === JSON.stringify({ href: VIDEO_RET.gelap.href, unduh: VIDEO_RET.gelap.nama }),
+        'tema Dark: tombol mengarah ke ' + VIDEO_RET.gelap.href + ' (unduh sebagai ' + VIDEO_RET.gelap.nama + ')', await atributUnduh(pg));
+      const u = await unduh(pg, 'gelap', VIDEO_RET);
+      cek(g, u.ok, 'klik (Dark) → unduhan ' + VIDEO_RET.gelap.nama + ' (ukuran & SHA-256 = ' + VIDEO_RET.gelap.href + ')', u);
+      cek(g, !errs.length, 'tanpa error halaman', errs);
+      await ctx.close();
+    },
+    RET3: async () => {
+      const g = 'RET3 RETIREMENT NEXT SEBELUM SELESAI';
+      const { ctx, pg, errs } = await buka(null, 'retirement');
+      await klik(pg, 'siPlay');
+      await pg.waitForTimeout(1500);
+      await klik(pg, 'siNext');
+      const k = await uv(pg);
+      cek(g, k.status === 'tidak-sah' && /NEXT/.test(k.alasan) && !(await terlihat(pg)), 'Next sebelum scene 1 selesai → tidak sah, tombol tersembunyi', k);
+      cek(g, !errs.length, 'tanpa error halaman', errs);
+      await ctx.close();
     }
   };
 
   const t0 = Date.now();
   const antre = Object.keys(SKENARIO).filter((k) => !BAGIAN || BAGIAN.includes(k));
   /* panjang dulu, pendek mengisi slot */
-  const urut = ['1', '2', '3', '4', '6', '7', '5', 'BACK1', 'MUNDUR', 'LAJU', 'PAKSA'].filter((k) => antre.includes(k));
+  const urut = ['1', '2', 'RET1', 'RET2', '3', '4', '6', '7', '5', 'BACK1', 'MUNDUR', 'LAJU', 'PAKSA', 'RET3'].filter((k) => antre.includes(k));
   await Promise.all(Array.from({ length: Math.min(PARALEL, urut.length) }, async () => {
     while (urut.length) {
       const k = urut.shift();
@@ -401,19 +476,21 @@ function serve() {
 
   /* R. berkas yang tidak boleh berubah */
   if (!BAGIAN || BAGIAN.includes('R')) {
-    const jaga = ['src/sales-idea-player.js', 'src/sales-idea-keranjang.js', 'src/sales-idea-asset.js', 'src/sales-idea-asset.css', 'src/sales-idea.js', 'sw.js', 'assets/narasi'];
+    /* timing scene Retirement (src/sales-idea-retirement.js) boleh disesuaikan dengan narasi; desainnya (CSS) tidak */
+    const jaga = ['src/sales-idea-player.js', 'src/sales-idea-keranjang.js', 'src/sales-idea-asset.js', 'src/sales-idea-asset.css',
+      'src/sales-idea-retirement.css', 'src/sales-idea.js', 'sw.js', 'assets/narasi'];
     const audio = fs.readdirSync(path.join(ROOT, 'src')).filter((f) => /-audio\.js$/.test(f)).map((f) => 'src/' + f);
     const d = spawnSync('git', ['diff', '--name-only', 'HEAD', '--'].concat(jaga, audio), { cwd: ROOT, encoding: 'utf8' }).stdout.trim();
-    cek('R REPO', !d, 'pemutar, narator, scene Asset, manifest audio, service worker tidak berubah', d);
+    cek('R REPO', !d, 'pemutar, narator, scene Asset, CSS Retirement, manifest audio, service worker tidak berubah', d);
     const idx = spawnSync('git', ['diff', '-U0', 'HEAD', '--', 'index.html'], { cwd: ROOT, encoding: 'utf8' }).stdout;
     const tambah = idx.split('\n').filter((l) => /^\+[^+]/.test(l)), hapus = idx.split('\n').filter((l) => /^-[^-]/.test(l));
     cek('R REPO', hapus.length === 0 && tambah.length <= 1 && (tambah.length === 0 || /src\/sales-idea-video\.js/.test(tambah[0])), 'index.html: hanya +1 tag skrip sales-idea-video.js', { tambah, hapus });
     /* tanpa 404 statis: setiap video yang dirujuk modul ada di repo, dan sebaliknya */
     const modul = fs.readFileSync(path.join(ROOT, 'src/sales-idea-video.js'), 'utf8');
     const dirujuk = [...new Set(modul.match(/assets\/video\/[\w.-]+\.mp4/g) || [])].sort();
-    const harus = Object.values(VIDEO).map((v) => v.href).sort();
+    const harus = Object.values(VIDEO).concat(Object.values(VIDEO_RET)).map((v) => v.href).sort();
     const ada = harus.map((h) => { const f = path.join(ROOT, h); return fs.existsSync(f) ? fs.statSync(f).size : 0; });
-    cek('R REPO', JSON.stringify(dirujuk) === JSON.stringify(harus) && ada.every((n) => n > 0), 'video yang dirujuk modul = ' + harus.join(' + ') + ', keduanya ada di repo', { dirujuk, ukuran: ada });
+    cek('R REPO', JSON.stringify(dirujuk) === JSON.stringify(harus) && ada.every((n) => n > 0), 'video yang dirujuk modul = ' + harus.join(' + ') + ', semuanya ada di repo', { dirujuk, ukuran: ada });
   }
 
   let grup = '';

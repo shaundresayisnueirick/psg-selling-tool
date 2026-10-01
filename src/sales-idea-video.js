@@ -1,13 +1,14 @@
 /* ============================================================
-   Sales Idea → "⬇ Download Video" (pilot: Asset Creation saja)
+   Sales Idea → "⬇ Download Video" (Asset Creation, Retirement Planning)
    ------------------------------------------------------------
-   Tombol unduh video pre-render (assets/video/asset-terang.mp4 atau
-   asset-gelap.mp4, menurut tema aktif saat tombol diklik) baru tampil
-   sesudah presentasi Asset ditonton UTUH, dari awal sampai akhir, secara
+   Tombol unduh video pre-render (assets/video/<cerita>-terang.mp4 atau
+   <cerita>-gelap.mp4, menurut tema aktif saat tombol diklik) baru tampil
+   sesudah presentasi ditonton UTUH, dari awal sampai akhir, secara
    normal di sesi ini. Modul ini tidak mengubah pemutar, narator, maupun
    scene; ia hanya membaca:
      - status pemutar : atribut data-sip-status pada #layarSalesIdea
-     - scene aktif    : node .acs[data-acs] di panggung + SalesIdea10Jari.keadaan()
+     - scene aktif    : node scene cerita (.acs[data-acs], .rps[data-rps])
+                        di panggung + SalesIdea10Jari.keadaan()
      - jam scene      : animasi berhingga terpanjang di panggung saat scene
                         mulai berputar (ujungnya = durasi timeline scene)
    Satu putaran:
@@ -25,7 +26,7 @@
    keyboard pemutar dicatat (hanya dibaca) untuk membedakannya.
    Putaran gugur hanya bisa diganti putaran baru dari scene 1. Scene
    terakhir selesai dalam putaran sah → tombol tampil dan tetap tampil
-   sampai keluar dari Asset atau halaman dimuat ulang (status hanya di
+   sampai keluar dari cerita itu atau halaman dimuat ulang (status hanya di
    memori, tidak disimpan).
    Ini gerbang tampilan, bukan pengaman berkas: video tetap bisa diunduh
    langsung lewat URL-nya.
@@ -39,6 +40,11 @@
       sel: '.acs', attr: 'data-acs',
       video: { terang: 'assets/video/asset-terang.mp4', gelap: 'assets/video/asset-gelap.mp4' },
       nama: { terang: 'PSG-Asset-Light.mp4', gelap: 'PSG-Asset-Dark.mp4' }
+    },
+    retirement: {
+      sel: '.rps', attr: 'data-rps',
+      video: { terang: 'assets/video/retirement-terang.mp4', gelap: 'assets/video/retirement-gelap.mp4' },
+      nama: { terang: 'PSG-Retirement-Light.mp4', gelap: 'PSG-Retirement-Dark.mp4' }
     }
   };
   var TOLERANSI_MULAI = 400;   /* md: jam scene saat terlihat mulai berputar */

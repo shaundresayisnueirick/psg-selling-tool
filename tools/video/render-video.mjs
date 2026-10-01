@@ -3,9 +3,9 @@
    Prototype pre-render video Sales Idea (alat developer).
    ------------------------------------------------------------
    Bukan bagian runtime PWA: tidak dimuat index.html / sw.js dan tidak
-   mengubah berkas production. Prototype ini hanya untuk Asset Creation.
+   mengubah berkas production. Cerita: Asset Creation dan Retirement Planning.
 
-     node tools/video/render-video.mjs --cerita asset [--out <folder>]
+     node tools/video/render-video.mjs --cerita asset|retirement [--out <folder>]
           [--fps 30] [--jeda-scene 0] [--ffmpeg <path>] [--tanpa-encode]
      node tools/video/render-video.mjs --cek <folder>/asset.json
 
@@ -68,6 +68,18 @@ const CERITA = {
       '#layarSalesIdea .si-footer{display:none!important}',
       '#layarSalesIdea .si-back-hub,#layarSalesIdea .si-close,#layarSalesIdea [data-kbs-suara]{visibility:hidden!important}',
       '#layarSalesIdea .acs-cue{display:none!important}',
+      '#layarSalesIdea .sil-kartu{display:none!important}'
+    ].join('\n')
+  },
+  retirement: {
+    judul: 'Retirement Planning', pilih: 'retirement', sel: '.rps', attr: 'data-rps', jumlah: 6,
+    manifest: 'src/sales-idea-retirement-audio.js', glob: 'PSGRetirementAudio',
+    input: ['index.html', 'src/styles.css', 'src/branding.css', 'src/sales-idea-player.js', 'src/sales-idea-player.css',
+      'src/sales-idea.js', 'src/sales-idea-keranjang.js', 'src/psg-karakter.js', 'src/psg-karakter.css',
+      'src/sales-idea-retirement.js', 'src/sales-idea-retirement.css', 'src/sales-idea-retirement-audio.js'],
+    css: [
+      '#layarSalesIdea .si-footer{display:none!important}',
+      '#layarSalesIdea .si-back-hub,#layarSalesIdea .si-close,#layarSalesIdea [data-kbs-suara]{visibility:hidden!important}',
       '#layarSalesIdea .sil-kartu{display:none!important}'
     ].join('\n')
   }

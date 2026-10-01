@@ -1,12 +1,13 @@
 # Pre-render video Sales Idea (prototype)
 
 Alat developer, **bukan** bagian runtime PWA: tidak dimuat `index.html` / `sw.js`
-dan tidak mengubah berkas production. Saat ini hanya untuk **Asset Creation**.
+dan tidak mengubah berkas production. Cerita: **Asset Creation** (`asset`) dan
+**Retirement Planning** (`retirement`).
 
 ```sh
-node tools/video/render-video.mjs --cerita asset --out <folder-di-luar-repo>
-node tools/video/render-video.mjs --cek <folder>/asset.json   # render masih segar?
-node tests/sales-idea-video.test.js [--hasil <folder>]        # validasi prototype
+node tools/video/render-video.mjs --cerita asset|retirement --out <folder-di-luar-repo>
+node tools/video/render-video.mjs --cek <folder>/<cerita>.json   # render masih segar?
+node tests/sales-idea-video.test.js [--cerita asset|retirement] [--hasil <folder>]
 ```
 
 Opsi: `--fps 30` (bawaan), `--jeda-scene <md>` (bawaan 0 = tanpa timing baru),
@@ -16,8 +17,9 @@ ditanam saat encode lewat filter overlay ffmpeg; hanya berkas video).
 `--tema gelap` merender tema Dark Gold (kunci localStorage tema PWA yang sama);
 bawaan terang (Original). Folder output wajib di luar repo; bawaan
 folder sementara sistem. Video/WAV/PNG hasil render tidak boleh masuk Git,
-kecuali dua MP4 resmi tombol Download Video yang disalin manual dari hasil
-render: `assets/video/asset-terang.mp4` dan `assets/video/asset-gelap.mp4`.
+kecuali MP4 resmi tombol Download Video yang disalin manual dari hasil
+render: `assets/video/asset-terang.mp4`, `asset-gelap.mp4`,
+`retirement-terang.mp4`, dan `retirement-gelap.mp4`.
 
 ## Kebutuhan
 
@@ -51,12 +53,12 @@ render: `assets/video/asset-terang.mp4` dan `assets/video/asset-gelap.mp4`.
 
 | Berkas | Isi |
 |---|---|
-| `asset.json` | cerita, resolusi, fps, durasi & jadwal audio tiap scene/segmen, hash input (deteksi render usang), bukti UI tersembunyi & render maju, hasil validasi |
-| `asset.frame.json` | per frame: nomor, scene, τ (md), ketukan, sha1 PNG |
-| `asset.wav` | audio tersusun, 48 kHz mono PCM 16-bit |
-| `frame/asset-SNN-awal.png`, `-akhir.png` | frame pertama & terakhir tiap scene |
-| `asset-lembar-frame.png` | lembar kontak frame awal/akhir |
-| `asset.mp4` | hanya bila encoder tersedia |
+| `<cerita>.json` | cerita, resolusi, fps, durasi & jadwal audio tiap scene/segmen, hash input (deteksi render usang), bukti UI tersembunyi & render maju, hasil validasi |
+| `<cerita>.frame.json` | per frame: nomor, scene, τ (md), ketukan, sha1 PNG |
+| `<cerita>.wav` | audio tersusun, 48 kHz mono PCM 16-bit |
+| `frame/<cerita>-SNN-awal.png`, `-akhir.png` | frame pertama & terakhir tiap scene |
+| `<cerita>-lembar-frame.png` | lembar kontak frame awal/akhir |
+| `<cerita>.mp4` | hanya bila encoder tersedia |
 
 UI PWA (← Sales Idea, Narasi, ✕, bar kontrol, Panduan untuk agen, kartu akhir)
 disembunyikan lewat CSS yang hanya disuntikkan ke halaman render.
