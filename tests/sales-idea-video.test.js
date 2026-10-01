@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 /* Pre-render video Sales Idea (tools/video/render-video.mjs) — cerita
    Asset Creation (bawaan), Retirement Planning, dan Keranjang Kehidupan
-   (16:9 `basket` dan 9:16 `basket-portrait`).
+   (16:9 `retirement` / `basket`; 9:16 `retirement-portrait` / `basket-portrait`).
 
-     node tests/sales-idea-video.test.js [--cerita asset|retirement|basket|basket-portrait] [--hasil <folder>] [--out <folder>]
+     node tests/sales-idea-video.test.js [--cerita asset|retirement|retirement-portrait|basket|basket-portrait] [--hasil <folder>] [--out <folder>]
 
    Tanpa --hasil: cerita di-render ke folder di luar repo (bawaan: folder
    sementara sistem), lalu hasilnya diperiksa. Dengan --hasil: hanya
@@ -30,7 +30,8 @@
    R. repo: berkas yang dilacak Git tidak berubah, git status sama,
       tidak ada MP4/WAV/PNG render di repo selain MP4 resmi tombol
       Download Video (assets/video/asset-terang.mp4, asset-gelap.mp4,
-      retirement-terang.mp4, retirement-gelap.mp4, basket-terang.mp4,
+      retirement-terang.mp4, retirement-gelap.mp4, retirement-terang-portrait.mp4,
+      retirement-gelap-portrait.mp4, basket-terang.mp4,
       basket-gelap.mp4, basket-terang-portrait.mp4, basket-gelap-portrait.mp4),
       output di luar repo; --cek menyatakan render segar dan mendeteksi
       input yang berubah serta parameter render efektif yang berubah (CSS
@@ -67,6 +68,7 @@ const K = args.includes('--cerita') ? args[args.indexOf('--cerita') + 1] : 'asse
 const HARAP = {
   asset: { manifest: 'src/sales-idea-asset-audio.js', glob: 'PSGAssetAudio', scene: 6, segmen: 14, totalMin: 120000, totalMaks: 140000, kira: '≈ 129 dtk' },
   retirement: { manifest: 'src/sales-idea-retirement-audio.js', glob: 'PSGRetirementAudio', scene: 6, segmen: 6, totalMin: 115000, totalMaks: 135000, kira: '≈ 125 dtk' },
+  'retirement-portrait': { manifest: 'src/sales-idea-retirement-audio.js', glob: 'PSGRetirementAudio', scene: 6, segmen: 6, totalMin: 115000, totalMaks: 135000, kira: '≈ 125 dtk', lebar: 720, tinggi: 1280 },
   basket: { manifest: 'src/sales-idea-keranjang-audio.js', glob: 'PSGKeranjangAudio', scene: 10, segmen: 10, totalMin: 115000, totalMaks: 135000, kira: '≈ 126 dtk' },
   'basket-portrait': { manifest: 'src/sales-idea-keranjang-audio.js', glob: 'PSGKeranjangAudio', scene: 10, segmen: 10, totalMin: 115000, totalMaks: 135000, kira: '≈ 126 dtk', lebar: 720, tinggi: 1280 }
 }[K];
@@ -76,6 +78,7 @@ const FRAME_MD = 1000 / 30;
 /* satu-satunya video yang boleh ada di repo: MP4 resmi tombol Download Video */
 const MP4_RESMI = ['assets/video/asset-terang.mp4', 'assets/video/asset-gelap.mp4',
   'assets/video/retirement-terang.mp4', 'assets/video/retirement-gelap.mp4',
+  'assets/video/retirement-terang-portrait.mp4', 'assets/video/retirement-gelap-portrait.mp4',
   'assets/video/basket-terang.mp4', 'assets/video/basket-gelap.mp4',
   'assets/video/basket-terang-portrait.mp4', 'assets/video/basket-gelap-portrait.mp4'];
 const bukanResmi = (berkas) => berkas.filter((f) => !MP4_RESMI.includes(f));

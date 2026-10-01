@@ -2,13 +2,13 @@
 
 Alat developer, **bukan** bagian runtime PWA: tidak dimuat `index.html` / `sw.js`
 dan tidak mengubah berkas production. Cerita: **Asset Creation** (`asset`),
-**Retirement Planning** (`retirement`), dan **Keranjang Kehidupan** (`basket` 16:9 dan
-`basket-portrait` 9:16 untuk HP).
+**Retirement Planning** (`retirement` 16:9 dan `retirement-portrait` 9:16 untuk HP),
+dan **Keranjang Kehidupan** (`basket` 16:9 dan `basket-portrait` 9:16 untuk HP).
 
 ```sh
-node tools/video/render-video.mjs --cerita asset|retirement|basket|basket-portrait --out <folder-di-luar-repo>
+node tools/video/render-video.mjs --cerita asset|retirement|retirement-portrait|basket|basket-portrait --out <folder-di-luar-repo>
 node tools/video/render-video.mjs --cek <folder>/<cerita>.json   # render masih segar?
-node tests/sales-idea-video.test.js [--cerita asset|retirement|basket|basket-portrait] [--hasil <folder>]
+node tests/sales-idea-video.test.js [--cerita asset|retirement|retirement-portrait|basket|basket-portrait] [--hasil <folder>]
 ```
 
 Opsi: `--fps 30` (bawaan), `--jeda-scene <md>` (bawaan 0 = tanpa timing baru),
@@ -20,10 +20,11 @@ bawaan terang (Original). Folder output wajib di luar repo; bawaan
 folder sementara sistem. Video/WAV/PNG hasil render tidak boleh masuk Git,
 kecuali MP4 resmi tombol Download Video yang disalin manual dari hasil
 render: `assets/video/asset-terang.mp4`, `asset-gelap.mp4`,
-`retirement-terang.mp4`, `retirement-gelap.mp4`, `basket-terang.mp4`,
+`retirement-terang.mp4`, `retirement-gelap.mp4`, `retirement-terang-portrait.mp4`,
+`retirement-gelap-portrait.mp4`, `basket-terang.mp4`,
 `basket-gelap.mp4`, `basket-terang-portrait.mp4`, dan `basket-gelap-portrait.mp4`.
 
-## 9:16 untuk HP (`basket-portrait`)
+## 9:16 untuk HP (`basket-portrait`, `retirement-portrait`)
 
 Halaman render 360×640 px CSS dengan skala piksel 2 → video 720×1280: tata letak
 responsif PWA versi ponsel (panggung di atas, teks di bawah), bukan video 16:9 yang
@@ -33,6 +34,13 @@ dari tata letak, panggung ±1,08:1 (zoom kamera tidak memotong label di tepi), t
 diperbesar. Branding 9:16 sendiri (logo 44 px kanan atas sejajar judul, watermark
 120 px opasitas 6% yang tidak menyentuh teks); branding 16:9 tetap. Tombol Download memberi berkas 9:16
 hanya kepada smartphone (`kelasPerangkat()` di `src/sales-idea-video.js`).
+
+`retirement-portrait` memakai pola yang sama, tetapi panel teks mengikuti tinggi
+isinya dan panggung mengisi sisa layar (seperti PWA ponsel): panggung Retirement
+responsif (posisi %, huruf `cqmin`), dan panggung bertinggi tetap yang pendek
+membuat tokoh menutupi teks kartu S2. Logo sama dengan Basket; watermark 116 px
+(opasitas 6%) diukur agar tidak menyentuh teks yang terlihat, termasuk saat teks
+masuk.
 
 ## `--cek`: render masih segar?
 

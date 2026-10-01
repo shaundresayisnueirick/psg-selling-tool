@@ -44,14 +44,20 @@
               unduhan PSG-Basket-Dark.mp4 = berkas repo.
    KBS3       Keranjang: Next sebelum scene 1 selesai → tidak sah, tombol
               tersembunyi.
-   PERANGKAT  kelas perangkat (PSGUnduhVideo.keadaan().perangkat) dan berkas
+   RET4–RET6  seperti KBS4–KBS6 untuk Retirement: HP (potret Original → unduhan
+              retirement-terang-portrait.mp4; diputar + Dark → tetap
+              retirement-gelap-portrait.mp4), tablet (Dark → retirement-gelap.mp4;
+              diputar + Original → retirement-terang.mp4), foldable terbuka
+              (Original/Dark → retirement-terang/gelap.mp4).
+   PERANGKAT  untuk Basket DAN Retirement: kelas perangkat
+              (PSGUnduhVideo.keadaan().perangkat) dan berkas
               yang dipilih SAAT KLIK pada 23 profil emulasi Chromium (HP
               Android/iPhone potret & landscape, HP diputar di halaman yang sama,
               layar luar foldable, tablet potret & landscape, foldable terbuka,
               laptop, desktop, layar lebar/ultrawide, layar sentuh besar, jendela
               desktop sempit, HP "situs desktop", HP + mouse dan tablet +
               trackpad → desktop) × tema Original/Dark: smartphone →
-              basket-<tema>-portrait.mp4, lainnya → basket-<tema>.mp4.
+              <cerita>-<tema>-portrait.mp4, lainnya → <cerita>-<tema>.mp4.
               Hanya simulasi browser (screen, viewport, sentuh, pointer, hover) —
               bukan perangkat fisik.
    KBS4       HP Android potret (emulasi), tema Original: 10 scene ditonton utuh →
@@ -101,6 +107,10 @@ const VIDEO_RET = {
 const VIDEO_KBS = {
   terang: { href: 'assets/video/basket-terang.mp4', nama: 'PSG-Basket-Light.mp4' },
   gelap: { href: 'assets/video/basket-gelap.mp4', nama: 'PSG-Basket-Dark.mp4' }
+};
+const VIDEO_RET_P = {
+  terang: { href: 'assets/video/retirement-terang-portrait.mp4', nama: 'PSG-Retirement-Light-Portrait.mp4' },
+  gelap: { href: 'assets/video/retirement-gelap-portrait.mp4', nama: 'PSG-Retirement-Dark-Portrait.mp4' }
 };
 const VIDEO_KBS_P = {
   terang: { href: 'assets/video/basket-terang-portrait.mp4', nama: 'PSG-Basket-Light-Portrait.mp4' },
@@ -274,6 +284,30 @@ function serve() {
       }
     }
     return '';
+  }
+  /* Retirement di perangkat emulasi: ditonton utuh → unduhan V1 (tema awal); lalu
+     (opsional) diputar + tema diganti → klik memilih V2; unduhan dicocokkan SHA-256 */
+  async function tontonUnduhPerangkat(o) {
+    const { ctx, pg, errs } = await buka(o.tema, 'retirement', o.profil);
+    const jejak = { terlihat: false }, g = o.g;
+    cek(g, (await uv(pg)).perangkat === o.kelas, o.ket + ' → kelas ' + o.kelas, await uv(pg));
+    await klik(pg, 'siPlay');
+    const err = await tontonSampaiAkhir(pg, 1, jejak);
+    cek(g, !err && !jejak.terlihat, 'scene 1–6 ditonton sampai selesai; tombol tidak terlihat sebelumnya', err);
+    await pg.waitForTimeout(300);
+    cek(g, (await uv(pg)).status === 'selesai' && (await terlihat(pg)), 'completion sah → tombol tampil', await uv(pg));
+    const t1 = (await temaHalaman(pg)) === 'dark' ? 'gelap' : 'terang';
+    const u1 = await unduh(pg, t1, { [t1]: o.V1 });
+    cek(g, u1.ok, 'klik → unduhan ' + o.V1.nama + ' (ukuran & SHA-256 = ' + o.V1.href + ')', u1);
+    if (o.putar) { await pg.setViewportSize({ width: o.putar[0], height: o.putar[1] }); await pg.waitForTimeout(300); }
+    const s1 = await gantiTemaLaluKlik(pg);
+    cek(g, s1.saatKlik && s1.saatKlik.href === o.V2.href && s1.saatKlik.unduh === o.V2.nama,
+      (o.putar ? 'diputar + ' : '') + 'ganti tema lalu klik → ' + o.V2.href, s1);
+    const t2 = s1.tema === 'dark' ? 'gelap' : 'terang';
+    const u2 = await unduh(pg, t2, { [t2]: o.V2 });
+    cek(g, u2.ok, 'klik → unduhan ' + o.V2.nama + ' (ukuran & SHA-256 = ' + o.V2.href + ')', u2);
+    cek(g, !errs.length, 'tanpa error halaman', errs);
+    await ctx.close();
   }
   /* seek: semua animasi berhingga di panggung digeser (manipulasi currentTime) */
   const geser = (pg, md) => pg.evaluate((md) => {
@@ -595,8 +629,9 @@ function serve() {
     },
     PERANGKAT: async () => {
       const g = 'PERANGKAT KLASIFIKASI & PEMETAAN (EMULASI)';
+      for (const [kunci, VL, VP] of [['basket', VIDEO_KBS, VIDEO_KBS_P], ['retirement', VIDEO_RET, VIDEO_RET_P]])
       for (const p of PROFIL) {
-        const { ctx, pg, errs } = await buka(null, 'basket', p.o);
+        const { ctx, pg, errs } = await buka(null, kunci, p.o);
         if (p.putar) { await pg.setViewportSize({ width: p.putar[0], height: p.putar[1] }); await pg.waitForTimeout(150); }
         const hasil = { kelas: (await uv(pg)).perangkat, tema: {} };
         for (let i = 0; i < 2; i++) {
@@ -604,10 +639,10 @@ function serve() {
           hasil.tema[tema] = k;
           if (i === 0) { await gantiTema(pg); await pg.waitForTimeout(50); }
         }
-        const V = p.kelas === 'smartphone' ? VIDEO_KBS_P : VIDEO_KBS;
+        const V = p.kelas === 'smartphone' ? VP : VL;
         const benar = (t, v) => hasil.tema[t] && hasil.tema[t].href === v.href && hasil.tema[t].unduh === v.nama;
         cek(g, hasil.kelas === p.kelas && benar('original', V.terang) && benar('dark', V.gelap) && !errs.length,
-          p.nama + ' → ' + p.kelas + ' → ' + (p.kelas === 'smartphone' ? 'Portrait' : 'Landscape') + ' (Original: ' + V.terang.href.split('/').pop() + ', Dark: ' + V.gelap.href.split('/').pop() + ')', Object.assign(hasil, { errs }));
+          kunci + ' | ' + p.nama + ' → ' + p.kelas + ' → ' + (p.kelas === 'smartphone' ? 'Portrait' : 'Landscape') + ' (Original: ' + V.terang.href.split('/').pop() + ', Dark: ' + V.gelap.href.split('/').pop() + ')', Object.assign(hasil, { errs }));
         await ctx.close();
       }
     },
@@ -675,6 +710,12 @@ function serve() {
       cek(g, !errs.length, 'tanpa error halaman', errs);
       await ctx.close();
     },
+    RET4: () => tontonUnduhPerangkat({ g: 'RET4 RETIREMENT SMARTPHONE (EMULASI)', profil: HP(412, 915, 2.625), tema: null, kelas: 'smartphone',
+      V1: VIDEO_RET_P.terang, putar: [915, 412], V2: VIDEO_RET_P.gelap, ket: 'HP potret → diputar ke landscape (tetap Portrait)' }),
+    RET5: () => tontonUnduhPerangkat({ g: 'RET5 RETIREMENT TABLET (EMULASI)', profil: HP(1180, 820, 2), tema: 'dark', kelas: 'tablet',
+      V1: VIDEO_RET.gelap, putar: [820, 1180], V2: VIDEO_RET.terang, ket: 'tablet landscape → diputar ke potret (tetap Landscape)' }),
+    RET6: () => tontonUnduhPerangkat({ g: 'RET6 RETIREMENT FOLDABLE TERBUKA (EMULASI)', profil: HP(884, 1104, 2.5), tema: null, kelas: 'tablet',
+      V1: VIDEO_RET.terang, putar: null, V2: VIDEO_RET.gelap, ket: 'foldable terbuka 884×1104' }),
     KBS3: async () => {
       const g = 'KBS3 KERANJANG NEXT SEBELUM SELESAI';
       const { ctx, pg, errs } = await buka(null, 'basket');
@@ -691,7 +732,7 @@ function serve() {
   const t0 = Date.now();
   const antre = Object.keys(SKENARIO).filter((k) => !BAGIAN || BAGIAN.includes(k));
   /* panjang dulu, pendek mengisi slot */
-  const urut = ['KBS1', 'KBS2', 'KBS4', 'KBS5', 'KBS6', '1', '2', 'RET1', 'RET2', '3', '4', '6', '7', '5', 'BACK1', 'MUNDUR', 'LAJU', 'PAKSA', 'PERANGKAT', 'RET3', 'KBS3'].filter((k) => antre.includes(k));
+  const urut = ['KBS1', 'KBS2', 'KBS4', 'KBS5', 'KBS6', '1', '2', 'RET1', 'RET2', 'RET4', 'RET5', 'RET6', '3', '4', '6', '7', '5', 'BACK1', 'MUNDUR', 'LAJU', 'PAKSA', 'PERANGKAT', 'RET3', 'KBS3'].filter((k) => antre.includes(k));
   await Promise.all(Array.from({ length: Math.min(PARALEL, urut.length) }, async () => {
     while (urut.length) {
       const k = urut.shift();
@@ -720,7 +761,7 @@ function serve() {
     /* tanpa 404 statis: setiap video yang dirujuk modul ada di repo, dan sebaliknya */
     const modul = fs.readFileSync(path.join(ROOT, 'src/sales-idea-video.js'), 'utf8');
     const dirujuk = [...new Set(modul.match(/assets\/video\/[\w.-]+\.mp4/g) || [])].sort();
-    const harus = Object.values(VIDEO).concat(Object.values(VIDEO_RET), Object.values(VIDEO_KBS), Object.values(VIDEO_KBS_P)).map((v) => v.href).sort();
+    const harus = Object.values(VIDEO).concat(Object.values(VIDEO_RET), Object.values(VIDEO_RET_P), Object.values(VIDEO_KBS), Object.values(VIDEO_KBS_P)).map((v) => v.href).sort();
     const ada = harus.map((h) => { const f = path.join(ROOT, h); return fs.existsSync(f) ? fs.statSync(f).size : 0; });
     cek('R REPO', JSON.stringify(dirujuk) === JSON.stringify(harus) && ada.every((n) => n > 0), 'video yang dirujuk modul = ' + harus.join(' + ') + ', semuanya ada di repo', { dirujuk, ukuran: ada });
   }

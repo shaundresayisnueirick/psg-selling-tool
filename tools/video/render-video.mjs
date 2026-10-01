@@ -4,9 +4,10 @@
    ------------------------------------------------------------
    Bukan bagian runtime PWA: tidak dimuat index.html / sw.js dan tidak
    mengubah berkas production. Cerita: Asset Creation, Retirement Planning,
-   dan Keranjang Kehidupan (16:9 dan 9:16 untuk HP: basket-portrait).
+   dan Keranjang Kehidupan (16:9; 9:16 untuk HP: retirement-portrait,
+   basket-portrait).
 
-     node tools/video/render-video.mjs --cerita asset|retirement|basket|basket-portrait [--out <folder>]
+     node tools/video/render-video.mjs --cerita asset|retirement|retirement-portrait|basket|basket-portrait [--out <folder>]
           [--fps 30] [--jeda-scene 0] [--ffmpeg <path>] [--tanpa-encode]
      node tools/video/render-video.mjs --cek <folder>/asset.json
 
@@ -135,6 +136,35 @@ CERITA['basket-portrait'] = Object.assign({}, CERITA.basket, {
   branding: {
     logo: 'assets/logo-psg.png', logoTinggi: 44, logoKanan: 24, logoAtas: 26,
     watermarkLebar: 120, watermarkOpasitas: 0.06, watermarkKanan: 40, watermarkBawah: 36
+  }
+});
+
+/* Retirement Planning 9:16 (720×1280) untuk HP: pola yang sama dengan basket-portrait
+   (halaman 360×640 px CSS, skala 2 = tata letak responsif PWA versi ponsel). Panel
+   teks mengikuti tinggi isinya dan panggung mengisi sisa layar (seperti PWA ponsel),
+   karena panggung Retirement responsif (posisi %, huruf cqmin): panggung yang
+   dipendekkan ke tinggi tetap membuat tokoh menutupi teks kartu S2. Scene, timing,
+   narasi, dan audio sama dengan 16:9. */
+CERITA['retirement-portrait'] = Object.assign({}, CERITA.retirement, {
+  judul: 'Retirement Planning (9:16)',
+  layar: { lebar: 360, tinggi: 640, skala: 2 },
+  css: CERITA.retirement.css + '\n' + [
+    '#layarSalesIdea .rps > .si-presentation-topbar .si-back-hub,#layarSalesIdea .rps > .si-presentation-topbar .si-close,#layarSalesIdea .rps > .si-presentation-topbar [data-kbs-suara]{display:none!important}',
+    '#layarSalesIdea .rps > .si-presentation-topbar{grid-template-columns:minmax(0,1fr)!important;min-height:48px!important}',
+    '#layarSalesIdea .rps > .si-presentation-topbar .si-presentation-brand{grid-column:1!important}',
+    '#layarSalesIdea .rps > .si-presentation-topbar .si-presentation-brand span{display:inline-flex!important}',
+    '#layarSalesIdea .rps > .si-presentation-topbar .si-presentation-brand b{font-size:17px!important}',
+    '#layarSalesIdea .rps-body{grid-template-rows:minmax(0,1fr) auto!important;grid-template-columns:minmax(0,1fr)!important;gap:12px!important}',
+    '#layarSalesIdea .rps-text{align-content:center!important;padding:16px 20px!important;gap:10px!important}',
+    '#layarSalesIdea .rps-title{font-size:22px!important;line-height:1.2!important}',
+    '#layarSalesIdea .rps-focus{font-size:15px!important;line-height:1.35!important}',
+    '#layarSalesIdea .rps-isi{font-size:16.5px!important;line-height:1.5!important}'
+  ].join('\n'),
+  /* logo sama dengan basket-portrait; watermark diukur agar tidak menyentuh teks
+     yang terlihat di 6 scene, termasuk saat teks masuk (panel penuh teks) */
+  branding: {
+    logo: 'assets/logo-psg.png', logoTinggi: 44, logoKanan: 24, logoAtas: 26,
+    watermarkLebar: 116, watermarkOpasitas: 0.06, watermarkKanan: 40, watermarkBawah: 34
   }
 });
 

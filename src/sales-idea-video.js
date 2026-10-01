@@ -48,7 +48,12 @@
     retirement: {
       sel: '.rps', attr: 'data-rps',
       video: { terang: 'assets/video/retirement-terang.mp4', gelap: 'assets/video/retirement-gelap.mp4' },
-      nama: { terang: 'PSG-Retirement-Light.mp4', gelap: 'PSG-Retirement-Dark.mp4' }
+      nama: { terang: 'PSG-Retirement-Light.mp4', gelap: 'PSG-Retirement-Dark.mp4' },
+      /* 9:16 (720×1280) untuk smartphone */
+      potret: {
+        video: { terang: 'assets/video/retirement-terang-portrait.mp4', gelap: 'assets/video/retirement-gelap-portrait.mp4' },
+        nama: { terang: 'PSG-Retirement-Light-Portrait.mp4', gelap: 'PSG-Retirement-Dark-Portrait.mp4' }
+      }
     },
     basket: {
       sel: '.kbs', attr: 'data-kbs',
