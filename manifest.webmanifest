@@ -17,25 +17,25 @@
   ],
   "icons": [
     {
-      "src": "icons/ikon-192.png",
+      "src": "icons/ikon-psg-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "icons/ikon-512.png",
+      "src": "icons/ikon-psg-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "icons/ikon-192-maskable.png",
+      "src": "icons/ikon-psg-192-maskable.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "icons/ikon-512-maskable.png",
+      "src": "icons/ikon-psg-512-maskable.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"

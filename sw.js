@@ -15,7 +15,7 @@
    - Hanya jawaban yang benar-benar berhasil (status 200) yang disimpan,
      sehingga halaman error tidak pernah ikut tersimpan. */
 
-const VERSI = 'insurance-hub-v116.0.0';
+const VERSI = 'insurance-hub-v117.0.0';
 
 /* Semua berkas inti ikut disimpan sejak pemasangan, supaya aplikasi tetap
    utuh walaupun kunjungan pertama terputus di tengah jalan.
@@ -112,11 +112,11 @@ const BERKAS = [
   './src/sales-idea-singapura.js?v=114',
   './assets/logo-psg.png',
   './assets/logo-psg-terang.png',
-  './icons/ikon-192.png',
-  './icons/ikon-512.png',
-  './icons/ikon-192-maskable.png',
-  './icons/ikon-512-maskable.png',
-  './icons/ikon-apple-180.png',
+  './icons/ikon-psg-192.png',
+  './icons/ikon-psg-512.png',
+  './icons/ikon-psg-192-maskable.png',
+  './icons/ikon-psg-512-maskable.png',
+  './icons/ikon-psg-apple-180.png',
   /* rekaman narasi Bekerja di Singapura (voice Bian): hanya 13 berkas yang dipakai */
   './assets/narasi/singapore/S01-01.mp3',
   './assets/narasi/singapore/S01-02.mp3',
