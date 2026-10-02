@@ -167,6 +167,12 @@
     source.setAttribute('data-psg-preview-source','library');
     const dibuat=new Date(x.createdAt); const waktuValid=!Number.isNaN(dibuat.getTime());
     source.innerHTML='<div class="kop"><h2>'+esc(x.title)+'</h2><p>Snapshot Library · Dibuat '+(waktuValid?dibuat.toLocaleDateString('id-ID'):'-')+(waktuValid?', pukul '+dibuat.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}):'')+'</p></div>'+x.html;
+    /* Snapshot membawa atribut listener dari halaman asal, tetapi event
+       listener tidak ikut tersimpan dalam innerHTML. Buang tombol Preview
+       hasil injeksi lama dan lepas penanda agar attach() membuat satu tombol
+       baru dengan handler aktif di modal Library ini. */
+    source.querySelectorAll('.psg-preview-btn').forEach(function(n){ n.remove(); });
+    source.querySelectorAll('[data-preview-attached]').forEach(function(n){ delete n.dataset.previewAttached; });
     /* Logo yang ikut tersimpan di dalam cuplikan dibuang saat ilustrasi
        ditampilkan kembali. Aturan ukurannya hanya ada di halaman ringkasan
        asalnya, jadi di sini gambarnya tampil seukuran berkas aslinya —
@@ -181,12 +187,18 @@
     card.append(head,body);modal.appendChild(card);document.body.appendChild(modal);
     close.onclick=closeDetail;
     modal.addEventListener('click',e=>{if(e.target===modal)closeDetail()});
-    print.onclick=()=>{
+    const cetakIlustrasi=button=>{
       const oldTitle=document.title;document.title=x.title;
-      if(window.PSGPrintPreview?.printWithConsultant){ window.PSGPrintPreview.printWithConsultant(print); }
+      if(window.PSGPrintPreview?.printWithConsultant){ window.PSGPrintPreview.printWithConsultant(button); }
       else { window.print(); }
       setTimeout(()=>{document.title=oldTitle},1200);
     };
+    print.onclick=()=>cetakIlustrasi(print);
+    source.querySelectorAll('button').forEach(function(button){
+      if(/(cetak|print|simpan\s+(sebagai|ke)\s+pdf|pdf)/i.test((button.textContent||'').replace(/\s+/g,' ').trim())){
+        button.addEventListener('click',function(){cetakIlustrasi(button);});
+      }
+    });
     document.documentElement.classList.add('psg-library-detail-open');
     document.body.classList.add('psg-library-detail-open');
     setTimeout(()=>window.PSGPrintPreview?.attach?.(),0);

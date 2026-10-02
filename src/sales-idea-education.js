@@ -909,6 +909,16 @@
     muncul(tl, satu(stage, '.eps-isi'), 480, 560);
   }
 
+  /* Panggung potret MP4 Education S07/S09 memakai kamera horizontal ini.
+     Player PWA menyisihkan tinggi untuk kontrol bawah, sehingga rasionya
+     lebih tinggi dan kamera otomatis meluas ke atas-bawah. Pada dua scene
+     ini, pertahankan skala/lebar kamera MP4 dan perluas hanya bagian bawah:
+     koordinat karakter tetap sama sementara ruang panggung PWA tetap terisi. */
+  var KAMERA_POTRET = {
+    7: [18.11, 30, 443.78, 380],
+    9: [3.96, 10, 472.08, 400]
+  };
+
   /* viewBox mengikuti rasio tiap SVG: area inti utuh, sisanya dunia */
   function paskan(svg) {
     var w = svg.clientWidth, h = svg.clientHeight;
@@ -916,7 +926,11 @@
     if (!w || !h) return;
     var I = svg.getAttribute('data-inti').split(' ').map(Number);
     var a = w / h, w0 = I[2] - I[0], h0 = I[3] - I[1], vb;
-    if (a >= w0 / h0) { var ww = h0 * a; vb = [(I[0] + I[2]) / 2 - ww / 2, I[1], ww, h0]; }
+    var scene = svg.closest('.eps'), n = scene ? +scene.getAttribute('data-eps') : 0;
+    var kamera = KAMERA_POTRET[n];
+    if (kamera && window.innerWidth <= 1023 && a + 0.01 < kamera[2] / kamera[3]) {
+      vb = [kamera[0], kamera[1], kamera[2], kamera[2] / a];
+    } else if (a >= w0 / h0) { var ww = h0 * a; vb = [(I[0] + I[2]) / 2 - ww / 2, I[1], ww, h0]; }
     else { var hh = w0 / a, ekstra = hh - h0; vb = [I[0], I[1] - ekstra * 0.6, w0, hh]; }
     svg.setAttribute('viewBox', vb.map(f).join(' '));
   }
