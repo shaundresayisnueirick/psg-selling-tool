@@ -15,7 +15,7 @@
    - Hanya jawaban yang benar-benar berhasil (status 200) yang disimpan,
      sehingga halaman error tidak pernah ikut tersimpan. */
 
-const VERSI = 'insurance-hub-v117.0.0';
+const VERSI = 'insurance-hub-v117.1.4';
 
 /* Semua berkas inti ikut disimpan sejak pemasangan, supaya aplikasi tetap
    utuh walaupun kunjungan pertama terputus di tengah jalan.
@@ -33,6 +33,7 @@ const BERKAS = [
   './manifest.webmanifest',
   './src/styles.css',
   './src/branding.css',
+  './src/home-carousel.css',
   './src/sales-idea-player.css?v=107',
   './src/psg-karakter.css?v=107',
   './src/sales-idea-retirement.css?v=107',
@@ -71,6 +72,7 @@ const BERKAS = [
   './src/engines/besmartLiteLengkap.js',
   './src/data/bsl-lengkap.js',
   './src/umum.js',
+  './src/home-carousel.js',
   './src/isian-terakhir.js',
   './src/catatan-ghp.js',
   './src/tunggu-12-ghp.js',
@@ -110,6 +112,14 @@ const BERKAS = [
   './src/sales-idea-lanjut.js?v=110',
   './src/sales-idea-singapura-audio.js?v=114',
   './src/sales-idea-singapura.js?v=114',
+  './assets/home-carousel/01-cemerlang-prime.webp',
+  './assets/home-carousel/02-cristal-prime.webp',
+  './assets/home-carousel/03-iflexyguard.webp',
+  './assets/home-carousel/04-rizqia.webp',
+  './assets/home-carousel/05-gen-aman.webp',
+  './assets/home-carousel/06-besmart-lite-future.webp',
+  './assets/home-carousel/07-gen-healthcare-protection.webp',
+  './assets/home-carousel/08-referral-fiesta.webp',
   './assets/logo-psg.png',
   './assets/logo-psg-terang.png',
   './icons/ikon-psg-192.png',

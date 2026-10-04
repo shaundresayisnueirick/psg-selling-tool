@@ -247,7 +247,7 @@
   /* orang berdiri: kaki di (x, y), skala s, cermin bila arah -1 */
   function orang(kelas, x, y, s, o, arah) {
     var tx = arah === -1 ? x + 61 * s : x - 61 * s;
-    return '<g class="eps-orang ' + kelas + '"><g transform="translate(' + f(tx) + ' ' + f(y - 226 * s) + ') scale(' + (arah === -1 ? -s : s) + ' ' + s + ')">' + tokoh(o) + '</g></g>';
+    return '<g class="eps-orang ' + kelas + '"><g transform="translate(' + f(tx) + ' ' + f(y - 226 * s) + ') scale(' + (arah === -1 ? -s : s) + ' ' + s + ')">' + tokoh(o).replace('<svg class="psg-k', '<svg width="120" height="240" class="psg-k') + '</g></g>';
   }
   /* poros sendi ditulis inline supaya tidak bergantung pada versi CSS */
   var POROS_DEWASA = {
@@ -909,6 +909,48 @@
     muncul(tl, satu(stage, '.eps-isi'), 480, 560);
   }
 
+  /* Kamera dasar renderer MP4: tiap scene punya frame tersendiri untuk
+     layout panggung landscape dan portrait. Untuk stage live yang lebih
+     lebar, frame melebar simetris pada anchor x referensi. Untuk stage yang
+     lebih sempit/tinggi, tinggi bertambah ke bawah dari anchor y referensi. */
+  var KAMERA_REFERENSI = {
+    7: {
+      landscape: [-15.12, 30, 510.23, 380],
+      portrait: [18.11, 30, 443.78, 380]
+    },
+    8: {
+      landscape: [-15.12, 30, 510.23, 380],
+      portrait: [20, -3.63, 440, 436.05]
+    },
+    9: {
+      landscape: [-28.54, 10, 537.09, 400],
+      portrait: [3.96, 10, 472.08, 400]
+    }
+  };
+
+  /* Tentukan orientasi dari susunan stage dan kartu yang benar-benar tampil,
+     bukan dari lebar viewport perangkat. */
+  function orientasiPanggung(svg, rasio) {
+    var stage = svg.closest('.eps-stage'), body = stage && stage.parentElement;
+    var teks = body && body.querySelector('.eps-text');
+    if (stage && teks) {
+      var rs = stage.getBoundingClientRect(), rt = teks.getBoundingClientRect();
+      if (rt.left >= rs.right - 1) return 'landscape';
+      if (rt.top >= rs.bottom - 1) return 'portrait';
+    }
+    return rasio >= 1.25 ? 'landscape' : 'portrait';
+  }
+
+  function kameraUntukStage(kamera, rasioStage) {
+    var x = kamera[0], y = kamera[1], w = kamera[2], h = kamera[3];
+    if (rasioStage > w / h) {
+      var lebar = h * rasioStage;
+      var pusatX = x + w / 2;
+      return [pusatX - lebar / 2, y, lebar, h];
+    }
+    return [x, y, w, w / rasioStage];
+  }
+
   /* viewBox mengikuti rasio tiap SVG: area inti utuh, sisanya dunia */
   function paskan(svg) {
     var w = svg.clientWidth, h = svg.clientHeight;
@@ -916,7 +958,13 @@
     if (!w || !h) return;
     var I = svg.getAttribute('data-inti').split(' ').map(Number);
     var a = w / h, w0 = I[2] - I[0], h0 = I[3] - I[1], vb;
-    if (a >= w0 / h0) { var ww = h0 * a; vb = [(I[0] + I[2]) / 2 - ww / 2, I[1], ww, h0]; }
+    var scene = svg.closest('.eps'), n = scene ? +scene.getAttribute('data-eps') : 0;
+    var preset = KAMERA_REFERENSI[n];
+    var orientasi = preset ? orientasiPanggung(svg, a) : null;
+    var kamera = preset && preset[orientasi];
+    if (kamera) {
+      vb = kameraUntukStage(kamera, a);
+    } else if (a >= w0 / h0) { var ww = h0 * a; vb = [(I[0] + I[2]) / 2 - ww / 2, I[1], ww, h0]; }
     else { var hh = w0 / a, ekstra = hh - h0; vb = [I[0], I[1] - ekstra * 0.6, w0, hh]; }
     svg.setAttribute('viewBox', vb.map(f).join(' '));
   }

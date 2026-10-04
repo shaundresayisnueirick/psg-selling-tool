@@ -2637,22 +2637,21 @@ function dGambar() {
           + batasTunda + ' tahun. Lewat dari itu, waktunya memendek dan setoran per bulan '
           + 'langsung melonjak.';
       }
-      return;
+    } else {
+      el('dTabelTunda').innerHTML =
+        '<thead><tr><th>Kalau mulai</th><th class="kanan">Sisa waktu</th>'
+        + '<th class="kanan">Lama setoran</th><th class="kanan">Setoran /bulan</th>'
+        + '<th class="kanan">Selisih</th></tr></thead><tbody>'
+        + r.efekMenunda.map(x =>
+            '<tr class="' + (x.tunda === 0 ? 'tandai' : '') + '">'
+            + '<td>' + (x.tunda === 0 ? 'Sekarang' : x.tunda + ' tahun lagi') + '</td>'
+            + '<td class="kanan angka">' + x.sisa + ' thn</td>'
+            + '<td class="kanan angka">' + x.lama + ' thn</td>'
+            + '<td class="kanan angka">' + (x.setoran ? rp(x.setoran) : 'Tidak ada waktu') + '</td>'
+            + '<td class="kanan angka">' + (x.setoran && x.tunda > 0
+                ? '+' + rp(x.setoran - r.efekMenunda[0].setoran) : '\u2014') + '</td></tr>').join('')
+        + '</tbody>';
     }
-
-    el('dTabelTunda').innerHTML =
-      '<thead><tr><th>Kalau mulai</th><th class="kanan">Sisa waktu</th>'
-      + '<th class="kanan">Lama setoran</th><th class="kanan">Setoran /bulan</th>'
-      + '<th class="kanan">Selisih</th></tr></thead><tbody>'
-      + r.efekMenunda.map(x =>
-          '<tr class="' + (x.tunda === 0 ? 'tandai' : '') + '">'
-          + '<td>' + (x.tunda === 0 ? 'Sekarang' : x.tunda + ' tahun lagi') + '</td>'
-          + '<td class="kanan angka">' + x.sisa + ' thn</td>'
-          + '<td class="kanan angka">' + x.lama + ' thn</td>'
-          + '<td class="kanan angka">' + (x.setoran ? rp(x.setoran) : 'Tidak ada waktu') + '</td>'
-          + '<td class="kanan angka">' + (x.setoran && x.tunda > 0
-              ? '+' + rp(x.setoran - r.efekMenunda[0].setoran) : '\u2014') + '</td></tr>').join('')
-      + '</tbody>';
   }
 
   // ---------- ringkasan untuk prospek ----------

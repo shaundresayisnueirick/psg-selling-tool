@@ -15,6 +15,7 @@
 <title>PSG Selling Tools — Insurance Hub</title>
 <link rel="stylesheet" href="src/styles.css">
 <link rel="stylesheet" href="src/branding.css">
+<link rel="stylesheet" href="src/home-carousel.css">
 <link rel="stylesheet" href="src/sales-idea-player.css?v=107">
 <link rel="stylesheet" href="src/psg-karakter.css?v=107">
 <link rel="stylesheet" href="src/sales-idea-retirement.css?v=107">
@@ -132,7 +133,55 @@ el.addEventListener('pointerdown',function(){tutup(true);});})();</script>
 
 <img class="logo-cetak" src="assets/logo-psg.png" alt="PSG — Patriot Shining Generation">
 <main>
-  <section class="layar aktif" id="layarProduk">
+  <section class="layar aktif psg-home-carousel-layout" id="layarProduk">
+    <section class="psg-home-carousel tanpa-cetak" id="psgHomeCarousel" aria-label="Carousel produk PSG">
+      <div class="psg-home-carousel__viewport" id="psgHomeCarouselViewport" role="region" aria-roledescription="carousel" aria-label="Produk perlindungan">
+        <div class="psg-home-carousel__track">
+          <figure class="psg-home-carousel__slide" data-carousel-slide data-product="Cemerlang Prime" role="group" aria-roledescription="slide" aria-label="1 dari 8: Cemerlang Prime">
+            <img src="assets/home-carousel/01-cemerlang-prime.webp" alt="Cemerlang Prime" width="1920" height="1080" loading="eager" fetchpriority="high" decoding="async" draggable="false">
+          </figure>
+          <figure class="psg-home-carousel__slide" data-carousel-slide data-product="CRISTAL Prime" role="group" aria-roledescription="slide" aria-label="2 dari 8: CRISTAL Prime">
+            <img src="assets/home-carousel/02-cristal-prime.webp" alt="CRISTAL Prime" width="1920" height="1080" loading="lazy" decoding="async" draggable="false">
+          </figure>
+          <figure class="psg-home-carousel__slide" data-carousel-slide data-product="iFLEXYGUARD" role="group" aria-roledescription="slide" aria-label="3 dari 8: iFLEXYGUARD">
+            <img src="assets/home-carousel/03-iflexyguard.webp" alt="iFLEXYGUARD" width="1920" height="1080" loading="lazy" decoding="async" draggable="false">
+          </figure>
+          <figure class="psg-home-carousel__slide" data-carousel-slide data-product="RIZQIA" role="group" aria-roledescription="slide" aria-label="4 dari 8: RIZQIA">
+            <img src="assets/home-carousel/04-rizqia.webp" alt="RIZQIA" width="1920" height="1080" loading="lazy" decoding="async" draggable="false">
+          </figure>
+          <figure class="psg-home-carousel__slide" data-carousel-slide data-product="GEN Aman" role="group" aria-roledescription="slide" aria-label="5 dari 8: GEN Aman">
+            <img src="assets/home-carousel/05-gen-aman.webp" alt="GEN Aman" width="1920" height="1080" loading="lazy" decoding="async" draggable="false">
+          </figure>
+          <figure class="psg-home-carousel__slide" data-carousel-slide data-product="BeSMART Lite / Lite Future" role="group" aria-roledescription="slide" aria-label="6 dari 8: BeSMART Lite / Lite Future">
+            <img src="assets/home-carousel/06-besmart-lite-future.webp" alt="BeSMART Lite / Lite Future" width="1920" height="1080" loading="lazy" decoding="async" draggable="false">
+          </figure>
+          <figure class="psg-home-carousel__slide" data-carousel-slide data-product="GEN HealthCare Protection" role="group" aria-roledescription="slide" aria-label="7 dari 8: GEN HealthCare Protection">
+            <img src="assets/home-carousel/07-gen-healthcare-protection.webp" alt="GEN HealthCare Protection" width="1920" height="1080" loading="lazy" decoding="async" draggable="false">
+          </figure>
+          <figure class="psg-home-carousel__slide" data-carousel-slide data-product="Referral Fiesta" role="group" aria-roledescription="slide" aria-label="8 dari 8: Referral Fiesta">
+            <img src="assets/home-carousel/08-referral-fiesta.webp" alt="Referral Fiesta" width="1920" height="1080" loading="lazy" decoding="async" draggable="false">
+          </figure>
+        </div>
+      </div>
+      <div class="psg-home-carousel__controls">
+        <button type="button" class="psg-home-carousel__arrow" data-carousel-prev aria-label="Slide sebelumnya" aria-controls="psgHomeCarouselViewport">
+          <span aria-hidden="true">‹</span>
+        </button>
+        <div class="psg-home-carousel__dots" role="group" aria-label="Pilih slide carousel">
+          <button type="button" data-carousel-dot="0" aria-label="Tampilkan slide 1: Cemerlang Prime" aria-current="true"></button>
+          <button type="button" data-carousel-dot="1" aria-label="Tampilkan slide 2: CRISTAL Prime" aria-current="false"></button>
+          <button type="button" data-carousel-dot="2" aria-label="Tampilkan slide 3: iFLEXYGUARD" aria-current="false"></button>
+          <button type="button" data-carousel-dot="3" aria-label="Tampilkan slide 4: RIZQIA" aria-current="false"></button>
+          <button type="button" data-carousel-dot="4" aria-label="Tampilkan slide 5: GEN Aman" aria-current="false"></button>
+          <button type="button" data-carousel-dot="5" aria-label="Tampilkan slide 6: BeSMART Lite / Lite Future" aria-current="false"></button>
+          <button type="button" data-carousel-dot="6" aria-label="Tampilkan slide 7: GEN HealthCare Protection" aria-current="false"></button>
+          <button type="button" data-carousel-dot="7" aria-label="Tampilkan slide 8: Referral Fiesta" aria-current="false"></button>
+        </div>
+        <button type="button" class="psg-home-carousel__arrow" data-carousel-next aria-label="Slide berikutnya" aria-controls="psgHomeCarouselViewport">
+          <span aria-hidden="true">›</span>
+        </button>
+      </div>
+    </section>
     <p class="pengantar">Pilih produk untuk mulai menghitung. Semua perhitungan berjalan di HP, tanpa koneksi internet.</p>
     <div class="blok profil-entry tanpa-cetak">
       <div class="baris satu">
@@ -2299,6 +2348,7 @@ el.addEventListener('pointerdown',function(){tutup(true);});})();</script>
 <script src="src/raya-pro-maxima.js"></script>
 <script src="src/tunggu-12-ghp.js"></script>
 <script src="src/app.js"></script>
+<script src="src/home-carousel.js"></script>
 <script src="src/data/bsl-lengkap.js"></script>
 <script src="src/engines/besmartLiteLengkap.js"></script>
 <script src="src/bsl-ui.js"></script>

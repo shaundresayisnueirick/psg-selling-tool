@@ -79,6 +79,28 @@
         video: { terang: 'assets/video/education-terang-portrait.mp4', gelap: 'assets/video/education-gelap-portrait.mp4' },
         nama: { terang: 'PSG-Education-Light-Portrait.mp4', gelap: 'PSG-Education-Dark-Portrait.mp4' }
       }
+    },
+    jari: {
+      sel: '.jps, [data-jps-alasan]',
+      attr: 'data-jps',
+      video: {
+        terang: 'assets/video/jari-terang.mp4',
+        gelap: 'assets/video/jari-gelap.mp4'
+      },
+      nama: {
+        terang: 'PSG-10-Jari-Light.mp4',
+        gelap: 'PSG-10-Jari-Dark.mp4'
+      },
+      potret: {
+        video: {
+          terang: 'assets/video/jari-terang-portrait.mp4',
+          gelap: 'assets/video/jari-gelap-portrait.mp4'
+        },
+        nama: {
+          terang: 'PSG-10-Jari-Light-Portrait.mp4',
+          gelap: 'PSG-10-Jari-Dark-Portrait.mp4'
+        }
+      }
     }
   };
   var TOLERANSI_MULAI = 400;   /* md: jam scene saat terlihat mulai berputar */
@@ -96,6 +118,14 @@
     if (!root || !root.classList.contains('aktif') || !si || typeof si.keadaan !== 'function') return null;
     var m = si.keadaan().mode;
     return CERITA[m] ? m : null;
+  }
+  function cariNode(c, keadaan) {
+    if (keadaan && keadaan.mode === 'jari') {
+      var i = +keadaan.indeks || 0;
+      if (i < 6) return stage.querySelector('.jps[data-jps="' + (i + 1) + '"]');
+      return stage.querySelector('[data-jps-alasan="' + (i - 5) + '"]');
+    }
+    return stage.querySelector(c.sel);
   }
   function sekarang() { return window.performance && performance.now ? performance.now() : Date.now(); }
 
@@ -188,15 +218,17 @@
     if (!kunci) { if (sesi) keluar(); return; }
     if (!sesi || sesi.kunci !== kunci) masuk(kunci);
     sampel();
-    var c = sesi.c, node = stage.querySelector(c.sel), status = root.getAttribute('data-sip-status');
-    var si = SI();
-    sesi.total = si.keadaan().total || 0;
+    var c = sesi.c, si = SI(), keadaan = si.keadaan(), node = cariNode(c, keadaan), status = root.getAttribute('data-sip-status');
+    sesi.total = keadaan.total || 0;
     if (!node) { tampilkan(); return; }
     var d = sesi.adegan;
     if (!d || d.node !== node) {
       /* scene baru di panggung (NEXT / BACK / PLAY / REPLAY / dibuka) */
       var lama = d;
-      d = sesi.adegan = { node: node, indeks: (+node.getAttribute(c.attr) || 1) - 1, dipantau: false, selesai: false, jam: null };
+      var indeksNode = keadaan.mode === 'jari'
+        ? (+keadaan.indeks || 0)
+        : ((+node.getAttribute(c.attr) || 1) - 1);
+      d = sesi.adegan = { node: node, indeks: indeksNode, dipantau: false, selesai: false, jam: null };
       if (status === 'berputar') mulaiAdegan(d, lama);
       else if (status !== 'siap') gugur('scene ' + (d.indeks + 1) + ' tidak diputar');
       else if (!sesi.sah) { sesi.putaran = null; sesi.status = 'belum'; sesi.alasan = ''; }   /* dibuka ulang: diam di frame siap */
