@@ -87,7 +87,9 @@ const MP4_RESMI = ['assets/video/asset-terang.mp4', 'assets/video/asset-gelap.mp
   'assets/video/basket-terang.mp4', 'assets/video/basket-gelap.mp4',
   'assets/video/basket-terang-portrait.mp4', 'assets/video/basket-gelap-portrait.mp4',
   'assets/video/education-terang.mp4', 'assets/video/education-gelap.mp4',
-  'assets/video/education-terang-portrait.mp4', 'assets/video/education-gelap-portrait.mp4'];
+  'assets/video/education-terang-portrait.mp4', 'assets/video/education-gelap-portrait.mp4',
+  'assets/video/jari-terang.mp4', 'assets/video/jari-gelap.mp4',
+  'assets/video/jari-terang-portrait.mp4', 'assets/video/jari-gelap-portrait.mp4'];
 const bukanResmi = (berkas) => berkas.filter((f) => !MP4_RESMI.includes(f));
 
 let gagal = 0;

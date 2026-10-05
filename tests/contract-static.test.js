@@ -55,8 +55,13 @@ const JS_DIIZINKAN = {
   }],
   'src/app.js': [{
     dari: '34593519c233710ed358d93f3392c048f3b6614be086daef8f0f50dffcf69164',
-    ke: 'f671c1d5aea3bda76d0c9b8486784d318ee26107d175a8d5e56da6ef387d2856',
-    alasan: 'Input komponen Kebutuhan Dana Pensiun (dk_*) dirender tanpa atribut value dari DP_KOMPONEN.awal (sisa angka demo Rp19 juta). Kalkulator memang mulai kosong (dNilai 0) dan hanya diisi dari profil aktif; angka demo sebelumnya sempat tampil di DOM sampai layar DP dibuka. Tidak ada rumus yang berubah.',
+    ke: 'a9ae56c22e44199422c9ac71a12c98170c0a2ea8022f12f1d13e8d7878060153',
+    alasan: 'Input komponen Kebutuhan Dana Pensiun (dk_*) dirender tanpa atribut value dari DP_KOMPONEN.awal (sisa angka demo Rp19 juta). Kalkulator memang mulai kosong (dNilai 0) dan hanya diisi dari profil aktif; angka demo sebelumnya sempat tampil di DOM sampai layar DP dibuka. Tidak ada rumus yang berubah. Education Planning (dGambar): saat setoran sama (pertumbuhan 0%) cabang itu tidak lagi return lebih awal, sehingga bagian "ringkasan untuk prospek" tetap dirender; tabel efek menunda hanya dibangun pada cabang lain. Tidak ada rumus yang berubah.',
+  }],
+  'src/library-ilustrasi.js': [{
+    dari: '57a58e17a4e9c117431f3d52c24e40bc11c3c26fec0be12b18a2b5d885ebc4d7',
+    ke: 'd48676bfb12d3c028201a6669541aa6f6afb6dea9f11ebfbba4b83a696d90a17',
+    alasan: 'Detail Library: tombol Preview basi (.psg-preview-btn) dan penanda data-preview-attached yang ikut tersimpan di snapshot dibuang, supaya attach() membuat satu tombol Preview baru dengan handler aktif. Tombol cetak/print/PDF di dalam snapshot (listener-nya tidak ikut tersimpan) diberi handler cetakIlustrasi yang sama dengan tombol Cetak modal. Data Library, storage, dan isi snapshot tidak berubah.',
   }],
   'src/aktivitas-ui.js': [{
     dari: 'f79804459cb8b93f3ebbfa4380299a2f4bca485155cf79c844aa703d31aba0cf',

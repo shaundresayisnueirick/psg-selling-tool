@@ -422,13 +422,14 @@
             id: 'jari-alasan-' + (k + 1),
             siapDi: 'akhir',
             render: function (stage) { a.render(stage, k); tandaiAlasan(stage, k); },
-            /* alasan 1 (teks final dengan kalimat pembuka): jam scene minimal
-               selama rekamannya, supaya timeline tidak selesai sebelum narasi */
-            animate: k === 0 ? function (tl, stage) {
+            /* tiap alasan: jam scene minimal selama rekamannya, supaya timeline
+               (status 'selesai' yang dipakai Next, kartu akhir, dan gerbang
+               Download) tidak selesai sebelum narasi */
+            animate: function (tl, stage) {
               if (typeof a.animate === 'function') a.animate(tl, stage);
-              var kartu = satu(stage, '[data-jps-alasan]'), ms = lamaRekaman(window.PSGJariAlasanAudio, 'S01-01');
+              var kartu = satu(stage, '[data-jps-alasan]'), ms = lamaRekaman(window.PSGJariAlasanAudio, 'S' + (k < 9 ? '0' : '') + (k + 1) + '-01');
               if (kartu && ms) tl.add(kartu, [], { duration: ms });
-            } : a.animate
+            }
           });
         })(k);
       }

@@ -1,0 +1,88 @@
+/* Flyer carousel Beranda diperbesar (src/home-carousel-modal.js): modal
+   <dialog> di dalam aplikasi, bukan Fullscreen API. Flyer tampil utuh
+   (contain, tidak dipotong) tanpa filter; artwork tidak diubah. */
+.psg-home-carousel__perbesar{
+  position:absolute;
+  inset:0;
+  z-index:1;
+  width:100%;
+  height:100%;
+  margin:0;
+  padding:0;
+  border:0;
+  border-radius:inherit;
+  background:transparent;
+  cursor:zoom-in;
+  -webkit-tap-highlight-color:transparent;
+}
+.psg-home-carousel__perbesar:focus-visible{
+  outline:2px solid var(--focus);
+  outline-offset:-4px;
+}
+
+html.psg-flyer-modal-terbuka,
+html.psg-flyer-modal-terbuka body{overflow:hidden}
+
+.psg-flyer-modal{
+  position:fixed;
+  inset:0;
+  box-sizing:border-box;
+  width:100%;
+  height:100%;
+  max-width:none;
+  max-height:none;
+  margin:0;
+  padding:max(10px,env(safe-area-inset-top)) max(10px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left));
+  border:0;
+  background:rgba(8,10,14,.94);
+  color:#fff;
+  overflow:hidden;
+  overscroll-behavior:contain;
+}
+.psg-flyer-modal[open]{
+  display:grid;
+  grid-template-rows:auto minmax(0,1fr);
+  gap:8px;
+}
+.psg-flyer-modal::backdrop{background:rgba(8,10,14,.94)}
+.psg-flyer-modal__bilah{
+  display:flex;
+  justify-content:flex-end;
+}
+.psg-flyer-modal__tutup{
+  min-height:44px;
+  padding:0 18px;
+  border:1px solid rgba(255,255,255,.5);
+  border-radius:999px;
+  background:rgba(255,255,255,.14);
+  color:#fff;
+  font:inherit;
+  font-weight:700;
+  cursor:pointer;
+}
+.psg-flyer-modal__tutup:hover{background:rgba(255,255,255,.24)}
+.psg-flyer-modal__tutup:focus-visible{
+  outline:3px solid #fff;
+  outline-offset:2px;
+}
+.psg-flyer-modal__panggung{
+  position:relative;
+  min-width:0;
+  min-height:0;
+}
+/* absolut di dalam panggung: kotak gambar selalu sama dengan panggung,
+   sehingga contain membatasi lebar dan tinggi (termasuk HP landscape) */
+.psg-flyer-modal__gambar{
+  position:absolute;
+  inset:0;
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  object-position:center;
+  user-select:none;
+  -webkit-user-drag:none;
+}
+@media print{
+  .psg-flyer-modal{display:none!important}
+}
