@@ -4,10 +4,11 @@
    ------------------------------------------------------------
    Bukan bagian runtime PWA: tidak dimuat index.html / sw.js dan tidak
    mengubah berkas production. Cerita: Asset Creation, Retirement Planning,
-   Keranjang Kehidupan, dan Education Planning (16:9; 9:16 untuk HP:
-   asset-portrait, retirement-portrait, basket-portrait, education-portrait).
+   Keranjang Kehidupan, Education Planning, dan Bekerja di Singapura (16:9;
+   9:16 untuk HP: asset-portrait, retirement-portrait, basket-portrait,
+   education-portrait, singapura-portrait).
 
-     node tools/video/render-video.mjs --cerita asset|asset-portrait|retirement|retirement-portrait|basket|basket-portrait|education|education-portrait|jari|jari-portrait|singapore|singapore-portrait [--out <folder>]
+     node tools/video/render-video.mjs --cerita asset|asset-portrait|retirement|retirement-portrait|basket|basket-portrait|education|education-portrait|jari|jari-portrait|singapore|singapore-portrait|singapura|singapura-portrait [--out <folder>]
           [--fps 30] [--jeda-scene 0] [--ffmpeg <path>] [--browser <path>] [--tanpa-encode]
      node tools/video/render-video.mjs --cek <folder>/asset.json
 
@@ -101,6 +102,20 @@ const CERITA = {
     input: ['index.html', 'src/styles.css', 'src/branding.css', 'src/sales-idea-player.js', 'src/sales-idea-player.css',
       'src/sales-idea.js', 'src/sales-idea-keranjang.js', 'src/psg-karakter.js', 'src/psg-karakter.css',
       'src/sales-idea-education.js', 'src/sales-idea-education.css', 'src/sales-idea-education-audio.js'],
+    css: [
+      '#layarSalesIdea .si-footer{display:none!important}',
+      '#layarSalesIdea .si-back-hub,#layarSalesIdea .si-close,#layarSalesIdea [data-kbs-suara]{visibility:hidden!important}',
+      '#layarSalesIdea .sil-kartu{display:none!important}'
+    ].join('\n')
+  },
+  /* Bekerja di Singapura: tokoh digambar modul sendiri (tanpa psg-karakter); klip
+     rekaman dipotong dari berkas MP3 lewat start/end manifest */
+  singapura: {
+    judul: 'Bekerja di Singapura', pilih: 'singapura', sel: '.sgs', attr: 'data-sgs', jumlah: 8,
+    manifest: 'src/sales-idea-singapura-audio.js', glob: 'PSGSingapuraAudio',
+    input: ['index.html', 'src/styles.css', 'src/branding.css', 'src/sales-idea-player.js', 'src/sales-idea-player.css',
+      'src/sales-idea.js', 'src/sales-idea-keranjang.js',
+      'src/sales-idea-singapura.js', 'src/sales-idea-singapura.css', 'src/sales-idea-singapura-audio.js'],
     css: [
       '#layarSalesIdea .si-footer{display:none!important}',
       '#layarSalesIdea .si-back-hub,#layarSalesIdea .si-close,#layarSalesIdea [data-kbs-suara]{visibility:hidden!important}',
@@ -265,6 +280,33 @@ CERITA['education-portrait'] = Object.assign({}, CERITA.education, {
   ].join('\n'),
   /* sama dengan asset-portrait; watermark diukur tidak menyentuh teks yang terlihat
      di 10 scene, termasuk saat teks masuk */
+  branding: {
+    logo: 'assets/logo-psg.png', logoTinggi: 44, logoKanan: 24, logoAtas: 26,
+    watermarkLebar: 116, watermarkOpasitas: 0.06, watermarkKanan: 40, watermarkBawah: 34
+  }
+});
+
+/* Bekerja di Singapura 9:16 (720×1280) untuk HP: pola asset-portrait / education-portrait
+   (panel teks mengikuti isi, panggung mengisi sisa layar, padding bawah kartu = zona
+   watermark; baris terakhir S4–S6 memanjang ke area watermark). Panggung 4:3 selalu
+   memenuhi lebar layar. Scene, timing, narasi, dan audio sama dengan 16:9. */
+CERITA['singapura-portrait'] = Object.assign({}, CERITA.singapura, {
+  judul: 'Bekerja di Singapura (9:16)',
+  layar: { lebar: 360, tinggi: 640, skala: 2 },
+  css: CERITA.singapura.css + '\n' + [
+    '#layarSalesIdea .sgs > .si-presentation-topbar .si-back-hub,#layarSalesIdea .sgs > .si-presentation-topbar .si-close,#layarSalesIdea .sgs > .si-presentation-topbar [data-kbs-suara]{display:none!important}',
+    '#layarSalesIdea .sgs > .si-presentation-topbar{grid-template-columns:minmax(0,1fr)!important;min-height:48px!important}',
+    '#layarSalesIdea .sgs > .si-presentation-topbar .si-presentation-brand{grid-column:1!important}',
+    '#layarSalesIdea .sgs > .si-presentation-topbar .si-presentation-brand span{display:inline-flex!important}',
+    '#layarSalesIdea .sgs > .si-presentation-topbar .si-presentation-brand b{font-size:17px!important}',
+    '#layarSalesIdea .sgs-body{grid-template-rows:minmax(0,1fr) auto!important;grid-template-columns:minmax(0,1fr)!important;gap:12px!important}',
+    '#layarSalesIdea .sgs-text{align-content:center!important;padding:16px 20px 40px!important;gap:10px!important}',
+    '#layarSalesIdea .sgs-title{font-size:22px!important;line-height:1.2!important}',
+    '#layarSalesIdea .sgs-focus{font-size:15px!important;line-height:1.35!important}',
+    '#layarSalesIdea .sgs-isi{font-size:16.5px!important;line-height:1.5!important}'
+  ].join('\n'),
+  /* sama dengan asset-portrait; watermark diukur tidak menyentuh teks yang terlihat
+     di 8 scene, termasuk saat teks masuk */
   branding: {
     logo: 'assets/logo-psg.png', logoTinggi: 44, logoKanan: 24, logoAtas: 26,
     watermarkLebar: 116, watermarkOpasitas: 0.06, watermarkKanan: 40, watermarkBawah: 34
@@ -741,6 +783,20 @@ async function capture(br, url, jadwal, an, ff, wav) {
     enc.stdin.once('error', gagal);
     try { enc.stdin.write(buf, tutup); } catch (e) { tutup(e); }
   });
+  /* Chromium kadang menulis screenshot sebagai PNG RGBA (color type 6, beberapa piksel
+     alpha < 255) di antara frame RGB. Format frame yang berganti di tengah aliran membuat
+     ffmpeg menyusun ulang filtergraph; logo (masukan satu gambar yang sudah habis) lalu
+     hilang sampai akhir video — terjadi pada singapura-portrait mulai frame awal S4.
+     Frame RGBA dinormalkan ke RGB (alpha dibuang, sama dengan konversi ke yuv420p)
+     sebelum disimpan & dikirim, jadi semua frame berformat sama. */
+  let frameRgba = 0;
+  const normalPng = (buf) => {
+    if (!ff || buf[25] !== 6) return buf;
+    const r = spawnSync(ff.bin, ['-v', 'error', '-f', 'png_pipe', '-i', 'pipe:0', '-pix_fmt', 'rgb24', '-f', 'image2pipe', '-c:v', 'png', 'pipe:1'], { input: buf, maxBuffer: 1 << 27 });
+    if (r.status !== 0 || !r.stdout || r.stdout[25] !== 2) throw new Error('normalisasi frame RGBA gagal: ' + String(r.stderr || '').trim());
+    frameRgba++;
+    return r.stdout;
+  };
   const folderFrame = path.join(OUT, 'frame');
   fs.mkdirSync(folderFrame, { recursive: true });
   const frame = [], ui = [];
@@ -775,7 +831,7 @@ async function capture(br, url, jadwal, an, ff, wav) {
         return { sceneDom: node && +node.getAttribute(attr), lokal, ketuk: node && +node.getAttribute('data-ketuk') };
       }, [tau, kelompok.sel, kelompok.attr, kelompok.lokal]);
       if (!st || st.sceneDom !== st.lokal) throw new Error('scene DOM berubah/tidak cocok saat capture global ' + s.n + ': ' + JSON.stringify(st));
-      const png = await pg.screenshot({ clip: { x: 0, y: 0, width: LAYAR.lebar, height: LAYAR.tinggi }, type: 'png' });
+      const png = normalPng(await pg.screenshot({ clip: { x: 0, y: 0, width: LAYAR.lebar, height: LAYAR.tinggi }, type: 'png' }));
       frame.push([f, s.n, +tau.toFixed(3), st.ketuk, sha1(png).slice(0, 16)]);
       if (k === 0) fs.writeFileSync(path.join(folderFrame, FILEKEY + '-S' + dua(s.n) + '-awal.png'), png);
       if (k === s.frame.jumlah - 1) fs.writeFileSync(path.join(folderFrame, FILEKEY + '-S' + dua(s.n) + '-akhir.png'), png);
@@ -783,6 +839,7 @@ async function capture(br, url, jadwal, an, ff, wav) {
     }
     log('  scene ' + s.n + ': ' + s.frame.jumlah + ' frame (' + (s.panjangMd / 1000).toFixed(2) + ' dtk)');
   }
+  if (frameRgba) log('  frame PNG RGBA dinormalkan ke RGB: ' + frameRgba);
   const seek = await pg.evaluate(() => window.__render.seek);
   await ctx.close();
   if (galat.length) throw new Error('galat halaman saat capture: ' + galat.join(' | '));

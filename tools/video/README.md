@@ -5,18 +5,23 @@ dan tidak mengubah berkas production. Cerita: **Asset Creation** (`asset` 16:9 d
 `asset-portrait` 9:16 untuk HP),
 **Retirement Planning** (`retirement` 16:9 dan `retirement-portrait` 9:16 untuk HP),
 **Keranjang Kehidupan** (`basket` 16:9 dan `basket-portrait` 9:16 untuk HP),
-dan **Education Planning** (`education` 16:9 dan `education-portrait` 9:16 untuk HP).
+**Education Planning** (`education` 16:9 dan `education-portrait` 9:16 untuk HP),
+dan **Bekerja di Singapura** (`singapura` 16:9 dan `singapura-portrait` 9:16 untuk HP).
 
 ```sh
-node tools/video/render-video.mjs --cerita asset|asset-portrait|retirement|retirement-portrait|basket|basket-portrait|education|education-portrait --out <folder-di-luar-repo>
+node tools/video/render-video.mjs --cerita asset|asset-portrait|retirement|retirement-portrait|basket|basket-portrait|education|education-portrait|singapura|singapura-portrait --out <folder-di-luar-repo>
 node tools/video/render-video.mjs --cek <folder>/<cerita>.json   # render masih segar?
-node tests/sales-idea-video.test.js [--cerita asset|asset-portrait|retirement|retirement-portrait|basket|basket-portrait|education|education-portrait] [--hasil <folder>]
+node tests/sales-idea-video.test.js [--cerita asset|asset-portrait|retirement|retirement-portrait|basket|basket-portrait|education|education-portrait|singapura|singapura-portrait] [--hasil <folder>]
 ```
 
 Opsi: `--fps 30` (bawaan), `--jeda-scene <md>` (bawaan 0 = tanpa timing baru),
 `--ffmpeg <path>`, `--tanpa-encode`, `--branding` (logo `assets/logo-psg.png`
 kecil di kanan atas + watermark logo opasitas 6% di bawah-kanan panel teks,
-ditanam saat encode lewat filter overlay ffmpeg; hanya berkas video).
+ditanam saat encode lewat filter overlay ffmpeg; hanya berkas video). Screenshot
+yang ditulis Chromium sebagai PNG RGBA dinormalkan ke RGB sebelum encode: format
+frame yang berganti di tengah aliran membuat ffmpeg menyusun ulang filtergraph dan
+logo/watermark hilang sampai akhir video. `tests/sales-idea-video.test.js` memeriksa
+area logo di setiap frame.
 `--tema gelap` merender tema Dark Gold (kunci localStorage tema PWA yang sama);
 bawaan terang (Original). Folder output wajib di luar repo; bawaan
 folder sementara sistem. Video/WAV/PNG hasil render tidak boleh masuk Git,
@@ -26,10 +31,11 @@ render: `assets/video/asset-terang.mp4`, `asset-gelap.mp4`,
 `retirement-terang.mp4`, `retirement-gelap.mp4`, `retirement-terang-portrait.mp4`,
 `retirement-gelap-portrait.mp4`, `basket-terang.mp4`,
 `basket-gelap.mp4`, `basket-terang-portrait.mp4`, `basket-gelap-portrait.mp4`,
-`education-terang.mp4`, `education-gelap.mp4`, `education-terang-portrait.mp4`, dan
-`education-gelap-portrait.mp4`.
+`education-terang.mp4`, `education-gelap.mp4`, `education-terang-portrait.mp4`,
+`education-gelap-portrait.mp4`, `singapura-terang.mp4`, `singapura-gelap.mp4`,
+`singapura-terang-portrait.mp4`, dan `singapura-gelap-portrait.mp4`.
 
-## 9:16 untuk HP (`basket-portrait`, `retirement-portrait`, `asset-portrait`, `education-portrait`)
+## 9:16 untuk HP (`basket-portrait`, `retirement-portrait`, `asset-portrait`, `education-portrait`, `singapura-portrait`)
 
 Halaman render 360×640 px CSS dengan skala piksel 2 → video 720×1280: tata letak
 responsif PWA versi ponsel (panggung di atas, teks di bawah), bukan video 16:9 yang
@@ -58,6 +64,12 @@ S6, baris chip setoran di kartu teks disembunyikan: angka yang sama sudah tampil
 panggung dan di teks isi, dan tanpa itu panggung S6 menyusut ke ±240 px CSS (label
 panggung ±8 px). Durasi Education mengikuti timeline PWA (perkiraan 80 md/huruf, lebih
 panjang dari rekaman di semua scene), jadi tiap scene berakhir dengan jeda tanpa suara.
+
+`singapura-portrait` memakai pola `asset-portrait` tanpa penyesuaian per scene (panggung
+4:3 selalu memenuhi lebar layar). Durasi ±307 dtk mengikuti timeline PWA apa adanya (±34%
+tanpa suara: jeda dramatis, awal & ekor scene). Klip rekaman Singapura dipotong dari
+berkas MP3 lewat start/end manifest; label SINGAPURA/INDONESIA yang kadang terpotong di
+tepi panggung berasal dari framing kamera, sama dengan 16:9.
 
 ## `--cek`: render masih segar?
 
