@@ -366,6 +366,11 @@
     jj(satu(fj, '.jps-lencana'), [[t0 + 900, { opacity: 0 }], [t0 + 1300, { opacity: 1 }]]);
     jj(satu(sv, '.jps-chip-isi'), [[t0 + 1000, { opacity: 0, transform: 'translate(0px,6px)' }], [t0 + 1500, { opacity: 1, transform: 'none' }]]);
     jj(satu(stage, '.jps-ubin-fokus .jps-ubin-isi'), [[t0 + 1100, { opacity: 0 }], [t0 + 1500, { opacity: 1 }]]);
+    /* jam scene minimal selama rekaman pertanyaannya (S02-01 … S06-01),
+       supaya status 'selesai' (Next, gerbang Download) tidak datang sebelum
+       narasinya selesai */
+    var node = satu(stage, '.jps'), ms = lamaRekaman(window.PSGJariAudio, 'S0' + (q + 1) + '-01');
+    if (node && ms) tl.add(node, [], { duration: ms });
     ambient(tl, sv);
   }
 
