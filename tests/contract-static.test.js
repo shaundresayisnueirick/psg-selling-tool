@@ -35,8 +35,8 @@ const isSubseq = (sub, arr) => { let i = 0; for (const x of arr) if (x === sub[i
 const INLINE_DIIZINKAN = {
   'program-summary.html': [{
     dari: 'a677e3718adabddb70d89776b699908b108cd7c3cccc030d915ac7e539819893',
-    ke: 'b9b2fd8f57a089120267d937b42ea9aa50d7eb3167cd22f22b10c162a190d943',
-    alasan: 'Tabel Manfaat Gabungan dibungkus <table> bila isinya hanya <thead>/<tbody>/<tr> (sebelumnya tampil sebagai teks menyambung). Tidak menyentuh angka. Detail komponen pembentuk program (nama produk + catatan sumber hitungan untuk agen) diberi tanpa-cetak: tetap bisa dibuka di layar, tidak ikut Preview/cetak/PDF. catatanSlot tidak lagi dimasukkan ke Prompt Flyer AI. Tidak menyentuh angka.',
+    ke: 'bf869d58a69fb4adebf048754824d61944312dc39660a5960b5b3d7342061889',
+    alasan: 'Tabel Manfaat Gabungan dibungkus <table> bila isinya hanya <thead>/<tbody>/<tr> (sebelumnya tampil sebagai teks menyambung). Tidak menyentuh angka. Detail komponen pembentuk program tetap bagian dokumen nasabah: <details> diberi data-cetak-buka (dibuka preview-cetak.js di Preview dan saat mencetak, termasuk dari Library) dan tabelnya data-print-label=Polis yang disusun untuk judul pecahan cetak. catatanSlot tidak lagi dimasukkan ke Prompt Flyer AI. Tidak menyentuh angka.',
   }],
 };
 
@@ -45,8 +45,8 @@ const INLINE_DIIZINKAN = {
 const JS_DIIZINKAN = {
   'src/preview-cetak.js': [{
     dari: 'abe686a05ed724852a36ff89e964940514f9f719686b4e0fcd09e21fc3c92d29',
-    ke: '08cbdff72ec35c7abb59318fc2e10a948284a1cd7910b86ff4f0cf3ab05b30bf',
-    alasan: 'Pemecah tabel cetak memetakan sel menurut posisi kolom (colspan), bukan urutan DOM. Sebelumnya baris Total ber-colspan mendapat kolom lebih banyak dari judulnya: angka bertumpuk dan Total bergeser ke kolom yang salah. Tidak menyentuh nilai. cleanClone membuang tombol kontrol kecuali yang ditandai data-preview-preserve (atap dan lapis Segitiga Financial, yang sekaligus gambar dokumen); tombol itu dibuat tidak bisa difokus/diklik di Preview. Sebelumnya seluruh button dibuang sehingga Segitiga kosong di Preview.',
+    ke: 'f80fa13fcbb7facfb9af39a91f8ac581758cd1857c471397c9a0c2565f220987',
+    alasan: 'Pemecah tabel cetak memetakan sel menurut posisi kolom (colspan), bukan urutan DOM. Sebelumnya baris Total ber-colspan mendapat kolom lebih banyak dari judulnya: angka bertumpuk dan Total bergeser ke kolom yang salah. Tidak menyentuh nilai. cleanClone membuang tombol kontrol kecuali yang ditandai data-preview-preserve (atap dan lapis Segitiga Financial, yang sekaligus gambar dokumen); tombol itu dibuat tidak bisa difokus/diklik di Preview. Sebelumnya seluruh button dibuang sehingga Segitiga kosong di Preview. <details data-cetak-buka> dibuka di Preview dan selama mencetak (beforeprint/afterprint) karena browser hanya mencetak judul <details> yang tertutup. makePrintSplit memakai data-print-label tabel sebagai judul pecahan bila ada (bawaan tetap Timeline Program).',
   }],
   'src/core.js': [{
     dari: '385c5f77851f6b5b5c94b6e3bf6d65d3df77faef9b21a1c9cd4aa137c1833c7c',
@@ -75,8 +75,8 @@ const JS_DIIZINKAN = {
   }],
   'src/segitiga-solusi.js': [{
     dari: '5b966b2719a2edf471e097e56cca6058a03e08aeca6d895a9bcd370b6c4a6af7',
-    ke: 'e77c83a17ab918b8043c9737248efd4f51d4631a3c9bb571847bc73cafbc2027',
-    alasan: 'Lama bayar dasar Gen Aman + GHPS dibaca dari database (gspaHealthPaymentTermsAvailable: key DATA_GSPA.dasar yang juga ada di DATA_GHPS.batasUsia, divalidasi lewat engine GSPA, ghpsHitung, dan waiverHitung bila Waiver ON) menggantikan daftar tetap [5,10]; lama bayar tersimpan yang tidak tersedia diganti yang terdekat sebelum dihitung dan saat kartu digambar, plan/Waiver memicu validasi ulang. programNarrative memfilter fase memakai toYear (sebelumnya properti to yang tidak ada, sehingga tercetak Tahun 16–null). Catatan, sangkalan, dan teks cadangan deskripsi plan Health di Ringkasan Program tanpa istilah internal (engine, kalkulator existing, Program Financial Engine); typo GPHS menjadi GHPS. Formula premi, manfaat, agregasi, dan timeline tidak berubah.',
+    ke: '6066ba377b14607b3afe190f427809978206f5399ed283eac6c63ca74073b010',
+    alasan: 'Lama bayar dasar Gen Aman + GHPS dibaca dari database (gspaHealthPaymentTermsAvailable: key DATA_GSPA.dasar yang juga ada di DATA_GHPS.batasUsia, divalidasi lewat engine GSPA, ghpsHitung, dan waiverHitung bila Waiver ON) menggantikan daftar tetap [5,10]; lama bayar tersimpan yang tidak tersedia diganti yang terdekat sebelum dihitung dan saat kartu digambar, plan/Waiver memicu validasi ulang. programNarrative memfilter fase memakai toYear (sebelumnya properti to yang tidak ada, sehingga tercetak Tahun 16–null). Catatan, sangkalan, dan teks cadangan deskripsi plan Health di Ringkasan Program tanpa istilah internal (engine, kalkulator existing, Program Financial Engine); typo GPHS menjadi GHPS. catatanSlot (ikut tercetak di Detail komponen pembentuk program) ditulis untuk nasabah, bukan instruksi agen. Formula premi, manfaat, agregasi, dan timeline tidak berubah.',
   }],
   'src/segitiga.js': [{
     dari: '4391f3d4d282245e34ccb988c4a1b82c812c40e4c7ea1b9cea9984fd835eaa38',

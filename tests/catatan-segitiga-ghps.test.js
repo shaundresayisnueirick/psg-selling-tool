@@ -53,7 +53,7 @@ const FLEX1 = { productKey: 'FLEX', productName: 'iFLEXYGUARD', paymentTerm: 5, 
 const CATATAN_FLEX = 'Untuk iFLEXYGUARD, Bonus 75 adalah 50% dari UP dasar awal';
 /* Teks internal yang tidak boleh sampai ke dokumen nasabah (Preview, cetak, PDF). */
 const INTERNAL = ['COMBO_Summary', 'sourceField', 'normalized', 'programModel', 'Program Financial Engine', 'engine kalkulator',
-  'kalkulator existing', 'existing', 'Prompt Flyer AI', 'Salin prompt', 'Detail komponen pembentuk program',
+  'kalkulator existing', 'existing', 'Prompt Flyer AI', 'Salin prompt',
   'Nama produk disimpan sebagai detail sumber perhitungan', 'Isi nama dan kontak agen', 'Cetak atau Simpan sebagai PDF',
   'Preview', 'GPHS', '–null', 'null'];
 
@@ -161,6 +161,63 @@ const kontras = (fg, bg) => {
   const a = L(fg), b = L(bg); return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
 };
 const tanpaInternal = (teks) => INTERNAL.filter((w) => teks.includes(w));
+
+/* "Detail komponen pembentuk program" adalah isi dokumen nasabah: ada di
+   layar (dilipat), Preview, cetak/PDF, dan Library; isinya tabel produk yang
+   benar-benar dipilih, tanpa catatan internal. */
+const JUDUL_DETAIL = 'Detail komponen pembentuk program';
+const rekamCetak = (pg) => pg.evaluate(() => {
+  window.__ujiCetak = null;
+  addEventListener('beforeprint', () => {
+    const d = [...document.querySelectorAll('details.program-hidden-detail')].filter((x) => x.getClientRects().length).pop();
+    window.__ujiCetak = { ada: !!d, buka: !!(d && d.open), teks: d ? d.innerText : '', tinggiTabel: d ? Math.max(0, ...[...d.querySelectorAll('table')].map((t) => Math.round(t.getBoundingClientRect().height))) : 0 };
+  }, { once: true });
+});
+const judulPecahanSalah = (teks) => /Timeline Program — bagian/.test(teks);
+async function cekDetailKomponen(pg, label, produk, root, opsi) {
+  root = root || 'main'; opsi = opsi || {};
+  /* layar: ada, dilipat, judul terlihat, tabel produk di dalamnya */
+  const lay = await pg.evaluate((a) => {
+    const d = document.querySelector(a.root + ' details.program-hidden-detail');
+    return d && { buka: d.open, judul: d.querySelector('summary').innerText.trim(), terlihat: d.getBoundingClientRect().height > 0,
+      cetak: !d.closest('.tanpa-cetak') && !d.classList.contains('tanpa-cetak'), penanda: d.hasAttribute('data-cetak-buka'), isi: [...d.querySelectorAll('table')].map((t) => t.textContent).join(' ') };
+  }, { root });
+  cek(lay && lay.terlihat && lay.judul === JUDUL_DETAIL && lay.cetak && lay.penanda && produk.every((n) => lay.isi.includes(n)),
+    label + ': detail komponen ada di layar (dilipat, tanpa tanpa-cetak) dengan produk ' + produk.join(' + '), lay);
+  /* Preview */
+  await pg.evaluate(() => window.PSGPrintPreview.open()); await pg.waitForTimeout(300);
+  const pv = await pg.evaluate(() => {
+    const b = document.querySelector('.psg-print-preview-body'), d = b.querySelector('details.program-hidden-detail');
+    return { ada: !!d, buka: !!(d && d.open), teks: d ? d.innerText : '', tinggiTabel: d ? Math.max(0, ...[...d.querySelectorAll('table')].map((t) => Math.round(t.getBoundingClientRect().height))) : 0 };
+  });
+  cek(pv.ada && pv.buka && pv.tinggiTabel > 0 && pv.teks.includes(JUDUL_DETAIL) && produk.every((n) => pv.teks.includes(n)) && !tanpaInternal(pv.teks).length,
+    label + ': detail komponen terbuka di Preview, tabel produk terlihat, tanpa catatan internal', Object.assign({ bocor: tanpaInternal(pv.teks) }, pv));
+  /* Preview → Cetak (PDF). Dari Library jalur ini dilewati: sejak sebelum
+     perubahan ini PDF-nya kosong untuk seluruh isi (aturan cetak Library
+     menyembunyikan modal Preview) — bug lama di luar cakupan. */
+  if (opsi.previewCetak !== false) {
+    await pg.evaluate(() => document.body.classList.add('psg-universal-preview-print'));
+    await rekamCetak(pg);
+    await pg.emulateMedia({ media: 'print' });
+    const pdf1 = await pg.pdf({ format: 'A4', printBackground: true });
+    const c1 = await pg.evaluate(() => window.__ujiCetak);
+    cek(pdf1.length > 20000 && c1 && c1.buka && c1.tinggiTabel > 0 && produk.every((n) => c1.teks.includes(n)) && !tanpaInternal(c1.teks).length && !judulPecahanSalah(c1.teks),
+      label + ': Preview → Cetak/PDF memuat tabel detail komponen (tanpa judul pecahan "Timeline Program")', c1);
+    await pg.emulateMedia({ media: 'screen' });
+    await pg.evaluate(() => document.body.classList.remove('psg-universal-preview-print'));
+  }
+  await pg.evaluate(() => document.querySelector('#psgPrintPreviewModal .sakelar').click());
+  /* cetak langsung (Ctrl+P / tombol Cetak) → PDF; sesudahnya kembali dilipat */
+  await rekamCetak(pg);
+  await pg.emulateMedia({ media: 'print' });
+  const pdf2 = await pg.pdf({ format: 'A4', printBackground: true });
+  const c2 = await pg.evaluate(() => window.__ujiCetak);
+  await pg.emulateMedia({ media: 'screen' });
+  const sesudah = await pg.evaluate((r) => { const d = document.querySelector(r + ' details.program-hidden-detail'); return d && d.open; }, root);
+  cek(pdf2.length > 20000 && c2 && c2.buka && c2.tinggiTabel > 0 && produk.every((n) => c2.teks.includes(n)) && !tanpaInternal(c2.teks).length && !judulPecahanSalah(c2.teks),
+    label + ': cetak langsung/PDF memuat tabel detail komponen (tanpa judul pecahan "Timeline Program")', c2);
+  cek(sesudah === false, label + ': sesudah cetak, detail kembali dilipat seperti di layar', sesudah);
+}
 /* Seluruh teks dokumen termasuk bagian tersembunyi (detail agen, prompt),
    tanpa isi <script>/<style>. */
 const teksDokumen = () => { const c = document.body.cloneNode(true); c.querySelectorAll('script,style').forEach((n) => n.remove());
@@ -213,15 +270,20 @@ const teksDokumen = () => { const c = document.body.cloneNode(true); c.querySele
     cek(!/kalkulator existing|engine kalkulator|Program Financial Engine/.test(semua), 'Segitiga: catatan/sangkalan tanpa istilah engine internal', semua.match(/.{30}(existing|engine|Engine).{30}/g));
     cek(!galat.length, 'Segitiga: tanpa error halaman', galat);
 
-    /* 3. cetak & Preview bersih dari catatan internal */
+    /* 3. cetak & Preview bersih dari catatan internal; detail komponen tetap ada */
+    const produkSeg = await pg.evaluate(() => JSON.parse(sessionStorage.getItem('insuranceHub.comboGeneratedSummary')).selected.map((x) => x.productName));
+    cek(produkSeg.length === 2, 'Segitiga: dua komponen terpilih', produkSeg);
+    await cekDetailKomponen(pg, 'Segitiga', produkSeg);
     await pg.emulateMedia({ media: 'print' });
+    await pg.evaluate(() => window.dispatchEvent(new Event('beforeprint')));
     const cetak = await pg.evaluate(() => document.body.innerText);
-    cek(!tanpaInternal(cetak).length, 'Segitiga: teks cetak tanpa catatan internal/kontrol UI', tanpaInternal(cetak));
+    await pg.evaluate(() => window.dispatchEvent(new Event('afterprint')));
+    cek(!tanpaInternal(cetak).length && /Rincian produk yang membentuk program/.test(cetak), 'Segitiga: teks cetak (detail terbuka) tanpa catatan internal/kontrol UI', tanpaInternal(cetak));
     await pg.emulateMedia({ media: 'screen' });
     await pg.evaluate(() => window.PSGPrintPreview.open()); await pg.waitForTimeout(300);
     const pv = await pg.evaluate(() => { const b = document.querySelector('.psg-print-preview-body');
-      return { teks: b.innerText, tombol: b.querySelectorAll('button').length, detail: b.querySelectorAll('.program-hidden-detail,.tanpa-cetak,textarea').length }; });
-    cek(!tanpaInternal(pv.teks).length && !pv.tombol && !pv.detail, 'Segitiga: Preview tanpa catatan internal, tombol, detail agen, prompt', { bocor: tanpaInternal(pv.teks), tombol: pv.tombol, detail: pv.detail });
+      return { teks: b.innerText, tombol: b.querySelectorAll('button').length, internal: b.querySelectorAll('.tanpa-cetak,textarea').length }; });
+    cek(!tanpaInternal(pv.teks).length && !pv.tombol && !pv.internal, 'Segitiga: Preview tanpa catatan internal, tombol, prompt', { bocor: tanpaInternal(pv.teks), tombol: pv.tombol, internal: pv.internal });
     await ctx.close();
   }
 
@@ -258,7 +320,7 @@ const teksDokumen = () => { const c = document.body.cloneNode(true); c.querySele
   }
 
   /* ================================================================ */
-  bagian('3. Cetak & Preview Ringkasan Program (Analisa Kebutuhan → Kombinasi) tanpa catatan internal');
+  bagian('3. Ringkasan Program (Analisa Kebutuhan → Kombinasi): detail komponen tetap ada, catatan internal tidak tercetak');
   {
     /* agen sengaja dikosongkan: petunjuk "Isi nama dan kontak agen" hanya untuk layar */
     const { ctx, pg, galat } = await ringkasanCombo(browser, url, [GSPA12_W10, CRIS3], { extra: { agentName: '', agentHP: '' } });
@@ -274,9 +336,24 @@ const teksDokumen = () => { const c = document.body.cloneNode(true); c.querySele
     await pg.emulateMedia({ media: 'screen' });
     await pg.evaluate(() => window.PSGPrintPreview.open()); await pg.waitForTimeout(300);
     const pv = await pg.evaluate(() => { const b = document.querySelector('.psg-print-preview-body');
-      return { teks: b.innerText, tombol: b.querySelectorAll('button').length, detail: b.querySelectorAll('.program-hidden-detail,.tanpa-cetak,textarea').length }; });
-    cek(!tanpaInternal(pv.teks).length && !pv.tombol && !pv.detail, 'Preview tanpa catatan internal, tombol kontrol, detail agen, prompt', { bocor: tanpaInternal(pv.teks), tombol: pv.tombol, detail: pv.detail });
-    cek(!galat.length, 'Cetak: tanpa error halaman', galat);
+      return { teks: b.innerText, tombol: b.querySelectorAll('button').length, internal: b.querySelectorAll('.tanpa-cetak,textarea').length }; });
+    cek(!tanpaInternal(pv.teks).length && !pv.tombol && !pv.internal, 'Preview tanpa catatan internal, tombol kontrol, prompt', { bocor: tanpaInternal(pv.teks), tombol: pv.tombol, internal: pv.internal });
+    await pg.evaluate(() => document.querySelector('#psgPrintPreviewModal .sakelar').click());
+    /* detail komponen: layar, Preview, cetak/PDF */
+    const PRODUK_A = ['GSPA', 'Cristal Prime'];
+    await cekDetailKomponen(pg, 'Ringkasan Program', PRODUK_A);
+    /* Library: tersimpan, terbuka di Preview dan saat dicetak dari Library */
+    await pg.click('#programSimpanLibrary'); await pg.waitForTimeout(300);
+    const lib = await pg.evaluate(() => { const a = JSON.parse(localStorage.getItem('insuranceHub.libraryIlustrasi.v1') || '[]'); const x = a[0];
+      return x && { id: x.id, adaDetail: /program-hidden-detail/.test(x.html) && /data-cetak-buka/.test(x.html), html: x.html }; });
+    cek(lib && lib.adaDetail && PRODUK_A.every((n) => lib.html.includes(n)) && !/Nama produk disimpan|Prompt Flyer AI/.test(lib.html),
+      'Library: detail komponen ikut tersimpan bersama produknya, tanpa prompt/catatan internal', lib && { adaDetail: lib.adaDetail });
+    await pg.goto(url + 'index.html');
+    await pg.waitForFunction(() => !!window.bukaLayar && !!window.InsuranceHubLibrary);
+    await pg.evaluate(() => window.bukaLayar('LIBRARY_ILUSTRASI')); await pg.waitForTimeout(400);
+    await pg.click('.lib-view[data-id="' + lib.id + '"]'); await pg.waitForTimeout(400);
+    await cekDetailKomponen(pg, 'Library', PRODUK_A, '#libraryDetailModal', { previewCetak: false });
+    cek(!galat.length, 'Cetak & Library: tanpa error halaman', galat);
     await ctx.close();
   }
 

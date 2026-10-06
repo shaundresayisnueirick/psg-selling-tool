@@ -177,9 +177,10 @@ const h=d.html||{};
 const out=document.getElementById('comboOutput');
 out.innerHTML=''
   +'<section class="blok"><h2>Ringkasan Program</h2>'+h.ringkasan+'</section>'
-  /* Detail komponen (nama produk + catatan sumber hitungan) adalah alat bantu
-     agen: tetap bisa dibuka di layar, tetapi tidak ikut Preview, cetak, dan PDF. */
-  +'<details class="blok program-hidden-detail tanpa-cetak"><summary>Detail komponen pembentuk program</summary><div style="margin-top:10px"><div class="gulir"><table class="tahunan polis-table">'+h.polis+'</table></div><p class="catatan">'+esc(h.catatanSlot)+'</p></div></details>'
+  /* Detail komponen pembentuk program adalah bagian dokumen nasabah. Di layar
+     tetap dilipat; data-cetak-buka membuatnya terbuka di Preview, cetak/PDF,
+     dan cetakan Library (preview-cetak.js). */
+  +'<details class="blok program-hidden-detail" data-cetak-buka><summary>Detail komponen pembentuk program</summary><div style="margin-top:10px"><div class="gulir"><table class="tahunan polis-table" data-print-label="Polis yang disusun">'+h.polis+'</table></div><p class="catatan">'+esc(h.catatanSlot)+'</p></div></details>'
   +'<section class="blok"><h2>Manfaat Gabungan Program</h2><p class="catatan">Nilai di bawah merupakan gabungan manfaat sejenis dari komponen yang dipilih, dengan masa berlaku mengikuti masing-masing komponen.</p><div class="program-benefits-summary">'+(h.manfaat
      /* Alur Analisa Kebutuhan dan Segitiga lama mengirim isi tabel saja
         (<thead>/<tbody>/<tr>). Tanpa pembungkus <table>, browser membuang
