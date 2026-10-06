@@ -430,7 +430,10 @@
   /* Segitiga tetap tiga lapis karena ketiganya adalah RISIKO — mungkin
      terjadi, mungkin tidak. Pensiun berbeda sifatnya: kalau tidak meninggal
      lebih dulu, hari tua pasti datang. Secara visual ia menjadi atap rumah,
-     tanpa mengubah logic maupun formula perhitungannya. */
+     tanpa mengubah logic maupun formula perhitungannya.
+     Atap dan lapis berupa <button> (bisa diketuk di layar), tetapi juga
+     GAMBAR dokumen: data-preview-preserve membuat Preview tidak membuangnya
+     bersama tombol kontrol (preview-cetak.js). */
   function segitiga(h, ringkas) {
     const lapis = ['life', 'ci', 'health'];
     return '<div class="sgt-bungkus">' +
@@ -438,7 +441,7 @@
       '<div class="sgt-atap-wrap sgt-lapis-wrap sgt-pensiun-wrap">' +
       (urutan('pensiun') ? '<span class="sgt-nomor">' + urutan('pensiun') + '</span>' : '') +
       '<button type="button" class="sgt-atap sgt-pensiun' +
-      ((!ringkas && S.terbuka === 'pensiun') ? ' aktif' : '') + '" data-sgt-lapis="pensiun">' +
+      ((!ringkas && S.terbuka === 'pensiun') ? ' aktif' : '') + '" data-sgt-lapis="pensiun" data-preview-preserve="1">' +
       '<span class="sgt-judul">TUA / PENSIUN</span>' +
       (ringkas ? '<span class="sgt-nilai">' + nilaiLapis(h, 'pensiun') + '</span>' : '') +
       '</button></div>' +
@@ -450,7 +453,7 @@
         return '<div class="sgt-lapis-wrap">' +
           (n ? '<span class="sgt-nomor">' + n + '</span>' : '') +
           '<button type="button" class="sgt-lapis sgt-' + k + aktif + '" ' +
-          'data-sgt-lapis="' + k + '">' +
+          'data-sgt-lapis="' + k + '" data-preview-preserve="1">' +
           '<span class="sgt-judul">' + l.judul + '</span>' +
           (ringkas ? '<span class="sgt-nilai">' + nilaiLapis(h, k) + '</span>' : '') +
           '</button></div>';

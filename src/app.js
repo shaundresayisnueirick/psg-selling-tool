@@ -333,7 +333,8 @@ function kakiAgenHtml(na, hp) {
       if (!kontak) kontak = String(k.whatsapp || a.hp || '').trim();
     } catch (_) {}
   }
-  if (!nama && !kontak) return 'Isi nama dan kontak agen di layar kalkulator agar tampil di sini.';
+  /* Petunjuk untuk agen, bukan isi dokumen nasabah: tampil di layar saja. */
+  if (!nama && !kontak) return '<span class="tanpa-cetak">Isi nama dan kontak agen di layar kalkulator agar tampil di sini.</span>';
   return 'Disajikan oleh <b>' + esc(nama || '\u2014') + '</b>'
     + (kontak ? ' \u2022 <b>' + esc(kontak) + '</b>' : '');
 }
@@ -4444,7 +4445,9 @@ function oHitung() {
     + '</td><td class="kanan angka">' + (r.totalCI ? rp(r.totalCI) : '—') + '</td><td class="kanan angka">'
     + (r.totalAngioplasty ? rp(r.totalAngioplasty) : '—') + '</td><td class="kanan angka">' + rp(r.totalAkhirKontrak)
     + '</td><td>—</td></tr></tbody>';
-  el('oCatatanSlot').textContent = 'Setiap slot dihitung sendiri. Status yang tidak valid tidak masuk total summary/timeline, sesuai aturan COMBO_Summary.';
+  /* Catatan di bawah ini ikut tercetak dan dibawa ke Ringkasan Program,
+     jadi ditulis untuk nasabah: tanpa istilah internal (slot, COMBO_Summary). */
+  el('oCatatanSlot').textContent = 'Setiap polis dihitung sendiri. Polis yang belum memenuhi syarat tidak dimasukkan ke total ringkasan maupun timeline.';
 
   // Summary benefit dinamis: hanya benefit yang benar-benar ada di program yang dipilih.
   const benefitRows = [];
@@ -4466,7 +4469,7 @@ function oHitung() {
   el('oTabelManfaat').innerHTML =
     '<thead><tr><th>Manfaat</th><th class="kanan">Nilai</th><th>Dasar / aturan</th></tr></thead><tbody>'
     + benefitRows.join('') + '</tbody>';
-  el('oCatatanManfaat').textContent = 'Summary mengikuti aturan agregasi COMBO_Summary: benefit sejenis digabung, cap gabungan tetap diterapkan, dan benefit produk berbeda tetap memiliki jalur masing-masing.';
+  el('oCatatanManfaat').textContent = 'Manfaat sejenis dari beberapa polis digabung dengan tetap memperhatikan batas gabungannya; manfaat yang hanya dimiliki satu produk ditampilkan tersendiri.';
 
   // Timeline dinamis. Kolom hanya ditampilkan bila benefit tersebut benar-benar
   // tersedia pada polis yang aktif. Kenaikan benefit iFLEXYGUARD ditampilkan di
@@ -4505,11 +4508,16 @@ function oHitung() {
         '</tr>';
     }).join('') + '</tbody>';
 
+  /* Kalimat produk hanya ditulis bila produknya memang ada di hasil
+     hitungan ini (r.aktif) — sebelumnya kalimat iFLEXYGUARD selalu ikut,
+     termasuk pada program tanpa iFLEXYGUARD. */
   el('oCatatanTimeline').textContent =
-    'Timeline dinamis mengikuti benefit yang benar-benar tersedia pada produk yang dipilih. ' +
-    'Kolom yang tidak relevan disembunyikan. Benefit yang sejenis tetap digabung. ' +
-    'Untuk iFLEXYGUARD, Bonus 75 adalah 50% dari UP dasar awal dan ditampilkan sebagai peristiwa terpisah pada usia 75; ' +
-    'kenaikan manfaat 150%/200% tetap terlihat pada kolom Meninggal Sebab Apa Pun sesuai tahun polis.';
+    'Timeline hanya menampilkan manfaat yang tersedia pada polis yang dipilih. ' +
+    'Manfaat sejenis dari beberapa polis digabung.' +
+    (hasBonus75
+      ? ' Untuk iFLEXYGUARD, Bonus 75 adalah 50% dari UP dasar awal dan ditampilkan sebagai peristiwa terpisah pada usia 75; ' +
+        'kenaikan manfaat 150%/200% tetap terlihat pada kolom Meninggal Sebab Apa Pun sesuai tahun polis.'
+      : '');
   // Excel COMBO_Summary tidak memakai tabel skenario terpisah; semua skenario GSPA masuk
   // ke kolom timeline. Kita kosongkan blok lama agar summary tidak menggandakan informasi.
   el('oTabelSkenario').innerHTML = '';

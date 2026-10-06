@@ -216,8 +216,11 @@ function makePrintSplit(table){
     return part;
   }
 
+  /* Judul pecahan mengikuti tabelnya bila diberi data-print-label (mis. tabel
+     detail komponen program); tanpa penanda tetap "Timeline Program". */
+  const judul=table.getAttribute('data-print-label')||'Timeline Program';
   groups.forEach((g,idx)=>{
-    const label='Timeline Program — bagian '+(idx+1)+'/'+groups.length;
+    const label=judul+' — bagian '+(idx+1)+'/'+groups.length;
     wrap.appendChild(makeTable(g,label));
   });
 
@@ -361,8 +364,27 @@ function makePrintSplit(table){
     }catch(_){}
   }
 
+  /* Blok <details> bertanda data-cetak-buka (mis. "Detail komponen pembentuk
+     program") dilipat di layar tetapi isinya bagian dokumen nasabah. Browser
+     hanya mencetak judul <details> yang tertutup, jadi blok ini dibuka di
+     Preview dan selama mencetak, lalu dikembalikan seperti semula. */
+  const DETAIL_CETAK='details[data-cetak-buka]';
+  let detailDibuka=[];
+  function bukaDetailCetak(){
+    document.querySelectorAll(DETAIL_CETAK+':not([open])').forEach(d=>{d.open=true;detailDibuka.push(d)});
+  }
+  function tutupDetailCetak(){
+    detailDibuka.forEach(d=>{d.open=false});
+    detailDibuka=[];
+  }
+
   function cleanClone(clone){
-    clone.querySelectorAll('.tanpa-cetak,[data-preview-hide],button').forEach(n=>n.remove());
+    /* Tombol kontrol dibuang. Tombol yang sekaligus menjadi gambar dokumen
+       (mis. atap dan lapis Segitiga Financial) ditandai data-preview-preserve:
+       tetap tampil, tetapi tidak bisa difokus atau diklik di Preview. */
+    clone.querySelectorAll('.tanpa-cetak,[data-preview-hide],button:not([data-preview-preserve])').forEach(n=>n.remove());
+    clone.querySelectorAll('button[data-preview-preserve]').forEach(n=>{n.setAttribute('tabindex','-1');n.setAttribute('aria-disabled','true');n.style.pointerEvents='none'});
+    clone.querySelectorAll(DETAIL_CETAK).forEach(d=>{d.open=true});
     /* Pindahkan sebelum ID dibersihkan agar helper dapat mengenali struktur
        khusus halaman Kombinasi. */
     pindahkanWaiverKMBKeBawah(clone);
@@ -455,7 +477,9 @@ function makePrintSplit(table){
     const mo=new MutationObserver(()=>attach());mo.observe(document.body,{childList:true,subtree:true});
     window.addEventListener('beforeprint',ensurePrintWaiverPosition);
     window.addEventListener('beforeprint',ensurePrintIdentity);
+    window.addEventListener('beforeprint',bukaDetailCetak);
     window.addEventListener('afterprint',removePrintIdentity);
+    window.addEventListener('afterprint',tutupDetailCetak);
     window.PSGPrintPreview={open:showPreview,attach,printWithConsultant:directPrint};
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
