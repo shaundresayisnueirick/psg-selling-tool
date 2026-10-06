@@ -979,11 +979,15 @@ html.psg-library-summary-open,html.psg-library-summary-open body{overflow:hidden
 .library-batch-card .print-logo,.library-batch-card .brand-top,.library-batch-card img[src*="logo-psg"]{display:none!important}
 .library-detail-card .logo-psg-app,.library-detail-card .logo-cetak,.library-detail-card img[src*="logo-psg"]{width:96px!important;max-width:96px!important;height:auto!important;object-fit:contain!important;display:block}
 
-/* identitas konsultan di dokumen (disisipkan preview-cetak.js) */
+/* identitas konsultan di dokumen (disisipkan preview-cetak.js).
+   Versi Preview mengikuti tema layar lewat token (dulu #111 di atas #fff,
+   sehingga menjadi pita putih di ujung Preview tema gelap). Cetak/PDF tetap
+   hitam di atas putih lewat blok 17 (.psg-consultant-print dan
+   body.psg-universal-preview-print ... .psg-consultant-print). */
 .psg-consultant-print{display:none}
 .psg-consultant-print.psg-consultant-preview{
   display:flex;align-items:center;gap:12px;margin:18px 0 0;padding:12px 0 0;border-top:1px solid var(--border-strong);
-  font-size:9pt;color:#111;background:#fff;break-inside:avoid;
+  font-size:9pt;color:var(--text);background:var(--surface);break-inside:avoid;
 }
 .psg-consultant-print.psg-consultant-preview img.psg-consultant-photo{width:42px;height:42px;border-radius:50%;object-fit:cover;border:1px solid #999}
 .psg-consultant-print.psg-consultant-preview .psg-consultant-meta{flex:1;line-height:1.35}
@@ -1714,14 +1718,15 @@ details.quick-group > summary{
 .sgt-urut{margin:6px 0 0 18px;padding:0}
 .sgt-urut li{margin-bottom:4px}
 .sgt-pensiun-wrap{width:100%}
-/* Posisi atap TUA / PENSIUN (layar saja; hasil cetak tidak berubah).
+/* Posisi atap TUA / PENSIUN (layar dan cetak; dulu layar saja karena di
+   cetakan bentuk Segitiga transparan — lihat bagian 18).
    Wadah atap juga berkelas .sgt-lapis-wrap dan .sgt-pensiun-wrap, yang
    ditulis sesudah .sgt-atap-wrap dan menimpa position/align-items/width-nya.
    Akibatnya atap jatuh ke alur normal di bawah ruang 104px yang disiapkan
    untuknya: ada ruang kosong di atas atap dan alas atap menimpa LIFE.
    Di sini atap ditaruh di alur secara eksplisit dengan tinggi pas 104px;
    jaraknya ke LIFE mengikuti jarak antar-lapis (gap .sgt-gambar). */
-@media screen{
+@media screen,print{
   .sgt-gambar.sgt-rumah{padding-top:0}
   .sgt-rumah > .sgt-atap-wrap{position:relative;top:auto;left:auto;transform:none;width:300px;height:104px;align-items:flex-end}
   /* nomor prioritas atap duduk di dalam alas segitiga, bukan di ruang
@@ -1733,8 +1738,8 @@ details.quick-group > summary{
    yang sama dengan atap dan tiap lapis lewat subgrid, sehingga TUA/PENSIUN,
    LIFE, CRITICAL ILLNESS, dan HEALTH selalu sejajar dengan bentuknya
    walaupun tinggi teksnya berubah. Tanpa dukungan subgrid, tata letak lama
-   tetap dipakai. */
-@media screen and (min-width:646px){
+   tetap dipakai. Cetakan memakai tata letak yang sama dengan layar lebar. */
+@media screen and (min-width:646px),print{
   @supports (grid-template-rows:subgrid){
     .sgt-bungkus{display:grid;grid-template-columns:300px minmax(0,1fr);grid-template-rows:repeat(4,auto);column-gap:var(--s-5);row-gap:3px;align-items:stretch}
     .sgt-bungkus > .sgt-gambar.sgt-rumah{grid-column:1;grid-row:1 / span 4;display:grid;grid-template-rows:subgrid;align-items:stretch;justify-items:center;min-width:0;padding:0}
@@ -2702,4 +2707,51 @@ html:has(#layarSalesIdea.aktif){overflow:hidden}
   .usia-live::before{display:none}
   html,body{background:#fff!important}
   table.tahunan th{position:static}
+}
+
+/* =====================================================================
+   18. CETAK — SEGITIGA FINANCIAL
+   ---------------------------------------------------------------------
+   Rumah Segitiga (atap TUA / PENSIUN, lapis LIFE, CRITICAL ILLNESS,
+   HEALTH, nomor prioritas) digambar seluruhnya dengan warna latar. Blok 17
+   membuat latar setiap elemen di dalam <main> transparan dan teksnya #111
+   ("main *:not(...)", spesifisitas 0,2,1); cetak dari Preview memaksa teks
+   #000 ("... .psg-print-preview-body *", 1,2,1). Akibatnya di cetakan/PDF
+   bentuknya hilang dan hanya teks yang tersisa.
+
+   Blok 17 tidak diubah. Aturan di bawah mengembalikan warna yang sama
+   dengan layar dan meminta browser mencetak latarnya apa adanya
+   (print-color-adjust:exact), juga saat opsi "Background graphics" mati.
+   :is(main,#psgPrintPreviewModal,...) bernilai spesifisitas satu ID, jadi
+   menang atas kedua aturan tadi di semua jalur cetak: cetak langsung dari
+   layar, Preview → Cetak, dan detail Library. Tata letak dan ukuran tidak
+   disentuh di sini.
+   ===================================================================== */
+@media print{
+  html body :is(main,#psgPrintPreviewModal,#libraryDetailModal,#libraryBatchModal,#libraryOnePageModal) .sgt-bungkus :is(.sgt-atap,.sgt-lapis,.sgt-landasan,.sgt-nomor){
+    -webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;
+  }
+  html body :is(main,#psgPrintPreviewModal,#libraryDetailModal,#libraryBatchModal,#libraryOnePageModal) .sgt-bungkus .sgt-gambar .sgt-atap{background-color:#5B6B57!important}
+  html body :is(main,#psgPrintPreviewModal,#libraryDetailModal,#libraryBatchModal,#libraryOnePageModal) .sgt-bungkus .sgt-gambar .sgt-life{background-color:#3EA7D6!important}
+  html body :is(main,#psgPrintPreviewModal,#libraryDetailModal,#libraryBatchModal,#libraryOnePageModal) .sgt-bungkus .sgt-gambar .sgt-ci{background-color:#F2B8C6!important}
+  html body :is(main,#psgPrintPreviewModal,#libraryDetailModal,#libraryBatchModal,#libraryOnePageModal) .sgt-bungkus .sgt-gambar .sgt-health{background-color:#E0A32E!important}
+  html body :is(main,#psgPrintPreviewModal,#libraryDetailModal,#libraryBatchModal,#libraryOnePageModal) .sgt-bungkus .sgt-gambar .sgt-landasan{background-color:#5B6B57!important}
+  html body :is(main,#psgPrintPreviewModal,#libraryDetailModal,#libraryBatchModal,#libraryOnePageModal) .sgt-bungkus .sgt-gambar .sgt-nomor{background-color:#12212E!important}
+
+  /* teks: sama dengan layar (blok 17 juga mengatur -webkit-text-fill-color) */
+  html body :is(main,#psgPrintPreviewModal,#libraryDetailModal,#libraryBatchModal,#libraryOnePageModal) .sgt-bungkus .sgt-gambar .sgt-atap,
+  html body :is(main,#psgPrintPreviewModal,#libraryDetailModal,#libraryBatchModal,#libraryOnePageModal) .sgt-bungkus .sgt-gambar .sgt-atap :is(.sgt-judul,.sgt-nilai){
+    color:#F7F8F4!important;-webkit-text-fill-color:#F7F8F4!important;
+  }
+  html body :is(main,#psgPrintPreviewModal,#libraryDetailModal,#libraryBatchModal,#libraryOnePageModal) .sgt-bungkus .sgt-gambar .sgt-lapis,
+  html body :is(main,#psgPrintPreviewModal,#libraryDetailModal,#libraryBatchModal,#libraryOnePageModal) .sgt-bungkus .sgt-gambar .sgt-lapis :is(.sgt-judul,.sgt-nilai){
+    color:#12212E!important;-webkit-text-fill-color:#12212E!important;
+  }
+  html body :is(main,#psgPrintPreviewModal,#libraryDetailModal,#libraryBatchModal,#libraryOnePageModal) .sgt-bungkus .sgt-gambar .sgt-landasan,
+  html body :is(main,#psgPrintPreviewModal,#libraryDetailModal,#libraryBatchModal,#libraryOnePageModal) .sgt-bungkus .sgt-gambar .sgt-landasan :is(.sgt-judul,.sgt-nilai){
+    color:#F4F7F2!important;-webkit-text-fill-color:#F4F7F2!important;
+  }
+  html body :is(main,#psgPrintPreviewModal,#libraryDetailModal,#libraryBatchModal,#libraryOnePageModal) .sgt-bungkus .sgt-gambar .sgt-nomor{
+    color:#fff!important;-webkit-text-fill-color:#fff!important;
+  }
 }

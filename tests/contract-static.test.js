@@ -35,8 +35,8 @@ const isSubseq = (sub, arr) => { let i = 0; for (const x of arr) if (x === sub[i
 const INLINE_DIIZINKAN = {
   'program-summary.html': [{
     dari: 'a677e3718adabddb70d89776b699908b108cd7c3cccc030d915ac7e539819893',
-    ke: 'dea75439026141f77a65c889ba7caab346a6f731707aa734c9963b76d1bc8666',
-    alasan: 'Tabel Manfaat Gabungan dibungkus <table> bila isinya hanya <thead>/<tbody>/<tr> (sebelumnya tampil sebagai teks menyambung). Tidak menyentuh angka.',
+    ke: 'b9b2fd8f57a089120267d937b42ea9aa50d7eb3167cd22f22b10c162a190d943',
+    alasan: 'Tabel Manfaat Gabungan dibungkus <table> bila isinya hanya <thead>/<tbody>/<tr> (sebelumnya tampil sebagai teks menyambung). Tidak menyentuh angka. Detail komponen pembentuk program (nama produk + catatan sumber hitungan untuk agen) diberi tanpa-cetak: tetap bisa dibuka di layar, tidak ikut Preview/cetak/PDF. catatanSlot tidak lagi dimasukkan ke Prompt Flyer AI. Tidak menyentuh angka.',
   }],
 };
 
@@ -45,8 +45,8 @@ const INLINE_DIIZINKAN = {
 const JS_DIIZINKAN = {
   'src/preview-cetak.js': [{
     dari: 'abe686a05ed724852a36ff89e964940514f9f719686b4e0fcd09e21fc3c92d29',
-    ke: '5047860d6c7868c80548d215371e4c013c139185083ecc462033e47f1f8638a5',
-    alasan: 'Pemecah tabel cetak memetakan sel menurut posisi kolom (colspan), bukan urutan DOM. Sebelumnya baris Total ber-colspan mendapat kolom lebih banyak dari judulnya: angka bertumpuk dan Total bergeser ke kolom yang salah. Tidak menyentuh nilai.',
+    ke: '08cbdff72ec35c7abb59318fc2e10a948284a1cd7910b86ff4f0cf3ab05b30bf',
+    alasan: 'Pemecah tabel cetak memetakan sel menurut posisi kolom (colspan), bukan urutan DOM. Sebelumnya baris Total ber-colspan mendapat kolom lebih banyak dari judulnya: angka bertumpuk dan Total bergeser ke kolom yang salah. Tidak menyentuh nilai. cleanClone membuang tombol kontrol kecuali yang ditandai data-preview-preserve (atap dan lapis Segitiga Financial, yang sekaligus gambar dokumen); tombol itu dibuat tidak bisa difokus/diklik di Preview. Sebelumnya seluruh button dibuang sehingga Segitiga kosong di Preview.',
   }],
   'src/core.js': [{
     dari: '385c5f77851f6b5b5c94b6e3bf6d65d3df77faef9b21a1c9cd4aa137c1833c7c',
@@ -55,8 +55,8 @@ const JS_DIIZINKAN = {
   }],
   'src/app.js': [{
     dari: '34593519c233710ed358d93f3392c048f3b6614be086daef8f0f50dffcf69164',
-    ke: 'a9ae56c22e44199422c9ac71a12c98170c0a2ea8022f12f1d13e8d7878060153',
-    alasan: 'Input komponen Kebutuhan Dana Pensiun (dk_*) dirender tanpa atribut value dari DP_KOMPONEN.awal (sisa angka demo Rp19 juta). Kalkulator memang mulai kosong (dNilai 0) dan hanya diisi dari profil aktif; angka demo sebelumnya sempat tampil di DOM sampai layar DP dibuka. Tidak ada rumus yang berubah. Education Planning (dGambar): saat setoran sama (pertumbuhan 0%) cabang itu tidak lagi return lebih awal, sehingga bagian "ringkasan untuk prospek" tetap dirender; tabel efek menunda hanya dibangun pada cabang lain. Tidak ada rumus yang berubah.',
+    ke: '5232e3cc2f2bcc5d1d2658e2c92f3082d2f6b55b7f31aeaa9e0d45379c4b980b',
+    alasan: 'Input komponen Kebutuhan Dana Pensiun (dk_*) dirender tanpa atribut value dari DP_KOMPONEN.awal (sisa angka demo Rp19 juta). Kalkulator memang mulai kosong (dNilai 0) dan hanya diisi dari profil aktif; angka demo sebelumnya sempat tampil di DOM sampai layar DP dibuka. Tidak ada rumus yang berubah. Education Planning (dGambar): saat setoran sama (pertumbuhan 0%) cabang itu tidak lagi return lebih awal, sehingga bagian "ringkasan untuk prospek" tetap dirender; tabel efek menunda hanya dibangun pada cabang lain. Tidak ada rumus yang berubah. Ringkasan Kombinasi: kalimat iFLEXYGUARD/Bonus 75 pada catatan timeline hanya ditulis bila iFLEXYGUARD ada di hasil hitungan (r.aktif); sebelumnya statis dan ikut terbawa ke Ringkasan Program tanpa iFLEXYGUARD. Catatan slot/manfaat ditulis ulang tanpa istilah internal (COMBO_Summary, slot). Petunjuk agen bila nama/kontak agen kosong dibungkus tanpa-cetak. Tidak ada rumus, agregasi, atau timeline yang berubah.',
   }],
   'src/library-ilustrasi.js': [{
     dari: '57a58e17a4e9c117431f3d52c24e40bc11c3c26fec0be12b18a2b5d885ebc4d7',
@@ -72,6 +72,16 @@ const JS_DIIZINKAN = {
     dari: 'dfd143970d9e79bc8ec46687724748da98147b9ae78985619a71c83c7a0c747f',
     ke: 'c2bc0b382ebc2d1b6a0d5e6e9727c08df9dec9a322d53cb50918f2f2a658afff',
     alasan: 'Sales Idea memakai pemutar interaktif (src/sales-idea-player.js): tiap langkah yang ada menjadi scene dengan Play/Pause/Replay/Next/Back. init() kini idempoten sehingga listener klik dokumen tidak lagi menumpuk tiap kali layar dibuka. Retirement Planning memakai cerita interaktif (src/sales-idea-retirement.js) dengan data retirementSteps yang sama. Keranjang Kehidupan memakai cerita interaktif (src/sales-idea-keranjang.js) dengan data basketSteps yang sama. Education Planning memakai cerita interaktif (src/sales-idea-education.js) dengan data educationSteps yang sama. 10 Jari memakai cerita tangan interaktif (src/sales-idea-jari.js) dalam 9 langkah (BAB 1: 5 risiko dalam satu scene, BAB 2: 5 pertanyaan, BAB 3: 3 alasan dengan renderer lama) dengan data fingers dan reasons yang sama; teks fokus/inti jari dipindah ke teksJari() tanpa perubahan isi. Asset Creation memakai cerita interaktif (src/sales-idea-asset.js) dengan data assetCreationSteps yang sama; renderer lama tetap sebagai cadangan. SalesIdea10Jari.keadaan() (hanya dibaca: mode, indeks scene, jumlah scene) dipakai kartu akhir "Mari Kita Hitung" (src/sales-idea-lanjut.js). Data, ID, kelas, dan API SalesIdea10Jari tidak berubah. Sales Idea 06 "Bekerja di Singapura": data singapuraSteps (12 langkah), kartu hub, dispatch adeganMode ke PSGSingapuraStory (src/sales-idea-singapura.js), mode baru di setMode dan jumlahLangkah. Sales Idea lain tidak berubah. Sales Idea 06 V2: data singapuraSteps menjadi 8 langkah (storyboard final); pemutaran, dispatch, dan hub tidak berubah. Pembersihan catatan internal agen dari tampilan: catatan .si-hub-note di hub, paragraf pengantar 3 Alasan, body/insight jari 10 (dikosongkan), kalimat "Untuk Sales Idea ini…" di Retirement S1, dan label "Inti percakapan:" di Asset S6; ID, data lain, dan API tidak berubah.',
+  }],
+  'src/segitiga-solusi.js': [{
+    dari: '5b966b2719a2edf471e097e56cca6058a03e08aeca6d895a9bcd370b6c4a6af7',
+    ke: 'e77c83a17ab918b8043c9737248efd4f51d4631a3c9bb571847bc73cafbc2027',
+    alasan: 'Lama bayar dasar Gen Aman + GHPS dibaca dari database (gspaHealthPaymentTermsAvailable: key DATA_GSPA.dasar yang juga ada di DATA_GHPS.batasUsia, divalidasi lewat engine GSPA, ghpsHitung, dan waiverHitung bila Waiver ON) menggantikan daftar tetap [5,10]; lama bayar tersimpan yang tidak tersedia diganti yang terdekat sebelum dihitung dan saat kartu digambar, plan/Waiver memicu validasi ulang. programNarrative memfilter fase memakai toYear (sebelumnya properti to yang tidak ada, sehingga tercetak Tahun 16–null). Catatan, sangkalan, dan teks cadangan deskripsi plan Health di Ringkasan Program tanpa istilah internal (engine, kalkulator existing, Program Financial Engine); typo GPHS menjadi GHPS. Formula premi, manfaat, agregasi, dan timeline tidak berubah.',
+  }],
+  'src/segitiga.js': [{
+    dari: '4391f3d4d282245e34ccb988c4a1b82c812c40e4c7ea1b9cea9984fd835eaa38',
+    ke: 'd702eb252e275bfb2f5b4cef8ddd338fd7aea70bab258405de38cde6d8b90398',
+    alasan: 'Tombol atap dan lapis Segitiga Financial diberi data-preview-preserve agar ikut tampil di Preview (bagian dari gambar dokumen). Logika dan perhitungan tidak berubah.',
   }],
 };
 

@@ -1040,10 +1040,53 @@
     }catch(e){ return {ok:false,error:e&&e.message?e.message:'Engine gagal menghitung.'}; }
   }
 
+  /* Lama bayar dasar Gen Aman + GHPS yang benar-benar tersedia, dibaca dari
+     database, bukan daftar tetap. Kandidatnya masa bayar yang ada di tabel
+     dasar GSPA sekaligus di batas usia masuk GHPS (saat ini 5/10/15 dengan
+     usia maksimal 70/65/60). Tiap kandidat divalidasi dengan jalur yang sama
+     dengan perhitungan: tarif dasar lewat engine GSPA, ghpsHitung (batas usia
+     masuk + tarif plan terpilih), dan waiverHitung bila Waiver ON. Usia yang
+     dipakai adalah usia hasil engine GSPA, sama dengan perhitungannya. */
+  function gspaHealthPaymentTermsAvailable(item,profile){
+    const dasar=(typeof DATA_GSPA!=='undefined'&&DATA_GSPA&&DATA_GSPA.dasar)||{};
+    const batas=(typeof DATA_GHPS!=='undefined'&&DATA_GHPS&&DATA_GHPS.batasUsia)||{};
+    const kandidat=Object.keys(dasar).filter(k=>Object.prototype.hasOwnProperty.call(batas,k))
+      .map(Number).filter(n=>n>0).sort((a,b)=>a-b);
+    const tgl=profile&&profile.tglLahir?new Date(profile.tglLahir+'T00:00:00Z'):null;
+    if(!tgl) return {terms:kandidat,usia:null};
+    const jk=profile.jk, up=Math.max(100000000,Number(item.up)||100000000);
+    const plan=item.healthPlan||'Gold Standard', pakaiWaiver=item.pakaiWaiver===true;
+    const metode=item.metode||item._programMetode||'Tahunan';
+    let usia=null;
+    const terms=kandidat.filter(mpp=>{
+      const base=engineResult('GSPA',{nama:profile.nama,jk,tglLahir:tgl,mpp,metode,mode:'By UP',upDasar:up,premiNet:0,modeWakaf:'Non Wakaf',nilaiWakaf:0,persenWakaf:0},typeof DATA_GSPA!=='undefined'?DATA_GSPA:null);
+      if(base.result && base.result.usia!=null) usia=base.result.usia;
+      if(!base.ok) return false;
+      if(typeof ghpsHitung!=='function' || !ghpsHitung(base.result.usia,mpp,plan).sah) return false;
+      if(pakaiWaiver && (typeof waiverHitung!=='function' || !waiverHitung(base.result.usia,mpp,jk,up,base.result.diskon).sah)) return false;
+      return true;
+    });
+    return {terms,usia};
+  }
+  /* Lama bayar yang tersimpan tetapi tidak lagi tersedia (mis. 15 tahun lalu
+     usia menjadi 61, atau plan/Waiver berubah) tidak dipertahankan: diganti
+     masa bayar tersedia yang terdekat (bila sama jauh, yang lebih pendek).
+     Bila tidak ada satu pun yang tersedia, nilainya dibiarkan sehingga
+     perhitungan tetap gagal dengan alasan dari engine — tanpa angka palsu. */
+  function gspaHealthNormalizeTerm(item,profile){
+    const av=gspaHealthPaymentTermsAvailable(item,profile);
+    const cur=Number(item.paymentTerm)||5;
+    if(!av.terms.length || av.terms.includes(cur)) return Object.assign({changed:false,term:cur},av);
+    const next=av.terms.slice().sort((a,b)=>Math.abs(a-cur)-Math.abs(b-cur)||a-b)[0];
+    item.paymentTerm=next;
+    return Object.assign({changed:true,from:cur,term:next},av);
+  }
+
   function buildProductCalculation(need,kode,item,profile){
     const usia=usiaProgram(profile.tglLahir), jk=profile.jk;
     const tgl=profile.tglLahir?new Date(profile.tglLahir+'T00:00:00Z'):null;
     const metode=item.metode||item._programMetode||'Tahunan';
+    if(kode==='GSPA_HEALTH') gspaHealthNormalizeTerm(item,profile);
     const paymentTerm=Number(item.paymentTerm)||({GSPA:5,GPRO:10,CEM:10,FLEX:5,RIZQIA:10,BSL:5,CRIS:10,LF:5}[kode]||5);
     const protectionTerm=Number(item.protectionTerm)||({CEM:25,CRIS:25}[kode]||0);
     const healthConfig=(item.healthConfig && item.healthConfig.enabled) ? item.healthConfig : null;
@@ -1442,7 +1485,14 @@
     } else if(kode==='GSPA_HEALTH'){
       const plans=(typeof DATA_GHPS!=='undefined'&&Array.isArray(DATA_GHPS.urutan))?DATA_GHPS.urutan:['Gold Standard','Gold Deluxe','Diamond Superior','Diamond Deluxe','Platinum Deluxe','Titanium'];
       h+='<div class="sgs-pb-grid"><div><label>Plan Health</label><select class="sgs-pb-field" data-field="healthPlan">'+optionHtml(plans,item.healthPlan||'Gold Standard')+'</select></div><div><label>UP dasar jiwa untuk kombinasi</label>'+moneyInput(Number(item.up)||100000000,'up','0')+'</div></div>';
-      h+='<div class="sgs-pb-grid"><div><label>Lama bayar dasar</label><select class="sgs-pb-field" data-field="paymentTerm">'+optionHtml([5,10],item.paymentTerm||5,v=>v+' tahun')+'</select></div><div><label>Waiver Gen Aman</label><label class="sgs-pb-switch"><input type="checkbox" data-field="pakaiWaiver"'+(item.pakaiWaiver===true?' checked':'')+'><span class="sgs-pb-slider"></span><b class="sgs-pb-switch-text">'+(item.pakaiWaiver===true?'ON':'OFF')+'</b></label><small class="sgs-pb-help">Membebaskan kontribusi dasar bila peserta terdiagnosa penyakit kritis sesuai ketentuan polis.</small></div></div>';
+      const lamaBayar=gspaHealthNormalizeTerm(item,profile);
+      h+='<div class="sgs-pb-grid"><div><label>Lama bayar dasar</label><select class="sgs-pb-field" data-field="paymentTerm">'+optionHtml(lamaBayar.terms,item.paymentTerm||5,v=>v+' tahun')+'</select>'+
+        (!lamaBayar.terms.length
+          ? '<p class="catatan akt-peringatan">Tidak ada lama bayar Gen Aman + GHPS yang tersedia'+(lamaBayar.usia!=null?' untuk usia '+esc(String(lamaBayar.usia))+' tahun':'')+'.</p>'
+          : lamaBayar.changed
+            ? '<p class="catatan">Lama bayar '+esc(String(lamaBayar.from))+' tahun tidak tersedia'+(lamaBayar.usia!=null?' untuk usia '+esc(String(lamaBayar.usia))+' tahun':'')+' dengan pilihan ini; disesuaikan menjadi '+esc(String(lamaBayar.term))+' tahun.</p>'
+            : '')+
+        '</div><div><label>Waiver Gen Aman</label><label class="sgs-pb-switch"><input type="checkbox" data-field="pakaiWaiver"'+(item.pakaiWaiver===true?' checked':'')+'><span class="sgs-pb-slider"></span><b class="sgs-pb-switch-text">'+(item.pakaiWaiver===true?'ON':'OFF')+'</b></label><small class="sgs-pb-help">Membebaskan kontribusi dasar bila peserta terdiagnosa penyakit kritis sesuai ketentuan polis.</small></div></div>';
       h+='<div><label>Cara bayar program</label><div class="sgs-pb-fixed">Mengikuti pilihan global program</div></div>';
     } else if(kode==='GPRO_HEALTH'){
       h+='<div class="sgs-pb-grid"><div><label>Plan Health</label><select class="sgs-pb-field" data-field="healthPlan">'+optionHtml(['Gold Standard','Gold Deluxe','Diamond Superior','Diamond Deluxe','Platinum Deluxe','Titanium'],item.healthPlan||'Gold Standard')+'</select></div><div><label>UP jiwa dasar</label>'+moneyInput(Number(item.up)||100000000,'up','0')+'</div></div>';
@@ -1732,7 +1782,7 @@
       }
       if(r.healthEmbedded && r.healthPlan){
         const m=healthPlan(r.healthPlan);
-        addBenefit('health','Perlindungan kesehatan GHP/GPHS',0,{category:'health',event:'health',aggregateGroup:'health_plan',description:m?('Plan '+r.healthPlan+': wilayah '+m.wilayah+'; kamar '+m.kamar+'; limit tahunan '+rp(m.limit)+'; limit booster '+rp(m.booster)+'; '+m.cover+'.'):('Plan '+r.healthPlan+' sesuai hasil kalkulator existing.')});
+        addBenefit('health','Perlindungan kesehatan GHP/GHPS',0,{category:'health',event:'health',aggregateGroup:'health_plan',description:m?('Plan '+r.healthPlan+': wilayah '+m.wilayah+'; kamar '+m.kamar+'; limit tahunan '+rp(m.limit)+'; limit booster '+rp(m.booster)+'; '+m.cover+'.'):('Plan '+r.healthPlan+' sesuai ketentuan produk.')});
       }
     } else if(x.product==='GPRO'){
       const bp = r.premiPerSetoran||r.premiSesuaiMetode||x.premium;
@@ -1902,7 +1952,10 @@
 
   function programNarrative(model){
     const out=[];
-    model.phases.filter(p=>p.to!==null).forEach(p=>{
+    /* Fase premi tanpa akhir (Health yang terus berjalan) punya toYear null dan
+       ditulis terpisah sebagai "Mulai tahun …" di bawah. Properti "to" tidak
+       pernah ada, sehingga dulu fase itu ikut tercetak sebagai "Tahun 16–null". */
+    model.phases.filter(p=>p.toYear!==null).forEach(p=>{
       out.push('<div class="program-duration-line"><b>Tahun '+p.fromYear+'–'+p.toYear+'</b><br><b>'+rp(p.totalAnnual)+'</b> per tahun'+(p.hasRecurring?'*':'')+'</div>');
     });
     const tail=model.phases.find(p=>p.toYear===null);
@@ -2006,7 +2059,7 @@
         }
         h+='<tr class="tandai"><td>Kenaikan UP Dasar Gen Aman</td><td class="ka">7,5%</td><td class="ka">Setiap 5 tahun</td><td class="ka">Ikut berubah mengikuti seluruh manfaat meninggal yang aktif</td></tr>';
         h+='</tbody></table>';
-        blocks.push('<div class="program-benefit-line"><b>Kenaikan Manfaat Gen Aman</b>'+h+'<small>UP Dasar Gen Aman meningkat 7,5% setiap 5 tahun sesuai hasil kalkulator existing. Kolom UP seluruh program merupakan gabungan seluruh manfaat meninggal yang aktif pada usia/periode tersebut.</small></div>');
+        blocks.push('<div class="program-benefit-line"><b>Kenaikan Manfaat Gen Aman</b>'+h+'<small>UP Dasar Gen Aman meningkat 7,5% setiap 5 tahun. Kolom UP seluruh program merupakan gabungan seluruh manfaat meninggal yang aktif pada usia/periode tersebut.</small></div>');
       }
     }
 
@@ -2041,7 +2094,7 @@
           '<tr><td>Dasar pembayaran klaim</td><td>'+esc(m.cover||'—')+'</td></tr>'+
           '</tbody></table></div>';
       } else {
-        details='<small>'+esc(escapeAttrText(b.description||'Mengikuti manfaat Health pada kalkulator existing.'))+'</small>';
+        details='<small>'+esc(escapeAttrText(b.description||'Mengikuti manfaat plan Health yang dipilih.'))+'</small>';
       }
       blocks.push('<div class="program-benefit-line"><b>Perlindungan kesehatan</b>'+details+
         '<small>Premi Health/GHP tetap berjalan selama perlindungan kesehatan aktif dan dapat berubah sesuai ketentuan produk, termasuk penyesuaian terkait usia dan biaya kesehatan.</small></div>');
@@ -2071,7 +2124,7 @@
       }catch(_){ }
       const tunggu12=(window.InsuranceHubTunggu12&&typeof window.InsuranceHubTunggu12.html==='function')?window.InsuranceHubTunggu12.html():'';
       blocks.push('<div class="program-benefit-line"><b>Ketentuan perlindungan Health</b>'+waiting+tunggu12+ncbHtml+ncdHtml+
-        '<small>NCB/NCD dan ketentuan lain mengikuti plan serta aturan GHP existing. Informasi ini adalah ringkasan ketentuan produk, bukan perubahan manfaat polis.</small></div>');
+        '<small>NCB/NCD dan ketentuan lain mengikuti plan serta ketentuan produk GHP. Informasi ini adalah ringkasan ketentuan produk, bukan perubahan manfaat polis.</small></div>');
     }
 
     // WAIVER: one unified program-level explanation/table.
@@ -2105,7 +2158,7 @@
         rows += '<tr><td>Akhir tahun '+y+'</td><td class="ka">'+(relief>0?rp(relief):'—')+'</td></tr>';
       }
       const waiverDesc='Jika kondisi yang memenuhi ketentuan Waiver terjadi sebelum masa bayar selesai, premi yang masih memenuhi syarat dari seluruh komponen program yang memiliki Waiver dapat dibebaskan untuk sisa masa bayar.';
-      const waiverHealthNote='Premi Health/GHP/GPHS tidak termasuk pembebasan Waiver dan tetap berjalan selama perlindungan kesehatan aktif.';
+      const waiverHealthNote='Premi Health/GHP/GHPS tidak termasuk pembebasan Waiver dan tetap berjalan selama perlindungan kesehatan aktif.';
       const waiverTermNote='Setelah masa bayar komponen yang dilindungi selesai, tidak ada lagi premi eligible dari komponen tersebut yang dapat dibebaskan.';
       const table=rows?'<table class="akt-tabel"><thead><tr><th>Jika risiko terjadi pada</th><th class="ka">Sisa premi eligible yang berpotensi dibebaskan</th></tr></thead><tbody>'+rows+'</tbody></table>':'';
       /* Tidak lagi didorong ke daftar manfaat. Blok ini dipindahkan ke bagian
@@ -2437,7 +2490,7 @@
       : '';
 
     const manfaat=benefitNarrative(model,profile);
-    const duration='<div class="program-duration-line">Masa bayar terpanjang untuk komponen premi terbatas: <b>'+model.maxPaymentTerm+' tahun</b>. Masa perlindungan manfaat dapat lebih panjang dan mengikuti hasil kalkulator masing-masing komponen.</div>';
+    const duration='<div class="program-duration-line">Masa bayar terpanjang untuk komponen premi terbatas: <b>'+model.maxPaymentTerm+' tahun</b>. Masa perlindungan manfaat dapat lebih panjang dan mengikuti ketentuan masing-masing komponen.</div>';
     const normalizedForAudit=model.normalized.map(n=>({product:n.product,productName:n.productName,premiumComponents:n.premiumComponents,benefits:n.benefits,coverageEndAge:n.coverageEndAge}));
     const detailRows=successful.map(x=>'<tr><td>'+esc(INFO[x.need]?.title||x.need)+'</td><td>'+esc(x.productName)+'</td><td>'+rp(x.premium)+'</td><td>'+esc(x.metode||payMode)+'</td><td>'+esc(String(x.paymentTerm||'-')+' thn')+'</td><td>'+rp(x.totalPaid)+'</td></tr>').join('');
     sessionStorage.setItem('insuranceHub.comboGeneratedSummary',JSON.stringify({version:'segitiga-program-7',customerName:profile.nama,customerTgl:profile.tglLahir,customerAge:currentAge,customerJk:profile.jk,
@@ -2448,7 +2501,7 @@
       targets:{life:alt?.items?.life?.up||0,ci:alt?.items?.ci?.up||0,retirement:alt?.items?.pensiun?.target||0},
       selected:successful.map(x=>({productKey:x.product,productName:x.productName,need:x.need,premium:x.premium,totalPaid:x.totalPaid,paymentTerm:x.paymentTerm,metode:x.metode,protectionTerm:x.protectionTerm,retirementAge:x.retirementAge||null,up:x.result?.up||x.result?.upDasar||x.result?.upTotal||x.up||0})),
       programModel:{maxPaymentTerm:model.maxPaymentTerm,phases:model.phases,normalized:normalizedForAudit},
-      html:{ringkasan:ring,polis:'<div class="gulir"><table class="tahunan"><thead><tr><th>Kebutuhan</th><th>Produk</th><th>Premi</th><th>Metode</th><th>Masa bayar</th><th>Total bayar</th></tr></thead><tbody>'+detailRows+'</tbody></table></div>',manfaat:manfaat,durasi:duration,timeline:timelineHtml,waiver:waiverBlokProgram,skenario:'',catatanSlot:'Nama produk disimpan sebagai detail sumber perhitungan untuk agen. Halaman utama program disajikan berdasarkan manfaat dan komitmen program.',catatanManfaat:'Manfaat sejenis hanya digabung bila event dan sifat manfaatnya sama. Manfaat dengan kondisi atau event berbeda tidak dijumlahkan ke angka utama. Semua nilai berasal dari hasil kalkulator existing.',catatanTimeline:catatanTimelineHtml,catatanSkenario:'',sangkalan:'Seluruh angka dan manfaat berasal dari engine kalkulator produk existing. Program Financial Engine hanya menormalisasi dan menggabungkan hasil; tidak membuat formula premi baru.',kakiAgen:''}}));
+      html:{ringkasan:ring,polis:'<div class="gulir"><table class="tahunan"><thead><tr><th>Kebutuhan</th><th>Produk</th><th>Premi</th><th>Metode</th><th>Masa bayar</th><th>Total bayar</th></tr></thead><tbody>'+detailRows+'</tbody></table></div>',manfaat:manfaat,durasi:duration,timeline:timelineHtml,waiver:waiverBlokProgram,skenario:'',catatanSlot:'Nama produk disimpan sebagai detail sumber perhitungan untuk agen. Halaman utama program disajikan berdasarkan manfaat dan komitmen program.',catatanManfaat:'Manfaat sejenis hanya digabung bila peristiwa dan sifat manfaatnya sama. Manfaat dengan kondisi atau peristiwa berbeda tidak dijumlahkan ke angka utama.',catatanTimeline:catatanTimelineHtml,catatanSkenario:'',sangkalan:'Ilustrasi gabungan beberapa polis yang berdiri sendiri, dihitung dari tarif yang berlaku saat ini. Bukan bagian dari polis dan tidak mengikat secara hukum. Setiap polis tunduk pada Ketentuan Polis resmi PT Asuransi Jiwa Generali Indonesia dan hasil underwriting masing-masing.',kakiAgen:''}}));
   }
 
   function openProgramBuilder(alt,h,s){
@@ -2628,7 +2681,9 @@
             item.lastResult=null;
             syncEmbeddedHealth(draft);
             rerender();
-          } else if(field==='need'||field==='produk'||field==='paket'||(item.need==='pensiun' && (field==='paymentTerm'||field==='retirementAge'||field==='target'))) { syncEmbeddedHealth(draft); rerender(); }
+          } else if(field==='need'||field==='produk'||field==='paket'||(item.need==='pensiun' && (field==='paymentTerm'||field==='retirementAge'||field==='target'))
+            /* lama bayar Gen Aman + GHPS yang tersedia ikut plan dan Waiver */
+            ||(item.produk==='GSPA_HEALTH' && (field==='healthPlan'||field==='pakaiWaiver'))) { syncEmbeddedHealth(draft); rerender(); }
           else persist();
         });
       });

@@ -362,7 +362,11 @@ function makePrintSplit(table){
   }
 
   function cleanClone(clone){
-    clone.querySelectorAll('.tanpa-cetak,[data-preview-hide],button').forEach(n=>n.remove());
+    /* Tombol kontrol dibuang. Tombol yang sekaligus menjadi gambar dokumen
+       (mis. atap dan lapis Segitiga Financial) ditandai data-preview-preserve:
+       tetap tampil, tetapi tidak bisa difokus atau diklik di Preview. */
+    clone.querySelectorAll('.tanpa-cetak,[data-preview-hide],button:not([data-preview-preserve])').forEach(n=>n.remove());
+    clone.querySelectorAll('button[data-preview-preserve]').forEach(n=>{n.setAttribute('tabindex','-1');n.setAttribute('aria-disabled','true');n.style.pointerEvents='none'});
     /* Pindahkan sebelum ID dibersihkan agar helper dapat mengenali struktur
        khusus halaman Kombinasi. */
     pindahkanWaiverKMBKeBawah(clone);
