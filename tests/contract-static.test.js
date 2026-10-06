@@ -83,6 +83,11 @@ const JS_DIIZINKAN = {
     ke: 'd702eb252e275bfb2f5b4cef8ddd338fd7aea70bab258405de38cde6d8b90398',
     alasan: 'Tombol atap dan lapis Segitiga Financial diberi data-preview-preserve agar ikut tampil di Preview (bagian dari gambar dokumen). Logika dan perhitungan tidak berubah.',
   }],
+  'src/app-version.js': [{
+    dari: 'f1cb8c2a2a673cb4a3719bb6deee684426995715f5c77637138f0aad6c9f2c80',
+    ke: '53d50e28821ed9328b0d136b337292678356e1c5d5072e5737b4176854703abe',
+    alasan: 'Label versi yang terlihat agen (halaman login dan kaki dashboard) naik dari v1.5 ke v1.6 untuk rilis flyer campaign tanpa medical di Home Carousel. Hanya teks PSG_APP_VERSION/PSG_APP_VERSION_LABEL; manifest dan versi cache service worker tidak berubah.',
+  }],
 };
 
 /* 1. Berkas JS dilindungi */

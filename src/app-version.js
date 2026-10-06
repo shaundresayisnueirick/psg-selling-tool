@@ -5,8 +5,8 @@
    di perangkatnya sudah versi terbaru — tanpa perlu bertanya.
 
    Naikkan angkanya setiap kali ada rilis yang dibagikan ke agen. */
-window.PSG_APP_VERSION = 'v1.5';
-window.PSG_APP_VERSION_LABEL = 'Aplikasi Web v1.5';
+window.PSG_APP_VERSION = 'v1.6';
+window.PSG_APP_VERSION_LABEL = 'Aplikasi Web v1.6';
 
 /* Nama lama dipertahankan supaya kode yang mungkin masih membacanya tidak
    mendadak mendapat undefined. */
