@@ -29,16 +29,22 @@ function arg(name) {
 }
 const browserExe = arg('--browser');
 const screenshotsDir = arg('--screenshots');
+/* [nama, berkas, lebar, tinggi]. Flyer #9 (campaign tanpa medical) dipakai
+   apa adanya dari file yang diunggah (1672×941, rasio 16:9), tanpa crop atau
+   perbesaran. */
 const PRODUCTS = [
-  ['Cemerlang Prime', '01-cemerlang-prime.webp'],
-  ['CRISTAL Prime', '02-cristal-prime.webp'],
-  ['iFLEXYGUARD', '03-iflexyguard.webp'],
-  ['RIZQIA', '04-rizqia.webp'],
-  ['GEN Aman', '05-gen-aman.webp'],
-  ['BeSMART Lite / Lite Future', '06-besmart-lite-future.webp'],
-  ['GEN HealthCare Protection', '07-gen-healthcare-protection.webp'],
-  ['Referral Fiesta', '08-referral-fiesta.webp']
+  ['Cemerlang Prime', '01-cemerlang-prime.webp', 1920, 1080],
+  ['CRISTAL Prime', '02-cristal-prime.webp', 1920, 1080],
+  ['iFLEXYGUARD', '03-iflexyguard.webp', 1920, 1080],
+  ['RIZQIA', '04-rizqia.webp', 1920, 1080],
+  ['GEN Aman', '05-gen-aman.webp', 1920, 1080],
+  ['BeSMART Lite / Lite Future', '06-besmart-lite-future.webp', 1920, 1080],
+  ['GEN HealthCare Protection', '07-gen-healthcare-protection.webp', 1920, 1080],
+  ['Referral Fiesta', '08-referral-fiesta.webp', 1920, 1080],
+  ['Super Nonmedical Limit 2026', '09-campaign-tanpa-medical.webp', 1672, 941]
 ];
+const N = PRODUCTS.length;
+const LAST = N - 1;
 const EXPECTED_CACHE_VERSION = 'insurance-hub-v117.1.5';
 const MIME = {
   html: 'text/html; charset=utf-8', js: 'text/javascript; charset=utf-8',
@@ -119,11 +125,11 @@ function staticChecks() {
   check(sectionStart >= 0 && sectionStart < html.indexOf('<p class="pengantar">'),
     'markup carousel berada sebelum banner PSG Selling Tools');
   check(products.length === PRODUCTS.length && products.every((name, i) => name === PRODUCTS[i][0]),
-    'delapan slide mengikuti urutan produk yang disetujui', products.length === 8 ? undefined : products);
+    'sembilan slide mengikuti urutan produk yang disetujui', products.length === N ? undefined : products);
   check(!/<a\b/i.test(section), 'slide artwork tidak berisi link atau CTA');
   check(section.includes('data-carousel-prev') && section.includes('data-carousel-next') &&
-    (section.match(/data-carousel-dot=/g) || []).length === 8,
-  'kontrol prev/next dan delapan dot tersedia');
+    (section.match(/data-carousel-dot=/g) || []).length === N,
+  'kontrol prev/next dan sembilan dot tersedia');
   check(css.includes('aspect-ratio:16/9') && css.includes('object-fit:contain'),
     'CSS menjaga rasio 16:9 tanpa crop agresif');
   check(css.includes('overflow:hidden') && css.includes('display:flex') &&
@@ -158,7 +164,15 @@ function staticChecks() {
     const listed = sw.includes("'./assets/home-carousel/" + filename + "'");
     if (!webp || !listed) { assetsValid = false; missing.push({ filename, webp, serviceWorkerListed: listed }); }
   });
-  check(assetsValid, 'delapan WebP valid tersedia dan tercantum di precache service worker', assetsValid ? undefined : missing);
+  check(assetsValid, 'sembilan WebP valid tersedia dan tercantum di precache service worker', assetsValid ? undefined : missing);
+  const labelSlide = Array.from(section.matchAll(/aria-label="(\d+) dari (\d+): ([^"]+)"/g), (m) => m.slice(1).join('|'));
+  check(labelSlide.length === N && labelSlide.every((label, i) => label === (i + 1) + '|' + N + '|' + PRODUCTS[i][0]),
+    'label aksesibel slide memakai jumlah slide yang benar', labelSlide);
+  const imgBaru = section.match(/<img src="assets\/home-carousel\/09-campaign-tanpa-medical\.webp"[^>]*>/);
+  check(!!imgBaru && imgBaru[0].includes('alt="' + PRODUCTS[LAST][0] + '"') &&
+    imgBaru[0].includes('width="' + PRODUCTS[LAST][2] + '"') && imgBaru[0].includes('height="' + PRODUCTS[LAST][3] + '"') &&
+    imgBaru[0].includes('loading="lazy"'),
+  'flyer baru: slide terakhir memakai asset campaign tanpa medical dengan ukuran aslinya', imgBaru && imgBaru[0]);
 }
 
 async function waitForStableLayout(page) {
@@ -182,12 +196,12 @@ async function waitForSlideTransition(page) {
 }
 
 async function verifyMidTransition(page, from, to, screenshotPath) {
-  const before = await page.evaluate(({ from, to }) => {
+  const before = await page.evaluate(({ from, to, last }) => {
     const track = document.querySelector('.psg-home-carousel__track');
     const viewport = document.getElementById('psgHomeCarouselViewport');
     const children = Array.from(track.children);
     const outgoingIndex = from + 1;
-    const incomingIndex = from === 7 && to === 0 ? 9 : to + 1;
+    const incomingIndex = from === last && to === 0 ? last + 2 : to + 1;
     const rect = (node) => {
       const r = node.getBoundingClientRect();
       return { left: r.left, right: r.right, width: r.width };
@@ -201,20 +215,20 @@ async function verifyMidTransition(page, from, to, screenshotPath) {
       outgoingProduct: children[outgoingIndex].dataset.product,
       incomingProduct: children[incomingIndex].dataset.product,
       childCount: children.length,
-      cloneFirst: children[9].dataset.carouselClone,
-      targetTransform: 'translate3d(-' + ((to === 0 && from === 7 ? 9 : to + 1) * 100) + '%, 0px, 0px)'
+      cloneFirst: children[last + 2].dataset.carouselClone,
+      targetTransform: 'translate3d(-' + ((to === 0 && from === last ? last + 2 : to + 1) * 100) + '%, 0px, 0px)'
     };
-  }, { from, to });
+  }, { from, to, last: LAST });
 
   await clickInPage(page, '[data-carousel-next]');
   const activeDuring = Number(await page.locator('#psgHomeCarousel').getAttribute('data-active-index'));
   await new Promise((resolve) => setTimeout(resolve, 260));
-  const middle = await page.evaluate(({ from, to }) => {
+  const middle = await page.evaluate(({ from, to, last }) => {
     const track = document.querySelector('.psg-home-carousel__track');
     const viewport = document.getElementById('psgHomeCarouselViewport');
     const children = Array.from(track.children);
     const outgoingIndex = from + 1;
-    const incomingIndex = from === 7 && to === 0 ? 9 : to + 1;
+    const incomingIndex = from === last && to === 0 ? last + 2 : to + 1;
     const rect = (node) => {
       const r = node.getBoundingClientRect();
       return { left: r.left, right: r.right, width: r.width };
@@ -249,7 +263,7 @@ async function verifyMidTransition(page, from, to, screenshotPath) {
       outgoingProduct: children[outgoingIndex].dataset.product,
       incomingProduct: children[incomingIndex].dataset.product
     };
-  }, { from, to });
+  }, { from, to, last: LAST });
   if (screenshotPath) await page.locator('#psgHomeCarouselViewport').screenshot({ path: screenshotPath });
 
   const transition = await waitForSlideTransition(page);
@@ -276,7 +290,7 @@ async function verifyMidTransition(page, from, to, screenshotPath) {
     };
   }, { to });
 
-  const endIndex = to === 0 && from === 7 ? 1 : to + 1;
+  const endIndex = to === 0 && from === LAST ? 1 : to + 1;
   const expectedSettledTransform = 'translate3d(-' + (endIndex * 100) + '%, 0px, 0px)';
   const progress = middle.animations.some((animation) => animation.state === 'running' &&
     typeof animation.progress === 'number' && animation.progress > 0 && animation.progress < 1);
@@ -286,11 +300,11 @@ async function verifyMidTransition(page, from, to, screenshotPath) {
     middle.incomingVisibleWidth >= middle.viewportWidth * 0.2;
   const slideDirection = middle.outgoing.left < before.outgoing.left - 1 &&
     middle.incoming.left < before.incoming.left - 1;
-  const normalizedAfterWrap = from !== 7 || to !== 0 || settled.transform === 'translate3d(-100%, 0px, 0px)';
+  const normalizedAfterWrap = from !== LAST || to !== 0 || settled.transform === 'translate3d(-100%, 0px, 0px)';
   const fullySettled = settled.index === to && settled.transform === expectedSettledTransform &&
     Math.abs(settled.visibleWidths[endIndex] - settled.viewportWidth) <= 2 &&
     settled.visibleWidths.every((width, i) => i === endIndex || width <= 1);
-  const okay = before.index === from && activeDuring === to && before.childCount === 10 &&
+  const okay = before.index === from && activeDuring === to && before.childCount === N + 2 &&
     before.outgoingProduct === PRODUCTS[from][0] && before.incomingProduct === PRODUCTS[to][0] &&
     before.trackLeft - middle.trackLeft > 1 && middle.targetTransform === before.targetTransform &&
     middle.transitionProperty.includes('transform') && middle.duration === '0.52s' && progress &&
@@ -381,16 +395,18 @@ async function advanceToTimerElapsed(page, elapsedMs) {
     });
     check(desktop.order[0] >= 0 && desktop.order[0] < desktop.order[1] && desktop.order[1] < desktop.order[2] && desktop.orderSpacing,
       'homepage render: Welcome Card → carousel → banner PSG Selling Tools', desktop.orderSpacing ? undefined : desktop.order);
-    check(desktop.products.length === 8 && desktop.products.every((name, i) => name === PRODUCTS[i][0]),
+    check(desktop.products.length === N && desktop.products.every((name, i) => name === PRODUCTS[i][0]),
       'homepage render: urutan slide sesuai daftar');
     /* Slide #8 diunggah ulang sebagai artwork 1920×1080 (commit "Add files via
        upload" + "fix: refresh carousel asset cache"); PNG sumber 1672×941 tidak
        pernah ada di repo, jadi perbandingan pikselnya tidak lagi berlaku. */
-    check(desktop.images.length === 8 && desktop.images.every((image) => image.width === 1920 && image.height === 1080),
-    'delapan flyer termuat 1920×1080',
+    check(desktop.images.length === N && desktop.images.every((image, i) => image.width === PRODUCTS[i][2] && image.height === PRODUCTS[i][3]),
+    'sembilan flyer termuat dengan ukuran aslinya (#1–#8 1920×1080, #9 1672×941)',
     desktop.images.map(({ width, height, src }) => ({ width, height, src })));
     check(desktop.images[7].src === 'assets/home-carousel/08-referral-fiesta.webp',
       'slide #8 memakai WebP runtime Referral Fiesta final', desktop.images[7]);
+    check(desktop.images[LAST].src === 'assets/home-carousel/' + PRODUCTS[LAST][1] && desktop.images[LAST].filter === 'none',
+      'slide #9 memakai flyer campaign tanpa medical tanpa filter', desktop.images[LAST]);
     check(Math.abs(desktop.ratio - 16 / 9) < 0.005 && desktop.stage.width <= 1366,
       'layout desktop 1366px menjaga rasio 16:9', { width: desktop.stage.width, height: desktop.stage.height, ratio: desktop.ratio });
     check(desktop.order[0] < desktop.order[1] && desktop.order[1] < desktop.order[2] &&
@@ -454,9 +470,9 @@ async function advanceToTimerElapsed(page, elapsedMs) {
     }
     await verifyMidTransition(page, 1, 2);
     await verifyMidTransition(page, 2, 3);
-    await clickInPage(page, '[data-carousel-dot="7"]');
+    await clickInPage(page, '[data-carousel-dot="' + LAST + '"]');
     await waitForSlideTransition(page);
-    await verifyMidTransition(page, 7, 0);
+    await verifyMidTransition(page, LAST, 0);
 
     const crossDeviceCases = [
       { label: 'desktop', width: 1366, height: 900 },
@@ -510,11 +526,11 @@ async function advanceToTimerElapsed(page, elapsedMs) {
     await waitForSlideTransition(page);
 
     const cycle = [0, 1, 2];
-    for (const expected of [3, 4, 5, 6, 7, 0]) {
+    for (const expected of PRODUCTS.map((_, i) => i).slice(3).concat(0)) {
       await advanceToTimerElapsed(page, 5500);
       index = await page.locator('#psgHomeCarousel').getAttribute('data-active-index');
       trackTransform = await page.locator('.psg-home-carousel__track').evaluate((track) => track.style.transform);
-      const physicalTarget = expected === 0 ? 9 : expected + 1;
+      const physicalTarget = expected === 0 ? N + 1 : expected + 1;
       const expectedTransform = 'translate3d(-' + (physicalTarget * 100) + '%, 0px, 0px)';
       if (Number(index) !== expected || trackTransform !== expectedTransform) {
         cycle.push(Number(index));
@@ -530,9 +546,9 @@ async function advanceToTimerElapsed(page, elapsedMs) {
       cycle.push(Number(index));
     }
     timerAudit = await readTimerAudit(page);
-    check(cycle.join(',') === '0,1,2,3,4,5,6,7,0' && timerAudit.fired === 8 &&
+    check(cycle.join(',') === PRODUCTS.map((_, i) => i).concat(0).join(',') && timerAudit.fired === N &&
       timerAudit.active === 1 && timerAudit.maxActive === 1,
-    'siklus runtime dan wrap alami track lengkap 0 → 1 → 2 → 3 → 4 → 5 → 6 → 7 → 0', { cycle, timerAudit });
+    'siklus runtime dan wrap alami track lengkap 0 → 1 → … → 8 → 0', { cycle, timerAudit });
 
     async function checkManualReset(selector, expectedAfterAction, expectedAfterTimer, label) {
       await advanceToTimerElapsed(page, 2000);
@@ -558,7 +574,7 @@ async function advanceToTimerElapsed(page, elapsedMs) {
 
     await checkManualReset('[data-carousel-next]', 1, 2, 'Next mereset timer penuh dan tidak menggandakan timeout');
     await checkManualReset('[data-carousel-prev]', 1, 2, 'Prev mereset timer penuh dan tidak menggandakan timeout');
-    await checkManualReset('[data-carousel-dot="7"]', 7, 0, 'dot mereset timer penuh dan siklus kembali ke slide 0');
+    await checkManualReset('[data-carousel-dot="' + LAST + '"]', LAST, 0, 'dot mereset timer penuh dan siklus kembali ke slide 0');
 
     await advanceToTimerElapsed(page, 2000);
     const beforeSwipe = await readTimerAudit(page);
@@ -662,8 +678,8 @@ async function advanceToTimerElapsed(page, elapsedMs) {
         trackAnak: document.querySelector('.psg-home-carousel__track').children.length };
     });
     check(pemicuInfo.jumlah === 1 && pemicuInfo.tag === 'BUTTON' && pemicuInfo.type === 'button' &&
-      pemicuInfo.haspopup === 'dialog' && !pemicuInfo.diTrack && pemicuInfo.trackAnak === 10 &&
-      /^Perbesar flyer \d dari 8: /.test(pemicuInfo.label || ''),
+      pemicuInfo.haspopup === 'dialog' && !pemicuInfo.diTrack && pemicuInfo.trackAnak === N + 2 &&
+      new RegExp('^Perbesar flyer \\d dari ' + N + ': ').test(pemicuInfo.label || ''),
     'modal: satu pemicu tombol yang bisa difokus menutupi flyer tanpa mengubah track', pemicuInfo);
 
     // 10–11: setiap flyer yang diklik membuka flyer yang sama
@@ -680,7 +696,7 @@ async function advanceToTimerElapsed(page, elapsedMs) {
     }
     check(hasilKlik.every((r, i) => r.open && r.index === String(i) && r.aktif === String(i) &&
       new URL(r.src, 'http://x/').pathname === '/assets/home-carousel/' + PRODUCTS[i][1] && r.alt === PRODUCTS[i][0] && (r.label || '').includes(PRODUCTS[i][0])),
-    'modal: klik flyer membuka flyer yang sama dengan yang diklik (8 slide)', hasilKlik);
+    'modal: klik flyer membuka flyer yang sama dengan yang diklik (9 slide)', hasilKlik);
     check(page.url() === urlSebelumModal && popups.length === popupSebelumModal && (await keadaanModal()).jumlahModal === 1,
       'modal: klik flyer tidak membuka halaman/popup dan modal dipakai ulang');
 
@@ -794,6 +810,46 @@ async function advanceToTimerElapsed(page, elapsedMs) {
     await cekTutup(() => page.mouse.click(luar.x, luar.y),
       'modal: klik overlay di luar flyer menutup; slide tetap sama, timer restart penuh, satu navigasi, fokus kembali ke pemicu');
 
+    // Flyer baru #9 (campaign tanpa medical): asset benar, utuh, carousel ditahan,
+    // lalu ✕ Tutup / ESC / overlay kembali ke slide yang sama dan autoplay lanjut.
+    const bukaFlyerBaru = async () => {
+      await waitForSlideTransition(page);
+      await keSlide(LAST);
+      await advanceToTimerElapsed(page, 2000);
+      const sebelum = await readTimerAudit(page);
+      await klikFlyer();
+      await tungguGambarModal();
+      return { sebelum, st: await keadaanModal() };
+    };
+    let flyerBaru = await bukaFlyerBaru();
+    check(flyerBaru.st.open && flyerBaru.st.index === String(LAST) && flyerBaru.st.aktif === String(LAST) &&
+      new URL(flyerBaru.st.src, 'http://x/').pathname === '/assets/home-carousel/' + PRODUCTS[LAST][1] &&
+      flyerBaru.st.alt === PRODUCTS[LAST][0] && flyerBaru.st.label === 'Flyer ' + PRODUCTS[LAST][0] + ' diperbesar' &&
+      flyerBaru.st.tutupTeks === '✕ Tutup' && flyerBaru.st.fokus === 'tutup',
+    'flyer baru: klik slide #9 membuka asset campaign tanpa medical di modal yang sama', flyerBaru.st);
+    check(penuh(flyerBaru.st) && utuh(flyerBaru.st) && flyerBaru.st.filter === 'none' &&
+      flyerBaru.st.natural.join('x') === PRODUCTS[LAST][2] + 'x' + PRODUCTS[LAST][3],
+    'flyer baru: tampil utuh (contain), tidak terpotong, ukuran asli 1672×941', { konten: flyerBaru.st.konten, panggung: flyerBaru.st.panggung, natural: flyerBaru.st.natural });
+    await page.clock.fastForward(20000);
+    const auditBaruDitahan = await readTimerAudit(page);
+    check(auditBaruDitahan.active === 0 && auditBaruDitahan.fired === flyerBaru.sebelum.fired &&
+      (await aktifSekarang()) === String(LAST) && (await keadaanModal()).open,
+    'flyer baru: carousel berhenti selama modal terbuka (20 detik tanpa pergantian)', { sebelum: flyerBaru.sebelum, ditahan: auditBaruDitahan });
+    await cekTutup(async () => {
+      const t = await page.evaluate(() => { const r = document.querySelector('#psgFlyerModal [data-flyer-tutup]').getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; });
+      await page.mouse.click(t.x, t.y);
+    }, 'flyer baru: ✕ Tutup kembali ke slide #9, lalu autoplay 5,5 detik lanjut ke slide #1');
+    flyerBaru = await bukaFlyerBaru();
+    check(flyerBaru.st.open && flyerBaru.st.index === String(LAST), 'flyer baru: dibuka lagi untuk uji ESC', { index: flyerBaru.st.index });
+    await cekTutup(() => page.keyboard.press('Escape'),
+      'flyer baru: ESC kembali ke slide #9, lalu autoplay 5,5 detik lanjut ke slide #1');
+    flyerBaru = await bukaFlyerBaru();
+    const luarBaru = flyerBaru.st.konten.bottom + 12 <= flyerBaru.st.panggung.bottom
+      ? { x: flyerBaru.st.konten.left + flyerBaru.st.konten.width / 2, y: (flyerBaru.st.konten.bottom + flyerBaru.st.panggung.bottom) / 2 }
+      : { x: flyerBaru.st.rect.left + 16, y: flyerBaru.st.tutup.top + flyerBaru.st.tutup.height / 2 };
+    await cekTutup(() => page.mouse.click(luarBaru.x, luarBaru.y),
+      'flyer baru: klik overlay kembali ke slide #9, lalu autoplay 5,5 detik lanjut ke slide #1');
+
     // Responsif: desktop, tablet, smartphone (portrait & landscape), foldable
     const ukuranModal = [
       { label: 'desktop', width: 1366, height: 900 },
@@ -836,6 +892,40 @@ async function advanceToTimerElapsed(page, elapsedMs) {
     check(!escSesudahKlik.open && !escSesudahKlik.kunci && escSesudahKlik.fokus === 'pemicu',
       'modal: ESC tetap menutup sesudah klik di dalam flyer; fokus kembali ke pemicu', { open: escSesudahKlik.open, fokus: escSesudahKlik.fokus });
     await page.evaluate(() => { document.documentElement.setAttribute('data-theme', 'original'); document.body.setAttribute('data-theme', 'original'); });
+
+    // Flyer baru #9 di Light/Dark dan beberapa ukuran layar: tetap utuh tanpa filter
+    const hasilBaru = [];
+    for (const tema of ['original', 'dark']) {
+      await page.evaluate((t) => { document.documentElement.setAttribute('data-theme', t); document.body.setAttribute('data-theme', t); }, tema);
+      for (const u of [{ label: 'desktop', width: 1366, height: 900 }, { label: 'phone', width: 390, height: 844 }, { label: 'phone landscape', width: 844, height: 390 }]) {
+        await page.setViewportSize({ width: u.width, height: u.height });
+        await waitForStableLayout(page);
+        await page.evaluate(() => document.getElementById('psgHomeCarouselViewport').scrollIntoView({ block: 'center' }));
+        await keSlide(LAST);
+        const slide = await page.evaluate((i) => {
+          const img = document.querySelectorAll('#psgHomeCarousel [data-carousel-slide] img')[i];
+          const vp = document.getElementById('psgHomeCarouselViewport').getBoundingClientRect();
+          const r = img.getBoundingClientRect();
+          const s = Math.min(r.width / img.naturalWidth, r.height / img.naturalHeight);
+          const w = img.naturalWidth * s, h = img.naturalHeight * s, x = r.left + (r.width - w) / 2, y = r.top + (r.height - h) / 2;
+          return { fit: getComputedStyle(img).objectFit, filter: getComputedStyle(img).filter,
+            dalam: x >= vp.left - 1 && y >= vp.top - 1 && x + w <= vp.right + 1 && y + h <= vp.bottom + 1 };
+        }, LAST);
+        await klikFlyer();
+        await tungguGambarModal();
+        const st = await keadaanModal();
+        hasilBaru.push({ tema, label: u.label, slide, open: st.open, index: st.index, penuh: penuh(st), utuh: utuh(st), filter: st.filter,
+          src: st.src && new URL(st.src, 'http://x/').pathname });
+        await page.keyboard.press('Escape');
+      }
+    }
+    await page.evaluate(() => { document.documentElement.setAttribute('data-theme', 'original'); document.body.setAttribute('data-theme', 'original'); });
+    await page.setViewportSize({ width: 1366, height: 900 });
+    await waitForStableLayout(page);
+    await page.evaluate(() => document.getElementById('psgHomeCarouselViewport').scrollIntoView({ block: 'center' }));
+    check(hasilBaru.length === 6 && hasilBaru.every((r) => r.slide.fit === 'contain' && r.slide.filter === 'none' && r.slide.dalam &&
+      r.open && r.index === String(LAST) && r.penuh && r.utuh && r.filter === 'none' && r.src === '/assets/home-carousel/' + PRODUCTS[LAST][1]),
+    'flyer baru: Light & Dark, desktop/phone/phone landscape — slide dan modal utuh (contain) tanpa filter', hasilBaru);
 
     // Reduced motion: modal tetap bekerja, timer restart penuh
     await page.emulateMedia({ reducedMotion: 'reduce' });
@@ -1017,7 +1107,7 @@ async function advanceToTimerElapsed(page, elapsedMs) {
       const response = await fetch('assets/home-carousel/' + filename, { method: 'HEAD' });
       return { filename, status: response.status, type: response.headers.get('content-type') };
     })), PRODUCTS);
-    check(fileResponses.length === 8 && fileResponses.every((file) => file.status === 200 && file.type.includes('image/webp')),
+    check(fileResponses.length === N && fileResponses.every((file) => file.status === 200 && file.type.includes('image/webp')),
       'aset carousel dapat diminta dari homepage dan tersedia untuk cache PWA', fileResponses.filter((file) => file.status !== 200 || !file.type.includes('image/webp')));
 
     if (screenshotsDir) {

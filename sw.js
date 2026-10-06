@@ -122,6 +122,7 @@ const BERKAS = [
   './assets/home-carousel/06-besmart-lite-future.webp',
   './assets/home-carousel/07-gen-healthcare-protection.webp',
   './assets/home-carousel/08-referral-fiesta.webp',
+  './assets/home-carousel/09-campaign-tanpa-medical.webp',
   './assets/logo-psg.png',
   './assets/logo-psg-terang.png',
   './icons/ikon-psg-192.png',
