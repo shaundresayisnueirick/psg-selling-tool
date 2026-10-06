@@ -366,6 +366,11 @@
     jj(satu(fj, '.jps-lencana'), [[t0 + 900, { opacity: 0 }], [t0 + 1300, { opacity: 1 }]]);
     jj(satu(sv, '.jps-chip-isi'), [[t0 + 1000, { opacity: 0, transform: 'translate(0px,6px)' }], [t0 + 1500, { opacity: 1, transform: 'none' }]]);
     jj(satu(stage, '.jps-ubin-fokus .jps-ubin-isi'), [[t0 + 1100, { opacity: 0 }], [t0 + 1500, { opacity: 1 }]]);
+    /* jam scene minimal selama rekaman pertanyaannya (S02-01 … S06-01),
+       supaya status 'selesai' (Next, gerbang Download) tidak datang sebelum
+       narasinya selesai */
+    var node = satu(stage, '.jps'), ms = lamaRekaman(window.PSGJariAudio, 'S0' + (q + 1) + '-01');
+    if (node && ms) tl.add(node, [], { duration: ms });
     ambient(tl, sv);
   }
 
@@ -422,13 +427,14 @@
             id: 'jari-alasan-' + (k + 1),
             siapDi: 'akhir',
             render: function (stage) { a.render(stage, k); tandaiAlasan(stage, k); },
-            /* alasan 1 (teks final dengan kalimat pembuka): jam scene minimal
-               selama rekamannya, supaya timeline tidak selesai sebelum narasi */
-            animate: k === 0 ? function (tl, stage) {
+            /* tiap alasan: jam scene minimal selama rekamannya, supaya timeline
+               (status 'selesai' yang dipakai Next, kartu akhir, dan gerbang
+               Download) tidak selesai sebelum narasi */
+            animate: function (tl, stage) {
               if (typeof a.animate === 'function') a.animate(tl, stage);
-              var kartu = satu(stage, '[data-jps-alasan]'), ms = lamaRekaman(window.PSGJariAlasanAudio, 'S01-01');
+              var kartu = satu(stage, '[data-jps-alasan]'), ms = lamaRekaman(window.PSGJariAlasanAudio, 'S' + (k < 9 ? '0' : '') + (k + 1) + '-01');
               if (kartu && ms) tl.add(kartu, [], { duration: ms });
-            } : a.animate
+            }
           });
         })(k);
       }

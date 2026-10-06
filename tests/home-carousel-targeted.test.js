@@ -39,7 +39,7 @@ const PRODUCTS = [
   ['GEN HealthCare Protection', '07-gen-healthcare-protection.webp'],
   ['Referral Fiesta', '08-referral-fiesta.webp']
 ];
-const EXPECTED_CACHE_VERSION = 'insurance-hub-v117.1.1';
+const EXPECTED_CACHE_VERSION = 'insurance-hub-v117.1.5';
 const MIME = {
   html: 'text/html; charset=utf-8', js: 'text/javascript; charset=utf-8',
   css: 'text/css; charset=utf-8', json: 'application/json', svg: 'image/svg+xml',
@@ -138,13 +138,14 @@ function staticChecks() {
   check(!/userAgent|Android|iPhone|iPad|devicePixelRatio/i.test(carouselJs),
     'implementasi tidak mendeteksi atau mengunci jenis perangkat');
   check(sw.includes("const VERSI = '" + EXPECTED_CACHE_VERSION + "'"), 'cache service worker dinaikkan untuk paket carousel');
-
-  const referralSourcePath = path.join(ROOT, 'referral-fiesta-final.png');
-  const referralSource = fs.existsSync(referralSourcePath) ? fs.readFileSync(referralSourcePath) : null;
-  const referralSourceOkay = !!referralSource && referralSource.length > 24 &&
-    referralSource.toString('ascii', 1, 4) === 'PNG' &&
-    referralSource.readUInt32BE(16) === 1672 && referralSource.readUInt32BE(20) === 941;
-  check(referralSourceOkay, 'PNG final Referral Fiesta tersedia sebagai sumber 1672×941');
+  const modalJs = fs.readFileSync(path.join(ROOT, 'src/home-carousel-modal.js'), 'utf8');
+  check(!/requestFullscreen|fullscreenElement|exitFullscreen/i.test(modalJs) && /showModal\(\)/.test(modalJs),
+    'modal flyer memakai <dialog> di dalam aplikasi, bukan Fullscreen API');
+  const scriptCarousel = html.indexOf('<script src="src/home-carousel.js"></script>');
+  const scriptModal = html.indexOf('<script src="src/home-carousel-modal.js"></script>');
+  check(scriptCarousel >= 0 && scriptModal > scriptCarousel && html.includes('<link rel="stylesheet" href="src/home-carousel-modal.css">') &&
+    sw.includes("'./src/home-carousel-modal.js'") && sw.includes("'./src/home-carousel-modal.css'"),
+  'modal flyer dimuat sesudah carousel dan ikut precache service worker');
 
   let assetsValid = true;
   const missing = [];
@@ -382,49 +383,14 @@ async function advanceToTimerElapsed(page, elapsedMs) {
       'homepage render: Welcome Card → carousel → banner PSG Selling Tools', desktop.orderSpacing ? undefined : desktop.order);
     check(desktop.products.length === 8 && desktop.products.every((name, i) => name === PRODUCTS[i][0]),
       'homepage render: urutan slide sesuai daftar');
-    check(desktop.images.length === 8 && desktop.images.slice(0, 7).every((image) => image.width === 1920 && image.height === 1080) &&
-      desktop.images[7].width === 1672 && desktop.images[7].height === 941,
-    'slide 1–7 tetap 1920×1080 dan artwork final slide 8 termuat 1672×941',
+    /* Slide #8 diunggah ulang sebagai artwork 1920×1080 (commit "Add files via
+       upload" + "fix: refresh carousel asset cache"); PNG sumber 1672×941 tidak
+       pernah ada di repo, jadi perbandingan pikselnya tidak lagi berlaku. */
+    check(desktop.images.length === 8 && desktop.images.every((image) => image.width === 1920 && image.height === 1080),
+    'delapan flyer termuat 1920×1080',
     desktop.images.map(({ width, height, src }) => ({ width, height, src })));
     check(desktop.images[7].src === 'assets/home-carousel/08-referral-fiesta.webp',
       'slide #8 memakai WebP runtime Referral Fiesta final', desktop.images[7]);
-    const referralPixelCheck = await page.evaluate(async () => {
-      async function loadImage(src) {
-        const image = new Image();
-        image.src = src;
-        await image.decode();
-        return image;
-      }
-      const source = await loadImage('referral-fiesta-final.png');
-      const runtime = await loadImage('assets/home-carousel/08-referral-fiesta.webp');
-      if (source.naturalWidth !== runtime.naturalWidth || source.naturalHeight !== runtime.naturalHeight) {
-        return { source: [source.naturalWidth, source.naturalHeight], runtime: [runtime.naturalWidth, runtime.naturalHeight], meanAbsoluteError: Infinity };
-      }
-      const canvas = document.createElement('canvas');
-      canvas.width = source.naturalWidth;
-      canvas.height = source.naturalHeight;
-      const context = canvas.getContext('2d', { willReadFrequently: true });
-      context.drawImage(source, 0, 0);
-      const sourcePixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
-      context.clearRect(0, 0, canvas.width, canvas.height);
-      context.drawImage(runtime, 0, 0);
-      const runtimePixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
-      let difference = 0, samples = 0;
-      for (let i = 0; i < sourcePixels.length; i += 4) {
-        difference += Math.abs(sourcePixels[i] - runtimePixels[i]);
-        difference += Math.abs(sourcePixels[i + 1] - runtimePixels[i + 1]);
-        difference += Math.abs(sourcePixels[i + 2] - runtimePixels[i + 2]);
-        samples += 3;
-      }
-      return {
-        source: [source.naturalWidth, source.naturalHeight],
-        runtime: [runtime.naturalWidth, runtime.naturalHeight],
-        meanAbsoluteError: difference / samples
-      };
-    });
-    check(referralPixelCheck.source.join('x') === '1672x941' &&
-      referralPixelCheck.runtime.join('x') === '1672x941' && referralPixelCheck.meanAbsoluteError < 3,
-    'piksel WebP slide #8 cocok dekat dengan PNG final tanpa resize/crop', referralPixelCheck);
     check(Math.abs(desktop.ratio - 16 / 9) < 0.005 && desktop.stage.width <= 1366,
       'layout desktop 1366px menjaga rasio 16:9', { width: desktop.stage.width, height: desktop.stage.height, ratio: desktop.ratio });
     check(desktop.order[0] < desktop.order[1] && desktop.order[1] < desktop.order[2] &&
@@ -452,7 +418,9 @@ async function advanceToTimerElapsed(page, elapsedMs) {
 
     // Deterministic browser-clock verification of the live carousel runtime.
     // Hover and keyboard focus stay active while the normal-motion track slides.
-    await page.clock.pauseAt(new Date());
+    /* runFor() di waitForStableLayout memajukan jam halaman melewati jam
+       nyata; jeda 1 detik mencegah "Cannot fast-forward to the past". */
+    await page.clock.pauseAt(new Date(Date.now() + 1000));
     await page.emulateMedia({ reducedMotion: 'no-preference' });
     await page.mouse.move(500, 400);
     await page.evaluate(() => {
@@ -636,12 +604,300 @@ async function advanceToTimerElapsed(page, elapsedMs) {
       duplicateGuardAudit.fired === beforeDuplicateInit.fired,
     'memuat ulang script tidak memasang timer carousel duplikat', { beforeDuplicateInit, duplicateGuardAudit });
 
-    const urlBeforeClick = page.url();
-    const indexBeforeClick = await page.locator('#psgHomeCarousel').getAttribute('data-active-index');
-    await page.evaluate(() => document.getElementById('psgHomeCarouselViewport').click());
-    check(page.url() === urlBeforeClick &&
-      await page.locator('#psgHomeCarousel').getAttribute('data-active-index') === indexBeforeClick && popups.length === 0,
-    'klik artwork tidak membuka halaman, popup, atau aksi');
+    /* ---------- Flyer diperbesar: modal di dalam aplikasi ----------
+       Klik flyer kini membuka modal <dialog> (bukan Fullscreen API) tanpa
+       navigasi halaman atau popup; carousel ditahan selama modal terbuka. */
+    await page.setViewportSize({ width: 1366, height: 900 });
+    await waitForStableLayout(page);
+    await page.evaluate(() => document.getElementById('psgHomeCarouselViewport').scrollIntoView({ block: 'center' }));
+    const aktifSekarang = () => page.locator('#psgHomeCarousel').getAttribute('data-active-index');
+    const keSlide = async (i) => { await clickInPage(page, '[data-carousel-dot="' + i + '"]'); await waitForSlideTransition(page); };
+    const titikFlyer = async () => {
+      const box = await page.locator('#psgHomeCarouselViewport').boundingBox();
+      return { x: box.x + box.width / 2, y: box.y + box.height / 2 };
+    };
+    const klikFlyer = async () => { const p = await titikFlyer(); await page.mouse.click(p.x, p.y); };
+    const tungguGambarModal = () => page.evaluate(() => {
+      const img = document.querySelector('#psgFlyerModal [data-flyer-gambar]');
+      return img && img.decode ? img.decode().then(() => true, () => false) : false;
+    });
+    const keadaanModal = () => page.evaluate(() => {
+      const m = document.getElementById('psgFlyerModal');
+      const img = m && m.querySelector('[data-flyer-gambar]');
+      const tutup = m && m.querySelector('[data-flyer-tutup]');
+      const kotak = (n) => { const r = n.getBoundingClientRect(); return { left: r.left, top: r.top, width: r.width, height: r.height, right: r.right, bottom: r.bottom }; };
+      let konten = null;
+      if (img && img.naturalWidth) {
+        const r = img.getBoundingClientRect();
+        const s = Math.min(r.width / img.naturalWidth, r.height / img.naturalHeight);
+        const w = img.naturalWidth * s, h = img.naturalHeight * s;
+        konten = { left: r.left + (r.width - w) / 2, top: r.top + (r.height - h) / 2, width: w, height: h };
+        konten.right = konten.left + w; konten.bottom = konten.top + h;
+      }
+      const fokus = document.activeElement;
+      return {
+        ada: !!m, open: !!(m && m.open), tag: m && m.tagName,
+        ariaModal: m && m.getAttribute('aria-modal'), label: m && m.getAttribute('aria-label'),
+        index: m && m.dataset.flyerIndex, src: img && img.getAttribute('src'), alt: img && img.alt,
+        natural: img ? [img.naturalWidth, img.naturalHeight] : null,
+        objectFit: img && getComputedStyle(img).objectFit, filter: img && getComputedStyle(img).filter,
+        rect: m && m.open ? kotak(m) : null, panggung: m && m.open ? kotak(m.querySelector('[data-flyer-panggung]')) : null,
+        konten, viewport: { width: innerWidth, height: innerHeight },
+        tutupTeks: tutup && tutup.textContent.trim(), tutup: tutup && m.open ? kotak(tutup) : null,
+        fokus: fokus === tutup ? 'tutup' : (fokus && fokus.matches && fokus.matches('[data-flyer-perbesar]')) ? 'pemicu' : (fokus && (fokus.id || fokus.tagName)),
+        kunci: document.documentElement.classList.contains('psg-flyer-modal-terbuka'),
+        overflowHtml: getComputedStyle(document.documentElement).overflow,
+        overflowBody: getComputedStyle(document.body).overflow,
+        fullscreen: !!document.fullscreenElement,
+        aktif: document.getElementById('psgHomeCarousel').dataset.activeIndex,
+        jumlahModal: document.querySelectorAll('#psgFlyerModal').length
+      };
+    });
+
+    const pemicuInfo = await page.evaluate(() => {
+      const b = document.querySelectorAll('#psgHomeCarouselViewport [data-flyer-perbesar]');
+      const t = b[0];
+      return { jumlah: b.length, tag: t && t.tagName, type: t && t.type, label: t && t.getAttribute('aria-label'),
+        haspopup: t && t.getAttribute('aria-haspopup'), diTrack: !!(t && t.closest('.psg-home-carousel__track')),
+        trackAnak: document.querySelector('.psg-home-carousel__track').children.length };
+    });
+    check(pemicuInfo.jumlah === 1 && pemicuInfo.tag === 'BUTTON' && pemicuInfo.type === 'button' &&
+      pemicuInfo.haspopup === 'dialog' && !pemicuInfo.diTrack && pemicuInfo.trackAnak === 10 &&
+      /^Perbesar flyer \d dari 8: /.test(pemicuInfo.label || ''),
+    'modal: satu pemicu tombol yang bisa difokus menutupi flyer tanpa mengubah track', pemicuInfo);
+
+    // 10–11: setiap flyer yang diklik membuka flyer yang sama
+    const hasilKlik = [];
+    const urlSebelumModal = page.url();
+    const popupSebelumModal = popups.length;
+    for (let i = 0; i < PRODUCTS.length; i++) {
+      await keSlide(i);
+      await klikFlyer();
+      await tungguGambarModal();
+      const st = await keadaanModal();
+      hasilKlik.push({ i, open: st.open, index: st.index, src: st.src, alt: st.alt, label: st.label, aktif: st.aktif });
+      await page.keyboard.press('Escape');
+    }
+    check(hasilKlik.every((r, i) => r.open && r.index === String(i) && r.aktif === String(i) &&
+      new URL(r.src, 'http://x/').pathname === '/assets/home-carousel/' + PRODUCTS[i][1] && r.alt === PRODUCTS[i][0] && (r.label || '').includes(PRODUCTS[i][0])),
+    'modal: klik flyer membuka flyer yang sama dengan yang diklik (8 slide)', hasilKlik);
+    check(page.url() === urlSebelumModal && popups.length === popupSebelumModal && (await keadaanModal()).jumlahModal === 1,
+      'modal: klik flyer tidak membuka halaman/popup dan modal dipakai ulang');
+
+    // 12–14 + aksesibilitas + kunci scroll + autoplay berhenti
+    await keSlide(3);
+    await advanceToTimerElapsed(page, 2000);
+    const auditSebelumBuka = await readTimerAudit(page);
+    await klikFlyer();
+    await tungguGambarModal();
+    const auditSaatBuka = await readTimerAudit(page);
+    let modal = await keadaanModal();
+    const penuh = (st) => !!st.rect && Math.abs(st.rect.left) <= 1 && Math.abs(st.rect.top) <= 1 &&
+      Math.abs(st.rect.width - st.viewport.width) <= 1 && Math.abs(st.rect.height - st.viewport.height) <= 1;
+    const utuh = (st) => !!st.konten && !!st.panggung && st.objectFit === 'contain' &&
+      st.konten.left >= st.panggung.left - 1 && st.konten.right <= st.panggung.right + 1 &&
+      st.konten.top >= st.panggung.top - 1 && st.konten.bottom <= st.panggung.bottom + 1 &&
+      st.konten.left >= -1 && st.konten.top >= -1 && st.konten.right <= st.viewport.width + 1 && st.konten.bottom <= st.viewport.height + 1 &&
+      (Math.abs(st.konten.width - st.panggung.width) <= 1 || Math.abs(st.konten.height - st.panggung.height) <= 1) &&
+      Math.abs(st.konten.width / st.konten.height - st.natural[0] / st.natural[1]) < 0.01;
+    check(modal.open && modal.tag === 'DIALOG' && modal.ariaModal === 'true' && modal.label === 'Flyer RIZQIA diperbesar' &&
+      modal.tutupTeks === '✕ Tutup' && modal.fokus === 'tutup' && !modal.fullscreen,
+    'modal: dialog aria-modal dengan nama aksesibel, fokus ke tombol Tutup, tanpa Fullscreen API', modal);
+    check(penuh(modal), 'modal: memenuhi viewport', { rect: modal.rect, viewport: modal.viewport });
+    check(utuh(modal) && modal.filter === 'none' && modal.natural.join('x') === '1920x1080',
+      'modal: flyer tampil sebesar mungkin dengan contain, tidak terpotong, tanpa filter', { konten: modal.konten, panggung: modal.panggung, objectFit: modal.objectFit });
+    check(modal.kunci && modal.overflowHtml === 'hidden' && modal.overflowBody === 'hidden',
+      'modal: scroll halaman dikunci selama modal terbuka', { overflowHtml: modal.overflowHtml, overflowBody: modal.overflowBody });
+    await page.clock.fastForward(20000);
+    const auditDitahan = await readTimerAudit(page);
+    const aktifDitahan = await aktifSekarang();
+    check(auditSaatBuka.active === 0 && auditSaatBuka.cleared === auditSebelumBuka.cleared + 1 &&
+      auditDitahan.active === 0 && auditDitahan.fired === auditSebelumBuka.fired &&
+      auditDitahan.scheduled === auditSebelumBuka.scheduled && aktifDitahan === '3',
+    'modal: auto-rotation berhenti — 20 detik tanpa pergantian flyer', { auditSebelumBuka, auditSaatBuka, auditDitahan, aktifDitahan });
+
+    // kontrol di belakang modal tidak menerima input
+    const dibelakang = await page.evaluate(() => {
+      const root = document.getElementById('psgHomeCarousel');
+      const next = root.querySelector('[data-carousel-next]');
+      const r = next.getBoundingClientRect();
+      const atas = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+      next.focus();
+      const fokusNext = document.activeElement === next;
+      next.click();
+      root.querySelector('[data-carousel-prev]').click();
+      root.querySelector('[data-carousel-dot="6"]').click();
+      const vp = document.getElementById('psgHomeCarouselViewport');
+      vp.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerId: 41, pointerType: 'touch', isPrimary: true, clientX: 290, clientY: 130 }));
+      vp.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, pointerId: 41, pointerType: 'touch', isPrimary: true, clientX: 120, clientY: 134 }));
+      root.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+      return { tertutupModal: !!(atas && atas.closest('#psgFlyerModal')), fokusNext, aktif: root.dataset.activeIndex };
+    });
+    await page.keyboard.press('ArrowRight');
+    await page.keyboard.press('Tab');
+    const fokusTab = (await keadaanModal()).fokus;
+    await page.keyboard.press('Shift+Tab');
+    const fokusShiftTab = (await keadaanModal()).fokus;
+    const auditInput = await readTimerAudit(page);
+    check(dibelakang.tertutupModal && !dibelakang.fokusNext && dibelakang.aktif === '3' && (await aktifSekarang()) === '3' &&
+      fokusTab === 'tutup' && fokusShiftTab === 'tutup' && auditInput.active === 0 && auditInput.fired === auditSebelumBuka.fired,
+    'modal: Prev/Next/dot/swipe/panah di belakang modal tidak menerima input; Tab tetap di modal', { dibelakang, fokusTab, fokusShiftTab, auditInput });
+
+    // 15, 18–21: Tutup → slide sama, timer restart penuh, tanpa navigasi ganda, fokus ke pemicu
+    async function cekTutup(tutupFn, label) {
+      const sebelum = await readTimerAudit(page);
+      const aktifSebelum = await aktifSekarang();
+      await tutupFn();
+      const st = await keadaanModal();
+      const sesudah = await readTimerAudit(page);
+      await advanceToTimerElapsed(page, 5499);
+      const sebelumTenggat = await aktifSekarang();
+      const auditSebelumTenggat = await readTimerAudit(page);
+      await advanceToTimerElapsed(page, 5500);
+      const sesudahTenggat = await aktifSekarang();
+      await waitForSlideTransition(page);
+      const akhir = await readTimerAudit(page);
+      const harap = String((Number(aktifSebelum) + 1) % PRODUCTS.length);
+      check(!st.open && !st.kunci && st.overflowHtml !== 'hidden' && st.fokus === 'pemicu' && st.aktif === aktifSebelum &&
+        sesudah.active === 1 && sesudah.scheduled === sebelum.scheduled + 1 &&
+        sebelumTenggat === aktifSebelum && auditSebelumTenggat.fired === sebelum.fired &&
+        sesudahTenggat === harap && (await aktifSekarang()) === harap &&
+        akhir.fired === sebelum.fired + 1 && akhir.active === 1 && akhir.maxActive === 1,
+      label, { st: { open: st.open, kunci: st.kunci, fokus: st.fokus, aktif: st.aktif }, aktifSebelum, sebelum, sesudah, sebelumTenggat, sesudahTenggat, akhir });
+    }
+    await cekTutup(async () => {
+      const t = await page.evaluate(() => { const r = document.querySelector('#psgFlyerModal [data-flyer-tutup]').getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; });
+      await page.mouse.click(t.x, t.y);
+    }, 'modal: tombol Tutup menutup; slide tetap sama, timer restart penuh 5,5 detik, satu navigasi, fokus kembali ke pemicu');
+
+    // 16: ESC (dibuka lewat keyboard: Enter pada pemicu)
+    await page.evaluate(() => document.querySelector('[data-flyer-perbesar]').focus());
+    await page.keyboard.press('Enter');
+    await tungguGambarModal();
+    modal = await keadaanModal();
+    check(modal.open && modal.index === (await aktifSekarang()) && modal.fokus === 'tutup',
+      'modal: Enter pada pemicu membuka flyer aktif (padanan keyboard)', { index: modal.index, fokus: modal.fokus });
+    await cekTutup(() => page.keyboard.press('Escape'),
+      'modal: ESC menutup; slide tetap sama, timer restart penuh, satu navigasi, fokus kembali ke pemicu');
+
+    // 17: klik overlay di luar flyer menutup; klik flyer di dalam modal tidak menutup
+    await waitForSlideTransition(page);
+    await klikFlyer();
+    await tungguGambarModal();
+    modal = await keadaanModal();
+    await page.mouse.click(modal.konten.left + modal.konten.width / 2, modal.konten.top + modal.konten.height / 2);
+    const masihTerbuka = (await keadaanModal()).open;
+    check(masihTerbuka, 'modal: klik pada flyer di dalam modal tidak menutup modal');
+    const luar = modal.konten.bottom + 12 <= modal.panggung.bottom
+      ? { x: modal.konten.left + modal.konten.width / 2, y: (modal.konten.bottom + modal.panggung.bottom) / 2 }
+      : { x: modal.rect.left + 16, y: modal.tutup.top + modal.tutup.height / 2 };
+    await cekTutup(() => page.mouse.click(luar.x, luar.y),
+      'modal: klik overlay di luar flyer menutup; slide tetap sama, timer restart penuh, satu navigasi, fokus kembali ke pemicu');
+
+    // Responsif: desktop, tablet, smartphone (portrait & landscape), foldable
+    const ukuranModal = [
+      { label: 'desktop', width: 1366, height: 900 },
+      { label: 'tablet landscape', width: 1024, height: 768 },
+      { label: 'tablet portrait', width: 768, height: 1024 },
+      { label: 'phone', width: 390, height: 844 },
+      { label: 'phone landscape', width: 844, height: 390 },
+      { label: 'small phone', width: 360, height: 780 },
+      { label: 'foldable narrow', width: 280, height: 653 }
+    ];
+    const hasilUkuran = [];
+    for (const u of ukuranModal) {
+      await page.setViewportSize({ width: u.width, height: u.height });
+      await waitForStableLayout(page);
+      await page.evaluate(() => document.getElementById('psgHomeCarouselViewport').scrollIntoView({ block: 'center' }));
+      await klikFlyer();
+      await tungguGambarModal();
+      const st = await keadaanModal();
+      hasilUkuran.push({ label: u.label, open: st.open, penuh: penuh(st), utuh: utuh(st),
+        tutupTerlihat: !!st.tutup && st.tutup.top >= 0 && st.tutup.left >= 0 && st.tutup.right <= st.viewport.width && st.tutup.bottom <= st.viewport.height && st.tutup.height >= 44,
+        konten: st.konten && { w: Math.round(st.konten.width), h: Math.round(st.konten.height) } });
+      await page.keyboard.press('Escape');
+    }
+    check(hasilUkuran.every((r) => r.open && r.penuh && r.utuh && r.tutupTerlihat),
+      'modal: responsif — memenuhi viewport, flyer utuh, tombol Tutup terlihat (desktop/tablet/phone/foldable)', hasilUkuran);
+    await page.setViewportSize({ width: 1366, height: 900 });
+    await waitForStableLayout(page);
+    await page.evaluate(() => document.getElementById('psgHomeCarouselViewport').scrollIntoView({ block: 'center' }));
+
+    // Dark Theme: flyer sama tanpa filter
+    await page.evaluate(() => { document.documentElement.setAttribute('data-theme', 'dark'); document.body.setAttribute('data-theme', 'dark'); });
+    await klikFlyer();
+    await tungguGambarModal();
+    modal = await keadaanModal();
+    check(modal.open && modal.filter === 'none' && utuh(modal) && penuh(modal), 'modal: Dark Theme menampilkan flyer yang sama tanpa filter');
+    /* klik di dalam flyer bisa memindah fokus dari tombol Tutup; ESC tetap menutup */
+    await page.mouse.click(modal.konten.left + modal.konten.width / 2, modal.konten.top + modal.konten.height / 2);
+    await page.keyboard.press('Escape');
+    const escSesudahKlik = await keadaanModal();
+    check(!escSesudahKlik.open && !escSesudahKlik.kunci && escSesudahKlik.fokus === 'pemicu',
+      'modal: ESC tetap menutup sesudah klik di dalam flyer; fokus kembali ke pemicu', { open: escSesudahKlik.open, fokus: escSesudahKlik.fokus });
+    await page.evaluate(() => { document.documentElement.setAttribute('data-theme', 'original'); document.body.setAttribute('data-theme', 'original'); });
+
+    // Reduced motion: modal tetap bekerja, timer restart penuh
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await waitForSlideTransition(page);
+    await klikFlyer();
+    await tungguGambarModal();
+    modal = await keadaanModal();
+    check(modal.open && utuh(modal), 'modal: bekerja dengan prefers-reduced-motion');
+    await cekTutup(() => page.keyboard.press('Escape'), 'modal: reduced motion — ESC, slide sama, timer restart penuh, satu navigasi');
+    await page.emulateMedia({ reducedMotion: 'no-preference' });
+
+    // 7: visibility — tab tersembunyi menghentikan autoplay, tampil lagi memulai ulang
+    await waitForSlideTransition(page);
+    const aktifSebelumHidden = await aktifSekarang();
+    await page.evaluate(() => {
+      Object.defineProperty(document, 'hidden', { configurable: true, get: () => true });
+      document.dispatchEvent(new Event('visibilitychange'));
+    });
+    const auditHidden = await readTimerAudit(page);
+    await page.clock.fastForward(20000);
+    const aktifHidden = await aktifSekarang();
+    await page.evaluate(() => { delete document.hidden; document.dispatchEvent(new Event('visibilitychange')); });
+    const auditTampil = await readTimerAudit(page);
+    await advanceToTimerElapsed(page, 5500);
+    const aktifTampil = await aktifSekarang();
+    await waitForSlideTransition(page);
+    check(auditHidden.active === 0 && aktifHidden === aktifSebelumHidden && auditTampil.active === 1 &&
+      aktifTampil === String((Number(aktifSebelumHidden) + 1) % PRODUCTS.length),
+    'visibility: tab tersembunyi menghentikan autoplay; tampil lagi memulai ulang satu timer', { auditHidden, aktifHidden, auditTampil, aktifTampil });
+
+    // 8: Beranda tidak aktif — autoplay berhenti; modal yang terbuka ikut tertutup
+    const aktifSebelumPindah = await aktifSekarang();
+    await klikFlyer();
+    await tungguGambarModal();
+    await page.evaluate(() => document.getElementById('layarProduk').classList.remove('aktif'));
+    const modalSaatPindah = await keadaanModal();
+    const auditPindah = await readTimerAudit(page);
+    await page.clock.fastForward(20000);
+    const aktifPindah = await aktifSekarang();
+    await page.evaluate(() => document.getElementById('layarProduk').classList.add('aktif'));
+    const auditKembali = await readTimerAudit(page);
+    await advanceToTimerElapsed(page, 5500);
+    const aktifKembali = await aktifSekarang();
+    await waitForSlideTransition(page);
+    check(!modalSaatPindah.open && !modalSaatPindah.kunci && auditPindah.active === 0 && aktifPindah === aktifSebelumPindah &&
+      auditKembali.active === 1 && auditKembali.maxActive === 1 &&
+      aktifKembali === String((Number(aktifSebelumPindah) + 1) % PRODUCTS.length),
+    'Beranda tidak aktif: autoplay berhenti dan modal tertutup; Beranda aktif lagi memulai ulang satu timer',
+    { modalSaatPindah: { open: modalSaatPindah.open, kunci: modalSaatPindah.kunci }, auditPindah, aktifPindah, auditKembali, aktifKembali });
+
+    // Script modal dimuat ulang tidak menggandakan pemicu/modal
+    const muatUlangModal = await page.evaluate(() => new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = 'src/home-carousel-modal.js?duplicate-init-check=1';
+      script.onload = () => resolve({
+        pemicu: document.querySelectorAll('[data-flyer-perbesar]').length,
+        modal: document.querySelectorAll('#psgFlyerModal').length
+      });
+      script.onerror = () => reject(new Error('script modal kedua gagal dimuat'));
+      document.body.appendChild(script);
+    }));
+    check(muatUlangModal.pemicu === 1 && muatUlangModal.modal === 1, 'memuat ulang script modal tidak menggandakan pemicu atau modal', muatUlangModal);
 
     const beforeKeyboard = Number(await page.locator('#psgHomeCarousel').getAttribute('data-active-index'));
     await page.evaluate(() => document.querySelector('[data-carousel-prev]').focus());

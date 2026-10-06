@@ -20,6 +20,7 @@
     var timer = null;
     var sedangTransisi = false;
     var sentuhan = null;
+    var ditahan = false;
     var jedaOtomatis = 5500;
     var gerakDikurangi = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
     var layarBeranda = root.closest('.layar');
@@ -41,7 +42,7 @@
     }
 
     function bolehPutarOtomatis() {
-      return !document.hidden && (!layarBeranda || layarBeranda.classList.contains('aktif'));
+      return !ditahan && !document.hidden && (!layarBeranda || layarBeranda.classList.contains('aktif'));
     }
 
     function geserTrack(posisi, tanpaAnimasi) {
@@ -85,6 +86,7 @@
     }
 
     function navigasi(indeks, arah) {
+      if (ditahan) return;
       hapusTimer();
       if (sedangTransisi) selesaikanTransisi(false);
 
@@ -161,6 +163,20 @@
       }
     });
     viewport.addEventListener('pointercancel', function () { sentuhan = null; jadwalkan(); });
+
+    /* Penahan dari luar, mis. flyer diperbesar (src/home-carousel-modal.js):
+       selama ditahan tidak ada autoplay maupun pergantian slide; saat dilepas
+       slide tetap sama dan jeda autoplay dimulai ulang penuh. */
+    root.addEventListener('psg-carousel:tahan', function () {
+      ditahan = true;
+      sentuhan = null;
+      hapusTimer();
+    });
+    root.addEventListener('psg-carousel:lepas', function () {
+      if (!ditahan) return;
+      ditahan = false;
+      if (!sedangTransisi) jadwalkan();
+    });
 
     if (gerakDikurangi) {
       var perubahanGerak = function () {

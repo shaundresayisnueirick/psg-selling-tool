@@ -15,7 +15,7 @@
    - Hanya jawaban yang benar-benar berhasil (status 200) yang disimpan,
      sehingga halaman error tidak pernah ikut tersimpan. */
 
-const VERSI = 'insurance-hub-v117.1.4';
+const VERSI = 'insurance-hub-v117.1.5';
 
 /* Semua berkas inti ikut disimpan sejak pemasangan, supaya aplikasi tetap
    utuh walaupun kunjungan pertama terputus di tengah jalan.
@@ -34,6 +34,7 @@ const BERKAS = [
   './src/styles.css',
   './src/branding.css',
   './src/home-carousel.css',
+  './src/home-carousel-modal.css',
   './src/sales-idea-player.css?v=107',
   './src/psg-karakter.css?v=107',
   './src/sales-idea-retirement.css?v=107',
@@ -73,6 +74,7 @@ const BERKAS = [
   './src/data/bsl-lengkap.js',
   './src/umum.js',
   './src/home-carousel.js',
+  './src/home-carousel-modal.js',
   './src/isian-terakhir.js',
   './src/catatan-ghp.js',
   './src/tunggu-12-ghp.js',
@@ -106,7 +108,7 @@ const BERKAS = [
   './src/sales-idea-education.js?v=115',
   './src/sales-idea-jari-audio.js?v=116',
   './src/sales-idea-jari-alasan-audio.js?v=116',
-  './src/sales-idea-jari.js?v=116',
+  './src/sales-idea-jari.js?v=117',
   './src/sales-idea-asset-audio.js?v=116',
   './src/sales-idea-asset.js?v=116',
   './src/sales-idea-lanjut.js?v=110',
