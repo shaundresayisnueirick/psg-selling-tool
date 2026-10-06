@@ -88,7 +88,20 @@
               Dark) → jari-terang-portrait.mp4 lalu jari-gelap-portrait.mp4.
    JARIX      10 Jari, putaran gugur di scene 1: Next sebelum selesai, seek maju,
               laju ×4 (CDP) → masing-masing tidak sah, tombol tersembunyi.
-   PERANGKAT  untuk Asset, Basket, Retirement, dan Education: kelas perangkat
+   SG1        Bekerja di Singapura (tema Original) 8 scene ditonton utuh, dengan
+              PAUSE/RESUME di scene 3 → tombol tampil (tidak pernah sebelumnya);
+              href singapura-terang.mp4, unduhan PSG-Singapura-Light.mp4 = berkas
+              repo; ganti ke Dark lalu klik → PSG-Singapura-Dark.mp4.
+   SG2        Singapura (tema Dark) ditonton utuh → href singapura-gelap.mp4,
+              unduhan PSG-Singapura-Dark.mp4 = berkas repo.
+   SG3        Singapura: Next sebelum scene 1 selesai → tidak sah, tombol
+              tersembunyi.
+   SGX        Singapura, putaran gugur: seek maju, seek mundur, laju ×4 (CDP),
+              BACK, lompat scene (Next dari frame siap), muat ulang lalu lanjut
+              dari scene 2 → masing-masing tidak sah, tombol tersembunyi.
+   SG4–SG6    seperti EDU4–EDU6 untuk Singapura (HP → singapura-*-portrait.mp4,
+              tablet & foldable terbuka → singapura-*.mp4).
+   PERANGKAT  untuk Asset, Basket, Retirement, Education, dan Singapura: kelas perangkat
               (PSGUnduhVideo.keadaan().perangkat) dan berkas
               yang dipilih SAAT KLIK pada 23 profil emulasi Chromium (HP
               Android/iPhone potret & landscape, HP diputar di halaman yang sama,
@@ -159,6 +172,14 @@ const VIDEO_EDU_P = {
   terang: { href: 'assets/video/education-terang-portrait.mp4', nama: 'PSG-Education-Light-Portrait.mp4' },
   gelap: { href: 'assets/video/education-gelap-portrait.mp4', nama: 'PSG-Education-Dark-Portrait.mp4' }
 };
+const VIDEO_SG = {
+  terang: { href: 'assets/video/singapura-terang.mp4', nama: 'PSG-Singapura-Light.mp4' },
+  gelap: { href: 'assets/video/singapura-gelap.mp4', nama: 'PSG-Singapura-Dark.mp4' }
+};
+const VIDEO_SG_P = {
+  terang: { href: 'assets/video/singapura-terang-portrait.mp4', nama: 'PSG-Singapura-Light-Portrait.mp4' },
+  gelap: { href: 'assets/video/singapura-gelap-portrait.mp4', nama: 'PSG-Singapura-Dark-Portrait.mp4' }
+};
 const VIDEO_RET_P = {
   terang: { href: 'assets/video/retirement-terang-portrait.mp4', nama: 'PSG-Retirement-Light-Portrait.mp4' },
   gelap: { href: 'assets/video/retirement-gelap-portrait.mp4', nama: 'PSG-Retirement-Dark-Portrait.mp4' }
@@ -214,7 +235,8 @@ const CER = {
   education: { pilih: 'education', sel: '.eps', attr: 'data-eps', jumlah: 10 },
   /* 10 Jari: BAB 1–2 memakai .jps[data-jps] 1–6, BAB 3 [data-jps-alasan] 1–3 →
      nomor scene global dibaca dari SalesIdea10Jari.keadaan().indeks */
-  jari: { pilih: 'jari', sel: '.jps', attr: 'data-jps', jumlah: 9, indeksKeadaan: true }
+  jari: { pilih: 'jari', sel: '.jps', attr: 'data-jps', jumlah: 9, indeksKeadaan: true },
+  singapura: { pilih: 'singapura', sel: '.sgs', attr: 'data-sgs', jumlah: 8 }
 };
 
 const hasil = [];
@@ -352,7 +374,7 @@ function serve() {
     }
     return '';
   }
-  /* Retirement / Asset / Education di perangkat emulasi: ditonton utuh → unduhan V1
+  /* Retirement / Asset / Education / Singapura di perangkat emulasi: ditonton utuh → unduhan V1
      (tema awal); lalu (opsional) diputar + tema diganti → klik memilih V2; unduhan
      dicocokkan SHA-256 */
   async function tontonUnduhPerangkat(o) {
@@ -773,7 +795,7 @@ function serve() {
     },
     PERANGKAT: async () => {
       const g = 'PERANGKAT KLASIFIKASI & PEMETAAN (EMULASI)';
-      for (const [kunci, VL, VP] of [['basket', VIDEO_KBS, VIDEO_KBS_P], ['retirement', VIDEO_RET, VIDEO_RET_P], ['asset', VIDEO, VIDEO_P], ['education', VIDEO_EDU, VIDEO_EDU_P]])
+      for (const [kunci, VL, VP] of [['basket', VIDEO_KBS, VIDEO_KBS_P], ['retirement', VIDEO_RET, VIDEO_RET_P], ['asset', VIDEO, VIDEO_P], ['education', VIDEO_EDU, VIDEO_EDU_P], ['singapura', VIDEO_SG, VIDEO_SG_P]])
       for (const p of PROFIL) {
         const { ctx, pg, errs } = await buka(null, kunci, p.o);
         if (p.putar) { await pg.setViewportSize({ width: p.putar[0], height: p.putar[1] }); await pg.waitForTimeout(150); }
@@ -1111,6 +1133,97 @@ function serve() {
         await pg.waitForTimeout(1500);
       }, /lebih cepat|laju/);
     },
+    SG1: async () => {
+      const g = 'SG1 SINGAPURA ORIGINAL';
+      const { ctx, pg, errs } = await buka(null, 'singapura');
+      const jejak = { terlihat: false }, jeda = { 3: true, hasil: [] };
+      const k0 = await uv(pg);
+      cek(g, (await temaHalaman(pg)) === 'original' && !(await terlihat(pg)) && k0.cerita === 'singapura' && k0.status === 'belum', 'Singapura dibuka (tema Original): tombol tersembunyi, status belum', k0);
+      await klik(pg, 'siPlay');
+      cek(g, (await uv(pg)).status === 'berjalan', 'Play scene 1 dari awal → putaran berjalan', await uv(pg));
+      const err = await tontonSampaiAkhir(pg, 1, jejak, jeda);
+      cek(g, !err, 'scene 1–8 ditonton sampai selesai, Next di antaranya', err);
+      const j = jeda.hasil;
+      cek(g, j.length === 3 && j[0].jeda === 'jeda' && j[0].selama === 'berjalan' && j[1].masihJeda === 'jeda' && j[1].selama === 'berjalan' && j[2].lanjut === 'berputar',
+        'PAUSE 3 dtk lalu RESUME di scene 3 → putaran tetap berjalan', j);
+      cek(g, !jejak.terlihat, 'tombol tidak pernah terlihat sebelum scene 8 selesai');
+      await pg.waitForTimeout(300);
+      const k = await uv(pg);
+      cek(g, k.status === 'selesai' && k.tombol && (await terlihat(pg)), 'scene 8 selesai → completion sah, tombol tampil', k);
+      cek(g, JSON.stringify(await atributUnduh(pg)) === JSON.stringify({ href: VIDEO_SG.terang.href, unduh: VIDEO_SG.terang.nama }),
+        'tema Original: tombol mengarah ke ' + VIDEO_SG.terang.href + ' (unduh sebagai ' + VIDEO_SG.terang.nama + ')', await atributUnduh(pg));
+      const u1 = await unduh(pg, 'terang', VIDEO_SG);
+      cek(g, u1.ok, 'klik (Original) → unduhan ' + VIDEO_SG.terang.nama + ' (ukuran & SHA-256 = ' + VIDEO_SG.terang.href + ')', u1);
+      const s1 = await gantiTemaLaluKlik(pg);
+      cek(g, s1.tema === 'dark' && s1.saatKlik && s1.saatKlik.href === VIDEO_SG.gelap.href && s1.saatKlik.unduh === VIDEO_SG.gelap.nama,
+        'ganti ke Dark lalu klik pada tick yang sama → ' + VIDEO_SG.gelap.href + ' / ' + VIDEO_SG.gelap.nama + ' (tema saat klik)', s1);
+      const u2 = await unduh(pg, 'gelap', VIDEO_SG);
+      cek(g, u2.ok, 'klik (Dark) → unduhan ' + VIDEO_SG.gelap.nama + ' (ukuran & SHA-256 = ' + VIDEO_SG.gelap.href + ')', u2);
+      await pg.waitForTimeout(1200);
+      cek(g, (await terlihat(pg)) && (await uv(pg)).status === 'selesai', 'tombol tetap tampil sesudah diunduh (masih di cerita yang sama)', await uv(pg));
+      cek(g, !errs.length, 'tanpa error halaman', errs);
+      await ctx.close();
+    },
+    SG2: async () => {
+      const g = 'SG2 SINGAPURA DARK';
+      const { ctx, pg, errs } = await buka('dark', 'singapura');
+      cek(g, (await temaHalaman(pg)) === 'dark', 'Singapura diputar dalam tema Dark', await temaHalaman(pg));
+      const jejak = { terlihat: false };
+      await klik(pg, 'siPlay');
+      const err = await tontonSampaiAkhir(pg, 1, jejak);
+      cek(g, !err && !jejak.terlihat, 'scene 1–8 ditonton sampai selesai; tombol tidak terlihat sebelumnya', err);
+      await pg.waitForTimeout(300);
+      const k = await uv(pg);
+      cek(g, k.status === 'selesai' && (await terlihat(pg)), 'completion sah → tombol tampil', k);
+      cek(g, JSON.stringify(await atributUnduh(pg)) === JSON.stringify({ href: VIDEO_SG.gelap.href, unduh: VIDEO_SG.gelap.nama }),
+        'tema Dark: tombol mengarah ke ' + VIDEO_SG.gelap.href + ' (unduh sebagai ' + VIDEO_SG.gelap.nama + ')', await atributUnduh(pg));
+      const u = await unduh(pg, 'gelap', VIDEO_SG);
+      cek(g, u.ok, 'klik (Dark) → unduhan ' + VIDEO_SG.gelap.nama + ' (ukuran & SHA-256 = ' + VIDEO_SG.gelap.href + ')', u);
+      cek(g, !errs.length, 'tanpa error halaman', errs);
+      await ctx.close();
+    },
+    SG3: async () => {
+      const g = 'SG3 SINGAPURA NEXT SEBELUM SELESAI';
+      const { ctx, pg, errs } = await buka(null, 'singapura');
+      await klik(pg, 'siPlay');
+      await pg.waitForTimeout(1500);
+      await klik(pg, 'siNext');
+      const k = await uv(pg);
+      cek(g, k.status === 'tidak-sah' && /NEXT/.test(k.alasan) && !(await terlihat(pg)), 'Next sebelum scene 1 selesai → tidak sah, tombol tersembunyi', k);
+      cek(g, !errs.length, 'tanpa error halaman', errs);
+      await ctx.close();
+    },
+    SGX: async () => {
+      const g = 'SGX SINGAPURA PUTARAN GUGUR';
+      const gugur = async (label, aksi, pola) => {
+        const { ctx, pg, errs } = await buka(null, 'singapura');
+        await aksi(pg, ctx);
+        const k = await uv(pg);
+        cek(g, k.status === 'tidak-sah' && pola.test(k.alasan) && !(await terlihat(pg)) && !errs.length, label + ' → tidak sah, tombol tersembunyi', Object.assign({ errs }, k));
+        await ctx.close();
+      };
+      await gugur('seek maju 5 dtk di scene 1', async (pg) => { await klik(pg, 'siPlay'); await pg.waitForTimeout(2000); await geser(pg, 5000); await pg.waitForTimeout(600); }, /seek/);
+      await gugur('seek mundur 1,5 dtk di scene 1', async (pg) => { await klik(pg, 'siPlay'); await pg.waitForTimeout(3000); await geser(pg, -1500); await pg.waitForTimeout(600); }, /mundur/);
+      await gugur('laju animasi ×4 (DevTools/CDP)', async (pg, ctx) => {
+        await klik(pg, 'siPlay');
+        const cdp = await ctx.newCDPSession(pg);
+        await cdp.send('Animation.enable');
+        await cdp.send('Animation.setPlaybackRate', { playbackRate: 4 });
+        await pg.waitForTimeout(1500);
+      }, /lebih cepat|laju/);
+      await gugur('scene 1 utuh, Next, lalu BACK di scene 2', async (pg) => { await klik(pg, 'siPlay'); await tonton(pg); await klik(pg, 'siNext'); await pg.waitForTimeout(1500); await klik(pg, 'siPrev'); }, /^BACK/);
+      await gugur('lompat: Next ×7 dari frame siap → scene 8', async (pg) => { for (let i = 0; i < 7; i++) await klik(pg, 'siNext'); }, /tidak dimulai dari scene 1|tidak diputar|lompat/);
+      await gugur('muat ulang di scene 2 lalu lanjut dari scene 2', async (pg) => {
+        await klik(pg, 'siPlay'); await tonton(pg); await klik(pg, 'siNext'); await pg.waitForTimeout(2000);
+        await pg.reload(); await bukaCerita(pg, CER.singapura); await klik(pg, 'siNext');
+      }, /tidak dimulai dari scene 1|tidak diputar/);
+    },
+    SG4: () => tontonUnduhPerangkat({ g: 'SG4 SINGAPURA SMARTPHONE (EMULASI)', kunci: 'singapura', profil: HP(412, 915, 2.625), tema: null, kelas: 'smartphone',
+      V1: VIDEO_SG_P.terang, putar: [915, 412], V2: VIDEO_SG_P.gelap, ket: 'HP potret → diputar ke landscape (tetap Portrait)' }),
+    SG5: () => tontonUnduhPerangkat({ g: 'SG5 SINGAPURA TABLET (EMULASI)', kunci: 'singapura', profil: HP(1180, 820, 2), tema: 'dark', kelas: 'tablet',
+      V1: VIDEO_SG.gelap, putar: [820, 1180], V2: VIDEO_SG.terang, ket: 'tablet landscape → diputar ke potret (tetap Landscape)' }),
+    SG6: () => tontonUnduhPerangkat({ g: 'SG6 SINGAPURA FOLDABLE TERBUKA (EMULASI)', kunci: 'singapura', profil: HP(884, 1104, 2.5), tema: null, kelas: 'tablet',
+      V1: VIDEO_SG.terang, putar: null, V2: VIDEO_SG.gelap, ket: 'foldable terbuka 884×1104' }),
     KBS3: async () => {
       const g = 'KBS3 KERANJANG NEXT SEBELUM SELESAI';
       const { ctx, pg, errs } = await buka(null, 'basket');
@@ -1127,7 +1240,7 @@ function serve() {
   const t0 = Date.now();
   const antre = Object.keys(SKENARIO).filter((k) => !BAGIAN || BAGIAN.includes(k));
   /* panjang dulu, pendek mengisi slot */
-  const urut = ['JARI1', 'JARI2', 'JARI3', 'JARI4', 'JARI5', 'JARI6', 'JARI7', 'EDU1', 'EDU2', 'EDU4', 'EDU5', 'EDU6', 'KBS1', 'KBS2', 'KBS4', 'KBS5', 'KBS6', '1', '2', 'RET1', 'RET2', 'RET4', 'RET5', 'RET6', 'ACS4', 'ACS5', 'ACS6', '3', '4', '6', '7', '5', 'BACK1', 'MUNDUR', 'LAJU', 'PAKSA', 'PERANGKAT', 'EDUX', 'JARIX', 'RET3', 'KBS3', 'EDU3'].filter((k) => antre.includes(k));
+  const urut = ['JARI1', 'JARI2', 'JARI3', 'JARI4', 'JARI5', 'JARI6', 'JARI7', 'SG1', 'SG2', 'SG4', 'SG5', 'SG6', 'EDU1', 'EDU2', 'EDU4', 'EDU5', 'EDU6', 'KBS1', 'KBS2', 'KBS4', 'KBS5', 'KBS6', '1', '2', 'RET1', 'RET2', 'RET4', 'RET5', 'RET6', 'ACS4', 'ACS5', 'ACS6', '3', '4', '6', '7', '5', 'BACK1', 'MUNDUR', 'LAJU', 'PAKSA', 'PERANGKAT', 'EDUX', 'JARIX', 'SGX', 'RET3', 'KBS3', 'EDU3', 'SG3'].filter((k) => antre.includes(k));
   await Promise.all(Array.from({ length: Math.min(PARALEL, urut.length) }, async () => {
     while (urut.length) {
       const k = urut.shift();
@@ -1156,7 +1269,7 @@ function serve() {
     /* tanpa 404 statis: setiap video yang dirujuk modul ada di repo, dan sebaliknya */
     const modul = fs.readFileSync(path.join(ROOT, 'src/sales-idea-video.js'), 'utf8');
     const dirujuk = [...new Set(modul.match(/assets\/video\/[\w.-]+\.mp4/g) || [])].sort();
-    const harus = Object.values(VIDEO).concat(Object.values(VIDEO_P), Object.values(VIDEO_EDU), Object.values(VIDEO_EDU_P), Object.values(VIDEO_RET), Object.values(VIDEO_RET_P), Object.values(VIDEO_KBS), Object.values(VIDEO_KBS_P), Object.values(VIDEO_JARI), Object.values(VIDEO_JARI_P)).map((v) => v.href).sort();
+    const harus = Object.values(VIDEO).concat(Object.values(VIDEO_P), Object.values(VIDEO_EDU), Object.values(VIDEO_EDU_P), Object.values(VIDEO_SG), Object.values(VIDEO_SG_P), Object.values(VIDEO_RET), Object.values(VIDEO_RET_P), Object.values(VIDEO_KBS), Object.values(VIDEO_KBS_P), Object.values(VIDEO_JARI), Object.values(VIDEO_JARI_P)).map((v) => v.href).sort();
     const ada = harus.map((h) => { const f = path.join(ROOT, h); return fs.existsSync(f) ? fs.statSync(f).size : 0; });
     cek('R REPO', JSON.stringify(dirujuk) === JSON.stringify(harus) && ada.every((n) => n > 0), 'video yang dirujuk modul = ' + harus.join(' + ') + ', semuanya ada di repo', { dirujuk, ukuran: ada });
   }
