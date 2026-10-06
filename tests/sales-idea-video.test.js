@@ -1,10 +1,11 @@
 #!/usr/bin/env node
 /* Pre-render video Sales Idea (tools/video/render-video.mjs) — cerita
-   Asset Creation (bawaan), Retirement Planning, Keranjang Kehidupan, dan
-   Education Planning (16:9 `retirement` / `basket` / `education`; 9:16
-   `asset-portrait` / `retirement-portrait` / `basket-portrait` / `education-portrait`).
+   Asset Creation (bawaan), Retirement Planning, Keranjang Kehidupan, Education
+   Planning, dan Bekerja di Singapura (16:9 `retirement` / `basket` / `education` /
+   `singapura`; 9:16 `asset-portrait` / `retirement-portrait` / `basket-portrait` /
+   `education-portrait` / `singapura-portrait`).
 
-     node tests/sales-idea-video.test.js [--cerita asset|asset-portrait|retirement|retirement-portrait|basket|basket-portrait|education|education-portrait] [--hasil <folder>] [--out <folder>]
+     node tests/sales-idea-video.test.js [--cerita asset|asset-portrait|retirement|retirement-portrait|basket|basket-portrait|education|education-portrait|singapura|singapura-portrait] [--hasil <folder>] [--out <folder>]
 
    Tanpa --hasil: cerita di-render ke folder di luar repo (bawaan: folder
    sementara sistem), lalu hasilnya diperiksa. Dengan --hasil: hanya
@@ -74,7 +75,9 @@ const HARAP = {
   basket: { manifest: 'src/sales-idea-keranjang-audio.js', glob: 'PSGKeranjangAudio', scene: 10, segmen: 10, totalMin: 115000, totalMaks: 135000, kira: '≈ 126 dtk' },
   'basket-portrait': { manifest: 'src/sales-idea-keranjang-audio.js', glob: 'PSGKeranjangAudio', scene: 10, segmen: 10, totalMin: 115000, totalMaks: 135000, kira: '≈ 126 dtk', lebar: 720, tinggi: 1280 },
   education: { manifest: 'src/sales-idea-education-audio.js', glob: 'PSGEducationAudio', scene: 10, segmen: 27, totalMin: 225000, totalMaks: 250000, kira: '≈ 237 dtk' },
-  'education-portrait': { manifest: 'src/sales-idea-education-audio.js', glob: 'PSGEducationAudio', scene: 10, segmen: 27, totalMin: 225000, totalMaks: 250000, kira: '≈ 237 dtk', lebar: 720, tinggi: 1280 }
+  'education-portrait': { manifest: 'src/sales-idea-education-audio.js', glob: 'PSGEducationAudio', scene: 10, segmen: 27, totalMin: 225000, totalMaks: 250000, kira: '≈ 237 dtk', lebar: 720, tinggi: 1280 },
+  singapura: { manifest: 'src/sales-idea-singapura-audio.js', glob: 'PSGSingapuraAudio', scene: 8, segmen: 27, totalMin: 295000, totalMaks: 320000, kira: '≈ 307 dtk' },
+  'singapura-portrait': { manifest: 'src/sales-idea-singapura-audio.js', glob: 'PSGSingapuraAudio', scene: 8, segmen: 27, totalMin: 295000, totalMaks: 320000, kira: '≈ 307 dtk', lebar: 720, tinggi: 1280 }
 }[K];
 if (!HARAP) { console.log('cerita tidak dikenal: ' + K); process.exit(1); }
 const LB = HARAP.lebar || 1280, TG = HARAP.tinggi || 720, UK = LB + '×' + TG;
@@ -87,7 +90,9 @@ const MP4_RESMI = ['assets/video/asset-terang.mp4', 'assets/video/asset-gelap.mp
   'assets/video/basket-terang.mp4', 'assets/video/basket-gelap.mp4',
   'assets/video/basket-terang-portrait.mp4', 'assets/video/basket-gelap-portrait.mp4',
   'assets/video/education-terang.mp4', 'assets/video/education-gelap.mp4',
-  'assets/video/education-terang-portrait.mp4', 'assets/video/education-gelap-portrait.mp4'];
+  'assets/video/education-terang-portrait.mp4', 'assets/video/education-gelap-portrait.mp4',
+  'assets/video/singapura-terang.mp4', 'assets/video/singapura-gelap.mp4',
+  'assets/video/singapura-terang-portrait.mp4', 'assets/video/singapura-gelap-portrait.mp4'];
 const bukanResmi = (berkas) => berkas.filter((f) => !MP4_RESMI.includes(f));
 
 let gagal = 0;
@@ -229,7 +234,9 @@ function ukuranPng(file) { const b = fs.readFileSync(file); return b.slice(1, 4)
   }, { segmen, wav: '/keluaran/' + meta.audio.berkas });
   await br.close(); srv.close();
   sinkron.forEach((x) => cek(Math.abs(x.lagMd) <= FRAME_MD && x.korelasi > 0.95, 'S: ' + x.id + ' di WAV pada jadwal (selisih ' + x.lagMd.toFixed(2) + ' md, korelasi ' + x.korelasi.toFixed(4) + ')', x));
-  cek(sinkron.length === HARAP.segmen, 'S: ' + HARAP.segmen + ' segmen diperiksa', sinkron.length);
+  /* satu segmen bisa terdiri dari beberapa klip (Singapura S05-03: dua berkas) */
+  cek(new Set(sinkron.map((x) => x.id)).size === HARAP.segmen && sinkron.length === segmen.length,
+    'S: ' + HARAP.segmen + ' segmen (' + segmen.length + ' klip) diperiksa', { segmen: new Set(sinkron.map((x) => x.id)).size, klip: sinkron.length });
 
   /* ---------- U. UI tersembunyi ---------- */
   const tersembunyi = (v) => v === 'hidden' || v === 'tidak-ada';
@@ -248,6 +255,19 @@ function ukuranPng(file) { const b = fs.readFileSync(file); return b.slice(1, 4)
       cek(a && a.codec_name === 'aac', 'V: audio AAC', a);
       cek(Math.abs(+j.format.duration * 1000 - meta.totalMd) <= 2 * FRAME_MD, 'V: durasi MP4 = total durasi (±2 frame)', j.format.duration);
     } else console.log('  info  ffprobe tidak ada — stream MP4 tidak diperiksa');
+    /* logo branding ada di SEMUA frame: kecerahan area logo tiap frame = frame 0 (latar
+       bar judul statis). Menangkap logo/watermark yang hilang di tengah video. */
+    const b = meta.branding;
+    if (b && b.diterapkan) {
+      const png = fs.readFileSync(path.join(ROOT, b.logo)), lh = b.logoTinggi, lw = Math.round(lh * png.readUInt32BE(16) / png.readUInt32BE(20));
+      const area = 'crop=' + lw + ':' + lh + ':' + (LB - lw - b.logoKanan) + ':' + b.logoAtas;
+      const fl = spawnSync('ffmpeg', ['-v', 'error', '-i', mp4, '-vf', area + ',format=gray,signalstats,metadata=print:key=lavfi.signalstats.YAVG:file=-', '-f', 'null', '-'], { encoding: 'utf8', maxBuffer: 1 << 28 });
+      if (fl.status === 0) {
+        const yv = ((fl.stdout || '') + (fl.stderr || '')).match(/YAVG=[\d.]+/g).map((x) => +x.slice(5));
+        const beda = yv.findIndex((v) => Math.abs(v - yv[0]) > 3);
+        cek(yv.length === meta.frameTotal && beda < 0, 'V: logo branding ada di semua ' + meta.frameTotal + ' frame (area logo = frame 0)', { frame: yv.length, menyimpangMulai: beda });
+      } else console.log('  info  ffmpeg tidak ada — logo per frame tidak diperiksa');
+    }
   } else {
     cek(meta.video.status === 'terblokir' && /libx264/.test(meta.video.alasan) && !fs.existsSync(mp4), 'V: encode terblokir codec dengan alasan jelas, tanpa berkas MP4', meta.video);
     if (kodeAlat !== null) cek(kodeAlat === 4, 'V: alat keluar 4 saat encode terblokir', kodeAlat);

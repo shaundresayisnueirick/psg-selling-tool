@@ -1,6 +1,6 @@
 /* ============================================================
    Sales Idea → "⬇ Download Video" (Asset Creation, Retirement Planning,
-   Keranjang Kehidupan, Education Planning)
+   Keranjang Kehidupan, Education Planning, Bekerja di Singapura)
    ------------------------------------------------------------
    Tombol unduh video pre-render (assets/video/<cerita>-terang.mp4 atau
    <cerita>-gelap.mp4, menurut tema aktif saat tombol diklik; cerita yang punya
@@ -11,7 +11,7 @@
    scene; ia hanya membaca:
      - status pemutar : atribut data-sip-status pada #layarSalesIdea
      - scene aktif    : node scene cerita (.acs[data-acs], .rps[data-rps],
-                        .kbs[data-kbs], .eps[data-eps])
+                        .kbs[data-kbs], .eps[data-eps], .sgs[data-sgs])
                         di panggung + SalesIdea10Jari.keadaan()
      - jam scene      : animasi berhingga terpanjang di panggung saat scene
                         mulai berputar (ujungnya = durasi timeline scene)
@@ -100,6 +100,16 @@
           terang: 'PSG-10-Jari-Light-Portrait.mp4',
           gelap: 'PSG-10-Jari-Dark-Portrait.mp4'
         }
+      }
+    },
+    singapura: {
+      sel: '.sgs', attr: 'data-sgs',
+      video: { terang: 'assets/video/singapura-terang.mp4', gelap: 'assets/video/singapura-gelap.mp4' },
+      nama: { terang: 'PSG-Singapura-Light.mp4', gelap: 'PSG-Singapura-Dark.mp4' },
+      /* 9:16 (720×1280) untuk smartphone */
+      potret: {
+        video: { terang: 'assets/video/singapura-terang-portrait.mp4', gelap: 'assets/video/singapura-gelap-portrait.mp4' },
+        nama: { terang: 'PSG-Singapura-Light-Portrait.mp4', gelap: 'PSG-Singapura-Dark-Portrait.mp4' }
       }
     }
   };
