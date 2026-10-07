@@ -1,18 +1,14 @@
 /* Identity event function.
 
-   PSG Selling Tools bersifat Invite Only: akun dibuat oleh owner/admin,
-   bukan lewat pendaftaran mandiri. Setelan "Registration: Invite only" di
-   dashboard tetap disarankan; penolakan di sini adalah pengaman kedua bila
-   setelan itu terbuka, misalnya tepat setelah Identity diaktifkan.
+   PSG Selling Tools bersifat Invite Only lewat setelan dashboard
+   "Registration: Invite only"; penolakan pendaftaran publik tidak dilakukan
+   di sini.
 
-   userValidate hanya berjalan untuk pendaftaran mandiri (signup). Undangan
-   dari dashboard dan akun yang dibuat lewat admin API tidak melewati hook
-   ini, jadi tidak ikut tertolak. */
+   Hook userValidate yang dulu selalu menjalankan event.deny() sudah dihapus:
+   hook itu ikut berjalan saat undangan dari dashboard diproses, sehingga
+   "Invite users" gagal dengan "422 Failed to handle signup webhook".
+   Saat ini tidak ada handler event Identity yang aktif. */
 
-import type { UserValidateEvent } from '@netlify/functions'
+import type { NetlifyFunction } from '@netlify/functions'
 
-export default {
-  userValidate(event: UserValidateEvent) {
-    return event.deny()
-  },
-}
+export default {} satisfies NetlifyFunction
