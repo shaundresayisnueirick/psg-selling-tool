@@ -1,0 +1,11 @@
+{
+  "name": "psg-selling-tools",
+  "private": true,
+  "description": "PSG Selling Tools — situs statis + Netlify Functions untuk autentikasi.",
+  "dependencies": {
+    "@netlify/identity": "^2.0.0"
+  },
+  "devDependencies": {
+    "@netlify/functions": "^6.0.2"
+  }
+}
