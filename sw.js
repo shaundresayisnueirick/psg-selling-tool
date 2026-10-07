@@ -15,7 +15,7 @@
    - Hanya jawaban yang benar-benar berhasil (status 200) yang disimpan,
      sehingga halaman error tidak pernah ikut tersimpan. */
 
-const VERSI = 'insurance-hub-v117.1.5';
+const VERSI = 'insurance-hub-v117.1.6';
 
 /* Semua berkas inti ikut disimpan sejak pemasangan, supaya aplikasi tetap
    utuh walaupun kunjungan pertama terputus di tengah jalan.
@@ -241,6 +241,11 @@ self.addEventListener('activate', e => {
   );
 });
 
+function bypassCache(url) {
+  const p = url.pathname;
+  return p.indexOf('/.netlify/') === 0 || p === '/api' || p.indexOf('/api/') === 0;
+}
+
 function bolehDisimpan(res) {
   return res && res.status === 200 && (res.type === 'basic' || res.type === 'default');
 }
@@ -252,6 +257,12 @@ self.addEventListener('fetch', e => {
   let url;
   try { url = new URL(req.url); } catch (err) { return; }
   if (url.origin !== self.location.origin) return;   // biarkan permintaan luar apa adanya
+
+  /* Autentikasi dan API tidak pernah disentuh cache: jawabannya bergantung
+     pada siapa yang sedang masuk. Tanpa ini, permintaan GET ke
+     /.netlify/identity/user atau /api/psg/me jatuh ke aturan "cache dulu" di
+     bawah dan bisa menyajikan profil lama — bahkan milik agen lain. */
+  if (bypassCache(url)) return;
 
   const halaman = req.mode === 'navigate' ||
                   (req.headers.get('accept') || '').includes('text/html');

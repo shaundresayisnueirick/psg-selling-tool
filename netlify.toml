@@ -1,0 +1,41 @@
+# Konfigurasi minimum untuk Netlify Functions (fondasi autentikasi).
+# Situs tetap statis tanpa langkah build; folder publish tidak diubah di sini
+# dan tetap mengikuti setelan project.
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+
+# Jawaban API bergantung pada siapa yang sedang masuk: jangan pernah disimpan
+# peramban maupun CDN. Function juga mengirim header yang sama dari kodenya.
+[[headers]]
+  for = "/api/*"
+  [headers.values]
+    Cache-Control = "no-store, max-age=0"
+    Pragma = "no-cache"
+
+# Folder publish adalah akar repo, jadi kode server, dependensi, dan berkas
+# kerja ikut terunggah sebagai berkas statis. Jangan sajikan ke publik.
+[[redirects]]
+  from = "/netlify/*"
+  to = "/404"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/node_modules/*"
+  to = "/404"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/package.json"
+  to = "/404"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/package-lock.json"
+  to = "/404"
+  status = 404
+  force = true

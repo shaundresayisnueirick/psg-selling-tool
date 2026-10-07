@@ -1,2 +1,5 @@
 # Generator narasi (tools/narasi): WAV & berkas kerja sementara, jangan di-commit.
 /tools/narasi/.tmp/
+
+# Dependensi Netlify Functions — dipasang otomatis saat build Netlify.
+node_modules/
