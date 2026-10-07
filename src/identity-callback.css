@@ -1,0 +1,22 @@
+/* Kartu callback Netlify Identity (src/identity-callback.js): undangan dan
+   atur ulang password. Memakai kelas kartu layar masuk (.insurance-access-*)
+   supaya tampilannya sama di tema Original maupun Dark. */
+
+#psgIdentityGate{
+  position:fixed;inset:0;z-index:2147483647;
+  display:flex;align-items:center;justify-content:center;overflow:auto;
+  padding:max(20px,env(safe-area-inset-top)) 20px max(20px,env(safe-area-inset-bottom));
+  background:
+    radial-gradient(700px 420px at 12% 8%,rgba(184,144,74,.20),transparent 60%),
+    radial-gradient(760px 480px at 92% 96%,rgba(166,1,1,.20),transparent 60%),
+    linear-gradient(145deg,#07111F 0%,#0B1B32 55%,#10233F 100%);
+  font-family:var(--font-sans);
+}
+/* Saat aplikasi terkunci, styles.css menyembunyikan semua anak body kecuali
+   layar masuk. Kartu ini harus tetap terlihat di atasnya. */
+html.insurance-auth-locked body > div#psgIdentityGate{visibility:visible!important}
+#psgIdentityGate .psg-identity-form{text-align:left}
+#psgIdentityGate input[type="password"]{min-height:50px}
+#psgIdentityGate .insurance-access-btn:disabled{opacity:.7;cursor:progress}
+@media screen and (max-width:560px){#psgIdentityGate{padding-top:max(66px,calc(env(safe-area-inset-top) + 52px))}}
+@media print{#psgIdentityGate{display:none!important}}
