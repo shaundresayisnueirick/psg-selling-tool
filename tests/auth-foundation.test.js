@@ -55,7 +55,11 @@ async function main() {
   const me = baca('netlify/functions/psg-me.mts');
   cek(/path:\s*'\/api\/psg\/me'/.test(me), "psg-me config.path = '/api/psg/me'");
   cek(/export default async/.test(me) && /from '@netlify\/identity'/.test(me), 'psg-me: format function v2 + @netlify/identity');
-  cek(/userValidate[\s\S]*event\.deny\(\)/.test(baca('netlify/functions/identity.mts')), 'identity: pendaftaran mandiri ditolak');
+  /* Hook userValidate deny-all ikut berjalan saat undangan diproses
+     ("422 Failed to handle signup webhook"); Invite Only diatur di dashboard. */
+  const identitas = baca('netlify/functions/identity.mts').replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '');
+  cek(/export default\b/.test(identitas) && !/userValidate/.test(identitas) && !/\.deny\(/.test(identitas),
+    'identity: tanpa hook userValidate deny-all (undangan tidak tertolak)');
   const semuaFn = ['netlify/functions/psg-me.mts', 'netlify/functions/identity.mts', 'netlify/lib/psg-auth.mts'].map(baca).join('\n');
   cek(!/https?:\/\/(cdn|unpkg|jsdelivr)/i.test(semuaFn), 'tidak ada CDN eksternal');
 
