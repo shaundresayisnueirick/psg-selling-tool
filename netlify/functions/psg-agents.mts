@@ -1,4 +1,5 @@
 /* PSG Selling Tools — Management Agen API (PR #21). Admin operations stay server-side. */
+import { randomBytes } from 'node:crypto'
 import { admin, getIdentityConfig, getUser, requestPasswordRecovery, verifyRequestOrigin } from '@netlify/identity'
 import type { AdminUserUpdates, User } from '@netlify/identity'
 import type { Config } from '@netlify/functions'
