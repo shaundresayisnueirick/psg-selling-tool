@@ -1,6 +1,5 @@
 /* PSG Selling Tools — Management Agen API (PR #21). Admin operations stay server-side. */
-import { randomBytes } from 'node:crypto'
-import { admin, getIdentityConfig, getUser, requestPasswordRecovery, verifyRequestOrigin } from '@netlify/identity'
+import { admin, getUser, requestPasswordRecovery } from '@netlify/identity'
 import type { AdminUserUpdates, User } from '@netlify/identity'
 import type { Config } from '@netlify/functions'
 import { jawabJson, profilAman, ROLE_SISTEM, JENJANG, type Jenjang } from '../lib/psg-auth.mts'
@@ -41,51 +40,8 @@ async function listPsgUsers() {
   })
 }
 
-async function inviteUser(email: string): Promise<User> {
-  const identity = getIdentityConfig()
-  if (!identity) {
-    const err = new Error('Konfigurasi Netlify Identity tidak tersedia di runtime function.') as Error & { code?: string }
-    err.code = 'identity_config_missing'
-    throw err
-  }
-  if (!identity.url) {
-    const err = new Error('URL Netlify Identity tidak tersedia di runtime function.') as Error & { code?: string }
-    err.code = 'identity_url_missing'
-    throw err
-  }
-  if (!identity.token) {
-    const err = new Error('Operator token Netlify Identity tidak tersedia di runtime function.') as Error & { code?: string }
-    err.code = 'identity_token_missing'
-    throw err
-  }
-
-  const baseUrl = identity.url.replace(/\\/$/, '')
-  const response = await fetch(`${baseUrl}/invite`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${identity.token}`,
-      'Content-Type': 'application/json',
-      Accept: 'application/json',
-    },
-    body: JSON.stringify({ email }),
-  })
-  const raw = await response.text()
-  let data: unknown = null
-  try { data = raw ? JSON.parse(raw) : null } catch (_) {}
-
-  if (!response.ok) {
-    const message = data && typeof data === 'object' && 'msg' in data && typeof (data as {msg?: unknown}).msg === 'string'
-      ? (data as {msg: string}).msg
-      : raw.trim().slice(0, 300)
-    const err = new Error(message || `Identity invite gagal (HTTP ${response.status}).`) as Error & {
-      status?: number
-      code?: string
-    }
-    err.status = response.status
-    err.code = 'identity_invite_rejected'
-    throw err
-  }
-  return data as User
+function bootstrapPassword() {
+  return `Psg!${globalThis.crypto.randomUUID().replace(/-/g, '')}`
 }
 
 function errorStatus(err: unknown): number {
@@ -111,16 +67,16 @@ async function createAgent(body: Record<string, unknown>, actor: User) {
   if (!['agent','psg_admin'].includes(role)) return fail(400, 'invalid_role', 'Role tidak valid.')
   if (role === 'psg_admin' && !isOwner(actor)) return fail(403, 'forbidden_role', 'Hanya PSG Owner yang boleh membuat PSG Admin.')
 
-  /* DIAGNOSTIC STEP — sengaja hanya menguji admin.createUser().
-     Belum mengirim email/reset link. Tujuannya membuktikan apakah
-     Netlify Function benar-benar diizinkan membuat Identity user. */
   let created: User
   try {
     created = await admin.createUser({
       email,
-      password: 'PsgTest!' + cryptoRandomToken(),
+      password: bootstrapPassword(),
       data: {
-        app_metadata: { roles: role === 'psg_admin' ? ['psg_admin'] : [], psg: { nama, kodeAgen: kodeAgen || null, level, status: 'aktif' } },
+        app_metadata: {
+          roles: role === 'psg_admin' ? ['psg_admin'] : [],
+          psg: { nama, kodeAgen: kodeAgen || null, level, status: 'aktif' },
+        },
         user_metadata: { full_name: nama },
       },
     })
@@ -129,15 +85,28 @@ async function createAgent(body: Record<string, unknown>, actor: User) {
     const message = errorText(err)
     const duplicate = status === 409 || status === 422 || /already|exist|registered|taken|duplicate/i.test(message)
     return fail(duplicate ? 409 : 502, duplicate ? 'already_exists' : 'create_failed',
-      duplicate ? 'Akun tidak dibuat. Email tersebut sudah terdaftar di Netlify Identity.' :
-      `admin.createUser() ditolak: ${message || (status ? `HTTP ${status}` : 'tanpa detail error')}.`)
+      duplicate
+        ? 'Akun tidak dibuat. Email tersebut sudah terdaftar di Netlify Identity.'
+        : `Gagal membuat akun Identity (admin.createUser).${status ? ` HTTP ${status}.` : ''} ${message || 'Netlify tidak memberikan detail error.'}`)
+  }
+
+  try {
+    await requestPasswordRecovery(email)
+  } catch (err) {
+    const status = errorStatus(err)
+    const message = errorText(err)
+    return jawabJson(502, {
+      error: 'recovery_failed',
+      accountCreated: true,
+      user: safe(created),
+      message: `Akun berhasil dibuat, tetapi email untuk membuat password gagal dikirim.${status ? ` HTTP ${status}.` : ''} ${message}`.trim()
+    })
   }
 
   return jawabJson(201, {
     ok: true,
-    diagnostic: true,
-    message: 'TES BERHASIL: akun Identity berhasil dibuat. Email/link belum dikirim. Cek Netlify Identity > Users.',
     user: safe(created),
+    message: 'Akun agen berhasil dibuat dan email untuk membuat password sudah dikirim.'
   })
 }
 async function resend(body: Record<string, unknown>, actor: User) {
@@ -190,7 +159,6 @@ export default async (req: Request) => {
   try { actor=await actorOrThrow() } catch (e) { return e instanceof Response ? e : fail(500,'server_error','Terjadi kesalahan pada server.') }
   try {
     if(req.method==='GET') return jawabJson(200,{ok:true,users:await listPsgUsers()})
-    verifyRequestOrigin(req)
     let body: Record<string,unknown>={}
     try { body=await req.json() } catch (_) { return fail(400,'invalid_json','Data permintaan tidak valid.') }
     if(req.method==='POST') return text(body.action,30)==='resend_access' ? resend(body,actor) : createAgent(body,actor)
