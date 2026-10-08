@@ -42,8 +42,24 @@ async function listPsgUsers() {
 
 async function inviteUser(email: string): Promise<User> {
   const identity = getIdentityConfig()
-  if (!identity?.url || !identity.token) throw new Error('Identity operator token tidak tersedia di runtime Netlify.')
-  const response = await fetch(`${identity.url}/invite`, {
+  if (!identity) {
+    const err = new Error('Konfigurasi Netlify Identity tidak tersedia di runtime function.') as Error & { code?: string }
+    err.code = 'identity_config_missing'
+    throw err
+  }
+  if (!identity.url) {
+    const err = new Error('URL Netlify Identity tidak tersedia di runtime function.') as Error & { code?: string }
+    err.code = 'identity_url_missing'
+    throw err
+  }
+  if (!identity.token) {
+    const err = new Error('Operator token Netlify Identity tidak tersedia di runtime function.') as Error & { code?: string }
+    err.code = 'identity_token_missing'
+    throw err
+  }
+
+  const baseUrl = identity.url.replace(/\\/$/, '')
+  const response = await fetch(`${baseUrl}/invite`, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${identity.token}`,
@@ -52,12 +68,20 @@ async function inviteUser(email: string): Promise<User> {
     },
     body: JSON.stringify({ email }),
   })
-  const data = await response.json().catch(() => null)
+  const raw = await response.text()
+  let data: unknown = null
+  try { data = raw ? JSON.parse(raw) : null } catch (_) {}
+
   if (!response.ok) {
     const message = data && typeof data === 'object' && 'msg' in data && typeof (data as {msg?: unknown}).msg === 'string'
-      ? (data as {msg: string}).msg : `Identity invite gagal (HTTP ${response.status}).`
-    const err = new Error(message) as Error & { status?: number }
+      ? (data as {msg: string}).msg
+      : raw.trim().slice(0, 300)
+    const err = new Error(message || `Identity invite gagal (HTTP ${response.status}).`) as Error & {
+      status?: number
+      code?: string
+    }
     err.status = response.status
+    err.code = 'identity_invite_rejected'
     throw err
   }
   return data as User
@@ -95,10 +119,11 @@ async function createAgent(body: Record<string, unknown>, actor: User) {
   } catch (err) {
     const status = errorStatus(err)
     const message = errorText(err)
+    const code = (err as {code?: unknown} | null)?.code
     const duplicate = status === 409 || /already|exist|registered|taken|duplicate/i.test(message)
-    return fail(duplicate ? 409 : 502, duplicate ? 'already_exists' : 'invite_failed',
-      duplicate ? 'Akun tidak dibuat. Email tersebut sudah terdaftar di Netlify Identity.' :
-      'Netlify Identity gagal membuat undangan. Periksa konfigurasi Identity dan coba lagi.')
+    if (duplicate) return fail(409, 'already_exists', 'Akun tidak dibuat. Email tersebut sudah terdaftar di Netlify Identity.')
+    const detail = [code || 'unknown', status ? `HTTP ${status}` : '', message].filter(Boolean).join(' — ')
+    return fail(502, 'invite_failed', `Netlify Identity gagal membuat undangan: ${detail}`)
   }
 
   try {
