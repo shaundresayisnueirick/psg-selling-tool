@@ -118,14 +118,12 @@ async function resend(body: Record<string, unknown>, actor: User) {
   if (!target.email) return fail(409,'missing_email','Akun tidak memiliki email.')
   if (psgMeta(target).status === 'nonaktif') return fail(409,'inactive','Akun nonaktif tidak dikirimi link akses.')
   try {
-    if (!target.confirmedAt) {
-      await inviteUser(target.email)
-      return jawabJson(200,{ok:true,message:'Undangan akses sudah dikirim ulang.'})
-    }
     await requestPasswordRecovery(target.email)
-    return jawabJson(200,{ok:true,message:'Link atur ulang password sudah dikirim ulang.'})
-  } catch (_) {
-    return fail(502,'delivery_failed','Email akses tidak dapat dikirim saat ini.')
+    return jawabJson(200,{ok:true,message:'Link untuk membuat atau mengatur ulang password sudah dikirim ulang.'})
+  } catch (err) {
+    const status = errorStatus(err)
+    const message = errorText(err)
+    return fail(502,'delivery_failed',`Email akses tidak dapat dikirim.${status ? ` HTTP ${status}.` : ''} ${message}`.trim())
   }
 }
 
