@@ -5,7 +5,7 @@ const R=path.join(__dirname,'..');let bad=0;const ok=(x,m)=>x?console.log('✓ '
 console.log('[PR #21] targeted static checks');
 const server=read('netlify/functions/psg-agents.mts');
 for(const x of ['admin.listUsers','admin.getUser','admin.createUser','admin.updateUser']) ok(server.includes(x),'server API: '+x);
-ok(server.includes("path: '/api/psg/agents'"),'endpoint path');ok(server.includes('admin.createUser(')&&server.includes('requestPasswordRecovery('),'invite uses official create + recovery flow');ok(!server.includes('getIdentityConfig')&&!server.includes('async function inviteUser'),'invite does not depend on low-level Identity context/fetch');
+ok(server.includes("path: '/api/psg/agents'"),'endpoint path');ok(server.includes('admin.createUser(')&&server.includes('requestPasswordRecovery('),'invite uses official create + recovery flow');ok(server.includes("role: role === 'psg_admin' ? 'admin' : undefined"),'new PSG Admin receives Identity admin role');ok(!server.includes('getIdentityConfig')&&!server.includes('async function inviteUser'),'invite does not depend on low-level Identity context/fetch');
 ok(server.includes("roles.includes('psg_owner')")&&server.includes("roles.includes('psg_admin')"),'server-side owner/admin authorization');
 ok(!server.includes('localStorage')&&!server.includes('sessionStorage'),'server does not use browser storage');
 const auth=read('netlify/lib/psg-auth.mts');ok(auth.includes("ROLE_SISTEM = ['psg_owner', 'psg_admin']"),'role registry unchanged');ok(auth.includes('Array.isArray(app.roles)')&&!auth.includes('Array.isArray(user.roles) ? user.roles'),'server reads PSG roles from app_metadata');
