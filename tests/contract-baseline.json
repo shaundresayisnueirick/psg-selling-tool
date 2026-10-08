@@ -264,6 +264,9 @@
      "cpTambahAnak",
      "cpTambahRelasi",
      "cpTgl",
+     "cpTglError",
+     "cpTglManual",
+     "cpTglPicker",
      "cpUPCI",
      "cpUPJiwa",
      "cpUsia",
@@ -955,6 +958,29 @@
       "tag": "input",
       "classes": [],
       "attrs": {
+       "type": "hidden"
+      }
+     },
+     "cpTglError": {
+      "tag": "p",
+      "classes": [
+       "catatan"
+      ],
+      "attrs": {}
+     },
+     "cpTglManual": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "aria-describedby": "cpTglError",
+       "type": "text"
+      }
+     },
+     "cpTglPicker": {
+      "tag": "input",
+      "classes": [],
+      "attrs": {
+       "aria-label": "Pilih tanggal lahir melalui kalender",
        "type": "date"
       }
      },

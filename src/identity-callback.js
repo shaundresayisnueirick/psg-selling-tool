@@ -75,7 +75,7 @@
       '<p class="insurance-access-sub">' + teks + '</p>' +
       '<button type="button" class="insurance-access-btn" id="psgIdentityLanjut">' + esc(tombol) + '</button>'
     );
-    var b = document.getElementById('psgIdentityLanjut');
+    var b = wadah().querySelector('#psgIdentityLanjut');
     b.addEventListener('click', tutup);
     b.focus();
   }
@@ -130,11 +130,12 @@
       '</form>'
     );
 
-    var form = document.getElementById('psgIdentityForm');
-    var p1 = document.getElementById('psgIdentityPassword');
-    var p2 = document.getElementById('psgIdentityPassword2');
-    var tombol = document.getElementById('psgIdentitySimpan');
-    var galat = document.getElementById('psgIdentityError');
+    var gate = wadah();
+    var form = gate.querySelector('#psgIdentityForm');
+    var p1 = gate.querySelector('#psgIdentityPassword');
+    var p2 = gate.querySelector('#psgIdentityPassword2');
+    var tombol = gate.querySelector('#psgIdentitySimpan');
+    var galat = gate.querySelector('#psgIdentityError');
     var sibuk = false;
     setTimeout(function () { p1.focus(); }, 30);
 

@@ -268,7 +268,7 @@ el.addEventListener('pointerdown',function(){tutup(true);});})();</script>
         <div><label for="cpNama">Nama lengkap</label><input id="cpNama" type="text" placeholder="Nama nasabah" autocomplete="off"></div>
       </div>
       <div class="baris">
-        <div><label for="cpTgl">Tanggal lahir</label><input id="cpTgl" type="date"><div class="usia-live" id="cpUsia">Usia —</div></div>
+        <div><label for="cpTglManual">Tanggal lahir</label><div class="cp-tanggal-input"><input id="cpTglManual" type="text" inputmode="numeric" autocomplete="bday" placeholder="DD/MM/YYYY" maxlength="10" aria-describedby="cpTglError"><input id="cpTglPicker" type="date" aria-label="Pilih tanggal lahir melalui kalender"></div><input id="cpTgl" type="hidden"><p class="catatan" id="cpTglError" role="alert" hidden></p><div class="usia-live" id="cpUsia">Usia —</div></div>
         <div><label>Jenis kelamin</label>
           <div class="segmen" id="cpJK">
             <button type="button" data-nilai="PRIA" aria-pressed="true">Pria</button>

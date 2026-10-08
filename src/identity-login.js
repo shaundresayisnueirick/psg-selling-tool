@@ -11,6 +11,8 @@
   var ID_GATE = 'insuranceAccessGate';
   var ID_IDENTITY_FORM = 'psgIdentityForm';
   var ID_FORGOT_FORM = 'psgIdentityForgotForm';
+  var ID_RESTORE_STATUS = 'psgIdentityRestoreStatus';
+  var bootSedangBerjalan = false;
 
   function lib() {
     var x = window.PSGNetlifyIdentity;
@@ -73,6 +75,27 @@
     var gate = document.getElementById(ID_GATE);
     if (gate) gate.remove();
     document.documentElement.classList.remove('insurance-auth-locked');
+    window.dispatchEvent(new Event('psg:identity-ready'));
+  }
+
+  function tampilkanStatusPemulihan(gate, status, message) {
+    var node = document.getElementById(ID_RESTORE_STATUS);
+    var identity = gate && gate.querySelector('.psg-identity-login');
+    var legacy = document.getElementById('psgIdentityLegacyWrap');
+    if (!node) return;
+    if (identity) identity.hidden = status !== 'login';
+    if (legacy) legacy.hidden = true;
+    node.hidden = status === 'login';
+    node.textContent = message || '';
+    node.classList.toggle('psg-identity-restore-error', status === 'error');
+    if (status === 'error') {
+      var retry = document.createElement('button');
+      retry.type = 'button';
+      retry.className = 'psg-identity-link';
+      retry.textContent = 'Coba lagi';
+      retry.addEventListener('click', boot);
+      node.appendChild(retry);
+    }
   }
 
   async function profilServer() {
@@ -84,8 +107,10 @@
     });
     var data = {};
     try { data = await response.json(); } catch (_) {}
-    if (response.status === 401 || !data.authenticated) return null;
-    if (!response.ok || !data.user) throw new Error('server_profile_failed');
+    if (response.status === 401) return null;
+    if (!response.ok) throw new Error('server_profile_failed');
+    if (!data.authenticated) return null;
+    if (!data.user) throw new Error('server_profile_failed');
     return data.user;
   }
 
@@ -158,9 +183,17 @@
         '<button type="button" class="psg-identity-link" id="psgIdentityForgotCancel">Kembali ke login</button>' +
       '</form>';
 
+    var restoreStatus = document.createElement('div');
+    restoreStatus.id = ID_RESTORE_STATUS;
+    restoreStatus.className = 'psg-identity-restoring';
+    restoreStatus.setAttribute('role', 'status');
+    restoreStatus.setAttribute('aria-live', 'polite');
+    restoreStatus.hidden = true;
+
     var logo = card.querySelector('.insurance-access-logo');
     if (logo && logo.nextSibling) card.insertBefore(identity, logo.nextSibling);
     else card.insertBefore(identity, card.firstChild);
+    card.insertBefore(restoreStatus, identity);
 
     var legacyWrap = document.createElement('div');
     legacyWrap.id = 'psgIdentityLegacyWrap';
@@ -312,24 +345,39 @@
   }
 
   async function boot() {
+    if (bootSedangBerjalan) return;
+    bootSedangBerjalan = true;
+    try {
     var gate = document.getElementById(ID_GATE);
     if (!gate) return;
 
     var api = lib();
     if (!api) {
       pasangFormEmail(gate);
+      tampilkanStatusPemulihan(gate, 'login');
       return;
     }
 
     pasangFormEmail(gate);
-    var profile = await validasiSesiAda().catch(function () { return null; });
+    tampilkanStatusPemulihan(gate, 'restoring', 'Memulihkan sesi dan memeriksa profil PSG…');
+    var profile;
+    try {
+      profile = await validasiSesiAda();
+    } catch (_) {
+      tampilkanStatusPemulihan(gate, 'error', 'Sesi belum dapat diverifikasi. Periksa koneksi, lalu coba lagi.');
+      return;
+    }
     if (profile) {
       bukaAplikasi(profile);
       return;
     }
 
+    tampilkanStatusPemulihan(gate, 'login');
     var email = document.getElementById('psgIdentityEmail');
     if (email) setTimeout(function () { email.focus(); }, 50);
+    } finally {
+      bootSedangBerjalan = false;
+    }
   }
 
   var previousLogout = window.insuranceHubLogout;

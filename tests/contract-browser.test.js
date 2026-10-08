@@ -174,14 +174,16 @@ async function main() {
       };
     }, FC_HASH);
     const { pg, errors } = await openApp(ctx, url + 'index.html', { login: false });
+    const legacyToggle = pg.locator('#psgIdentityLegacyToggle');
+    if (await legacyToggle.isVisible()) await legacyToggle.click();
     const locked = await pg.evaluate(() => ({ gate: !!document.getElementById('insuranceAccessGate'),
       cls: document.documentElement.classList.contains('insurance-auth-locked'),
       mainHidden: getComputedStyle(document.querySelector('main')).visibility === 'hidden' }));
     ok(locked.gate && locked.cls && locked.mainHidden, 'Login gate tidak mengunci aplikasi: ' + JSON.stringify(locked));
     await pg.fill('#insuranceAgenNama', 'Agen Uji'); await pg.fill('#insuranceAgenKode', 'UJI001');
-    await pg.fill('#insuranceAccessCode', 'salah'); await pg.click('.insurance-access-btn'); await pg.waitForTimeout(250);
+    await pg.fill('#insuranceAccessCode', 'salah'); await pg.click('#psgIdentityLegacyWrap .insurance-access-btn'); await pg.waitForTimeout(250);
     ok(/tidak valid/i.test(await pg.textContent('#insuranceAccessError')), 'Kode salah tidak ditolak');
-    await pg.fill('#insuranceAccessCode', 'uji-kontrak-fc'); await pg.click('.insurance-access-btn'); await pg.waitForTimeout(500);
+    await pg.fill('#insuranceAccessCode', 'uji-kontrak-fc'); await pg.click('#psgIdentityLegacyWrap .insurance-access-btn'); await pg.waitForTimeout(500);
     const after = await pg.evaluate(() => ({ gate: !!document.getElementById('insuranceAccessGate'),
       cls: document.documentElement.classList.contains('insurance-auth-locked'), welcome: !!document.getElementById('insuranceWelcome'),
       level: JSON.parse(localStorage.getItem('insuranceHub.level.v1') || '{}').level, remember: localStorage.getItem('insuranceHub.access.remember.v3') }));

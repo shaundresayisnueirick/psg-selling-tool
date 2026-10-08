@@ -20,6 +20,11 @@ function walk(dir, base) {
   return out;
 }
 
+function sourceHash(root, file) {
+  const source = fs.readFileSync(path.join(root, file), 'utf8');
+  return H.sha(source);
+}
+
 function page(root, name) {
   const html = fs.readFileSync(path.join(root, name), 'utf8');
   const scripts = H.blocks(html, 'script');
@@ -71,7 +76,7 @@ function page(root, name) {
 function snapshot(root) {
   const files = walk(path.join(root, 'src'), root).filter((f) => f.endsWith('.js')).sort();
   const protectedFiles = {};
-  for (const f of files) protectedFiles[f] = H.sha(fs.readFileSync(path.join(root, f)));
+  for (const f of files) protectedFiles[f] = sourceHash(root, f);
   const keys = new Set();
   for (const f of files.concat(PAGES)) {
     const s = fs.readFileSync(path.join(root, f), 'utf8');
@@ -82,4 +87,4 @@ function snapshot(root) {
   return { protectedFiles, storageKeys: [...keys].sort(), pages };
 }
 
-module.exports = { snapshot, PAGES, PRINT_TEXT };
+module.exports = { snapshot, sourceHash, PAGES, PRINT_TEXT };

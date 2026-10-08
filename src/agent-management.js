@@ -52,6 +52,6 @@
     $('agentMgmtModal')?.addEventListener('click',e=>{if(e.target===$('agentMgmtModal'))close()});
   }
   async function open(){if(await authorize()){await load()}}
-  function init(){bind();authorize().catch(()=>nav(false));const s=$('layarAgentManagement');if(s)new MutationObserver(()=>{if(s.classList.contains('aktif'))open()}).observe(s,{attributes:true,attributeFilter:['class']});window.PSGAgentManagement={refreshAuthorization:authorize,open}}
+  function init(){bind();nav(false);const refresh=()=>authorize().catch(()=>nav(false));window.addEventListener('psg:identity-ready',refresh);if(window.InsuranceHubIdentity?.source==='server:/api/psg/me')refresh();const s=$('layarAgentManagement');if(s)new MutationObserver(()=>{if(s.classList.contains('aktif'))open()}).observe(s,{attributes:true,attributeFilter:['class']});window.PSGAgentManagement={refreshAuthorization:refresh,open}}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();

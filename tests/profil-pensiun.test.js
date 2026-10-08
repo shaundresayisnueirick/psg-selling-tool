@@ -12,16 +12,15 @@
    C. profil dengan data pensiun → Dana Pensiun terisi otomatis
    D. pindah profil B → A → B → data selalu mengikuti profil aktif
    E. tanpa profil aktif → Dana Pensiun kosong, juga sesudah muat ulang
-   F. Edit → tanpa perubahan → Batal → data asli profil tetap tampil
-   G. Edit → ubah komponen pensiun → Batal → perubahan tidak tersimpan dan
-      data asli profil yang diedit kembali (bukan data profil lain atau
-      Isian Terakhir; profil aktif tidak berubah)
+   F. Edit → tanpa perubahan → Batal → form kosong, data tersimpan tetap
+   G. Edit → ubah komponen pensiun → Batal → form kosong, perubahan tidak
+      tersimpan (bukan data profil lain atau Isian Terakhir; aktif tetap)
    H. Edit → ubah data → Simpan → tersimpan benar (p.snapshot.pensiun utuh,
       hanya kolom yang diubah berubah, lengkap saat dibuka kembali)
    I. Edit cepat (< 340 ms, sebelum jadwal Isian Terakhir) → tidak ada data
       profil lain yang masuk ke form maupun ke rekaman
    J. angka bawaan lama Rp19 juta tidak muncul di kalkulator maupun profil
-   K. sesudah Batal edit form berisi data asli profil (mode edit selesai);
+   K. sesudah Batal edit form kosong (mode edit selesai);
       "+ Buat Profil Baru" (pintu Sales Idea) dan "Kosongkan form" (pintu
       Dashboard) selalu mengosongkan form, sehingga profil baru yang disimpan
       sesudahnya tidak membawa data profil yang tadi diedit
@@ -132,7 +131,7 @@ const formProfil = (pg) => pg.evaluate(() => {
   o.__relasi = document.querySelectorAll('#cpRelasiLainList [data-other-family-row]').length;
   return o;
 });
-const tanpaIdentitas = (f) => { const c = Object.assign({}, f); ['cpNama', 'cpTgl', 'cpUsia', '__jk'].forEach((k) => delete c[k]); return c; };
+const tanpaIdentitas = (f) => { const c = Object.assign({}, f); ['cpNama', 'cpTgl', 'cpTglManual', 'cpTglPicker', 'cpTglError', 'cpUsia', '__jk'].forEach((k) => delete c[k]); return c; };
 const pensiunForm = (pg) => pg.evaluate((kolom) => {
   const o = {}; Object.entries(kolom).forEach(([k, id]) => { o[k] = document.getElementById(id).value; }); return o;
 }, KOLOM).then((o) => Object.fromEntries(Object.entries(o).map(([k, v]) => [k, angka(v)])));
@@ -201,7 +200,8 @@ const tanamIsianLama = (pg, kunci, layar, isian) => pg.evaluate(([ki, kunci, lay
 (async () => {
   const srv = await serve(ROOT);
   const url = 'http://127.0.0.1:' + srv.address().port + '/index.html';
-  const browser = await chromium.launch();
+  const browserPath = process.argv.find((arg, i, all) => all[i - 1] === '--browser');
+  const browser = await chromium.launch(browserPath ? { executablePath: browserPath } : {});
   const konteks = () => browser.newContext({ viewport: { width: 390, height: 844 }, serviceWorkers: 'block', locale: 'id-ID', timezoneId: 'Asia/Jakarta' });
   const semuaError = [];
   console.log('Profil Nasabah & Kebutuhan Dana Pensiun per profil (' + ROOT + ')');
@@ -265,7 +265,7 @@ const tanamIsianLama = (pg, kunci, layar, isian) => pg.evaluate(([ki, kunci, lay
   cek(sama(await pensiunForm(pg), PENSIUN), '[F] form Edit menampilkan keenam komponen pensiun B', await pensiunForm(pg));
   await klik(pg, '#cpReset'); await pg.waitForTimeout(JEDA_PULIH);
   f = await formProfil(pg);
-  cek(sama(f, formEditB), '[F] Batal tanpa perubahan: data asli B tetap tampil', beda(formEditB, f));
+  cek(sama(f, bersih), '[F] Batal tanpa perubahan: form kembali kosong', beda(bersih, f));
   cek(sama(tanpaWaktu(await profil(pg, 'Bapak B')), tanpaWaktu(B0)), '[F] rekaman B tidak berubah');
   cek(await aktifSekarang() === idB, '[F] profil aktif tidak berubah');
   cek(await pg.evaluate(() => document.getElementById('cpStatusBar').dataset.editId || '') === '', '[F] mode edit berakhir');
@@ -295,7 +295,7 @@ const tanamIsianLama = (pg, kunci, layar, isian) => pg.evaluate(([ki, kunci, lay
 
   /* ---------- G. Edit → ubah satu komponen → Batal ---------- */
   /* Profil aktif A dan Isian Terakhir berisi angka penanda milik A: Batal
-     harus mengembalikan data asli B, bukan data profil lain atau isian lama. */
+     harus membersihkan form, bukan mengembalikan data profil lain atau lama. */
   const penanda = {};
   Object.keys(DATA_B).forEach((id) => { penanda[id] = /Dob$/.test(id) ? '1999-09-09' : (id === 'cpStatus' ? 'Cerai' : (id === 'cpHealth' ? 'ADA' : (/^(cpPekerjaan|cpHP|cpPasangan|cpCatatan|cpAyah|cpIbu)$/.test(id) ? 'BOCOR' : '9.999.000'))); });
   await gunakan(pg, 'Bapak A');
@@ -305,14 +305,14 @@ const tanamIsianLama = (pg, kunci, layar, isian) => pg.evaluate(([ki, kunci, lay
   await isi(pg, 'cpDPRutin', '1.000');
   await klik(pg, '#cpReset'); await pg.waitForTimeout(JEDA_PULIH);
   f = await formProfil(pg);
-  cek(sama(f, formEditB1), '[G] ubah Rutin → Batal: data asli B kembali', beda(formEditB1, f));
+  cek(sama(f, bersih), '[G] ubah Rutin → Batal: form kembali kosong', beda(bersih, f));
   cek(sama(tanpaWaktu(await profil(pg, 'Bapak B')), tanpaWaktu(B1)), '[G] perubahan Rutin tidak tersimpan', beda(tanpaWaktu(B1), tanpaWaktu(await profil(pg, 'Bapak B'))));
   cek(await aktifSekarang() === idA, '[G] profil aktif tetap A');
   await edit(pg, idB);
   await isi(pg, 'cpDPLiburan', '7.000.000'); await isi(pg, 'cpPekerjaan', 'Diubah'); await isi(pg, 'cpAset', '1.000');
   await klik(pg, '#cpReset'); await pg.waitForTimeout(JEDA_PULIH);
   f = await formProfil(pg);
-  cek(sama(f, formEditB1), '[G] ubah beberapa kolom → Batal: semua kembali ke data asli B', beda(formEditB1, f));
+  cek(sama(f, bersih), '[G] ubah beberapa kolom → Batal: form kembali kosong', beda(bersih, f));
   cek(sama(tanpaWaktu(await profil(pg, 'Bapak B')), tanpaWaktu(B1)), '[G] rekaman B tetap');
   cek(sama(tanpaWaktu(await profil(pg, 'Bapak A')), tanpaWaktu(A)), '[G] rekaman A tidak berubah');
   await gunakan(pg, 'Bapak B');
@@ -439,13 +439,13 @@ const tanamIsianLama = (pg, kunci, layar, isian) => pg.evaluate(([ki, kunci, lay
     await klik(kp, '#cpReset'); await kp.waitForTimeout(300);
     f = await formProfil(kp);
     let m = await modeEdit();
-    cek(sama(f, formEditBudi) && m.edit === '' && m.simpan === 'Simpan profil',
-      '[K1] ' + pintu + ': Edit Budi → Batal → data Budi kembali, mode edit selesai', { beda: beda(formEditBudi, f), mode: m });
+    cek(sama(f, bersihK) && m.edit === '' && m.simpan === 'Simpan profil',
+      '[K1] ' + pintu + ': Edit Budi → Batal → form kosong, mode edit selesai', { beda: beda(bersihK, f), mode: m });
     await edit(kp, idBudi);
     await isi(kp, 'cpDPRutin', '1.000'); await isi(kp, 'cpDPHobi', '9.000.000');
     await klik(kp, '#cpReset'); await kp.waitForTimeout(300);
     const Budi = await profil(kp, 'Budi');
-    cek(sama(tanpaWaktu(Budi), tanpaWaktu(Budi0)) && sama(await formProfil(kp), formEditBudi),
+    cek(sama(tanpaWaktu(Budi), tanpaWaktu(Budi0)) && sama(await formProfil(kp), bersihK),
       '[K4] ' + pintu + ': ubah pensiun → Batal → pensiun Budi tidak berubah', Budi.snapshot.pensiun);
     const tombol = pintu === 'Sales Idea' ? '#cpBuatBaru' : '#cpReset';
     const label = await kp.evaluate((s) => { const n = document.querySelector(s); return n && n.offsetParent !== null ? n.textContent : null; }, tombol);

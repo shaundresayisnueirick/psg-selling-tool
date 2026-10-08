@@ -12,6 +12,7 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const { pathToFileURL } = require('url');
+const { sourceHash } = require('./lib/snapshot');
 
 const ROOT = path.join(__dirname, '..');
 let gagal = 0, jumlah = 0;
@@ -122,7 +123,7 @@ async function main() {
   cek(!/localStorage|sessionStorage/.test(libSrc + fn), 'server tidak menyentuh storage browser');
   const identity = kode(baca('netlify/functions/identity.mts'));
   cek(!/userValidate|userLogin|userSignup/.test(identity), 'identity.mts tanpa hook userValidate/userLogin/userSignup');
-  const gate = crypto.createHash('sha256').update(fs.readFileSync(path.join(ROOT, 'src/access-gate.js'))).digest('hex');
+  const gate = sourceHash(ROOT, 'src/access-gate.js');
   cek(gate === JSON.parse(baca('tests/contract-baseline.json')).static.protectedFiles['src/access-gate.js'], 'src/access-gate.js tidak berubah');
 
   console.log('Alamat Identity');
