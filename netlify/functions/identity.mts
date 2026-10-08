@@ -1,14 +1,31 @@
-/* Identity event function.
+/* Identity lifecycle hooks for PSG system roles.
 
-   PSG Selling Tools bersifat Invite Only lewat setelan dashboard
-   "Registration: Invite only"; penolakan pendaftaran publik tidak dilakukan
-   di sini.
+   PSG application roles live in app_metadata.roles:
+   - psg_owner
+   - psg_admin
 
-   Hook userValidate yang dulu selalu menjalankan event.deny() sudah dihapus:
-   hook itu ikut berjalan saat undangan dari dashboard diproses, sehingga
-   "Invite users" gagal dengan "422 Failed to handle signup webhook".
-   Saat ini tidak ada handler event Identity yang aktif. */
+   Netlify/GoTrue admin endpoints use the user's built-in admin role for
+   privileged Identity administration. We keep that infrastructure role
+   separate from PSG's business/system roles: only PSG Owner/Admin users get
+   role="admin". Ordinary FC/BM/BD agents remain ordinary Identity users.
+   
+   On login, this hook normalizes the built-in Identity role to "admin" for
+   PSG Owner/Admin accounts. The change is persisted by the Identity event
+   system and becomes effective with the fresh login session. */
 
-import type { NetlifyFunction } from '@netlify/functions'
+import type { UserLoginEvent } from '@netlify/functions'
 
-export default {} satisfies NetlifyFunction
+export default {
+  userLogin(event: UserLoginEvent) {
+    const roles = Array.isArray(event.user.roles) ? event.user.roles : []
+    const isPsgManager = roles.includes('psg_owner') || roles.includes('psg_admin')
+    if (!isPsgManager || event.user.role === 'admin') return
+
+    return {
+      user: {
+        ...event.user,
+        role: 'admin',
+      },
+    }
+  },
+}
