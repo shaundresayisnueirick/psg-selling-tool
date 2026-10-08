@@ -247,9 +247,17 @@ function dataLamaUtuh(st) {
     cek(!st.href.includes('#') && !bocorDi(st.href).length, 'token dihapus dari alamat (hash dibersihkan)', st.href);
     cek(log.length === 0, 'belum ada permintaan ke Identity sebelum password diisi', log);
 
+    await pg.evaluate(() => {
+      document.querySelector('#psgIdentityGate form').addEventListener('submit', (event) => {
+        window.__inviteSubmitAudit = { defaultPrevented: event.defaultPrevented, form: event.currentTarget.outerHTML };
+      });
+    });
+
     await isiPassword(pg, 'pendek', 'pendek');
     st = await keadaan(pg);
-    cek(/minimal 8/.test(st.galat) && log.length === 0, 'password < 8 karakter ditolak tanpa permintaan', { galat: st.galat, judul: st.judul, kartu: st.kartu, teks: st.teksKartu });
+    const submitPrevented = await pg.evaluate(() => window.__inviteSubmitAudit?.defaultPrevented === true);
+    cek(submitPrevented && /minimal 8/.test(st.galat) && log.length === 0,
+      'password < 8 karakter dicegah callback tanpa permintaan Identity', { prevented: submitPrevented, galat: st.galat });
     await isiPassword(pg, PASSWORD, PASSWORD + 'x');
     st = await keadaan(pg);
     cek(/tidak sama/.test(st.galat) && log.length === 0, 'konfirmasi berbeda ditolak tanpa permintaan', st.galat);
@@ -304,7 +312,7 @@ function dataLamaUtuh(st) {
   {
     const { ctx, pg, log, errors } = await bukaKonteks(br);
     await pg.goto(base + '#recovery_token=' + TOKEN_RECOVERY);
-    await pg.waitForSelector('#psgIdentityPassword', { timeout: 10000 });
+    await pg.waitForSelector('#psgIdentityGate #psgIdentityPassword', { timeout: 10000 });
     let st = await keadaan(pg);
     cek(/Password Baru/.test(st.judul) && !st.href.includes('#') && st.terkunci,
       'recovery: kartu "Password Baru", hash dibersihkan, aplikasi tetap terkunci', st.judul);
@@ -324,7 +332,7 @@ function dataLamaUtuh(st) {
   {
     const { ctx, pg, errors } = await bukaKonteks(br, { ingat: true });
     await pg.goto(base + '#invite_token=' + TOKEN_UNDANGAN);
-    await pg.waitForSelector('#psgIdentityPassword', { timeout: 10000 });
+    await pg.waitForSelector('#psgIdentityGate #psgIdentityPassword', { timeout: 10000 });
     let st = await keadaan(pg);
     cek(st.kartuTerlihat && st.kartuDiAtas && !st.gateLama && !st.terkunci,
       'kartu undangan tampil di atas aplikasi yang sudah terbuka oleh login lama');

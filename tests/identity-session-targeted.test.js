@@ -37,7 +37,7 @@ async function main() {
   const fails = [];
   const check = (condition, label) => { checks++; console.log((condition ? 'PASS ' : 'FAIL ') + label); if (!condition) fails.push(label); };
 
-  async function openCase({ failFirstProfile = false } = {}) {
+  async function openCase({ failFirstProfile = false, identityUser = true, profileOverride = profile } = {}) {
     const context = await browser.newContext({ viewport: { width: 1280, height: 900 }, serviceWorkers: 'block' });
     const page = await context.newPage();
     page.setDefaultTimeout(5000);
@@ -51,17 +51,17 @@ async function main() {
     });
     await page.route('**/src/vendor/netlify-identity.js', route => route.fulfill({ status: 200, contentType: 'application/javascript', body: `
       window.PSGNetlifyIdentity = {
-        login: async () => ({}),
-        logout: async () => {},
+        login: async (email, password) => { window.__psgIdentityFixture.login = { email, password }; return {}; },
+        logout: async () => { window.__psgIdentityFixture.loggedOut = true; },
         requestPasswordRecovery: async () => {},
-        getUser: async () => { await new Promise(r => setTimeout(r, 350)); return { id: 'identity-1', email: 'budi@psg.test' }; }
+        getUser: async () => { await new Promise(r => setTimeout(r, 1000)); return ${identityUser ? "{ id: 'identity-1', email: 'budi@psg.test' }" : 'null'}; }
       };
     ` }));
     await page.route('**/api/psg/me', async route => {
       const calls = ++profileCalls;
       await new Promise(resolve => setTimeout(resolve, 250));
       if (failFirstProfile && calls === 1) return route.fulfill({ status: 503, contentType: 'application/json', body: JSON.stringify({ error: 'temporarily_unavailable' }) });
-      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ authenticated: true, user: profile }) });
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ authenticated: true, user: profileOverride }) });
     });
     await page.goto('http://127.0.0.1:' + server.address().port + '/', { waitUntil: 'load' });
     return { context, page, errors };
@@ -106,6 +106,67 @@ async function main() {
       await page.waitForFunction(() => !document.getElementById('insuranceAccessGate'), null, { timeout: 5000 });
       check(await page.evaluate(() => window.InsuranceHubIdentity?.email) === profile.email, 'retry memulihkan sesi setelah API kembali tersedia');
       check(errors.length === 0, 'retry tanpa JavaScript error');
+      await context.close();
+    }
+
+    console.log('[3] Sesi Identity invalid tidak diizinkan masuk');
+    {
+      const { context, page, errors } = await openCase({ identityUser: false });
+      await page.waitForSelector('#psgIdentityForm:not([hidden])');
+      check(await page.locator('#insuranceAccessGate').count() === 1, 'gate tetap terkunci saat sesi Identity tidak valid');
+      check(await page.evaluate(() => !window.InsuranceHubIdentity), 'profil lokal lama tidak menjadi authorization');
+      check(errors.length === 0, 'sesi invalid tanpa JavaScript error');
+      await context.close();
+    }
+
+    console.log('[4] Profile nonaktif tidak diizinkan masuk');
+    {
+      const { context, page, errors } = await openCase({ profileOverride: { ...profile, status: 'nonaktif' } });
+      await page.waitForSelector('#psgIdentityForm:not([hidden])');
+      check(await page.locator('#insuranceAccessGate').count() === 1, 'gate tetap terkunci saat server menyatakan nonaktif');
+      check(await page.evaluate(() => window.__psgIdentityFixture.loggedOut === true && !window.InsuranceHubIdentity),
+        'sesi nonaktif dicabut; localStorage lama tidak memulihkan akses');
+      check(errors.length === 0, 'profile nonaktif tanpa JavaScript error');
+      await context.close();
+    }
+
+    console.log('[5] Perubahan role/level di server langsung tercermin');
+    {
+      const changed = { ...profile, roles: [], level: 'FC' };
+      const { context, page, errors } = await openCase({ profileOverride: changed });
+      await page.waitForFunction(() => !document.getElementById('insuranceAccessGate'));
+      const current = await page.evaluate(() => ({ identity: window.InsuranceHubIdentity, level: window.InsuranceHubLevel,
+        inviteVisible: [...document.querySelectorAll('.psg-admin-only[data-psg-nav="manajemen"]')].some(node => !node.hidden) }));
+      check(current.identity?.roles?.length === 0 && current.level?.level === 'FC', 'role dan level mengikuti data server terbaru');
+      check(!current.inviteVisible, 'menu Invite Agen hilang setelah role admin dicabut di server');
+      check(errors.length === 0, 'perubahan role tanpa JavaScript error');
+      await context.close();
+    }
+
+    console.log('[6] Login email memuat profile dari /api/psg/me');
+    {
+      const { context, page, errors } = await openCase({ identityUser: false });
+      await page.waitForSelector('#psgIdentityForm:not([hidden])');
+      await page.fill('#psgIdentityEmail', 'budi@psg.test');
+      await page.fill('#psgIdentityPassword', 'password-uji');
+      await page.click('#psgIdentityMasuk');
+      await page.waitForFunction(() => !document.getElementById('insuranceAccessGate'));
+      const result = await page.evaluate(() => ({
+        login: window.__psgIdentityFixture.login,
+        identity: window.InsuranceHubIdentity,
+        level: window.InsuranceHubLevel,
+        welcome: document.getElementById('sambutanAgen')?.innerText || '',
+        sidebar: document.getElementById('psgSideAgen')?.innerText || '',
+        local: JSON.parse(localStorage.getItem('insuranceHub.agen.v1') || '{}'),
+      }));
+      check(result.login?.email === profile.email && result.login?.password === 'password-uji', 'form login memakai email/password yang diinput');
+      check(result.identity?.email === profile.email && result.identity?.nama === profile.nama && result.identity?.kodeAgen === profile.kodeAgen,
+        'login mengambil identitas dari /api/psg/me');
+      check(result.level?.level === profile.level && result.level?.namaAgen === profile.nama, 'InsuranceHubLevel mengikuti profile server');
+      check(result.welcome.includes(profile.nama) && result.welcome.includes(profile.kodeAgen) && result.sidebar.includes(profile.nama),
+        'Welcome dan Dashboard mengikuti profile server');
+      check(result.local.nama === 'Demo Lama' && result.local.kode === '1111111', 'localStorage demo tetap bukan source of truth');
+      check(errors.length === 0, 'login email dan profile server tanpa JavaScript error');
       await context.close();
     }
   } finally {
