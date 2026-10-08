@@ -22,6 +22,7 @@ const fail = (status: number, error: string, message: string) => jawabJson(statu
 async function actorOrThrow(): Promise<User> {
   const u = await getUser()
   if (!u) throw fail(401, 'unauthenticated', 'Silakan login dengan akun PSG.')
+  if (!okRoles(u).includes('admin')) throw fail(403, 'identity_admin_required', 'Akun PSG Owner/Admin belum memiliki role Identity "admin". Tambahkan role admin di Netlify Identity lalu login ulang.')
   if (!isOwner(u) && !isAdmin(u)) throw fail(403, 'forbidden', 'Akses Management Agen hanya untuk PSG Owner/Admin.')
   return u
 }
@@ -75,7 +76,7 @@ async function createAgent(body: Record<string, unknown>, actor: User) {
        data: {
          role: role === 'psg_admin' ? 'admin' : undefined,
         app_metadata: {
-          roles: role === 'psg_admin' ? ['psg_admin'] : [],
+          roles: role === 'psg_admin' ? ['admin', 'psg_admin'] : [],
           psg: { nama, kodeAgen: kodeAgen || null, level, status: 'aktif' },
         },
         user_metadata: { full_name: nama },
@@ -141,8 +142,8 @@ async function updateAgent(body: Record<string, unknown>, actor: User) {
   if(!['aktif','nonaktif'].includes(status)) return fail(400,'invalid_status','Status harus aktif atau nonaktif.')
   if(role!==null && !isOwner(actor)) return fail(403,'forbidden_role','PSG Admin tidak dapat mengubah role sistem.')
   if(role!==null && !['agent','psg_admin'].includes(role)) return fail(400,'invalid_role','Role sistem tidak valid.')
-  const roles = okRoles(target).filter(r=>r!=='psg_owner' && r!=='psg_admin')
-  if(role==='psg_admin') roles.push('psg_admin')
+  const roles = okRoles(target).filter(r=>r!=='psg_owner' && r!=='psg_admin' && r!=='admin')
+  if(role==='psg_admin') roles.push('admin','psg_admin')
   const updates: AdminUserUpdates = {
     app_metadata: { ...(target.appMetadata || {}), roles, psg: { ...psgMeta(target), nama, kodeAgen: kodeAgen || null, level, status } },
     user_metadata: { ...(target.userMetadata || {}), full_name: nama },
