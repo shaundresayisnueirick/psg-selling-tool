@@ -47,7 +47,7 @@
     $('agentMgmtForm')?.addEventListener('submit',async(e)=>{
       e.preventDefault();const f=e.currentTarget,mode=f.dataset.mode,btn=$('agentMgmtSubmit');btn.disabled=true;btn.textContent=mode==='invite'?'MEMPROSES…':'MENYIMPAN…';
       const body={email:$('agentMgmtEmail').value.trim(),nama:$('agentMgmtNama').value.trim(),kodeAgen:$('agentMgmtKode').value.trim(),level:$('agentMgmtLevel').value,status:$('agentMgmtStatus').value,role:$('agentMgmtRole').value};if(mode!=='invite')body.id=f.dataset.id;
-      try{await api(mode==='invite'?'POST':'PATCH',body);close();await load();if(mode==='invite')alert('Akun agen berhasil dibuat dan link akses sudah dikirim ke email.')}catch(err){if(mode==='invite'&&err.accountCreated){close();await load();alert(err.message||'Akun berhasil dibuat, tetapi link akses belum terkirim.')}else{alert(err.message||'Perubahan tidak dapat disimpan.')}}finally{btn.disabled=false;btn.textContent=mode==='invite'?'KIRIM AKSES':'SIMPAN PERUBAHAN'}
+      try{const hasil=await api(mode==='invite'?'POST':'PATCH',body);close();await load();if(mode==='invite')alert(hasil.diagnostic?'TES BERHASIL: akun Identity sudah dibuat. Belum ada email/link yang dikirim. Sekarang cek Netlify → Identity → Users.':'Akun agen berhasil dibuat dan link akses sudah dikirim ke email.')}catch(err){if(mode==='invite'&&err.accountCreated){close();await load();alert(err.message||'Akun berhasil dibuat, tetapi link akses belum terkirim.')}else{alert(err.message||'Perubahan tidak dapat disimpan.')}}finally{btn.disabled=false;btn.textContent=mode==='invite'?'KIRIM AKSES':'SIMPAN PERUBAHAN'}
     });
     $('agentMgmtModal')?.addEventListener('click',e=>{if(e.target===$('agentMgmtModal'))close()});
   }
