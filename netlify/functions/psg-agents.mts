@@ -5,7 +5,10 @@ import type { AdminUserUpdates, User } from '@netlify/identity'
 import type { Config } from '@netlify/functions'
 import { jawabJson, profilAman, ROLE_SISTEM, JENJANG, type Jenjang } from '../lib/psg-auth.mts'
 
-const okRoles = (u: User) => Array.isArray(u.roles) ? u.roles.filter((x): x is string => typeof x === 'string') : []
+const okRoles = (u: User) => {
+  const roles = u.appMetadata?.roles
+  return Array.isArray(roles) ? roles.filter((x): x is string => typeof x === 'string') : []
+}
 const isOwner = (u: User) => okRoles(u).includes('psg_owner')
 const isAdmin = (u: User) => okRoles(u).includes('psg_admin')
 const text = (v: unknown, n = 120) => typeof v === 'string' ? v.trim().slice(0, n) : ''
