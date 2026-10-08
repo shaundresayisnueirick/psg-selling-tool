@@ -8,7 +8,7 @@ for(const x of ['admin.listUsers','admin.getUser','admin.createUser','admin.upda
 ok(server.includes("path: '/api/psg/agents'"),'endpoint path');
 ok(server.includes("roles.includes('psg_owner')")&&server.includes("roles.includes('psg_admin')"),'server-side owner/admin authorization');
 ok(!server.includes('localStorage')&&!server.includes('sessionStorage'),'server does not use browser storage');
-const auth=read('netlify/lib/psg-auth.mts');ok(auth.includes("ROLE_SISTEM = ['psg_owner', 'psg_admin']"),'role registry unchanged');
+const auth=read('netlify/lib/psg-auth.mts');ok(auth.includes("ROLE_SISTEM = ['psg_owner', 'psg_admin']"),'role registry unchanged');ok(auth.includes('Array.isArray(app.roles)')&&!auth.includes('Array.isArray(user.roles) ? user.roles'),'server reads PSG roles from app_metadata');
 const gate=crypto.createHash('sha256').update(read('src/access-gate.js')).digest('hex');const base=JSON.parse(read('tests/contract-baseline.json')).static.protectedFiles['src/access-gate.js'];ok(gate===base,'legacy access-gate.js unchanged');
 const ui=read('src/agent-management.js');ok(ui.includes('/api/psg/me')&&ui.includes('/api/psg/agents'),'UI uses server auth + management API');ok(!ui.includes('localStorage')&&!ui.includes('sessionStorage'),'UI does not persist auth/data');
 const index=read('index.html');ok(index.includes('layarAgentManagement')&&index.includes('data-psg-nav="manajemen"'),'management screen/nav present');ok(index.includes('src/agent-management.js')&&index.includes('src/agent-management.css'),'management assets loaded');
