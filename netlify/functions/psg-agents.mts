@@ -136,8 +136,16 @@ async function resend(body: Record<string, unknown>, actor: User) {
   if (!psgUser(target) || !targetAllowed(actor,target)) return fail(403,'forbidden_target','Kamu tidak berwenang mengelola akun ini.')
   if (!target.email) return fail(409,'missing_email','Akun tidak memiliki email.')
   if (psgMeta(target).status === 'nonaktif') return fail(409,'inactive','Akun nonaktif tidak dikirimi link akses.')
-  try { await requestPasswordRecovery(target.email) } catch (_) { return fail(502,'recovery_failed','Link akses tidak dapat dikirim saat ini.') }
-  return jawabJson(200,{ok:true,message:'Link akses sudah diminta dikirim ulang.'})
+  try {
+    if (!target.confirmedAt) {
+      await inviteUser(target.email)
+      return jawabJson(200,{ok:true,message:'Undangan akses sudah dikirim ulang.'})
+    }
+    await requestPasswordRecovery(target.email)
+    return jawabJson(200,{ok:true,message:'Link atur ulang password sudah dikirim ulang.'})
+  } catch (_) {
+    return fail(502,'delivery_failed','Email akses tidak dapat dikirim saat ini.')
+  }
 }
 
 async function updateAgent(body: Record<string, unknown>, actor: User) {
