@@ -84,6 +84,12 @@ function bootstrapPassword() {
   return 'Psg!' + randomBytes(32).toString('base64url')
 }
 
+async function findUserByEmail(context: IdentityContext, email: string): Promise<User | null> {
+  const data = await identityRequest(context, '/admin/users?per_page=100')
+  const users = Array.isArray(data?.users) ? data.users as User[] : []
+  return users.find((u) => String(u.email || '').toLowerCase() === email.toLowerCase()) || null
+}
+
 async function createAgent(body: Record<string, unknown>, actor: User, context: IdentityContext) {
   const email = text(body.email, 254).toLowerCase()
   const nama = text(body.nama)
@@ -100,10 +106,12 @@ async function createAgent(body: Record<string, unknown>, actor: User, context: 
   try {
     /* Gunakan jalur Invite yang sama konsepnya dengan Identity Dashboard:
        POST /invite menghasilkan akun invited + email invitation. */
-    invited = await identityRequest(context, '/invite', {
+    await identityRequest(context, '/invite', {
       method: 'POST',
       body: JSON.stringify({ email }),
-    }) as User
+    })
+    invited = await findUserByEmail(context, email)
+    if (!invited) throw new Error('Undangan dikirim, tetapi akun belum muncul saat dibaca ulang dari Identity.')
   } catch (err) {
     const status = (err as { status?: number })?.status || 0
     const msg = errorText(err)
