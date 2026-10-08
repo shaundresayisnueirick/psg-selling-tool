@@ -11,6 +11,7 @@ const fs = require('fs');
 const path = require('path');
 const http = require('http');
 const crypto = require('crypto');
+const { sourceHash } = require('./lib/snapshot');
 
 function loadPlaywright() {
   const tries = ['playwright'];
@@ -209,7 +210,7 @@ function dataLamaUtuh(st) {
   cek(vendor.startsWith('/* @netlify/identity ' + vId + ' + gotrue-js ' + vGt + ' '),
     'bundel vendor sesuai versi package-lock (@netlify/identity ' + vId + ', gotrue-js ' + vGt + ')');
   cek(!/https?:\/\/(cdn|unpkg|jsdelivr|esm\.sh)/i.test(vendor + cb), 'tanpa CDN eksternal');
-  const hashGate = crypto.createHash('sha256').update(fs.readFileSync(path.join(ROOT, 'src/access-gate.js'))).digest('hex');
+  const hashGate = sourceHash(ROOT, 'src/access-gate.js');
   cek(hashGate === JSON.parse(baca('tests/contract-baseline.json')).static.protectedFiles['src/access-gate.js'],
     'src/access-gate.js (login lama) identik dengan baseline');
 

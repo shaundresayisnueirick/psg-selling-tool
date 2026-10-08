@@ -50,13 +50,18 @@ const JS_DIIZINKAN = {
   }],
   'src/core.js': [{
     dari: '385c5f77851f6b5b5c94b6e3bf6d65d3df77faef9b21a1c9cd4aa137c1833c7c',
-    ke: '223f11abe76cceb1057bb605b334df02c8842ccd18981c343533116950af531b',
-    alasan: 'Profil dengan kelanjutan untuk alur Sales Idea → Mari Kita Hitung: konteks {source, topic, target} hanya di memori (tanpa profileId, tanpa storage key baru), dipasang lewat InsuranceHubCustomerProfile.bukaUntuk(). cpApply (titik akhir Simpan/Gunakan) lanjut ke target konteks dan mengangkat PROFILE dari riwayat; tanpa konteks tetap bukaLayar(\'PRODUK\'). bukaLayar dan tombol btnProfil membersihkan konteks saat meninggalkan Profil. Banner + tombol Buat Profil Baru (mekanisme Kosongkan form) dibuat hanya saat ada konteks. Penyimpanan profil, Financial Triangle, dan alur Dashboard tidak berubah. Perbaikan Edit Profil: cpFillForm membaca komponen pensiun dari p.snapshot.pensiun (jalur yang ditulis cpFormValue dan dibaca kalkulator Dana Pensiun), bukan p.snapshot.snapshot.pensiun yang tidak pernah ada — sebelumnya Edit → Simpan menimpa keenam komponen dengan 0. Form Profil dikosongkan (cpFillForm({})) sesudah Simpan berhasil, supaya profil baru tidak mewarisi data non-identitas profil lain; rekaman tersimpan tidak disentuh. Batal edit tetap mengembalikan data asli profil yang diedit. Layar AGENT_MANAGEMENT (Invite Agen, hanya PSG Owner/Admin; diverifikasi ulang di server) ditambahkan ke LAYAR; layar dan alur lain tidak berubah.',
+    ke: '1a70863363e8e8f870636879316012e0997c1a8d17bdea9abbeb6f131159ad5f',
+    alasan: 'Profil Nasabah: konteks kelanjutan Sales Idea tetap hanya di memori; data tersimpan dan kalkulator tetap memakai profil aktif. Form baru dibuka kosong; Edit → Batal mengosongkan form tanpa mengubah rekaman, dan Simpan mengosongkan form setelah memperbarui rekaman. Tanggal lahir mendukung ketik DD/MM/YYYY dengan auto-slash, validasi kalender, date picker native terpisah, dan satu nilai internal YYYY-MM-DD untuk engine usia serta kompatibilitas profil lama. Tidak mengubah rumus usia atau data family.',
   }],
   'src/app.js': [{
     dari: '34593519c233710ed358d93f3392c048f3b6614be086daef8f0f50dffcf69164',
-    ke: '5232e3cc2f2bcc5d1d2658e2c92f3082d2f6b55b7f31aeaa9e0d45379c4b980b',
-    alasan: 'Input komponen Kebutuhan Dana Pensiun (dk_*) dirender tanpa atribut value dari DP_KOMPONEN.awal (sisa angka demo Rp19 juta). Kalkulator memang mulai kosong (dNilai 0) dan hanya diisi dari profil aktif; angka demo sebelumnya sempat tampil di DOM sampai layar DP dibuka. Tidak ada rumus yang berubah. Education Planning (dGambar): saat setoran sama (pertumbuhan 0%) cabang itu tidak lagi return lebih awal, sehingga bagian "ringkasan untuk prospek" tetap dirender; tabel efek menunda hanya dibangun pada cabang lain. Tidak ada rumus yang berubah. Ringkasan Kombinasi: kalimat iFLEXYGUARD/Bonus 75 pada catatan timeline hanya ditulis bila iFLEXYGUARD ada di hasil hitungan (r.aktif); sebelumnya statis dan ikut terbawa ke Ringkasan Program tanpa iFLEXYGUARD. Catatan slot/manfaat ditulis ulang tanpa istilah internal (COMBO_Summary, slot). Petunjuk agen bila nama/kontak agen kosong dibungkus tanpa-cetak. Tidak ada rumus, agregasi, atau timeline yang berubah.',
+    ke: 'accdefa3c35f29336e9f962681a02fd7ba7f838a0785a7189464111e39425d20',
+    alasan: 'BeSMART Lite Future: usia yang tidak tersedia disembunyikan dari kalkulator dan ringkasan; kontrol tampil ON/OFF dan ringkasan/cetak hanya memuat usia tersedia yang aktif. Rumus premi dan mesin produk tidak diubah. Perubahan ini sudah diverifikasi targeted test BeSMART 15/15.',
+  }],
+  'src/umum.js': [{
+    dari: '8b9f2031e17ec447660806c40c3a52e2ec0c0d2d9a07d582ac665f4e6c2b5b14',
+    ke: '9344fa5196bfbf5a23a877dc5de2e64d0f2bb180acfba1d6cc309566ccb2f444',
+    alasan: 'Identitas penyaji dokumen memprioritaskan nama dan kode agen dari InsuranceHubIdentity dengan source /api/psg/me dibanding data lokal lama, lalu memperbarui tampilan saat identity-ready. Data lokal tidak menjadi source of truth untuk identitas server. Tidak mengubah endpoint atau backend Invite Agen.',
   }],
   'src/library-ilustrasi.js': [{
     dari: '57a58e17a4e9c117431f3d52c24e40bc11c3c26fec0be12b18a2b5d885ebc4d7',

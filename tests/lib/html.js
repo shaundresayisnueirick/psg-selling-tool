@@ -5,7 +5,8 @@
 'use strict';
 const crypto = require('crypto');
 
-const sha = (s) => crypto.createHash('sha256').update(s).digest('hex');
+const normalizeLineEndings = (s) => String(s).replace(/\r\n?/g, '\n');
+const sha = (s) => crypto.createHash('sha256').update(normalizeLineEndings(s)).digest('hex');
 
 function blocks(html, tag) {
   const out = [];
@@ -55,4 +56,4 @@ function buttons(html) {
   return out;
 }
 
-module.exports = { sha, blocks, elements, buttons, parseAttrs, stripCode };
+module.exports = { sha, normalizeLineEndings, blocks, elements, buttons, parseAttrs, stripCode };
