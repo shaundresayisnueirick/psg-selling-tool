@@ -1,6 +1,5 @@
 /* PSG Selling Tools — Management Agen API (PR #21). Admin operations stay server-side. */
-import { randomBytes } from 'node:crypto'
-import { admin, getUser, requestPasswordRecovery, verifyRequestOrigin } from '@netlify/identity'
+import { admin, getIdentityConfig, getUser, requestPasswordRecovery, verifyRequestOrigin } from '@netlify/identity'
 import type { AdminUserUpdates, User } from '@netlify/identity'
 import type { Config } from '@netlify/functions'
 import { jawabJson, profilAman, ROLE_SISTEM, JENJANG, type Jenjang } from '../lib/psg-auth.mts'
@@ -41,7 +40,28 @@ async function listPsgUsers() {
   })
 }
 
-function bootstrapPassword() { return 'Psg!' + randomBytes(32).toString('base64url') }
+async function inviteUser(email: string): Promise<User> {
+  const identity = getIdentityConfig()
+  if (!identity?.url || !identity.token) throw new Error('Identity operator token tidak tersedia di runtime Netlify.')
+  const response = await fetch(`${identity.url}/invite`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${identity.token}`,
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+    body: JSON.stringify({ email }),
+  })
+  const data = await response.json().catch(() => null)
+  if (!response.ok) {
+    const message = data && typeof data === 'object' && 'msg' in data && typeof (data as {msg?: unknown}).msg === 'string'
+      ? (data as {msg: string}).msg : `Identity invite gagal (HTTP ${response.status}).`
+    const err = new Error(message) as Error & { status?: number }
+    err.status = response.status
+    throw err
+  }
+  return data as User
+}
 
 function errorStatus(err: unknown): number {
   const e = err as { status?: unknown; cause?: { status?: unknown } } | null
@@ -52,15 +72,6 @@ function errorText(err: unknown): string {
   const e = err as { message?: unknown; cause?: { message?: unknown } } | null
   const msg = typeof e?.message === 'string' ? e.message : (typeof e?.cause?.message === 'string' ? e.cause.message : '')
   return msg.trim()
-}
-
-function pesanCreateGagal(err: unknown): string {
-  const status = errorStatus(err)
-  const raw = errorText(err).toLowerCase()
-  if (status === 409 || status === 422 || /already|exist|registered|taken|duplicate|email/.test(raw)) {
-    return 'Akun tidak dibuat. Email tersebut kemungkinan sudah terdaftar di Netlify Identity.'
-  }
-  return 'Netlify Identity menolak pembuatan akun. Silakan coba lagi atau periksa konfigurasi Identity.'
 }
 
 async function createAgent(body: Record<string, unknown>, actor: User) {
@@ -75,36 +86,46 @@ async function createAgent(body: Record<string, unknown>, actor: User) {
   if (!['agent','psg_admin'].includes(role)) return fail(400, 'invalid_role', 'Role tidak valid.')
   if (role === 'psg_admin' && !isOwner(actor)) return fail(403, 'forbidden_role', 'Hanya PSG Owner yang boleh membuat PSG Admin.')
 
-  const roles = role === 'psg_admin' ? ['psg_admin'] : []
-  let created: User | undefined
+  let created: User
   try {
-    created = await admin.createUser({
-      email,
-      password: bootstrapPassword(),
-      data: {
-        app_metadata: { roles, psg: { nama, kodeAgen: kodeAgen || null, level, status: 'aktif' } },
-        user_metadata: { full_name: nama },
-      },
-    })
+    /* Gunakan endpoint Identity /invite karena menu ini memang mengundang
+       agen untuk membuat password sendiri. @netlify/identity 2.x belum
+       menyediakan admin.inviteUser() sebagai method high-level. */
+    created = await inviteUser(email)
   } catch (err) {
-    return fail(409, 'create_failed', pesanCreateGagal(err))
+    const status = errorStatus(err)
+    const message = errorText(err)
+    const duplicate = status === 409 || /already|exist|registered|taken|duplicate/i.test(message)
+    return fail(duplicate ? 409 : 502, duplicate ? 'already_exists' : 'invite_failed',
+      duplicate ? 'Akun tidak dibuat. Email tersebut sudah terdaftar di Netlify Identity.' :
+      'Netlify Identity gagal membuat undangan. Periksa konfigurasi Identity dan coba lagi.')
   }
 
   try {
-    await requestPasswordRecovery(email)
+    const roles = role === 'psg_admin' ? ['psg_admin'] : []
+    const updated = await admin.updateUser(created.id, {
+      app_metadata: {
+        ...(created.appMetadata || {}),
+        roles,
+        psg: { nama, kodeAgen: kodeAgen || null, level, status: 'aktif' },
+      },
+      user_metadata: { ...(created.userMetadata || {}), full_name: nama },
+    })
+    return jawabJson(201, {
+      ok: true,
+      message: 'Undangan berhasil dikirim. Agen akan menerima email untuk membuat password.',
+      user: safe(updated),
+    })
   } catch (_) {
-    /* Jangan menghapus akun yang sudah berhasil dibuat. Operator dapat
-       membuka kartu agen lalu memakai "Kirim ulang link" setelah itu. */
+    /* Undangan sudah terkirim; jangan menghapus akun. Data profil dapat
+       diperbaiki kemudian lewat Edit setelah agen menerima undangan. */
     return jawabJson(502, {
-      error: 'recovery_failed',
-      stage: 'recovery',
-      accountCreated: true,
+      error: 'profile_update_failed',
+      invitationSent: true,
       user: safe(created),
-      message: 'Akun berhasil dibuat, tetapi email link akses belum berhasil dikirim. Gunakan "Kirim ulang link" pada akun ini.'
+      message: 'Undangan berhasil dikirim, tetapi data profil agen belum tersimpan. Jangan kirim undangan baru; periksa lalu Edit akun ini.'
     })
   }
-
-  return jawabJson(201, { ok: true, message: 'Akun dibuat dan link akses sudah dikirim ke email.', user: safe(created) })
 }
 
 async function resend(body: Record<string, unknown>, actor: User) {
