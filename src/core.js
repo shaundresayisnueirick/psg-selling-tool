@@ -56,6 +56,7 @@ const LAYAR = {
   PRODUK:{el:'layarProduk',judul:'Insurance Hub',sub:'Alat hitung agen',kanan:{ke:'PROFILE',teks:'Profil'}},
   PROFILE:{el:'layarProfile',judul:'Profil Nasabah',sub:'Data tersimpan offline di perangkat ini',kiri:'PRODUK'},
   KARTU_KONSULTAN:{el:'layarKartuKonsultan',judul:'Kartu Konsultan',sub:'Identitas konsultan untuk materi dan PDF',kiri:'PRODUK'},
+  AGENT_MANAGEMENT:{el:'layarAgentManagement',judul:'Invite Agen',sub:'Kelola akun dan akses tim PSG',kiri:'PRODUK'},
   LIBRARY_ILUSTRASI:{el:'layarLibraryIlustrasi',judul:'Library Nasabah',sub:'Simpan dan temukan kembali hasil konsultasi nasabah dan keluarganya',kiri:'PRODUK'},
   SALES_IDEA:{el:'layarSalesIdea',judul:'Sales Idea',sub:'Sales Idea 10 Jari + 3 alasan memiliki asuransi',kiri:'PRODUK'},
   NEEDS:{el:'layarNeeds',judul:'Analisis Kebutuhan',sub:'Kebutuhan sebelum memilih produk',kiri:'PRODUK',kanan:{ke:'COMPARE',teks:'Bandingkan'}},

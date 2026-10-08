@@ -107,7 +107,9 @@ async function main() {
 
   console.log('Service worker');
   const src = baca('sw.js');
-  cek(/const VERSI = 'insurance-hub-v117\.1\.6'/.test(src), 'VERSI dinaikkan ke v117.1.6');
+  /* VERSI terus naik bersama aset baru; yang dijaga hanya batas bawahnya. */
+  const v = (src.match(/const VERSI = 'insurance-hub-v(\d+)\.(\d+)\.(\d+)'/) || []).slice(1).map(Number);
+  cek(v.length === 3 && (v[0] - 117 || v[1] - 1 || v[2] - 6) >= 0, 'VERSI minimal v117.1.6', v.join('.'));
   const listeners = {};
   const ctx = {
     self: { addEventListener: (t, f) => { listeners[t] = f; }, location: { origin: 'https://psg.test' },
