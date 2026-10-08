@@ -43,6 +43,26 @@ async function listPsgUsers() {
 
 function bootstrapPassword() { return 'Psg!' + randomBytes(32).toString('base64url') }
 
+function errorStatus(err: unknown): number {
+  const e = err as { status?: unknown; cause?: { status?: unknown } } | null
+  return typeof e?.status === 'number' ? e.status : (typeof e?.cause?.status === 'number' ? e.cause.status : 0)
+}
+
+function errorText(err: unknown): string {
+  const e = err as { message?: unknown; cause?: { message?: unknown } } | null
+  const msg = typeof e?.message === 'string' ? e.message : (typeof e?.cause?.message === 'string' ? e.cause.message : '')
+  return msg.trim()
+}
+
+function pesanCreateGagal(err: unknown): string {
+  const status = errorStatus(err)
+  const raw = errorText(err).toLowerCase()
+  if (status === 409 || status === 422 || /already|exist|registered|taken|duplicate|email/.test(raw)) {
+    return 'Akun tidak dibuat. Email tersebut kemungkinan sudah terdaftar di Netlify Identity.'
+  }
+  return 'Netlify Identity menolak pembuatan akun. Silakan coba lagi atau periksa konfigurasi Identity.'
+}
+
 async function createAgent(body: Record<string, unknown>, actor: User) {
   const email = text(body.email, 254).toLowerCase()
   const nama = text(body.nama)
@@ -56,7 +76,7 @@ async function createAgent(body: Record<string, unknown>, actor: User) {
   if (role === 'psg_admin' && !isOwner(actor)) return fail(403, 'forbidden_role', 'Hanya PSG Owner yang boleh membuat PSG Admin.')
 
   const roles = role === 'psg_admin' ? ['psg_admin'] : []
-  let created: User
+  let created: User | undefined
   try {
     created = await admin.createUser({
       email,
@@ -66,11 +86,24 @@ async function createAgent(body: Record<string, unknown>, actor: User) {
         user_metadata: { full_name: nama },
       },
     })
-    await requestPasswordRecovery(email)
   } catch (err) {
-    if (typeof created!=='undefined' && created?.id) { try { await admin.deleteUser(created.id) } catch (_) {} }
-    return fail(409, 'create_failed', 'Akun tidak dapat dibuat atau link akses tidak dapat dikirim. Email mungkin sudah terdaftar.')
+    return fail(409, 'create_failed', pesanCreateGagal(err))
   }
+
+  try {
+    await requestPasswordRecovery(email)
+  } catch (_) {
+    /* Jangan menghapus akun yang sudah berhasil dibuat. Operator dapat
+       membuka kartu agen lalu memakai "Kirim ulang link" setelah itu. */
+    return jawabJson(502, {
+      error: 'recovery_failed',
+      stage: 'recovery',
+      accountCreated: true,
+      user: safe(created),
+      message: 'Akun berhasil dibuat, tetapi email link akses belum berhasil dikirim. Gunakan "Kirim ulang link" pada akun ini.'
+    })
+  }
+
   return jawabJson(201, { ok: true, message: 'Akun dibuat dan link akses sudah dikirim ke email.', user: safe(created) })
 }
 
