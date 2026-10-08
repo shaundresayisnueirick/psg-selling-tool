@@ -102,10 +102,12 @@
     }
     if (profile.status === 'nonaktif') {
       await api.logout().catch(function () {});
+      setError(document.getElementById('psgIdentityServerError'), 'Akun PSG kamu berstatus nonaktif. Hubungi admin/owner PSG.');
       return null;
     }
     if (!profileDiizinkan(profile)) {
       await api.logout().catch(function () {});
+      setError(document.getElementById('psgIdentityServerError'), 'Akun Identity sudah terautentikasi, tetapi belum mendapat hak akses PSG. Tunggu assignment dari admin/owner.');
       return null;
     }
     return profile;
@@ -118,6 +120,13 @@
     if (!card || !legacyForm) return;
 
     gate.dataset.psgIdentityReady = '1';
+
+    var existingKicker = card.querySelector('.insurance-access-kicker');
+    var existingTitle = card.querySelector('#insuranceAccessTitle');
+    var existingSub = card.querySelector('.insurance-access-sub');
+    if (existingKicker) existingKicker.style.display = 'none';
+    if (existingTitle) existingTitle.style.display = 'none';
+    if (existingSub) existingSub.style.display = 'none';
 
     var sapaan = gate.querySelector('#insuranceSapaan');
     var identity = document.createElement('section');
@@ -149,7 +158,9 @@
         '<button type="button" class="psg-identity-link" id="psgIdentityForgotCancel">Kembali ke login</button>' +
       '</form>';
 
-    card.insertBefore(identity, card.firstChild);
+    var logo = card.querySelector('.insurance-access-logo');
+    if (logo && logo.nextSibling) card.insertBefore(identity, logo.nextSibling);
+    else card.insertBefore(identity, card.firstChild);
 
     var legacyWrap = document.createElement('div');
     legacyWrap.id = 'psgIdentityLegacyWrap';
