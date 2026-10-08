@@ -99,7 +99,10 @@
 
   function avatarWelcomeHTML(size){
     var foto='';
-    try{ foto=localStorage.getItem('insuranceHub.agen.foto.v1')||''; }catch(e){}
+    var identity=window.InsuranceHubIdentity;
+    var fotoKey=window.InsuranceHubCurrentPhotoKey
+      ? window.InsuranceHubCurrentPhotoKey() : 'insuranceHub.agen.foto.v1';
+    try{ foto=fotoKey?localStorage.getItem(fotoKey)||'':''; }catch(e){}
     if(foto){
       return '<img src="'+escHTML(foto)+'" alt="" class="insurance-welcome-avatar-img" style="width:'+size+'px;height:'+size+'px">';
     }
@@ -107,7 +110,8 @@
     try{
       var a=JSON.parse(localStorage.getItem('insuranceHub.agen.v1')||'{}');
       var l=JSON.parse(localStorage.getItem('insuranceHub.level.v1')||'{}');
-      nama=((l&&l.namaAgen)||a.nama||'').trim();
+      nama=String(identity&&identity.source==='server:/api/psg/me'
+        ? (identity.nama||'') : ((l&&l.namaAgen)||a.nama||'')).trim();
     }catch(e){}
     var ini=(nama||'A').charAt(0).toUpperCase();
     return '<span class="insurance-welcome-avatar-fallback" style="width:'+size+'px;height:'+size+'px">'+escHTML(ini)+'</span>';
@@ -135,10 +139,19 @@
     var old=document.getElementById('insuranceWelcome');
     if(old) old.remove();
 
+    var identity=window.InsuranceHubIdentity;
     var level=window.InsuranceHubLevel||{};
+    var fotoKey=window.InsuranceHubCurrentPhotoKey
+      ? window.InsuranceHubCurrentPhotoKey() : 'insuranceHub.agen.foto.v1';
     var nama=(level.namaAgen||'').trim();
     var kode=(level.kodeAgen||'').trim();
     var levelNama=level.nama||'Financial Consultant';
+    if(identity&&identity.source==='server:/api/psg/me'){
+      nama=String(identity.nama||'').trim();
+      kode=String(identity.kodeAgen||'').trim();
+      levelNama=identity.level==='BD'?'Business Director':identity.level==='BM'?'Business Manager':identity.level==='FC'?'Financial Consultant':'';
+    }
+    var levelKode=identity&&identity.source==='server:/api/psg/me' ? (identity.level||'') : (level.level||'');
 
     var w=document.createElement('div');
     w.id='insuranceWelcome';
@@ -147,20 +160,20 @@
         '<div class="insurance-welcome-photo-wrap">'+
           '<div class="insurance-welcome-avatar" id="insuranceWelcomeAvatar">'+avatarWelcomeHTML(108)+'</div>'+
           '<label class="insurance-welcome-photo-btn">'+
-            ' '+(function(){try{return localStorage.getItem('insuranceHub.agen.foto.v1')?'Ganti Foto':'Unggah Foto'}catch(e){return 'Unggah Foto';}}())+
+            ' '+(function(){try{return fotoKey&&localStorage.getItem(fotoKey)?'Ganti Foto':'Unggah Foto'}catch(e){return 'Unggah Foto';}}())+
             '<input id="insuranceWelcomePhoto" type="file" accept="image/*" hidden>'+
           '</label>'+
         '</div>'+
         '<div class="insurance-welcome-kicker">Selamat datang,</div>'+
         '<h2 id="insuranceWelcomeTitle">'+escHTML(nama||'Tenaga Pemasar')+'</h2>'+
         '<div class="insurance-welcome-meta">'+
-          '<span class="insurance-welcome-level">'+escHTML(level.level||'—')+'</span>'+
+          '<span class="insurance-welcome-level">'+escHTML(levelKode||'—')+'</span>'+
           '<span>'+escHTML(levelNama)+'</span>'+
           (kode?'<span>· '+escHTML(kode)+'</span>':'')+
         '</div>'+
         '<div class="insurance-welcome-motto">Together Every One Achieve More</div>'+
         '<div class="insurance-welcome-sub">Bahagia · Berkat · Berlimpah</div>'+
-        '<div class="insurance-welcome-info">Akses kamu aktif. Seluruh tools yang tersedia akan mengikuti jenjang <b>'+escHTML(level.level||'')+'</b> dan hak akses yang berlaku.</div>'+
+        '<div class="insurance-welcome-info">Akses kamu aktif. Seluruh tools yang tersedia akan mengikuti jenjang <b>'+escHTML(levelKode)+'</b> dan hak akses yang berlaku.</div>'+
         '<button type="button" class="insurance-welcome-btn" id="insuranceWelcomeStart">MULAI</button>'+
       '</div>';
 
@@ -168,8 +181,9 @@
 
     var photo=document.getElementById('insuranceWelcomePhoto');
     if(photo) photo.addEventListener('change',function(ev){
+      if(!fotoKey){ alert('Email Identity tidak tersedia untuk menyimpan foto profil.'); return; }
       bacaFotoWelcome(ev.target.files&&ev.target.files[0],function(data){
-        try{ localStorage.setItem('insuranceHub.agen.foto.v1',data); }catch(e){}
+        try{ localStorage.setItem(fotoKey,data); }catch(e){}
         var slot=document.getElementById('insuranceWelcomeAvatar');
         if(slot) slot.innerHTML=avatarWelcomeHTML(108);
         var lbl=document.querySelector('.insurance-welcome-photo-btn');
@@ -403,6 +417,14 @@
   window.insuranceHubBersihkanSesi=bersihkanSesi;
   window.insuranceHubCabutOtorisasi=cabutOtorisasi;
   window.insuranceHubIdentitas=identitasTersimpan;
+  window.insuranceHubEnsureAccessGate=function(){
+    renderGate();
+    return document.getElementById('insuranceAccessGate');
+  };
+
+  window.addEventListener('psg:identity-ready',function(){
+    if(document.getElementById('insuranceWelcome')) tampilkanSambutan();
+  });
 
   if(isUnlocked()){
     if(document.readyState==='loading'){
