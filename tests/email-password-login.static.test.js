@@ -45,7 +45,8 @@ const cb = read('src/identity-callback.js');
 ok(cb.includes('lib.handleAuthCallback()') && cb.includes('lib.acceptInvite(token, password)') && cb.includes('lib.updateUser({ password: password })'), 'PR #19 invite/recovery callback remains intact');
 
 const sw = read('sw.js');
-ok(sw.includes("insurance-hub-v117.1.7"), 'service worker version bumped for new assets');
+const swVersi = (sw.match(/const VERSI = 'insurance-hub-v(\d+)\.(\d+)\.(\d+)'/) || []).slice(1).map(Number);
+ok(swVersi.length === 3 && (swVersi[0] - 117 || swVersi[1] - 1 || swVersi[2] - 7) >= 0, 'service worker version bumped for new assets (minimal v117.1.7)');
 ok(sw.includes("'./src/identity-login.js'") && sw.includes("'./src/identity-login.css'"), 'new login assets are in the service worker precache');
 
 const requiredUi = ['type="email"','autocomplete="email"','type="password"','autocomplete="current-password"','Lupa Password?','MASUK DENGAN KODE AKSES LAMA'];
