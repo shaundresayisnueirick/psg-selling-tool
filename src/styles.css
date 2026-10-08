@@ -562,6 +562,11 @@ input:hover,select:hover,textarea:hover{border-color:var(--text-3)}
 input:focus,select:focus,textarea:focus{outline:none;border-color:var(--focus);box-shadow:var(--ring)}
 input[readonly],input:disabled,select:disabled,textarea:disabled{background:var(--surface-2);color:var(--text-3);cursor:not-allowed}
 input[type="date"]{min-height:var(--touch)}
+.cp-tanggal-input{display:flex;gap:8px;align-items:center}
+.cp-tanggal-input #cpTglManual{flex:1;min-width:0}
+.cp-tanggal-input #cpTglPicker{flex:0 0 52px;width:52px;padding:8px;color:transparent}
+.cp-tanggal-input #cpTglPicker::-webkit-calendar-picker-indicator{margin:0}
+.cp-tanggal-input #cpTglPicker[data-kosong]::before{content:none}
 input[type="date"]::-webkit-calendar-picker-indicator{opacity:.6;cursor:pointer}
 [data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1)}
 /* Tanggal kosong: DD/MM/YYYY abu-abu seperti placeholder. Atribut data-kosong

@@ -110,6 +110,7 @@ let sedangKembali = false;
 let cpKonteks = null;
 function bukaLayar(nama) {
   if (!LAYAR[nama]) nama = 'PRODUK';
+  const layarSebelum = layarAktif;
   /* Meninggalkan Profil (Back, Home, tab bar, menutup Sales Idea) membatalkan
      kelanjutan; hanya Profil itu sendiri yang boleh membawanya. */
   if (cpKonteks && nama !== 'PROFILE') cpKonteksHapus();
@@ -132,6 +133,7 @@ function bukaLayar(nama) {
   if (el('judul')) el('judul').textContent = s.judul;
   if (el('subJudul')) el('subJudul').textContent = s.sub;
   window.scrollTo(0, 0);
+  if (nama === 'PROFILE' && layarSebelum !== 'PROFILE' && typeof cpPrepareProfileOpen === 'function') cpPrepareProfileOpen();
   if (typeof cpAutoFillOnOpen === 'function') cpAutoFillOnOpen(nama);
   if (nama === 'SALES_IDEA') {
     const renderSalesIdea = () => {
@@ -319,8 +321,132 @@ function cpFormValue() {
     ].filter(x=>x.id==='self' || x.nama || x.tglLahir)
   };
 }
+function cpParseDob(value) {
+  const match = String(value || '').trim().match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  if (!match) return null;
+  const day = Number(match[1]), month = Number(match[2]), year = Number(match[3]);
+  const today = new Date();
+  if (year < today.getFullYear() - 120 || year > today.getFullYear()) return null;
+  const date = new Date(Date.UTC(year, month - 1, day));
+  if (date.getUTCFullYear() !== year || date.getUTCMonth() !== month - 1 || date.getUTCDate() !== day) return null;
+  if (date.getTime() > Date.UTC(today.getFullYear(), today.getMonth(), today.getDate())) return null;
+  return `${String(year).padStart(4, '0')}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+}
+function cpFormatDob(iso) {
+  const match = String(iso || '').match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  return match ? `${match[3]}/${match[2]}/${match[1]}` : '';
+}
+function cpFormatDobTyping(value) {
+  const raw = String(value || '');
+  if (raw.includes('/')) {
+    const parts = raw.split('/');
+    const dayRaw = (parts[0] || '').replace(/\D/g, '');
+    const monthRaw = (parts[1] || '').replace(/\D/g, '');
+    const yearRaw = parts.slice(2).join('').replace(/\D/g, '');
+    const day = (dayRaw.slice(0, 2) + monthRaw.slice(0, Math.max(0, dayRaw.length - 2))).slice(0, 2);
+    const month = (monthRaw.slice(0, 2) + yearRaw.slice(0, Math.max(0, monthRaw.length - 2))).slice(0, 2);
+    const year = (yearRaw + monthRaw.slice(2) + dayRaw.slice(2)).slice(0, 4);
+    let out = day;
+    if (parts.length > 1 || day.length === 2) out += '/' + month;
+    if (year || month.length === 2) out += '/' + year;
+    return out;
+  }
+  const digits = raw.replace(/\D/g, '').slice(0, 8);
+  if (digits.length < 2) return digits;
+  if (digits.length === 2) return digits + '/';
+  if (digits.length < 4) return digits.slice(0, 2) + '/' + digits.slice(2);
+  if (digits.length === 4) return digits.slice(0, 2) + '/' + digits.slice(2) + '/';
+  return digits.slice(0, 2) + '/' + digits.slice(2, 4) + '/' + digits.slice(4);
+}
+function cpDobCaret(value, digitCount) {
+  if (!digitCount) return 0;
+  let seen = 0, i = 0;
+  for (; i < value.length; i++) if (/\d/.test(value[i]) && ++seen === digitCount) { i++; break; }
+  return value[i] === '/' ? i + 1 : i;
+}
+function cpHandleDobInput(e) {
+  const input = e.currentTarget;
+  const start = input.selectionStart ?? input.value.length, end = input.selectionEnd ?? start;
+  const beforeStart = input.value.slice(0, start).replace(/\D/g, '').length;
+  const beforeEnd = input.value.slice(0, end).replace(/\D/g, '').length;
+  const formatted = cpFormatDobTyping(input.value);
+  if (formatted !== input.value) {
+    input.value = formatted;
+    input.setSelectionRange(cpDobCaret(formatted, beforeStart), cpDobCaret(formatted, beforeEnd));
+  }
+  cpSyncDob(false);
+}
+function cpHandleDobBeforeInput(e) {
+  const input = e.currentTarget, value = input.value;
+  const start = input.selectionStart, end = input.selectionEnd;
+  if (start == null || start !== end || !value.includes('/')) return;
+  const backspace = e.inputType === 'deleteContentBackward' && value[start - 1] === '/';
+  const forwardDelete = e.inputType === 'deleteContentForward' && value[start] === '/';
+  if (!backspace && !forwardDelete) return;
+  const parts = value.split('/');
+  const boundary = backspace ? start - 1 : start;
+  const group = value.slice(0, boundary).split('/').length - 1;
+  const partIndex = backspace ? group : group + 1;
+  if (!parts[partIndex]) return;
+  e.preventDefault();
+  parts[partIndex] = backspace ? parts[partIndex].slice(0, -1) : parts[partIndex].slice(1);
+  input.value = cpFormatDobTyping(parts.join('/'));
+  const digitsBefore = (backspace ? parts.slice(0, partIndex + 1) : parts.slice(0, partIndex)).join('').replace(/\D/g, '').length;
+  const caret = cpDobCaret(input.value, digitsBefore);
+  input.setSelectionRange(caret, caret);
+  input.dispatchEvent(new Event('input', {bubbles:true}));
+}
+function cpSyncDob(showError = false) {
+  const text = el('cpTglManual'), canonical = el('cpTgl'), picker = el('cpTglPicker'), error = el('cpTglError');
+  if (!text || !canonical) return true;
+  const value = text.value.trim();
+  if (!value) {
+    canonical.value = ''; if (picker) picker.value = '';
+    if (error) { error.hidden = true; error.textContent = ''; }
+    text.removeAttribute('aria-invalid'); canonical.dispatchEvent(new Event('input', {bubbles:true}));
+    return true;
+  }
+  const iso = cpParseDob(value);
+  if (iso) {
+    canonical.value = iso; if (picker) picker.value = iso;
+    if (error) { error.hidden = true; error.textContent = ''; }
+    text.removeAttribute('aria-invalid'); canonical.dispatchEvent(new Event('input', {bubbles:true}));
+    return true;
+  }
+  canonical.value = ''; if (picker) picker.value = '';
+  cpUpdateProfileAge();
+  if (showError) {
+    if (error) { error.textContent = 'Masukkan tanggal yang valid dengan format DD/MM/YYYY (usia maksimal 120 tahun dan tidak boleh di masa depan).'; error.hidden = false; }
+    text.setAttribute('aria-invalid', 'true');
+  } else {
+    if (error) { error.hidden = true; error.textContent = ''; }
+    text.removeAttribute('aria-invalid');
+  }
+  return false;
+}
+function cpUpdateProfileAge() {
+  const usia = formatUsiaGenerali(el('cpTgl')?.value);
+  if (el('cpUsia')) el('cpUsia').textContent = usia ? 'Usia ' + usia : 'Usia —';
+}
+function cpReflectDob() {
+  const canonical = el('cpTgl'), text = el('cpTglManual'), picker = el('cpTglPicker');
+  if (!canonical) return;
+  const iso = canonical.value || '';
+  if (text) text.value = cpFormatDob(iso);
+  if (picker) picker.value = iso;
+  if (el('cpTglError')) { el('cpTglError').hidden = true; el('cpTglError').textContent = ''; }
+  text?.removeAttribute('aria-invalid');
+}
+function cpPrepareProfileOpen() {
+  cpFillForm({});
+  const bar = el('cpStatusBar');
+  if (bar) { bar.dataset.editId = ''; bar.textContent = 'Form siap untuk profil baru.'; }
+  if (el('cpSimpan')) el('cpSimpan').textContent = 'Simpan profil';
+  if (el('cpReset')) el('cpReset').textContent = 'Kosongkan form';
+}
 function cpFillForm(p) {
   el('cpNama').value = p.nama || ''; el('cpTgl').value = p.tglLahir || '';
+  cpReflectDob();
   el('cpTgl')?.dispatchEvent(new Event('input',{bubbles:true}));
   el('cpPekerjaan').value = p.pekerjaan || ''; el('cpPenghasilan').value = p.penghasilan ? p.penghasilan.toLocaleString('id-ID') : '';
   el('cpHP').value = p.hp || ''; el('cpPasangan').value = p.pasangan || '';
@@ -449,6 +575,7 @@ function cpFormBaru() {
   if (nama) { nama.scrollIntoView({behavior:'smooth', block:'center'}); nama.focus({preventScroll:true}); }
 }
 function cpSave() {
+  if (!cpSyncDob(true)) { el('cpStatusBar').textContent = 'Tanggal lahir belum valid. Periksa format DD/MM/YYYY.'; el('cpTglManual')?.focus(); return; }
   const p = cpFormValue();
   if (!p.nama) { el('cpStatusBar').textContent = 'Nama nasabah wajib diisi sebelum disimpan.'; return; }
   const list = cpRead(); const now = new Date().toISOString();
@@ -619,9 +746,21 @@ function cpAutoFillOnOpen(nama) {
 
 function cpInit() {
   if (!el('cpSimpan')) return;
-  const refreshProfileAge=()=>{ const usia=formatUsiaGenerali(el('cpTgl')?.value); if(el('cpUsia')) el('cpUsia').textContent=usia?'Usia '+usia:'Usia —'; };
-  el('cpTgl')?.addEventListener('input',refreshProfileAge);
-  refreshProfileAge();
+  const hariIni = new Date(), picker = el('cpTglPicker');
+  if (picker) {
+    picker.min = `${String(hariIni.getFullYear() - 120).padStart(4, '0')}-01-01`;
+    picker.max = `${String(hariIni.getFullYear()).padStart(4, '0')}-${String(hariIni.getMonth() + 1).padStart(2, '0')}-${String(hariIni.getDate()).padStart(2, '0')}`;
+  }
+  el('cpTgl')?.addEventListener('input',cpUpdateProfileAge);
+  el('cpTgl')?.addEventListener('input',cpReflectDob);
+  el('cpTglManual')?.addEventListener('beforeinput',cpHandleDobBeforeInput);
+  el('cpTglManual')?.addEventListener('input',cpHandleDobInput);
+  el('cpTglManual')?.addEventListener('blur',()=>cpSyncDob(true));
+  el('cpTglPicker')?.addEventListener('change',()=>{
+    const iso=el('cpTglPicker').value;
+    el('cpTgl').value=iso; cpReflectDob(); el('cpTgl').dispatchEvent(new Event('input',{bubbles:true}));
+  });
+  cpUpdateProfileAge();
   /* Data Utama -> Keluarga & relasi: nama pasangan selalu mengikuti satu
      sumber utama. DOB tidak disentuh, sehingga agen cukup mengisi tanggal
      lahir di bagian Keluarga & relasi. */
@@ -636,8 +775,7 @@ function cpInit() {
   el('cpReset').addEventListener('click', () => {
     const editing = el('cpStatusBar').dataset.editId;
     if (editing) {
-      const original = cpRead().find(x => x.id === editing);
-      if (original) cpFillForm(original);
+      cpFillForm({});
       el('cpStatusBar').dataset.editId='';
       el('cpStatusBar').textContent='Edit dibatalkan. Data tersimpan tetap tidak berubah.';
       el('cpSimpan').textContent='Simpan profil';
