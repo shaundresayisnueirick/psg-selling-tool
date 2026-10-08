@@ -110,49 +110,35 @@ async function createAgent(body: Record<string, unknown>, actor: User) {
   if (!['agent','psg_admin'].includes(role)) return fail(400, 'invalid_role', 'Role tidak valid.')
   if (role === 'psg_admin' && !isOwner(actor)) return fail(403, 'forbidden_role', 'Hanya PSG Owner yang boleh membuat PSG Admin.')
 
+  /* DIAGNOSTIC STEP — sengaja hanya menguji admin.createUser().
+     Belum mengirim email/reset link. Tujuannya membuktikan apakah
+     Netlify Function benar-benar diizinkan membuat Identity user. */
   let created: User
   try {
-    /* Gunakan endpoint Identity /invite karena menu ini memang mengundang
-       agen untuk membuat password sendiri. @netlify/identity 2.x belum
-       menyediakan admin.inviteUser() sebagai method high-level. */
-    created = await inviteUser(email)
+    created = await admin.createUser({
+      email,
+      password: 'PsgTest!' + cryptoRandomToken(),
+      data: {
+        app_metadata: { roles: role === 'psg_admin' ? ['psg_admin'] : [], psg: { nama, kodeAgen: kodeAgen || null, level, status: 'aktif' } },
+        user_metadata: { full_name: nama },
+      },
+    })
   } catch (err) {
     const status = errorStatus(err)
     const message = errorText(err)
-    const code = (err as {code?: unknown} | null)?.code
-    const duplicate = status === 409 || /already|exist|registered|taken|duplicate/i.test(message)
-    if (duplicate) return fail(409, 'already_exists', 'Akun tidak dibuat. Email tersebut sudah terdaftar di Netlify Identity.')
-    const detail = [code || 'unknown', status ? `HTTP ${status}` : '', message].filter(Boolean).join(' — ')
-    return fail(502, 'invite_failed', `Netlify Identity gagal membuat undangan: ${detail}`)
+    const duplicate = status === 409 || status === 422 || /already|exist|registered|taken|duplicate/i.test(message)
+    return fail(duplicate ? 409 : 502, duplicate ? 'already_exists' : 'create_failed',
+      duplicate ? 'Akun tidak dibuat. Email tersebut sudah terdaftar di Netlify Identity.' :
+      `admin.createUser() ditolak: ${message || (status ? `HTTP ${status}` : 'tanpa detail error')}.`)
   }
 
-  try {
-    const roles = role === 'psg_admin' ? ['psg_admin'] : []
-    const updated = await admin.updateUser(created.id, {
-      app_metadata: {
-        ...(created.appMetadata || {}),
-        roles,
-        psg: { nama, kodeAgen: kodeAgen || null, level, status: 'aktif' },
-      },
-      user_metadata: { ...(created.userMetadata || {}), full_name: nama },
-    })
-    return jawabJson(201, {
-      ok: true,
-      message: 'Undangan berhasil dikirim. Agen akan menerima email untuk membuat password.',
-      user: safe(updated),
-    })
-  } catch (_) {
-    /* Undangan sudah terkirim; jangan menghapus akun. Data profil dapat
-       diperbaiki kemudian lewat Edit setelah agen menerima undangan. */
-    return jawabJson(502, {
-      error: 'profile_update_failed',
-      invitationSent: true,
-      user: safe(created),
-      message: 'Undangan berhasil dikirim, tetapi data profil agen belum tersimpan. Jangan kirim undangan baru; periksa lalu Edit akun ini.'
-    })
-  }
+  return jawabJson(201, {
+    ok: true,
+    diagnostic: true,
+    message: 'TES BERHASIL: akun Identity berhasil dibuat. Email/link belum dikirim. Cek Netlify Identity > Users.',
+    user: safe(created),
+  })
 }
-
 async function resend(body: Record<string, unknown>, actor: User) {
   const id = text(body.id, 100)
   if (!id) return fail(400,'invalid_id','ID agen wajib diisi.')
