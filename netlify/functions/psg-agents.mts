@@ -72,7 +72,8 @@ async function createAgent(body: Record<string, unknown>, actor: User) {
     created = await admin.createUser({
       email,
       password: bootstrapPassword(),
-      data: {
+       data: {
+         role: role === 'psg_admin' ? 'admin' : undefined,
         app_metadata: {
           roles: role === 'psg_admin' ? ['psg_admin'] : [],
           psg: { nama, kodeAgen: kodeAgen || null, level, status: 'aktif' },
