@@ -86,10 +86,18 @@
     if (!box) return;
     let nama = '', level = '', foto = '';
     try {
+      const identity = window.InsuranceHubIdentity;
       const l = JSON.parse(localStorage.getItem('insuranceHub.level.v1') || 'null') || {};
       const a = JSON.parse(localStorage.getItem('insuranceHub.agen.v1') || '{}') || {};
-      nama = String(l.namaAgen || a.nama || '').trim();
-      level = l.level ? (l.nama || '') + ' (' + l.level + ')' : '';
+      if (identity && identity.source === 'server:/api/psg/me') {
+        nama = String(identity.nama || '').trim();
+        level = identity.level ? (window.InsuranceHubLevel?.nama || '') + ' (' + identity.level + ')'
+          : (identity.roles || []).includes('psg_owner') ? 'PSG Owner'
+          : (identity.roles || []).includes('psg_admin') ? 'PSG Admin' : '';
+      } else {
+        nama = String(l.namaAgen || a.nama || '').trim();
+        level = l.level ? (l.nama || '') + ' (' + l.level + ')' : '';
+      }
       foto = localStorage.getItem('insuranceHub.agen.foto.v1') || '';
     } catch (_) {}
     const tanda = nama + '|' + level + '|' + foto.length;
@@ -146,6 +154,7 @@
     const mo = new MutationObserver(() => { clearTimeout(pasang._t); pasang._t = setTimeout(tandai, 30); });
     document.querySelectorAll('section.layar').forEach((n) => mo.observe(n, { attributes: true, attributeFilter: ['class'] }));
     window.addEventListener('storage', kartuAgen);
+    window.addEventListener('psg:identity-ready', kartuAgen);
     tandai();
   }
 

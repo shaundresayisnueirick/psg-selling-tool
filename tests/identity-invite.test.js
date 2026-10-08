@@ -140,18 +140,20 @@ const keadaan = (pg) => pg.evaluate(() => {
 });
 
 async function isiPassword(pg, a, b) {
-  await pg.fill('#psgIdentityPassword', a);
-  await pg.fill('#psgIdentityPassword2', b);
-  await pg.click('#psgIdentitySimpan');
+  await pg.fill('#psgIdentityGate #psgIdentityPassword', a);
+  await pg.fill('#psgIdentityGate #psgIdentityPassword2', b);
+  await pg.click('#psgIdentityGate #psgIdentitySimpan');
   await pg.waitForTimeout(300);
 }
 
 async function loginLama(pg) {
+  const toggle = pg.locator('#psgIdentityLegacyToggle');
+  if (await toggle.isVisible()) await toggle.click();
   await pg.waitForSelector('#insuranceAccessCode', { timeout: 10000 });
   await pg.fill('#insuranceAgenNama', 'Agen Uji');
   await pg.fill('#insuranceAgenKode', 'A001');
   await pg.fill('#insuranceAccessCode', 'uji-kontrak-fc');
-  await pg.click('.insurance-access-btn');
+  await pg.click('#psgIdentityLegacyWrap .insurance-access-btn');
   await pg.waitForTimeout(500);
   return pg.evaluate(() => ({ gate: !!document.getElementById('insuranceAccessGate'),
     terkunci: document.documentElement.classList.contains('insurance-auth-locked'),
@@ -180,10 +182,13 @@ function dataLamaUtuh(st) {
   console.log('[S] Statis');
   const html = baca('index.html');
   const skrip = Array.from(html.matchAll(/<script src="([^"]+)"><\/script>/g), (m) => m[1]);
-  const iVendor = skrip.indexOf('src/vendor/netlify-identity.js');
-  const iCallback = skrip.indexOf('src/identity-callback.js');
-  cek(iVendor >= 0 && iCallback === iVendor + 1 && skrip.indexOf('src/access-gate.js') < iVendor,
-    'index.html: vendor @netlify/identity lalu identity-callback.js, sesudah access-gate.js', { iVendor, iCallback });
+  const indexScript = (name) => skrip.findIndex(src => src.split('?')[0] === name);
+  const iVendor = indexScript('src/vendor/netlify-identity.js');
+  const iLogin = indexScript('src/identity-login.js');
+  const iManagement = indexScript('src/agent-management.js');
+  const iCallback = indexScript('src/identity-callback.js');
+  cek(iVendor >= 0 && iLogin > iVendor && iManagement > iLogin && iCallback > iManagement && skrip.indexOf('src/access-gate.js') < iVendor,
+    'index.html: Identity vendor, login, management, dan callback sesudah access-gate.js', { iVendor, iLogin, iManagement, iCallback });
   cek(iCallback === skrip.length - 1, 'index.html: identity-callback.js skrip terakhir (sesudah skrip baseline)');
   cek(html.includes('<link rel="stylesheet" href="src/identity-callback.css">'), 'index.html: identity-callback.css dimuat');
   for (const f of ['program-summary.html', 'comparison-summary.html']) {
@@ -234,7 +239,7 @@ function dataLamaUtuh(st) {
   {
     const { ctx, pg, log, errors } = await bukaKonteks(br);
     await pg.goto(base + '#invite_token=' + TOKEN_UNDANGAN);
-    await pg.waitForSelector('#psgIdentityPassword', { timeout: 10000 });
+    await pg.waitForSelector('#psgIdentityGate #psgIdentityPassword', { timeout: 10000 });
     let st = await keadaan(pg);
     cek(st.kartuTerlihat && st.kartuDiAtas && /Buat Password/.test(st.judul),
       'kartu "Buat Password" tampil di atas layar masuk lama', { judul: st.judul, kartuDiAtas: st.kartuDiAtas });
@@ -244,7 +249,7 @@ function dataLamaUtuh(st) {
 
     await isiPassword(pg, 'pendek', 'pendek');
     st = await keadaan(pg);
-    cek(/minimal 8/.test(st.galat) && log.length === 0, 'password < 8 karakter ditolak tanpa permintaan', st.galat);
+    cek(/minimal 8/.test(st.galat) && log.length === 0, 'password < 8 karakter ditolak tanpa permintaan', { galat: st.galat, judul: st.judul, kartu: st.kartu, teks: st.teksKartu });
     await isiPassword(pg, PASSWORD, PASSWORD + 'x');
     st = await keadaan(pg);
     cek(/tidak sama/.test(st.galat) && log.length === 0, 'konfirmasi berbeda ditolak tanpa permintaan', st.galat);
@@ -283,7 +288,7 @@ function dataLamaUtuh(st) {
   {
     const { ctx, pg, log, errors } = await bukaKonteks(br);
     await pg.goto(base + '#invite_token=SUDAH-DIPAKAI');
-    await pg.waitForSelector('#psgIdentityPassword', { timeout: 10000 });
+    await pg.waitForSelector('#psgIdentityGate #psgIdentityPassword', { timeout: 10000 });
     await isiPassword(pg, PASSWORD, PASSWORD);
     await pg.waitForTimeout(400);
     const st = await keadaan(pg);

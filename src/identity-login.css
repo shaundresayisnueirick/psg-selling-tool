@@ -1,6 +1,9 @@
 /* PSG Selling Tools — email/password login additions (PR #20)
    Reuses the existing insurance-access styles from src/styles.css. */
 .psg-identity-login{margin-top:8px}
+.psg-identity-restoring{margin:18px 0 8px;text-align:center;line-height:1.5}
+.psg-identity-restoring[hidden]{display:none!important}
+.psg-identity-restoring.psg-identity-restore-error{color:var(--danger,#a33)}
 .psg-identity-login h2{margin:0 0 6px}
 .psg-identity-password{position:relative;display:flex;align-items:stretch}
 .psg-identity-password input{padding-right:50px;flex:1;min-width:0}

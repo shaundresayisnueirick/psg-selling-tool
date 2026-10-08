@@ -2,7 +2,7 @@
  "generatedFrom": "origin/main 489be36 (Restore complete production source), jam uji 2026-09-24 10:00 WIB",
  "static": {
   "protectedFiles": {
-   "src/access-gate.js": "04535f79ce4ace7869df177ce7b1e3b989765f90a8b612839ca2ee7c545ef921",
+   "src/access-gate.js": "7eb6b4b1a143120db078ac7184de4b77d7008035a4f4dc1afa3423abfdd49d31",
    "src/aktivitas-ui.js": "f79804459cb8b93f3ebbfa4380299a2f4bca485155cf79c844aa703d31aba0cf",
    "src/aktivitas.js": "3e12609402263a20ecac19bc7cc91eeac20f0f3c0224cb20ffc177f7920193f1",
    "src/app-version.js": "f1cb8c2a2a673cb4a3719bb6deee684426995715f5c77637138f0aad6c9f2c80",

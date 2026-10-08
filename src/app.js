@@ -5017,7 +5017,7 @@ el('relUsia').innerHTML = USIA_PENSIUN.map(a => `
     <div class="premi" id="premi${a}"></div>
     <div class="rinci" id="rinci${a}"></div>
     <div class="atur">
-      <button type="button" class="sakelar" data-usia="${a}" aria-pressed="true">Tawarkan</button>
+      <button type="button" class="sakelar" data-usia="${a}" aria-pressed="true">ON</button>
       <label for="ku${a}">Dana</label>
       <select id="ku${a}" data-usia="${a}">
         <option value="">Ikut target</option>
@@ -5028,7 +5028,7 @@ el('relUsia').innerHTML = USIA_PENSIUN.map(a => `
 
 // Kotak pilihan usia di layar ringkasan — kembarannya sakelar di kalkulator.
 el('cipUsia').innerHTML = USIA_PENSIUN.map(a =>
-  '<button type="button" data-usia="' + a + '" aria-pressed="true">Usia ' + a + '</button>').join('');
+  '<button type="button" data-usia="' + a + '" aria-pressed="true">Usia ' + a + ' · ON</button>').join('');
 
 // Satu sumber kebenaran: apa pun yang diklik, kedua kendali ikut menyesuaikan.
 function setPilih(a, nilai, tanpaGambar) {
@@ -5036,10 +5036,13 @@ function setPilih(a, nilai, tanpaGambar) {
   const s = document.querySelector('.sakelar[data-usia="' + a + '"]');
   if (s) {
     s.setAttribute('aria-pressed', nilai);
-    s.textContent = nilai ? 'Tawarkan' : 'Lewati';
+    s.textContent = nilai ? 'ON' : 'OFF';
   }
   const c = document.querySelector('#cipUsia button[data-usia="' + a + '"]');
-  if (c) c.setAttribute('aria-pressed', nilai);
+  if (c) {
+    c.setAttribute('aria-pressed', nilai);
+    c.textContent = 'Usia ' + a + ' · ' + (nilai ? 'ON' : 'OFF');
+  }
   if (!tanpaGambar) gambar();
 }
 
@@ -5149,7 +5152,13 @@ function gambar() {
     el('nmKet').textContent = '';
     USIA_PENSIUN.forEach(a => {
       el('premi' + a).textContent = ''; el('rinci' + a).textContent = '';
-      el('up' + a).textContent = ''; el('st' + a).className = 'stasiun mati';
+      el('up' + a).textContent = '';
+      const kartu = el('st' + a);
+      kartu.className = 'stasiun mati';
+      kartu.hidden = true;
+      kartu.style.display = 'none';
+      const chip = document.querySelector('#cipUsia button[data-usia="' + a + '"]');
+      if (chip) { chip.hidden = true; chip.style.display = 'none'; }
     });
     ['ikhtisar','grafikPensiun','grafikJiwa','relRingkas','identitas','kakiAgen']
       .forEach(i => el(i).innerHTML = '');
@@ -5169,7 +5178,18 @@ function gambar() {
 
   r.hasil.forEach((h, i) => {
     const a = USIA_PENSIUN[i];
-    el('st' + a).className = 'stasiun' + (h.setoran != null ? ' ada' : '') + (pilihan[a] ? '' : ' mati');
+    const tersedia = h.setoran != null;
+    const kartu = el('st' + a);
+    kartu.hidden = !tersedia;
+    kartu.style.display = tersedia ? '' : 'none';
+    kartu.className = 'stasiun' + (tersedia ? ' ada' : '') + (pilihan[a] ? '' : ' mati');
+    const chip = document.querySelector('#cipUsia button[data-usia="' + a + '"]');
+    if (chip) {
+      chip.hidden = !tersedia;
+      chip.style.display = tersedia ? '' : 'none';
+      chip.disabled = !tersedia;
+      chip.title = tersedia ? '' : h.alasan;
+    }
     el('up' + a).textContent = 'Dana cair ' + rpSingkat(h.up);
     if (h.setoran == null) {
       el('premi' + a).innerHTML = '<span class="kosong">Tidak tersedia</span>';
@@ -5250,19 +5270,8 @@ function gambar() {
     + '<div>Jenis kelamin<b>' + inp.jk + '</b></div>'
     + '<div>Masa bayar<b>' + inp.mpp + ' tahun, ' + inp.setoran + '</b></div>';
 
-  // Usia yang tarifnya tidak ada tidak bisa ditawarkan — kotak pilihannya dimatikan.
-  r.hasil.forEach((h, i) => {
-    const c = document.querySelector('#cipUsia button[data-usia="' + USIA_PENSIUN[i] + '"]');
-    c.disabled = h.setoran == null;
-    c.title = h.setoran == null ? h.alasan : '';
-  });
-
-  el('relRingkas').innerHTML = r.hasil.map((h, i) => {
-    const a = USIA_PENSIUN[i];
-    if (!r.aktif[i]) {
-      return '<div class="stasiun mati"><div class="kepala"><span class="usia">USIA ' + a + '</span></div>'
-        + '<div class="rinci">' + (h.setoran == null ? 'Tidak tersedia' : 'Tidak ditawarkan') + '</div></div>';
-    }
+  el('relRingkas').innerHTML = r.hasil.filter(h => h.setoran != null && pilihan[h.retAge]).map(h => {
+    const a = h.retAge;
     return '<div class="stasiun ada">'
       + '<div class="kepala"><span class="usia">USIA ' + a + '</span>'
       + '<span class="up">Setoran ' + rp(h.setoran) + '/' + satuan + '</span></div>'

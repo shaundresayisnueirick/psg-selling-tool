@@ -154,8 +154,15 @@
   /* ---------- 2. Identitas agen ---------- */
 
   function agenTersimpan() {
-    try { return JSON.parse(localStorage.getItem('insuranceHub.agen.v1') || '{}'); }
-    catch (_) { return {}; }
+    let a = {};
+    try { a = JSON.parse(localStorage.getItem('insuranceHub.agen.v1') || '{}') || {}; }
+    catch (_) {}
+    const identity = window.InsuranceHubIdentity;
+    if (identity && identity.source === 'server:/api/psg/me') {
+      a.nama = identity.nama || '';
+      a.kode = identity.kodeAgen || '';
+    }
+    return a;
   }
 
   /* Semua kolom penyaji memakai pola id yang sama: xAgenNama dan xAgenHP.
@@ -163,7 +170,9 @@
   function isiIdentitasAgen() {
     const a = agenTersimpan();
     const L = levelAgen();
-    if (!a.nama && L.namaAgen) a.nama = L.namaAgen;
+    const identity = window.InsuranceHubIdentity;
+    const identityAktif = identity && identity.source === 'server:/api/psg/me';
+    if (!identityAktif && !a.nama && L.namaAgen) a.nama = L.namaAgen;
     /* Mode "dibuat untuk agen lain" mengganti identitas penyaji pada seluruh
        kolom cetak. Berbeda dari pengisian biasa, kolom yang sudah terisi ikut
        diganti — kalau tidak, nama pembuat sebelumnya akan tertinggal di
@@ -183,8 +192,10 @@
            identitasmu. Tanpa penanda ini nama agen lain tertinggal di kolom
            penyaji, karena pengisian biasa melewati kolom yang sudah berisi. */
         const bekasAtasNama = n.dataset && n.dataset.psgAtasNama === '1';
-        if (!timpa && !bekasAtasNama && n.value && n.value.trim()) return;
+        if (!identityAktif && !timpa && !bekasAtasNama && n.value && n.value.trim()) return;
+        if (n.id === 'fAgen') return;
         if (/HP$/.test(n.id)) { n.value = a.hp || ''; }
+        else if (identityAktif) n.value = a.nama || '';
         else if (a.nama) n.value = a.nama;
         if (n.dataset) {
           if (timpa) n.dataset.psgAtasNama = '1';
@@ -344,6 +355,7 @@
     pulihkanLayarDariAlamat();
     pasangHome();
     segarkan();
+    window.addEventListener('psg:identity-ready', segarkan);
 
     if (typeof window.bukaLayar === 'function' && !window.bukaLayar.__umumHook) {
       const asli = window.bukaLayar;
