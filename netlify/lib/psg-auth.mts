@@ -62,7 +62,7 @@ function teks(v: unknown, maks = 120): string | null {
 export function profilAman(user: User): ProfilAman {
   const app = (user.appMetadata || {}) as Record<string, unknown>
   const psg = (app.psg && typeof app.psg === 'object' ? app.psg : {}) as Record<string, unknown>
-  const rolesMentah = Array.isArray(user.roles) ? user.roles : Array.isArray(app.roles) ? (app.roles as unknown[]) : []
+  const rolesMentah = Array.isArray(app.roles) ? (app.roles as unknown[]) : []
   const roles = ROLE_SISTEM.filter((r) => rolesMentah.includes(r))
   const level = JENJANG.find((j) => j === psg.level) ?? null
 
