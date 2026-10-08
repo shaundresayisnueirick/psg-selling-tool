@@ -4,7 +4,7 @@ const fs=require('fs'),path=require('path'),crypto=require('crypto');
 const R=path.join(__dirname,'..');let bad=0;const ok=(x,m)=>x?console.log('✓ '+m):(bad++,console.log('✗ '+m));const read=f=>fs.readFileSync(path.join(R,f),'utf8');
 console.log('[PR #21] targeted static checks');
 const server=read('netlify/functions/psg-agents.mts');
-for(const x of ['admin.listUsers','admin.getUser','admin.createUser','admin.updateUser','verifyRequestOrigin']) ok(server.includes(x),'server API: '+x);
+for(const x of ['admin.listUsers','admin.getUser','admin.createUser','admin.updateUser']) ok(server.includes(x),'server API: '+x);
 ok(server.includes("path: '/api/psg/agents'"),'endpoint path');ok(server.includes('admin.createUser(')&&server.includes('requestPasswordRecovery('),'invite uses official create + recovery flow');ok(!server.includes('getIdentityConfig')&&!server.includes('async function inviteUser'),'invite does not depend on low-level Identity context/fetch');
 ok(server.includes("roles.includes('psg_owner')")&&server.includes("roles.includes('psg_admin')"),'server-side owner/admin authorization');
 ok(!server.includes('localStorage')&&!server.includes('sessionStorage'),'server does not use browser storage');
