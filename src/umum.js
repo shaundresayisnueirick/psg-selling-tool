@@ -59,15 +59,36 @@
   /* ---------- Sambutan dan foto agen ---------- */
 
   const FOTO_KEY = 'insuranceHub.agen.foto.v1';
+  const IDENTITY_SOURCE = 'server:/api/psg/me';
+
+  function identityAgen() {
+    const identity = window.InsuranceHubIdentity;
+    return identity && identity.source === IDENTITY_SOURCE ? identity : null;
+  }
 
   function levelAgen() {
+    const identity = identityAgen();
+    if (identity) {
+      const names = { FC: 'Financial Consultant', BM: 'Business Manager', BD: 'Business Director' };
+      return { level: identity.level || '', nama: names[identity.level] || '',
+        namaAgen: identity.nama || '', kodeAgen: identity.kodeAgen || '', source: 'identity-server' };
+    }
     if (window.InsuranceHubLevel && window.InsuranceHubLevel.level) return window.InsuranceHubLevel;
     try { return JSON.parse(localStorage.getItem('insuranceHub.level.v1') || 'null') || {}; }
     catch (_) { return {}; }
   }
 
+  function fotoKeyAktif() {
+    const identity = identityAgen();
+    if (!identity) return FOTO_KEY;
+    return typeof window.InsuranceHubIdentityPhotoKey === 'function'
+      ? window.InsuranceHubIdentityPhotoKey(identity.email) : '';
+  }
+
   function fotoTersimpan() {
-    try { return localStorage.getItem(FOTO_KEY) || ''; } catch (_) { return ''; }
+    const key = fotoKeyAktif();
+    if (!key) return '';
+    try { return localStorage.getItem(key) || ''; } catch (_) { return ''; }
   }
 
   /* Panel sambutan di halaman utama: foto, nama, dan level dari data masuk. */
@@ -112,10 +133,12 @@
       if (!e.target || e.target.id !== 'fotoAgen') return;
       const berkas = e.target.files && e.target.files[0];
       if (!berkas) return;
+      const key = fotoKeyAktif();
+      if (!key) { alert('Email Identity tidak tersedia untuk menyimpan foto profil.'); return; }
       const pembaca = new FileReader();
       pembaca.onload = function () {
         kecilkanFoto(String(pembaca.result), function (kecil) {
-          try { localStorage.setItem(FOTO_KEY, kecil); } catch (_) {
+          try { localStorage.setItem(key, kecil); } catch (_) {
             alert('Foto terlalu besar untuk disimpan di perangkat ini.');
             return;
           }
@@ -129,7 +152,8 @@
       const t = e.target;
       if (!(t instanceof Element)) return;
       if (t.closest('#hapusFotoAgen')) {
-        try { localStorage.removeItem(FOTO_KEY); } catch (_) {}
+        const key = fotoKeyAktif();
+        if (key) try { localStorage.removeItem(key); } catch (_) {}
         pasangSambutan();
       }
     });

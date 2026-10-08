@@ -98,7 +98,10 @@
         nama = String(l.namaAgen || a.nama || '').trim();
         level = l.level ? (l.nama || '') + ' (' + l.level + ')' : '';
       }
-      foto = localStorage.getItem('insuranceHub.agen.foto.v1') || '';
+      const fotoKey = identity && identity.source === 'server:/api/psg/me'
+        ? (typeof window.InsuranceHubIdentityPhotoKey === 'function' ? window.InsuranceHubIdentityPhotoKey(identity.email) : '')
+        : 'insuranceHub.agen.foto.v1';
+      foto = fotoKey ? (localStorage.getItem(fotoKey) || '') : '';
     } catch (_) {}
     const tanda = nama + '|' + level + '|' + foto.length;
     if (box.dataset.tanda === tanda) return;

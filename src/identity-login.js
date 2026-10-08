@@ -21,6 +21,18 @@
       ? x : null;
   }
 
+  function identityPhotoKey(email) {
+    var normalized = String(email || '').trim().toLowerCase();
+    return normalized ? 'insuranceHub.agen.foto.identity.v1.' + encodeURIComponent(normalized) : '';
+  }
+
+  window.InsuranceHubIdentityPhotoKey = identityPhotoKey;
+  window.InsuranceHubCurrentPhotoKey = function () {
+    var identity = window.InsuranceHubIdentity;
+    if (identity && identity.source === 'server:/api/psg/me') return identityPhotoKey(identity.email);
+    return 'insuranceHub.agen.foto.v1';
+  };
+
   function setError(node, message) {
     if (node) node.textContent = message || '';
   }
@@ -114,10 +126,10 @@
     return data.user;
   }
 
-  async function validasiSesiAda() {
+  async function validasiSesiAda(identityUser) {
     var api = lib();
     if (!api) return null;
-    var identityUser = await api.getUser();
+    if (!identityUser) identityUser = await api.getUser();
     if (!identityUser) return null;
 
     var profile = await profilServer();
@@ -348,10 +360,23 @@
     if (bootSedangBerjalan) return;
     bootSedangBerjalan = true;
     try {
-    var gate = document.getElementById(ID_GATE);
-    if (!gate) return;
-
     var api = lib();
+    var gate = document.getElementById(ID_GATE);
+    var identityUser = null;
+
+    /* Kode akses lama boleh membuka gate lebih awal. Bila itu terjadi, cek
+       sesi Identity tetap wajib dilakukan; jangan berhenti hanya karena gate
+       sudah dihapus oleh sesi perangkat lama. */
+    if (!gate) {
+      if (!api) return;
+      try { identityUser = await api.getUser(); } catch (_) { return; }
+      if (!identityUser) return;
+      document.documentElement.classList.add('insurance-auth-locked');
+      gate = typeof window.insuranceHubEnsureAccessGate === 'function'
+        ? window.insuranceHubEnsureAccessGate() : null;
+      if (!gate) return;
+    }
+
     if (!api) {
       pasangFormEmail(gate);
       tampilkanStatusPemulihan(gate, 'login');
@@ -362,7 +387,7 @@
     tampilkanStatusPemulihan(gate, 'restoring', 'Memulihkan sesi dan memeriksa profil PSG…');
     var profile;
     try {
-      profile = await validasiSesiAda();
+      profile = await validasiSesiAda(identityUser);
     } catch (_) {
       tampilkanStatusPemulihan(gate, 'error', 'Sesi belum dapat diverifikasi. Periksa koneksi, lalu coba lagi.');
       return;
