@@ -6,7 +6,7 @@
   const $=(id)=>document.getElementById(id);
   function nav(show){ document.querySelectorAll('.psg-admin-only[data-psg-nav="manajemen"]').forEach(b=>{b.hidden=!show;b.setAttribute('aria-hidden',show?'false':'true')}) }
   async function getMe(){ const r=await fetch('/api/psg/me',{cache:'no-store',credentials:'same-origin'}); if(!r.ok)return null; const d=await r.json().catch(()=>({})); return d.authenticated?d.user:null }
-  async function api(method='GET',body){ const r=await fetch(ENDPOINT,{method,cache:'no-store',credentials:'same-origin',headers:{Accept:'application/json',...(body?{'Content-Type':'application/json'}:{})},...(body?{body:JSON.stringify(body)}:{})}); const d=await r.json().catch(()=>({})); if(!r.ok)throw new Error(d.message||'Permintaan gagal.'); return d }
+  async function api(method='GET',body){ const r=await fetch(ENDPOINT,{method,cache:'no-store',credentials:'same-origin',headers:{Accept:'application/json',...(body?{'Content-Type':'application/json'}:{})},...(body?{body:JSON.stringify(body)}:{})}); const d=await r.json().catch(()=>({})); if(!r.ok){const err=new Error(d.message||'Permintaan gagal.');err.code=d.error||'';err.accountCreated=Boolean(d.accountCreated);err.payload=d;throw err} return d }
   const esc=(v)=>String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   function role(u){return (u.roles||[]).includes('psg_owner')?'PSG Owner':(u.roles||[]).includes('psg_admin')?'PSG Admin':(u.level||'Agen')}
   function canEdit(u){if((u.roles||[]).includes('psg_owner'))return false;return state.owner || !(u.roles||[]).includes('psg_admin')}
@@ -47,7 +47,7 @@
     $('agentMgmtForm')?.addEventListener('submit',async(e)=>{
       e.preventDefault();const f=e.currentTarget,mode=f.dataset.mode,btn=$('agentMgmtSubmit');btn.disabled=true;btn.textContent=mode==='invite'?'MEMPROSES…':'MENYIMPAN…';
       const body={email:$('agentMgmtEmail').value.trim(),nama:$('agentMgmtNama').value.trim(),kodeAgen:$('agentMgmtKode').value.trim(),level:$('agentMgmtLevel').value,status:$('agentMgmtStatus').value,role:$('agentMgmtRole').value};if(mode!=='invite')body.id=f.dataset.id;
-      try{await api(mode==='invite'?'POST':'PATCH',body);close();await load()}catch(err){alert(err.message||'Perubahan tidak dapat disimpan.')}finally{btn.disabled=false;btn.textContent=mode==='invite'?'KIRIM AKSES':'SIMPAN PERUBAHAN'}
+      try{await api(mode==='invite'?'POST':'PATCH',body);close();await load();if(mode==='invite')alert('Akun agen berhasil dibuat dan link akses sudah dikirim ke email.')}catch(err){if(mode==='invite'&&err.accountCreated){close();await load();alert(err.message||'Akun berhasil dibuat, tetapi link akses belum terkirim.')}else{alert(err.message||'Perubahan tidak dapat disimpan.')}}finally{btn.disabled=false;btn.textContent=mode==='invite'?'KIRIM AKSES':'SIMPAN PERUBAHAN'}
     });
     $('agentMgmtModal')?.addEventListener('click',e=>{if(e.target===$('agentMgmtModal'))close()});
   }
