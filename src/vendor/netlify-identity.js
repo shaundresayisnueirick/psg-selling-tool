@@ -1,7 +1,7 @@
 /* @netlify/identity 2.0.0 + gotrue-js 1.0.1 — keduanya lisensi MIT.
    Bundel browser untuk situs tanpa langkah build; memasang
-   window.PSGNetlifyIdentity (handleAuthCallback, acceptInvite, updateUser,
-   AuthError, MissingIdentityError). JANGAN disunting manual.
+   window.PSGNetlifyIdentity (login, getUser, logout, requestPasswordRecovery,
+   handleAuthCallback, acceptInvite, updateUser, AuthError, MissingIdentityError). JANGAN disunting manual.
 
    Dibuat ulang dari akar repo, dengan dependensi package-lock.json terpasang:
      npm ci
@@ -33,7 +33,11 @@ var PSGNetlifyIdentity = (() => {
     AuthError: () => AuthError,
     MissingIdentityError: () => MissingIdentityError,
     acceptInvite: () => acceptInvite,
+    getUser: () => getUser,
     handleAuthCallback: () => handleAuthCallback,
+    login: () => login,
+    logout: () => logout,
+    requestPasswordRecovery: () => requestPasswordRecovery,
     updateUser: () => updateUser
   });
 
@@ -863,5 +867,62 @@ var PSGNetlifyIdentity = (() => {
       throw AuthError.from(error);
     }
   };
+  var login = async (email, password) => {
+    const client = getClient();
+    try {
+      const gotrueUser = await client.login(email, password, persistSession);
+      const jwt = await gotrueUser.jwt();
+      const details = gotrueUser.tokenDetails();
+      setBrowserAuthCookies(jwt, details == null ? void 0 : details.refresh_token);
+      const user = toUser(gotrueUser);
+      startTokenRefresh();
+      emitAuthEvent(AUTH_EVENTS.LOGIN, user);
+      return user;
+    } catch (error) {
+      throw AuthError.from(error);
+    }
+  };
+  var getUser = async () => {
+    const client = getClient();
+    let currentUser2 = client.currentUser();
+    if (!currentUser2 && isBrowser2()) {
+      try {
+        await hydrateSession();
+      } catch {
+      }
+      currentUser2 = client.currentUser();
+    }
+    if (!currentUser2) return null;
+    try {
+      const freshUser = await currentUser2.getUserData();
+      return toUser(freshUser);
+    } catch {
+      return toUser(currentUser2);
+    }
+  };
+  var logout = async () => {
+    const client = getGoTrueClient();
+    const currentUser2 = client == null ? null : client.currentUser();
+    try {
+      if (currentUser2) {
+        await currentUser2.logout();
+      }
+    } catch (error) {
+      throw AuthError.from(error);
+    } finally {
+      stopTokenRefresh();
+      deleteBrowserAuthCookies();
+      emitAuthEvent(AUTH_EVENTS.LOGOUT, null);
+    }
+  };
+  var requestPasswordRecovery = async (email) => {
+    const client = getClient();
+    try {
+      return await client.requestPasswordRecovery(email);
+    } catch (error) {
+      throw AuthError.from(error);
+    }
+  };
+
   return __toCommonJS(vendor_entry_exports);
 })();
