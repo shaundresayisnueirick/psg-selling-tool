@@ -36,6 +36,7 @@
     aktivitas: () => klik('btnAktivitas'),
     library: () => klik('btnLibraryIlustrasi') || buka('LIBRARY_ILUSTRASI'),
     identitas: () => klik('btnKartuKonsultan') || buka('KARTU_KONSULTAN'),
+    manajemen: () => buka('AGENT_MANAGEMENT'),
     tema: () => klik('btnThemeSwitch') || (window.PSGTheme && window.PSGTheme.toggle()),
     keluar: () => klik('btnLogout'),
     menu: () => bukaSheet(),
@@ -51,7 +52,7 @@
     SOLUSI_HITUNG: 'kalkulator', SOLUSI_BANDING: 'kalkulator', KPR: 'kalkulator', KPR_RINGKAS: 'kalkulator',
     R2: 'kalkulator', R2_RINGKAS: 'kalkulator',
     SALES_IDEA: 'salesidea', AKTIVITAS: 'aktivitas', AKT_REKAP: 'aktivitas', SLIP_KOMISI: 'aktivitas',
-    LIBRARY_ILUSTRASI: 'library', KARTU_KONSULTAN: 'identitas',
+    LIBRARY_ILUSTRASI: 'library', KARTU_KONSULTAN: 'identitas', AGENT_MANAGEMENT: 'manajemen',
   };
   const DI_TABBAR = ['beranda', 'produk', 'nasabah', 'library'];
 
