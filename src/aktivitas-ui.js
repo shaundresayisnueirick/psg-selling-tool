@@ -92,7 +92,52 @@
   function gambarIdentitas() {
     const kotak = el('aktIdentitas');
     if (!kotak) return;
-    const a = A.agenBaca();
+    const identity = window.InsuranceHubIdentity;
+    const identityAktif = identity && identity.source === 'server:/api/psg/me';
+    const a = identityAktif && A.agenLokalBaca ? A.agenLokalBaca() : A.agenBaca();
+    if (identityAktif) {
+      const owner = Array.isArray(identity.roles) && identity.roles.includes('psg_owner');
+      const kodeAda = String(identity.kodeAgen || '').trim();
+      const levelAda = String(identity.level || '').trim();
+      const setup = owner && (!kodeAda || !levelAda);
+      const namaLevel = { FC: 'Financial Consultant', BM: 'Business Manager', BD: 'Business Director' };
+      const foto = fotoAgen();
+      kotak.innerHTML =
+        '<h2>Identitas agen</h2>' +
+        '<p class="catatan">Identitas resmi berasal dari akun Identity. Data ini tidak dapat diedit setelah ditetapkan.</p>' +
+        '<div class="baris">' +
+        '<div><label for="aktAgenNama">Nama agen</label>' +
+        '<input id="aktAgenNama" type="text" value="' + esc(identity.nama || '') + '" readonly aria-readonly="true"></div>' +
+        '<div><label for="aktAgenKode">Kode agen</label>' +
+        (setup && !kodeAda
+          ? '<input id="aktAgenKode" type="text" value="" maxlength="40" autocomplete="off" placeholder="Kode keagenan" required>'
+          : '<input id="aktAgenKode" type="text" value="' + esc(kodeAda) + '" readonly aria-readonly="true">') +
+        '</div></div>' +
+        '<div class="baris">' +
+        '<div><label for="aktAgenLevel">Level</label>' +
+        (setup && !levelAda
+          ? '<select id="aktAgenLevel" required><option value="">Pilih level</option><option value="FC">Financial Consultant (FC)</option><option value="BM">Business Manager (BM)</option><option value="BD">Business Director (BD)</option></select>'
+          : '<input id="aktAgenLevel" type="text" value="' + esc(levelAda ? (namaLevel[levelAda] || '') + ' (' + levelAda + ')' : '') + '" readonly aria-readonly="true">') +
+        '</div>' +
+        '<div><label>Role / status</label><input type="text" value="' +
+          esc((identity.roles || []).includes('psg_owner') ? 'PSG Owner' : (identity.roles || []).includes('psg_admin') ? 'PSG Admin' : 'Agen') +
+          ' · ' + esc(identity.status === 'nonaktif' ? 'Nonaktif' : 'Aktif') + '" readonly aria-readonly="true"></div></div>' +
+        (setup ? '<p class="catatan">Setup satu kali khusus PSG Owner. Setelah disimpan, kode dan level dikunci.</p>' : '') +
+        '<div class="baris"><div><label>Foto agen</label>' +
+        '<div class="akt-foto-baris"><label class="sambutan-foto" title="Ketuk untuk mengganti foto">' +
+        (foto ? '<img src="' + esc(foto) + '" alt="Foto agen">' : '<span class="sambutan-ikon">\u{1F464}</span>') +
+        '<input type="file" id="aktFotoAgen" accept="image/*" hidden></label>' +
+        '<div class="akt-foto-aksi"><button class="sakelar" id="aktGantiFoto" type="button">' +
+        (foto ? 'Ganti foto' : 'Unggah foto') + '</button>' +
+        (foto ? '<button class="sakelar" id="hapusFotoAgen" type="button">Hapus foto</button>' : '') +
+        '</div></div><p class="catatan">Foto disimpan pada perangkat ini untuk akun Identity yang sedang masuk.</p></div>' +
+        '<div><label for="aktAgenHp">Nomor HP</label>' +
+        '<input id="aktAgenHp" type="tel" inputmode="numeric" value="' + esc(a.hp) + '" placeholder="0812..."></div></div>' +
+        '<button class="sakelar" id="aktSimpanHp" type="button">Simpan nomor HP</button>' +
+        (setup ? ' <button class="aksi" id="aktSetupProfilOwner" type="button">Simpan setup identitas</button>' : '') +
+        '<p class="catatan" id="aktIdentitasStatus" role="status" aria-live="polite"></p>';
+      return;
+    }
     kotak.innerHTML =
       '<h2>Identitas agen</h2>' +
       '<p class="catatan">Diisi sekali. Dipakai sebagai kepala rekap klaim agar ' +
@@ -108,7 +153,7 @@
       '<label class="sambutan-foto" title="Ketuk untuk mengganti foto">' +
       (fotoAgen() ? '<img src="' + esc(fotoAgen()) + '" alt="Foto agen">'
         : '<span class="sambutan-ikon">\u{1F464}</span>') +
-      '<input type="file" id="fotoAgen" accept="image/*" hidden></label>' +
+      '<input type="file" id="aktFotoAgen" accept="image/*" hidden></label>' +
       '<div class="akt-foto-aksi">' +
       '<button class="sakelar" id="aktGantiFoto" type="button">' +
       (fotoAgen() ? 'Ganti foto' : 'Unggah foto') + '</button>' +
@@ -121,7 +166,49 @@
   }
 
   function fotoAgen() {
-    try { return localStorage.getItem('insuranceHub.agen.foto.v1') || ''; } catch (_) { return ''; }
+    try {
+      const key = typeof window.InsuranceHubCurrentPhotoKey === 'function'
+        ? window.InsuranceHubCurrentPhotoKey() : 'insuranceHub.agen.foto.v1';
+      return key ? localStorage.getItem(key) || '' : '';
+    } catch (_) { return ''; }
+  }
+
+  async function setupProfilOwner() {
+    const tombol = el('aktSetupProfilOwner');
+    const status = el('aktIdentitasStatus');
+    const kode = el('aktAgenKode');
+    const level = el('aktAgenLevel');
+    if (!tombol || !kode || !level) return;
+    const identity = window.InsuranceHubIdentity || {};
+    const kodeAgen = String(identity.kodeAgen || kode.value || '').trim();
+    const levelAgen = String(identity.level || level.value || '').trim();
+    if (!kodeAgen || !levelAgen) {
+      if (status) status.textContent = 'Isi kode agen dan pilih level terlebih dahulu.';
+      return;
+    }
+    tombol.disabled = true;
+    if (status) status.textContent = 'Menyimpan setup identitas…';
+    try {
+      const response = await fetch('/api/psg/profile-setup', {
+        method: 'POST', credentials: 'same-origin', cache: 'no-store',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({ kodeAgen, level: levelAgen })
+      });
+      let data = {};
+      try { data = await response.json(); } catch (_) {}
+      if (!response.ok) throw new Error(data.message || 'Setup identitas tidak dapat disimpan.');
+      const diterapkan = typeof window.InsuranceHubApplyIdentityProfile === 'function' &&
+        window.InsuranceHubApplyIdentityProfile(data.user);
+      if (!diterapkan && (typeof window.InsuranceHubRefreshIdentityProfile !== 'function' ||
+          !await window.InsuranceHubRefreshIdentityProfile())) {
+        throw new Error('Data tersimpan, tetapi profile server belum dapat dimuat ulang. Muat ulang halaman.');
+      }
+      if (status) status.textContent = 'Identitas berhasil disimpan dan dikunci.';
+      segarkan();
+    } catch (error) {
+      if (status) status.textContent = error && error.message ? error.message : 'Setup identitas gagal.';
+      tombol.disabled = false;
+    }
   }
 
   /* ---------- Ringkasan poin ---------- */
@@ -712,8 +799,25 @@
         return;
       }
 
+      if (t.closest('#aktSimpanHp')) {
+        const identity = window.InsuranceHubIdentity;
+        if (identity && identity.source === 'server:/api/psg/me') {
+          if (A.agenHpTulis) A.agenHpTulis(el('aktAgenHp').value);
+          else {
+            const lokal = A.agenLokalBaca ? A.agenLokalBaca() : { hp: '' };
+            lokal.hp = A.rapikanHp(el('aktAgenHp').value);
+            A.agenTulis(lokal);
+          }
+          const status = el('aktIdentitasStatus');
+          if (status) status.textContent = 'Nomor HP lokal tersimpan di perangkat ini.';
+          return;
+        }
+      }
+
+      if (t.closest('#aktSetupProfilOwner')) { setupProfilOwner(); return; }
+
       if (t.closest('#aktGantiFoto')) {
-        const f = el('fotoAgen');
+        const f = el('aktFotoAgen');
         if (f) f.click();
         return;
       }
@@ -1073,6 +1177,8 @@
     pasangPeristiwa();
     pasangPemisahRibuan();
     segarkan();
+    window.addEventListener('psg:identity-ready', segarkan);
+    window.addEventListener('psg:identity-photo-updated', segarkan);
   }
 
   if (document.readyState === 'loading') {
