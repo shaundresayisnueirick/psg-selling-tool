@@ -220,3 +220,109 @@
   html body .psg-print-disclaimer,
   html body .psg-sangkalan{font-size:9.5pt!important;line-height:1.42!important}
 }
+
+/* ---------- BeSMART Lite Future: distribusi cetak A4 ----------
+   Hanya berlaku saat laporan LF aktif dicetak. Layar dan cetak produk lain
+   tetap menggunakan aturan di atas. */
+@media print{
+  html body.print-wide:has(#layarRingkasan.aktif){page:auto!important}
+  html body #layarRingkasan.aktif{
+    animation:none!important;
+    transform:none!important;
+  }
+  html body #layarRingkasan .kop{
+    padding:4mm 5mm!important;
+    margin:0 0 3mm!important;
+  }
+  html body #layarRingkasan .kop .identitas{
+    gap:2.5mm 5mm!important;
+    margin-top:3mm!important;
+    padding-top:2.5mm!important;
+  }
+  html body #layarRingkasan > .blok{
+    padding:3mm 4mm!important;
+    margin-bottom:3mm!important;
+    break-inside:auto!important;
+    page-break-inside:auto!important;
+  }
+  html body #layarRingkasan > .blok > h2{
+    margin:0 0 2mm!important;
+    padding-bottom:1.5mm!important;
+    font-size:12pt!important;
+    line-height:1.2!important;
+  }
+  html body #layarRingkasan .identitas{gap:2mm 4mm!important;margin-top:2mm!important}
+  html body #layarRingkasan .identitas div{font-size:9pt!important;line-height:1.25!important}
+  html body #layarRingkasan .identitas b{font-size:10pt!important;margin-top:1mm!important}
+  html body #layarRingkasan .rel{padding-left:6mm!important}
+  html body #layarRingkasan .rel:before{left:2mm!important}
+  html body #layarRingkasan .stasiun{
+    padding:2mm 0!important;
+    break-inside:avoid!important;
+    page-break-inside:avoid!important;
+  }
+  html body #layarRingkasan .stasiun .premi{font-size:13pt!important;line-height:1.15!important;margin:1mm 0!important}
+  html body #layarRingkasan .stasiun .rinci{font-size:8.5pt!important;line-height:1.25!important}
+  html body #layarRingkasan .stasiun .up,
+  html body #layarRingkasan .stasiun .usia{font-size:9pt!important}
+  html body #layarRingkasan .ikhtisar{gap:2mm!important}
+  html body #layarRingkasan .ikhtisar .kartu{padding:2.5mm 3mm!important}
+  html body #layarRingkasan .ikhtisar .kartu .k{font-size:9pt!important}
+  html body #layarRingkasan .ikhtisar .kartu .v{font-size:12pt!important;line-height:1.2!important}
+  html body #layarRingkasan .lf-chart-shell{
+    padding:2.5mm 3mm!important;
+    break-inside:avoid!important;
+    page-break-inside:avoid!important;
+  }
+  html body #layarRingkasan > .blok:has(> #grafikPensiun),
+  html body #layarRingkasan > .blok:has(> #grafikJiwa){
+    break-inside:avoid!important;
+    page-break-inside:avoid!important;
+  }
+  html body #layarRingkasan .lf-chart-title{font-size:11pt!important;line-height:1.15!important}
+  html body #layarRingkasan .lf-chart-subtitle{font-size:9pt!important;margin:1mm 0 2mm!important}
+  html body #layarRingkasan .lf-chart-area{height:190px!important;padding-top:2mm!important;overflow:visible!important}
+  html body #layarRingkasan .lf-chart-gridline[style*="top:18%"]{top:15%!important}
+  html body #layarRingkasan .lf-chart-gridline[style*="top:60%"]{top:35%!important}
+  html body #layarRingkasan .lf-chart-gridline[style*="top:102%"]{top:55%!important}
+  html body #layarRingkasan .lf-chart-gridline[style*="top:144%"]{top:75%!important}
+  html body #layarRingkasan .lf-chart-gridline[style*="top:186%"]{top:95%!important}
+  html body #layarRingkasan .lf-chart-bars{gap:5px!important}
+  html body #layarRingkasan .lf-chart-value{font-size:8.5pt!important;height:25px!important}
+  html body #layarRingkasan .lf-chart-label{font-size:8.5pt!important;margin-top:1mm!important}
+  html body #layarRingkasan .lf-chart-sub{font-size:7.5pt!important}
+  html body #layarRingkasan .lf-chart-note{font-size:8.5pt!important;line-height:1.25!important;margin:2mm auto 0!important}
+  html body #layarRingkasan .catatan{font-size:9pt!important;line-height:1.3!important}
+  html body #layarRingkasan .blok:has(> #grafikPensiun){break-before:page!important;page-break-before:always!important}
+  html body #layarRingkasan .blok:has(> #grafikJiwa){break-after:page!important;page-break-after:always!important}
+  html body #layarRingkasan #lfWaiverBlok .blok{
+    padding:3mm 3.5mm!important;
+    margin-bottom:3mm!important;
+    break-inside:avoid!important;
+    page-break-inside:avoid!important;
+  }
+  html body #layarRingkasan #lfWaiverBlok table.tahunan{
+    width:100%!important;
+    max-width:100%!important;
+    table-layout:fixed!important;
+    font-size:8pt!important;
+    line-height:1.2!important;
+  }
+  html body #layarRingkasan #lfWaiverBlok table.tahunan th{
+    font-size:7.5pt!important;
+    line-height:1.15!important;
+    padding:2px 2.5px!important;
+    white-space:normal!important;
+    overflow-wrap:break-word!important;
+  }
+  html body #layarRingkasan #lfWaiverBlok table.tahunan td{
+    font-size:8pt!important;
+    line-height:1.2!important;
+    padding:2px 2.5px!important;
+    white-space:normal!important;
+    overflow-wrap:anywhere!important;
+  }
+  html body #layarRingkasan #lfWaiverBlok table.tahunan td.angka,
+  html body #layarRingkasan #lfWaiverBlok table.tahunan td.kanan{white-space:normal!important}
+  html body #layarRingkasan .psg-consultant-print{margin-top:3mm!important;padding-top:2mm!important}
+}
