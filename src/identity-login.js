@@ -150,6 +150,28 @@
     return profile;
   }
 
+  /* Dipakai setelah setup resmi owner tersimpan di app_metadata.psg.
+     Muat ulang data melalui endpoint server sebelum memperbarui semua layar. */
+  window.InsuranceHubRefreshIdentityProfile = async function () {
+    var profile = await validasiSesiAda();
+    if (!profile) return false;
+    bukaAplikasi(profile);
+    return true;
+  };
+
+  /* Profil dari respons function setup juga berasal langsung dari Identity
+     Admin API. Cocokkan email dan role sesi sebelum menerapkannya ke runtime. */
+  window.InsuranceHubApplyIdentityProfile = function (profile) {
+    var current = window.InsuranceHubIdentity;
+    var email = String(profile && profile.email || '').trim().toLowerCase();
+    if (!current || current.source !== 'server:/api/psg/me' || !email ||
+        email !== String(current.email || '').trim().toLowerCase() ||
+        !(Array.isArray(profile.roles) && profile.roles.indexOf('psg_owner') >= 0) ||
+        profile.status === 'nonaktif') return false;
+    bukaAplikasi(profile);
+    return true;
+  };
+
   function pasangFormEmail(gate) {
     if (!gate || gate.dataset.psgIdentityReady === '1') return;
     var card = gate.querySelector('.insurance-access-card');

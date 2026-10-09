@@ -86,8 +86,22 @@
     return awalan + '-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2);
   }
 
-  const agenBaca = () => baca(K_AGEN, { nama: '', kode: '', hp: '' });
+  const agenLokalBaca = () => baca(K_AGEN, { nama: '', kode: '', hp: '' });
+  const agenBaca = () => {
+    const a = agenLokalBaca();
+    const identity = window.InsuranceHubIdentity;
+    if (identity && identity.source === 'server:/api/psg/me') {
+      a.nama = identity.nama || '';
+      a.kode = identity.kodeAgen || '';
+    }
+    return a;
+  };
   const agenTulis = (a) => tulis(K_AGEN, a);
+  const agenHpTulis = (hp) => {
+    const a = agenLokalBaca();
+    a.hp = rapikanHp(hp);
+    return agenTulis(a);
+  };
   const kejadianBaca = () => baca(K_KEJADIAN, []);
   const kejadianTulis = (l) => tulis(K_KEJADIAN, l);
   const klaimBaca = () => baca(K_KLAIM, []);
@@ -707,7 +721,7 @@
     ATURAN_POIN: ATURAN_POIN, KONTES: KONTES, PRODUK: PRODUK,
     PENGALI_FREKUENSI: PENGALI_FREKUENSI,
     baca: baca, tulis: tulis, uid: uid,
-    agenBaca: agenBaca, agenTulis: agenTulis,
+    agenBaca: agenBaca, agenTulis: agenTulis, agenLokalBaca: agenLokalBaca, agenHpTulis: agenHpTulis,
     kejadianBaca: kejadianBaca, kejadianTulis: kejadianTulis,
     klaimBaca: klaimBaca, klaimTulis: klaimTulis,
     rapikanHp: rapikanHp, hpWa: hpWa, kunciProspek: kunciProspek,

@@ -130,7 +130,7 @@
     document.__fotoAgenSiap = true;
 
     document.addEventListener('change', function (e) {
-      if (!e.target || e.target.id !== 'fotoAgen') return;
+      if (!e.target || (e.target.id !== 'fotoAgen' && e.target.id !== 'aktFotoAgen')) return;
       const berkas = e.target.files && e.target.files[0];
       if (!berkas) return;
       const key = fotoKeyAktif();
@@ -143,6 +143,7 @@
             return;
           }
           pasangSambutan();
+          window.dispatchEvent(new Event('psg:identity-photo-updated'));
         });
       };
       pembaca.readAsDataURL(berkas);
@@ -155,6 +156,7 @@
         const key = fotoKeyAktif();
         if (key) try { localStorage.removeItem(key); } catch (_) {}
         pasangSambutan();
+        window.dispatchEvent(new Event('psg:identity-photo-updated'));
       }
     });
   }
