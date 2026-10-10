@@ -56,4 +56,16 @@ assert.strictEqual(Math.round(ilustrasiUSIN.premiTahunan), 482542500,
 assert.strictEqual(Math.round(ilustrasiUSIN.premiTahunan * 5), 2412712500,
   'Total BSL selama lima tahun harus menjadi Rp2.412.712.500.');
 
-console.log('COMBO BSL LITE UP DISCOUNT: LULUS — ambang Rp2,5 miliar, diskon rider saja, dan kasus USIN cocok.');
+const genAmanTanpaWaiverPerTahun = 509183125;
+assert.strictEqual(
+  Math.round(ilustrasiUSIN.premiTahunan + genAmanTanpaWaiverPerTahun),
+  991725625,
+  'Total kombinasi USIN tanpa waiver harus menjadi Rp991.725.625 per tahun.'
+);
+assert.strictEqual(
+  Math.round((ilustrasiUSIN.premiTahunan + genAmanTanpaWaiverPerTahun) * 5),
+  4958628125,
+  'Total kombinasi USIN selama lima tahun harus menjadi Rp4.958.628.125.'
+);
+
+console.log('COMBO BSL LITE UP DISCOUNT: LULUS — ambang Rp2,5 miliar, diskon rider saja, dan total kombinasi USIN cocok.');
