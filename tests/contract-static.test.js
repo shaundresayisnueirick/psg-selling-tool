@@ -55,8 +55,8 @@ const JS_DIIZINKAN = {
   }],
   'src/app.js': [{
     dari: '34593519c233710ed358d93f3392c048f3b6614be086daef8f0f50dffcf69164',
-    ke: 'accdefa3c35f29336e9f962681a02fd7ba7f838a0785a7189464111e39425d20',
-    alasan: 'BeSMART Lite Future: usia yang tidak tersedia disembunyikan dari kalkulator dan ringkasan; kontrol tampil ON/OFF dan ringkasan/cetak hanya memuat usia tersedia yang aktif. Rumus premi dan mesin produk tidak diubah. Perubahan ini sudah diverifikasi targeted test BeSMART 15/15.',
+    ke: 'ac9d21f76b26c90a84d7e475f06f14557e385791ff6de8c36cf63877cb749f14',
+    alasan: 'BeSMART Lite Future: usia yang tidak tersedia disembunyikan dari kalkulator dan ringkasan; kontrol tampil ON/OFF dan ringkasan/cetak hanya memuat usia tersedia yang aktif. Rumus premi LF tidak diubah. Tambahan perbaikan Kombinasi Produk: diskon 25% diterapkan hanya ke tarif rider Lite UP 400% saat total UP paket >= Rp2,5 miliar; premi UP dasar tidak didiskon. Regresi khusus disediakan di tests/combo-bsl-lite-up-discount.test.js.',
   }],
   'src/umum.js': [{
     dari: '8b9f2031e17ec447660806c40c3a52e2ec0c0d2d9a07d582ac665f4e6c2b5b14',
