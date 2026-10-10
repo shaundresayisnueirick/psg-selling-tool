@@ -196,7 +196,7 @@ async function undang(body: Record<string, unknown>, aktor: User, deps: DepsAgen
   if (!nama) return gagal(400, 'invalid_name', 'Nama agen wajib diisi.')
   if (!JENJANG.includes(level)) return gagal(400, 'invalid_level', 'Level harus FC, BM, atau BD.')
   if (!['agent', 'psg_admin'].includes(role)) return gagal(400, 'invalid_role', 'Role tidak valid.')
-  if (role === 'psg_admin' && !isOwner(aktor)) return gagal(403, 'forbidden_role', 'Hanya PSG Owner yang boleh membuat PSG Admin.')
+  if (role === 'psg_admin' && !isOwner(aktor) && !isAdmin(aktor)) return gagal(403, 'forbidden_role', 'Hanya PSG Owner/Admin yang boleh membuat PSG Admin.')
 
   /* Endpoint undangan resmi: membuat akun invited + mengirim email undangan. */
   let diundang: User | null
