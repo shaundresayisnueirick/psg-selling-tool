@@ -3619,6 +3619,13 @@ function comboTarifGSPA(tabel, mpp, jk, usia) {
   return b ? (b[String(usia)] || 0) : 0;
 }
 
+/* Faktor diskon rider Lite UP pada BeSMART Lite.
+   Ambang dihitung dari total UP paket (UP dasar + Lite UP), sama seperti
+   mesin kalkulator BeSMART Lite tersendiri. Premi UP dasar tidak didiskon. */
+function comboBSLFaktorDiskonLiteUp(totalUP) {
+  return Number(totalUP) >= 2500000000 ? 0.75 : 1;
+}
+
 function comboSlot(inp, s, tarifSemua) {
   const o = { produk: s.produk, lamaBayar: s.lamaBayar, lamaLindung: s.lamaLindung,
               up: s.up, sah: false, status: 'Nonaktif' };
@@ -3846,7 +3853,13 @@ function comboSlot(inp, s, tarifSemua) {
     const tabelMpp = lengkap && lengkap.mpp ? lengkap.mpp[String(s.lamaBayar)] : null;
     const tabelJK = tabelMpp ? tabelMpp[String(inp.jk).toUpperCase()] : null;
     const komponen = tabelJK ? tabelJK[String(usia)] : null;
-    dasar = komponen ? (Number(komponen[0]) || 0) + (Number(komponen[1]) || 0) : 0;
+    /* Tarif komponen[1] adalah rider Lite UP 400%. Mulai total UP paket
+       Rp2,5 miliar, hanya rider ini mendapat diskon 25%; premi dasar tetap
+       penuh. Ini menyamakan COMBO dengan mesin BeSMART Lite tersendiri. */
+    const faktorLiteUp = comboBSLFaktorDiskonLiteUp(s.up);
+    dasar = komponen
+      ? (Number(komponen[0]) || 0) + (Number(komponen[1]) || 0) * faktorLiteUp
+      : 0;
     basis = 500000000;
   }
   if (!dasar) {
