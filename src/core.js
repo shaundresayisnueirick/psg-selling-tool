@@ -669,6 +669,23 @@ function cpRenderInsuredSelector(nama){
   if(!profile) return;
   const members=cpFamilyMembers(profile);
   if(!members.length) return;
+  const apply=(id)=>{
+    if(id==='__manual__'){
+      /* Isian dibiarkan apa adanya supaya yang diketik agen tidak hilang. */
+      cpManual.add(nama);
+      cpSelectedFamily=null;
+      return;
+    }
+    cpManual.delete(nama);
+    const m=members.find(x=>x.id===id)||members[0]; if(!m)return;
+    cpSelectedFamily={...m,profileId:profile.id,familyName:profile.nama||''};
+    el(nameId).value=m.nama||''; el(nameId).dispatchEvent(new Event('input',{bubbles:true}));
+    const tglMap={LF:'fTgl',BSL:'bTgl',CRIS:'cTgl',CEM:'mTgl',KMB:'kTgl',GSPA:'gTgl',FLEX:'xTgl',GHP:'hTgl',DP:'dTgl',KPR:'pTgl',R2:'rTgl',GPRO:'qTgl',RAYA:'rayaTglLahir'};
+    const jkMap={LF:'fJK',BSL:'bJK',CRIS:'cJK',CEM:'mJK',KMB:'kJK',GSPA:'gJK',FLEX:null,GHP:'hJK',DP:'dJK',KPR:null,R2:'rJK',GPRO:'qJK',RAYA:null};
+    const t=tglMap[nama], j=jkMap[nama];
+    if(t && el(t)){el(t).value=m.tglLahir||'';el(t).dispatchEvent(new Event('input',{bubbles:true}));}
+    if(j) cpSetProductGender(j,m.jk);
+  };
   /* Selector disisipkan sebagai sibling sebelum .baris input utama. Kalau
      sudah ada, dipakai ulang selama masih MILIK profil aktif yang sama.
      Sebelumnya fungsi ini langsung berhenti begitu menemukan selector lama,
@@ -678,7 +695,13 @@ function cpRenderInsuredSelector(nama){
      usia yang salah berarti tarif yang salah. */
   const lama=host.parentElement.querySelector('[data-cp-insured-selector]');
   if(lama){
-    if(lama.dataset.cpProfileId===String(profile.id)) return;
+    if(lama.dataset.cpProfileId===String(profile.id)){
+      /* Back dari Ringkasan memicu auto-fill profil utama. Terapkan ulang
+         pilihan tertanggung yang masih tersimpan di dropdown yang sama. */
+      const existingSelect=lama.querySelector('select');
+      if(existingSelect) apply(existingSelect.value);
+      return;
+    }
     lama.remove();
   }
   const wrap=document.createElement('div'); wrap.setAttribute('data-cp-insured-selector','1');
@@ -701,23 +724,7 @@ function cpRenderInsuredSelector(nama){
   if(cpManual.has(nama)) currentId='__manual__';
   select.value=currentId;
   wrap.appendChild(field); host.parentElement.insertBefore(wrap, host);
-  const apply=(id)=>{
-    if(id==='__manual__'){
-      /* Isian dibiarkan apa adanya supaya yang diketik agen tidak hilang. */
-      cpManual.add(nama);
-      cpSelectedFamily=null;
-      return;
-    }
-    cpManual.delete(nama);
-    const m=members.find(x=>x.id===id)||members[0]; if(!m)return;
-    cpSelectedFamily={...m,profileId:profile.id,familyName:profile.nama||''};
-    el(nameId).value=m.nama||''; el(nameId).dispatchEvent(new Event('input',{bubbles:true}));
-    const tglMap={LF:'fTgl',BSL:'bTgl',CRIS:'cTgl',CEM:'mTgl',KMB:'kTgl',GSPA:'gTgl',FLEX:'xTgl',GHP:'hTgl',DP:'dTgl',KPR:'pTgl',R2:'rTgl',GPRO:'qTgl',RAYA:'rayaTglLahir'};
-    const jkMap={LF:'fJK',BSL:'bJK',CRIS:'cJK',CEM:'mJK',KMB:'kJK',GSPA:'gJK',FLEX:null,GHP:'hJK',DP:'dJK',KPR:null,R2:'rJK',GPRO:'qJK',RAYA:null};
-    const t=tglMap[nama], j=jkMap[nama];
-    if(t && el(t)){el(t).value=m.tglLahir||'';el(t).dispatchEvent(new Event('input',{bubbles:true}));}
-    if(j) cpSetProductGender(j,m.jk);
-  };
+
   select.addEventListener('change',()=>apply(select.value));
   /* Selecting the profile screen again always starts from self unless the
      user has explicitly chosen another member on the current screen. */

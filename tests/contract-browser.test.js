@@ -230,12 +230,32 @@ async function main() {
     /* Profil Nasabah + auto-fill */
     await open(pg, 'PROFILE');
     await setVal(pg, 'cpNama', 'Sinta Kontrak'); await setVal(pg, 'cpTgl', '1988-04-12'); await setVal(pg, 'cpPenghasilan', '15.000.000');
+    await setVal(pg, 'cpPasangan', 'Istri Sinta Kontrak'); await setVal(pg, 'cpPasanganDob', '1990-06-15'); await setVal(pg, 'cpStatus', 'Menikah');
     await clickSeg(pg, 'cpJK', 'WANITA');
     await pg.click('#cpSimpan'); await pg.waitForTimeout(400);
     R.profile = await pg.evaluate(() => ({ saved: JSON.parse(localStorage.getItem('insuranceHub.customerProfiles.v1') || '[]').length,
       active: !!localStorage.getItem('insuranceHub.customerProfile.active.v1'), screen: document.querySelector('.layar.aktif').id,
       fill: ['fNama', 'bNama', 'cNama', 'mNama', 'gNama', 'xNama', 'hNama', 'qNama', 'rayaNama'].map((id) => (document.getElementById(id) || {}).value) }));
     ok(R.profile.saved === 1 && R.profile.active && R.profile.fill.every((v) => v === 'Sinta Kontrak'), 'Profil / auto-fill gagal: ' + JSON.stringify(R.profile));
+
+    /* Regresi: pilihan anggota keluarga harus bertahan saat kembali dari Ringkasan. */
+    await open(pg, 'LF');
+    await pg.selectOption('#layarLF [data-cp-insured-selector] select', 'spouse');
+    const spouseBefore = await pg.evaluate(() => ({
+      selected: document.querySelector('#layarLF [data-cp-insured-selector] select')?.value,
+      nama: document.getElementById('fNama')?.value
+    }));
+    ok(spouseBefore.selected === 'spouse' && spouseBefore.nama === 'Istri Sinta Kontrak',
+      'Pemilihan pasangan mengisi kalkulator', spouseBefore);
+    await open(pg, 'LF_RINGKAS');
+    await open(pg, 'LF');
+    const spouseAfter = await pg.evaluate(() => ({
+      selected: document.querySelector('#layarLF [data-cp-insured-selector] select')?.value,
+      nama: document.getElementById('fNama')?.value
+    }));
+    ok(spouseAfter.selected === 'spouse' && spouseAfter.nama === 'Istri Sinta Kontrak',
+      'Kembali dari Ringkasan mempertahankan pasangan sebagai tertanggung', spouseAfter);
+    await pg.selectOption('#layarLF [data-cp-insured-selector] select', 'self');
 
     /* Hook judul ilustrasi -> presentasi tercatat */
     await open(pg, 'LF'); await setVal(pg, 'fTgl', '1988-04-12'); await pg.waitForTimeout(200);

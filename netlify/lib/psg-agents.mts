@@ -155,13 +155,13 @@ async function pelaku(deps: DepsAgents): Promise<User> {
   let sesi: User | null = null
   try { sesi = await deps.ambilUser() } catch (_) { sesi = null }
   if (!sesi || !sesi.id) throw new GalatAgen(401, 'unauthenticated', 'Silakan login dengan akun PSG.')
-  if (!isOwner(sesi) && !isAdmin(sesi)) throw new GalatAgen(403, 'forbidden', 'Akses Invite Agen hanya untuk PSG Owner/Admin.')
+  if (!isOwner(sesi) && !isAdmin(sesi)) throw new GalatAgen(403, 'forbidden', 'Akses Invite Agen hanya untuk PSG Dev/Admin.')
   const segar = await ambilTarget(deps, sesi.id).catch((e) => {
-    if (e instanceof GalatAgen && e.status === 404) throw new GalatAgen(403, 'forbidden', 'Akses Invite Agen hanya untuk PSG Owner/Admin.')
+    if (e instanceof GalatAgen && e.status === 404) throw new GalatAgen(403, 'forbidden', 'Akses Invite Agen hanya untuk PSG Dev/Admin.')
     throw e
   })
   if (profilAman(segar).status === 'nonaktif') throw new GalatAgen(403, 'inactive', 'Akun kamu nonaktif.')
-  if (!isOwner(segar) && !isAdmin(segar)) throw new GalatAgen(403, 'forbidden', 'Akses Invite Agen hanya untuk PSG Owner/Admin.')
+  if (!isOwner(segar) && !isAdmin(segar)) throw new GalatAgen(403, 'forbidden', 'Akses Invite Agen hanya untuk PSG Dev/Admin.')
   return segar
 }
 
@@ -196,7 +196,7 @@ async function undang(body: Record<string, unknown>, aktor: User, deps: DepsAgen
   if (!nama) return gagal(400, 'invalid_name', 'Nama agen wajib diisi.')
   if (!JENJANG.includes(level)) return gagal(400, 'invalid_level', 'Level harus FC, BM, atau BD.')
   if (!['agent', 'psg_admin'].includes(role)) return gagal(400, 'invalid_role', 'Role tidak valid.')
-  if (role === 'psg_admin' && !isOwner(aktor)) return gagal(403, 'forbidden_role', 'Hanya PSG Owner yang boleh membuat PSG Admin.')
+  if (role === 'psg_admin' && !isOwner(aktor) && !isAdmin(aktor)) return gagal(403, 'forbidden_role', 'Hanya PSG Dev/Admin yang boleh membuat PSG Admin.')
 
   /* Endpoint undangan resmi: membuat akun invited + mengirim email undangan. */
   let diundang: User | null

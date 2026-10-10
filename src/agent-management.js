@@ -2,13 +2,13 @@
 (function(){
   'use strict';
   const ENDPOINT='/api/psg/agents';
-  const state={owner:false,users:[],q:''};
+  const state={owner:false,admin:false,users:[],q:''};
   const $=(id)=>document.getElementById(id);
   function nav(show){ document.querySelectorAll('.psg-admin-only[data-psg-nav="manajemen"]').forEach(b=>{b.hidden=!show;b.setAttribute('aria-hidden',show?'false':'true')}) }
   async function getMe(){ const r=await fetch('/api/psg/me',{cache:'no-store',credentials:'same-origin'}); if(!r.ok)return null; const d=await r.json().catch(()=>({})); return d.authenticated?d.user:null }
   async function api(method='GET',body){ const r=await fetch(ENDPOINT,{method,cache:'no-store',credentials:'same-origin',headers:{Accept:'application/json',...(body?{'Content-Type':'application/json'}:{})},...(body?{body:JSON.stringify(body)}:{})}); const raw=await r.text(); let d={}; try{d=raw?JSON.parse(raw):{}}catch(_){} if(!r.ok){const detail=d.message||raw.trim().replace(/\\s+/g,' ').slice(0,300)||('HTTP '+r.status); const err=new Error(detail);err.code=d.error||'';err.accountCreated=Boolean(d.accountCreated);err.status=r.status;err.payload=d;throw err} return d }
   const esc=(v)=>String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-  function role(u){return (u.roles||[]).includes('psg_owner')?'PSG Owner':(u.roles||[]).includes('psg_admin')?'PSG Admin':(u.level||'Agen')}
+  function role(u){return (u.roles||[]).includes('psg_owner')?'PSG Dev':(u.roles||[]).includes('psg_admin')?'PSG Admin':(u.level||'Agen')}
   function canEdit(u){if((u.roles||[]).includes('psg_owner'))return false;return state.owner || !(u.roles||[]).includes('psg_admin')}
   function render(){
     const list=$('agentMgmtList');if(!list)return;
@@ -28,13 +28,13 @@
     $('agentMgmtModalSub').textContent=mode==='invite'?'Buat akun PSG lalu kirim link email untuk membuat password.':'Perbarui identitas, level, status, atau role PSG Admin.';
     $('agentMgmtEmail').value=u?.email||'';$('agentMgmtEmail').disabled=mode!=='invite';
     $('agentMgmtNama').value=u?.nama||'';$('agentMgmtKode').value=u?.kodeAgen||'';$('agentMgmtLevel').value=u?.level||'FC';$('agentMgmtStatus').value=u?.status||'aktif';
-    $('agentMgmtRole').value=(u?.roles||[]).includes('psg_admin')?'psg_admin':'agent';$('agentMgmtRoleWrap').hidden=!state.owner;
+    $('agentMgmtRole').value=(u?.roles||[]).includes('psg_admin')?'psg_admin':'agent';$('agentMgmtRoleWrap').hidden=!state.owner&&!(mode==='invite'&&state.admin);
     if(mode==='invite')$('agentMgmtRole').value='agent';
     m.hidden=false;$('agentMgmtNama').focus();
   }
   function close(){if($('agentMgmtModal'))$('agentMgmtModal').hidden=true}
   async function load(){ $('agentMgmtList').innerHTML='<div class="agent-mgmt-empty">Memuat data agen…</div>'; try{state.users=(await api()).users||[];render()}catch(_){$('agentMgmtList').innerHTML='<div class="agent-mgmt-empty">Data agen tidak dapat dimuat. Periksa hak akses dan koneksi.</div>'} }
-  async function authorize(){const me=await getMe();const roles=me?.roles||[];const ok=roles.includes('psg_owner')||roles.includes('psg_admin');state.owner=roles.includes('psg_owner');nav(ok);return ok}
+  async function authorize(){const me=await getMe();const roles=me?.roles||[];const ok=roles.includes('psg_owner')||roles.includes('psg_admin');state.owner=roles.includes('psg_owner');state.admin=roles.includes('psg_admin');nav(ok);return ok}
   function bind(){
     document.addEventListener('click',async(e)=>{
       const t=e.target instanceof Element?e.target:null;if(!t)return;
