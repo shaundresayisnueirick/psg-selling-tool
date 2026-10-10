@@ -189,9 +189,13 @@ async function main() {
   }
   {
     const g = gotrue(SEMUA);
-    let r = await jalan(g, sesi(ADMIN), 'POST', { email: 'adm@psg.test', nama: 'Adm', level: 'BM', role: 'psg_admin' });
-    cek(r.status === 403 && lewat(g, 'POST', '/invite').length === 0, 'admin tidak bisa mengundang PSG Admin', r.status);
-    r = await jalan(g, sesi(OWNER), 'POST', { email: 'adm@psg.test', nama: 'Adm', level: 'BM', role: 'psg_admin' });
+    const r = await jalan(g, sesi(ADMIN), 'POST', { email: 'adm-admin@psg.test', nama: 'Adm Admin', level: 'BM', role: 'psg_admin' });
+    cek(r.status === 201 && JSON.stringify(r.body.user.roles) === '["psg_admin"]',
+      'admin boleh mengundang PSG Admin saat role dipilih pada undangan', r.body.user);
+  }
+  {
+    const g = gotrue(SEMUA);
+    let r = await jalan(g, sesi(OWNER), 'POST', { email: 'adm@psg.test', nama: 'Adm', level: 'BM', role: 'psg_admin' });
     cek(r.status === 201 && JSON.stringify(r.body.user.roles) === '["psg_admin"]', 'owner mengundang PSG Admin', r.body.user);
     r = await jalan(g, sesi(OWNER), 'POST', { email: 'fc@psg.test', nama: 'FC', level: 'FC' });
     cek(r.status === 409 && r.body.error === 'already_exists' && g.log.filter((x) => x.method === 'PUT').length === 1,
