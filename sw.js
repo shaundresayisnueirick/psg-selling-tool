@@ -15,7 +15,7 @@
    - Hanya jawaban yang benar-benar berhasil (status 200) yang disimpan,
      sehingga halaman error tidak pernah ikut tersimpan. */
 
-const VERSI = 'insurance-hub-v117.1.18';
+const VERSI = 'insurance-hub-v117.1.19';
 
 /* Semua berkas inti ikut disimpan sejak pemasangan, supaya aplikasi tetap
    utuh walaupun kunjungan pertama terputus di tengah jalan.
