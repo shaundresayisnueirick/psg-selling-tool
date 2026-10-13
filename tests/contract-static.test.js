@@ -50,8 +50,11 @@ const JS_DIIZINKAN = {
   }],
   'src/core.js': [{
     dari: '385c5f77851f6b5b5c94b6e3bf6d65d3df77faef9b21a1c9cd4aa137c1833c7c',
-    ke: '1a70863363e8e8f870636879316012e0997c1a8d17bdea9abbeb6f131159ad5f',
-    alasan: 'Profil Nasabah: konteks kelanjutan Sales Idea tetap hanya di memori; data tersimpan dan kalkulator tetap memakai profil aktif. Form baru dibuka kosong; Edit → Batal mengosongkan form tanpa mengubah rekaman, dan Simpan mengosongkan form setelah memperbarui rekaman. Tanggal lahir mendukung ketik DD/MM/YYYY dengan auto-slash, validasi kalender, date picker native terpisah, dan satu nilai internal YYYY-MM-DD untuk engine usia serta kompatibilitas profil lama. Tidak mengubah rumus usia atau data family.',
+    ke: '65d9b9291f74e0a8104f39e01206d90e3e9aaa8871147385a61b3daffcc5879e',
+    alasan: 'Profil Nasabah: konteks kelanjutan Sales Idea tetap hanya di memori; data tersimpan dan kalkulator tetap memakai profil aktif. Form baru dibuka kosong; Edit → Batal mengosongkan form tanpa mengubah rekaman, dan Simpan mengosongkan form setelah memperbarui rekaman. Tanggal lahir mendukung ketik DD/MM/YYYY dengan auto-slash, validasi kalender, date picker native terpisah, dan satu nilai internal YYYY-MM-DD untuk engine usia serta kompatibilitas profil lama. Tidak mengubah rumus usia atau data family. '
+      + 'Sesudah hash 1a708633… (c2ef70e): 43f224d menerapkan ulang pilihan tertanggung keluarga saat dropdown yang sama ditemukan lagi (Back dari Ringkasan). 9f3920e dan d20d4a1 tidak mengubah core.js. '
+      + 'Perbaikan profil keluarga: cpAutofillAll tidak lagi menimpa identitas layar produk yang tertanggungnya anggota keluarga lain atau Ketik manual pada profil aktif yang sama (berganti profil tetap mengisi semua layar); isian identitas hanya ditulis ulang bila nilainya berubah; COMBO ikut memetakan tanggal lahir oTgl dan jenis kelamin oJK; pilihan tertanggung tiap layar dipulihkan sesudah index.html dimuat ulang (kembali dari program-summary.html) lewat storage key Isian Terakhir yang sudah ada (dropdown ber-id cpTertanggung<LAYAR>), dan untuk layarDP (.tanpa-simpan) hanya pilihan tertanggungnya yang dicatat — isian kebutuhan pensiun tetap tidak disimpan; sesudah Edit Profil pada profil aktif yang sama, dropdown tertanggung yang sudah tergambar diperbarui dari data keluarga terbaru (pilihan tetap, anggota yang dihapus kembali ke profil utama) sehingga produk di latar belakang tidak menghitung dengan data anggota yang lama. '
+      + 'Tidak mengubah tarif, rumus premi, autentikasi, Sales Idea, skema data keluarga, atau storage key.',
   }],
   'src/app.js': [{
     dari: '34593519c233710ed358d93f3392c048f3b6614be086daef8f0f50dffcf69164',
@@ -65,8 +68,9 @@ const JS_DIIZINKAN = {
   }],
   'src/library-ilustrasi.js': [{
     dari: '57a58e17a4e9c117431f3d52c24e40bc11c3c26fec0be12b18a2b5d885ebc4d7',
-    ke: 'd48676bfb12d3c028201a6669541aa6f6afb6dea9f11ebfbba4b83a696d90a17',
-    alasan: 'Detail Library: tombol Preview basi (.psg-preview-btn) dan penanda data-preview-attached yang ikut tersimpan di snapshot dibuang, supaya attach() membuat satu tombol Preview baru dengan handler aktif. Tombol cetak/print/PDF di dalam snapshot (listener-nya tidak ikut tersimpan) diberi handler cetakIlustrasi yang sama dengan tombol Cetak modal. Data Library, storage, dan isi snapshot tidak berubah.',
+    ke: '908df7f91ef97df8a518f2c11dce48cdfcdea5783855d12cbf6f0302387c10f1',
+    alasan: 'Detail Library: tombol Preview basi (.psg-preview-btn) dan penanda data-preview-attached yang ikut tersimpan di snapshot dibuang, supaya attach() membuat satu tombol Preview baru dengan handler aktif. Tombol cetak/print/PDF di dalam snapshot (listener-nya tidak ikut tersimpan) diberi handler cetakIlustrasi yang sama dengan tombol Cetak modal. Data Library, storage, dan isi snapshot tidak berubah. '
+      + 'Simpan ke Library: bila dropdown tertanggung produk (cpTertanggung<PRODUK>) bernilai Ketik manual, identitas tertanggung diambil dari isian produk (nama, tanggal lahir, jenis kelamin) dengan relationship Ketik manual dan insuredPersonId manual:<nama>|<tgl> — sebelumnya tercatat self/Diri Sendiri tanpa tanggal lahir sehingga dikelompokkan sebagai profil utama dan tergabung dengannya di Ringkasan 1 Halaman. MAP produk mendapat id tanggal lahir/jenis kelamin. Isi snapshot, angka, dan storage tidak berubah.',
   }],
   'src/aktivitas-ui.js': [{
     dari: 'f79804459cb8b93f3ebbfa4380299a2f4bca485155cf79c844aa703d31aba0cf',

@@ -12,20 +12,20 @@
   function write(a){localStorage.setItem(KEY,JSON.stringify(a))}
   function activeProfile(){try{return window.InsuranceHubCustomerProfile?.active?.()||null}catch(_){return null}}
   const MAP={
-    FLEX:{label:'iFLEXYGUARD 5',name:'xNama'},
-    BSL:{label:'BeSMART Lite',name:'bNama',result:'layarBSLIlus'},
-    LF:{label:'BeSMART Lite Future',name:'fNama'},
-    CRIS:{label:'Cristal Prime',name:'cNama',result:'layarCRISIlus'},
-    CEM:{label:'New Cemerlang Prime',name:'mNama',result:'layarCEMIlus'},
-    KMB:{label:'Kombinasi GSPA + Lite Future',name:'kNama'},
-    COMBO:{label:'Kombinasi Produk',name:'oNama'},
-    GSPA:{label:'Gen Aman / GSPA',name:'gNama'},
-    GHP:{label:'GHP GenPro',name:'hNama',result:'layarGHPIlus'},
-    GPRO:{label:'Gen Pro',name:'qNama',result:'layarGPRORingkas'},
-    RAYA:{label:'RAYA Pro Maxima',name:'rayaNama'},
-    DP:{label:'Dana Pensiun',name:'dNama',result:'layarDPRingkas'},
+    FLEX:{label:'iFLEXYGUARD 5',name:'xNama',tgl:'xTgl'},
+    BSL:{label:'BeSMART Lite',name:'bNama',tgl:'bTgl',jk:'bJK',result:'layarBSLIlus'},
+    LF:{label:'BeSMART Lite Future',name:'fNama',tgl:'fTgl',jk:'fJK'},
+    CRIS:{label:'Cristal Prime',name:'cNama',tgl:'cTgl',jk:'cJK',result:'layarCRISIlus'},
+    CEM:{label:'New Cemerlang Prime',name:'mNama',tgl:'mTgl',jk:'mJK',result:'layarCEMIlus'},
+    KMB:{label:'Kombinasi GSPA + Lite Future',name:'kNama',tgl:'kTgl',jk:'kJK'},
+    COMBO:{label:'Kombinasi Produk',name:'oNama',tgl:'oTgl',jk:'oJK'},
+    GSPA:{label:'Gen Aman / GSPA',name:'gNama',tgl:'gTgl',jk:'gJK'},
+    GHP:{label:'GHP GenPro',name:'hNama',tgl:'hTgl',jk:'hJK',result:'layarGHPIlus'},
+    GPRO:{label:'Gen Pro',name:'qNama',tgl:'qTgl',jk:'qJK',result:'layarGPRORingkas'},
+    RAYA:{label:'RAYA Pro Maxima',name:'rayaNama',tgl:'rayaTglLahir'},
+    DP:{label:'Dana Pensiun',name:'dNama',tgl:'dTgl',result:'layarDPRingkas'},
     KPR:{label:'Cicilan Rumah',name:'pNama',result:'layarKPRRingkas'},
-    R2:{label:'Rumah Kedua',name:'rNama',result:'layarR2Ringkas'},
+    R2:{label:'Rumah Kedua',name:'rNama',tgl:'rTgl',jk:'rJK',result:'layarR2Ringkas'},
     PDK:{label:'Dana Pendidikan',name:'nNama',result:'layarPDKRingkas'},
     COMBO2:{label:'Kombinasi Produk',name:'oNama',result:'layarCOMBORingkas'},
     BAND_PRODUK:{label:'Banding Pilihan Produk'},
@@ -88,6 +88,18 @@
     if(h) return h.replace(/^(Ilustrasi|Ringkasan|Kebutuhan|Hasil)\s*[—-]?\s*/i,'').trim()||h;
     return currentProduct()||'Hasil Konsultasi';
   }
+  /* Tertanggung "Ketik manual": dropdown tertanggung produk ini
+     (cpTertanggung<PRODUK>, src/core.js) bernilai __manual__, jadi orangnya
+     bukan anggota profil dan selectedFamily() kosong. Identitasnya diambil
+     dari isian produk itu sendiri; ID-nya dibentuk dari nama + tanggal lahir
+     supaya tidak bertabrakan dengan 'self'. */
+  function manualInsured(code){
+    const pilih=code&&el('cpTertanggung'+code);
+    if(!pilih||pilih.value!=='__manual__')return null;
+    const f=MAP[code]||{}, nama=(f.name&&el(f.name)?.value?.trim())||'', tgl=(f.tgl&&el(f.tgl)?.value)||'';
+    const jk=f.jk?String(el(f.jk)?.querySelector('[aria-pressed="true"]')?.dataset?.nilai||'').toUpperCase():'';
+    return {id:'manual:'+nama.toLowerCase()+'|'+tgl,nama,hubungan:'Ketik manual',tglLahir:tgl,jk};
+  }
   function familyLabel(x){ return x.familyName || x.customerName || 'Nasabah'; }
   function relationLabel(x){ return x.relationship || 'Diri Sendiri'; }
   function groupKey(x){ return String(x.profileId || ('name:'+String(familyLabel(x)).toLowerCase().trim())); }
@@ -99,7 +111,10 @@
     const titleBase=makeTitle(code);
     const title=(key==='NEEDS'?'Analisis Kebutuhan - ':key==='SEGITIGA_RINGKAS'?'Ringkasan Kebutuhan - ':product+' - ')+currentName(currentProduct()||code);
     const p=activeProfile();
-    const sel=window.InsuranceHubCustomerProfile?.selectedFamily?.()||null;
+    /* Sebelumnya tertanggung Ketik manual tercatat sebagai 'self' / Diri
+       Sendiri tanpa tanggal lahir: dikelompokkan sebagai profil utama dan
+       di Ringkasan 1 Halaman tergabung dengannya (ID sama). */
+    const sel=manualInsured(currentProduct())||window.InsuranceHubCustomerProfile?.selectedFamily?.()||null;
     const now=new Date();
     const item={id:'IL-'+now.getTime()+'-'+Math.random().toString(36).slice(2,7),title:title||titleBase,product,productCode:code,screenKey:key,customerName:sel?.nama||currentName(currentProduct()||code),profileId:p?.id||null,relationship:sel?.hubungan||'Diri Sendiri',insuredPersonId:sel?.id||'self',insuredDobSnapshot:sel?.tglLahir||'',insuredGenderSnapshot:sel?.jk||'',category:categoryFor(code,key),familyName:p?.nama||currentName(currentProduct()||code),createdAt:now.toISOString(),html:section.innerHTML.slice(0,250000)};
     /* Kalau ilustrasi ini dibuat atas nama agen lain, catat di entrinya.

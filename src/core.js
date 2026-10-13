@@ -482,7 +482,11 @@ function cpAutofillAll(p) {
   // Keep the existing product fields as the single UI surface; the profile
   // is only a source for identity data and never overwrites product inputs
   // such as UP, payment term, plan, or protection term.
+  /* Layar yang tertanggungnya anggota keluarga lain / Ketik manual (profil
+     yang sama) tidak ditimpa identitas profil utama — lihat cpTertanggungTetap. */
+  const tetap = cpTertanggungTetap(p);
   CP_COMMON.forEach(([nameId,tglId,jkId]) => {
+    if (tetap.has(nameId)) return;
     if (el(nameId)) {
       el(nameId).value = p.nama || '';
       el(nameId).dispatchEvent(new Event('input',{bubbles:true}));
@@ -516,8 +520,11 @@ function cpAutofillAll(p) {
 }
 function cpApply(p) {
   if (!p) return;
+  const profilSama = String(cpGetActive() || '') === String(p.id);
   cpAutofillAll(p);
-  cpSetActive(p.id); cpRender();
+  cpSetActive(p.id);
+  if (profilSama) cpSegarkanTertanggung(p);
+  cpRender();
   /* Satu-satunya titik akhir alur Profil (Simpan baru, Simpan perubahan,
      Gunakan). Dengan konteks kelanjutan: lanjut ke tujuannya. */
   if (cpKonteks) { const tujuan = cpKonteks.target; cpKonteksHapus(); cpLanjutKe(tujuan); return; }
@@ -650,6 +657,81 @@ let cpSelectedFamily = null;
 /* Layar yang sedang dalam mode "Ketik manual". Isian di layar ini tidak
    ditimpa oleh profil aktif sampai agen memilih anggota keluarga lagi. */
 const cpManual = new Set();
+/* Layar produk yang tertanggungnya bukan profil utama — anggota keluarga lain
+   atau Ketik manual — untuk profil aktif yang sama. cpAutofillAll tidak
+   menimpa identitas layar ini (sebelumnya membuka layar lain atau Back dari
+   Ringkasan mengisi ulang semua layar dengan profil utama, sehingga produk
+   di latar belakang diam-diam menghitung untuk orang lain sementara
+   dropdown-nya masih menunjukkan anggota yang dipilih). Berganti profil
+   aktif tetap mengisi semua layar dengan profil baru. */
+function cpTertanggungTetap(p){
+  const tetap=new Set();
+  if(!p || String(cpGetActive()||'')!==String(p.id)) return tetap;
+  Object.keys(CP_INSURED_KEYS).forEach(nama=>{
+    const nameId=CP_INSURED_KEYS[nama]; if(!el(nameId)) return;
+    if(cpManual.has(nama)){ tetap.add(nameId); return; }
+    const pilihan=cpDropdownTertanggung(nama, p.id);
+    if(pilihan && pilihan.value!=='self') tetap.add(nameId);
+  });
+  return tetap;
+}
+/* Dropdown tertanggung yang sudah tergambar di layar produk `nama`, bila
+   milik profil profileId (letaknya sama seperti di cpRenderInsuredSelector). */
+function cpDropdownTertanggung(nama, profileId){
+  const input=el(CP_INSURED_KEYS[nama]); if(!input) return null;
+  const host=input.closest('.baris') || input.parentElement;
+  const lama=host && host.parentElement && host.parentElement.querySelector('[data-cp-insured-selector]');
+  return lama && lama.dataset.cpProfileId===String(profileId) ? lama.querySelector('select') : null;
+}
+/* Profil aktif yang sama disimpan ulang (Edit Profil → Simpan perubahan):
+   dropdown tertanggung yang sudah tergambar diperbarui dari data keluarga
+   terbaru lewat cpRenderInsuredSelector — pilihan tiap layar tetap, kembali
+   ke profil utama bila anggotanya dihapus, dan identitas yang berubah
+   (mis. tanggal lahir pasangan) langsung ditulis sehingga produk di latar
+   belakang tidak terus menghitung dengan data anggota yang lama. Anggota
+   terakhir yang dipilih agen (dipakai Library) tetap, datanya diperbarui. */
+function cpSegarkanTertanggung(p){
+  const terakhir=cpSelectedFamily;
+  Object.keys(CP_INSURED_KEYS).forEach(nama=>{ if(cpDropdownTertanggung(nama, p.id)) cpRenderInsuredSelector(nama); });
+  if(terakhir && terakhir.profileId===p.id){
+    const m=cpFamilyMembers(p).find(x=>x.id===terakhir.id);
+    cpSelectedFamily=m ? {...m,profileId:p.id,familyName:p.nama||''} : null;
+  } else cpSelectedFamily=terakhir;
+}
+/* Pilihan tertanggung tiap layar ikut disimpan Isian Terakhir
+   (src/isian-terakhir.js: per profil aktif → per layar → per id isian), karena
+   dropdown-nya ber-id cpTertanggung<LAYAR>. Dengan itu pilihan tetap ada
+   sesudah index.html dimuat ulang, mis. kembali dari program-summary.html.
+   Tidak ada storage key baru; "Ketik manual" tidak dipulihkan karena isian
+   identitas yang diketik memang tidak disimpan. */
+function cpTertanggungTersimpan(nama, profileId){
+  try{
+    const data=JSON.parse(localStorage.getItem('insuranceHub.isianTerakhir.v1')||'{}')||{};
+    const v=((data[String(profileId)]||{})[LAYAR[nama]?.el]||{})['cpTertanggung'+nama];
+    return typeof v==='string' ? v : '';
+  }catch(_){ return ''; }
+}
+/* Layar .tanpa-simpan (layarDP: isian kebutuhan pensiun sengaja tidak
+   disimpan Isian Terakhir) tidak ikut menyimpan dropdown di atas. Untuk layar
+   itu HANYA pilihan tertanggungnya yang dicatat, di tempat yang sama dengan
+   layar lain. Isian lain layar itu tetap tidak disimpan, dan Isian Terakhir
+   tidak pernah memulihkan isian di dalam .tanpa-simpan maupun menimpa
+   layar yang tidak punya isian tersimpan — catatan ini hanya dibaca
+   cpTertanggungTersimpan. */
+function cpSimpanTertanggung(nama, profileId, id){
+  const input=el(CP_INSURED_KEYS[nama]), layar=LAYAR[nama]?.el;
+  if(!input || !layar || !input.closest('.tanpa-simpan')) return;
+  try{
+    const KEY='insuranceHub.isianTerakhir.v1';
+    const data=JSON.parse(localStorage.getItem(KEY)||'{}')||{};
+    const p=String(profileId);
+    data[p]=data[p]||{};
+    const isi=data[p][layar]=data[p][layar]||{};
+    if(isi['cpTertanggung'+nama]===id) return;
+    isi['cpTertanggung'+nama]=id;
+    localStorage.setItem(KEY, JSON.stringify(data));
+  }catch(_){}
+}
 function cpFamilyGender(v){ return String(v||'PRIA').toUpperCase()==='WANITA' ? 'WANITA' : 'PRIA'; }
 function cpFamilySelectorLabel(m){
   const age = formatUsiaGenerali(m?.tglLahir||'');
@@ -670,6 +752,7 @@ function cpRenderInsuredSelector(nama){
   const members=cpFamilyMembers(profile);
   if(!members.length) return;
   const apply=(id)=>{
+    cpSimpanTertanggung(nama, profile.id, id);
     if(id==='__manual__'){
       /* Isian dibiarkan apa adanya supaya yang diketik agen tidak hilang. */
       cpManual.add(nama);
@@ -679,12 +762,22 @@ function cpRenderInsuredSelector(nama){
     cpManual.delete(nama);
     const m=members.find(x=>x.id===id)||members[0]; if(!m)return;
     cpSelectedFamily={...m,profileId:profile.id,familyName:profile.nama||''};
-    el(nameId).value=m.nama||''; el(nameId).dispatchEvent(new Event('input',{bubbles:true}));
-    const tglMap={LF:'fTgl',BSL:'bTgl',CRIS:'cTgl',CEM:'mTgl',KMB:'kTgl',GSPA:'gTgl',FLEX:'xTgl',GHP:'hTgl',DP:'dTgl',KPR:'pTgl',R2:'rTgl',GPRO:'qTgl',RAYA:'rayaTglLahir'};
-    const jkMap={LF:'fJK',BSL:'bJK',CRIS:'cJK',CEM:'mJK',KMB:'kJK',GSPA:'gJK',FLEX:null,GHP:'hJK',DP:'dJK',KPR:null,R2:'rJK',GPRO:'qJK',RAYA:null};
+    /* Isian yang sudah sama tidak ditulis ulang: event input/klik hanya
+       dikirim bila identitas benar-benar berubah, supaya kalkulator tidak
+       menghitung ulang tanpa perlu. */
+    const isi=(id,v)=>{ if(el(id).value!==v){ el(id).value=v; el(id).dispatchEvent(new Event('input',{bubbles:true})); } };
+    isi(nameId, m.nama||'');
+    /* COMBO (Kombinasi Produk) juga punya tanggal lahir oTgl dan segmen oJK;
+       tanpa keduanya anggota keluarga dihitung dengan usia & jenis kelamin
+       profil utama. */
+    const tglMap={LF:'fTgl',BSL:'bTgl',CRIS:'cTgl',CEM:'mTgl',KMB:'kTgl',GSPA:'gTgl',FLEX:'xTgl',GHP:'hTgl',DP:'dTgl',KPR:'pTgl',R2:'rTgl',GPRO:'qTgl',RAYA:'rayaTglLahir',COMBO:'oTgl'};
+    const jkMap={LF:'fJK',BSL:'bJK',CRIS:'cJK',CEM:'mJK',KMB:'kJK',GSPA:'gJK',FLEX:null,GHP:'hJK',DP:'dJK',KPR:null,R2:'rJK',GPRO:'qJK',RAYA:null,COMBO:'oJK'};
     const t=tglMap[nama], j=jkMap[nama];
-    if(t && el(t)){el(t).value=m.tglLahir||'';el(t).dispatchEvent(new Event('input',{bubbles:true}));}
-    if(j) cpSetProductGender(j,m.jk);
+    if(t && el(t)) isi(t, m.tglLahir||'');
+    if(j && el(j)){
+      const target=cpFamilyGender(m.jk), aktif=el(j).querySelector('[aria-pressed="true"]');
+      if(!aktif || cpFamilyGender(aktif.dataset.nilai)!==target) cpSetProductGender(j,m.jk);
+    }
   };
   /* Selector disisipkan sebagai sibling sebelum .baris input utama. Kalau
      sudah ada, dipakai ulang selama masih MILIK profil aktif yang sama.
@@ -693,14 +786,19 @@ function cpRenderInsuredSelector(nama){
      dropdown masih milik profil sebelumnya — memilih "Anak" di sana akan
      memasukkan nama dan tanggal lahir anak orang lain ke ilustrasi, dan
      usia yang salah berarti tarif yang salah. */
+  const opsi=members.map(m=>[String(m.id||''), cpFamilySelectorLabel(m)]).concat([['__manual__','Ketik manual (tanpa profil)']]);
   const lama=host.parentElement.querySelector('[data-cp-insured-selector]');
+  let pilihanLama=null;
   if(lama){
     if(lama.dataset.cpProfileId===String(profile.id)){
-      /* Back dari Ringkasan memicu auto-fill profil utama. Terapkan ulang
-         pilihan tertanggung yang masih tersimpan di dropdown yang sama. */
       const existingSelect=lama.querySelector('select');
-      if(existingSelect) apply(existingSelect.value);
-      return;
+      /* Terapkan ulang pilihan tertanggung di dropdown yang sama (mis. Back
+         dari Ringkasan); isian yang sudah sama tidak ditulis ulang. Bila
+         daftar anggotanya sudah usang (Edit Profil mengubah/menghapus
+         anggota), dropdown dibangun ulang dengan pilihan yang sama. */
+      const opsiLama=existingSelect ? [...existingSelect.options].map(o=>[o.value, o.textContent]) : [];
+      if(existingSelect && JSON.stringify(opsiLama)===JSON.stringify(opsi)){ apply(existingSelect.value); return; }
+      if(existingSelect) pilihanLama=existingSelect.value;
     }
     lama.remove();
   }
@@ -710,16 +808,23 @@ function cpRenderInsuredSelector(nama){
   const field=document.createElement('div');
   field.innerHTML='<label>Data tertanggung</label><select aria-label="Pilih tertanggung"></select><p class="catatan">Default mengikuti profil aktif. Pilih anggota keluarga bila ilustrasi dibuat untuk pasangan, anak, orang tua, cucu, atau relasi lain. Pilih <b>Ketik manual</b> bila ingin mengisi nama dan tanggal lahir sendiri tanpa menyimpan profil.</p>';
   const select=field.querySelector('select');
+  select.id='cpTertanggung'+nama;   /* agar ikut disimpan Isian Terakhir per layar */
   /* Pilihan "Ketik manual" untuk agen yang langsung memakai kalkulator tanpa
      membuat Profil Nasabah lebih dulu. Tanpa ini, setiap kali layar dibuka
      kembali isian yang diketik tertimpa data profil aktif. */
-  select.innerHTML=members.map(m=>'<option value="'+esc(String(m.id||''))+'">'+esc(cpFamilySelectorLabel(m))+'</option>').join('')
-    +'<option value="__manual__">Ketik manual (tanpa profil)</option>';
+  select.innerHTML=opsi.map(([v,t])=>'<option value="'+esc(v)+'">'+esc(t)+'</option>').join('');
   /* Pilihan sebelumnya hanya dipertahankan bila berasal dari profil yang
      sama. Id anggota bersifat umum ('spouse', 'child-0'), jadi tanpa
      pemeriksaan profileId pilihan "anak" pada profil lama akan ikut terbawa
      ke profil baru yang kebetulan juga punya 'child-0'. */
-  let currentId=(cpSelectedFamily?.id && cpSelectedFamily.profileId===profile.id
+  /* Pilihan layar ini yang tersimpan (mis. sebelum index.html dimuat ulang)
+     didahulukan; selain itu pilihan terakhir pada profil yang sama. */
+  /* Dropdown yang dibangun ulang memakai pilihannya sendiri (atau profil
+     utama bila anggota itu sudah dihapus). */
+  const tersimpan=cpTertanggungTersimpan(nama, profile.id);
+  let currentId=pilihanLama!==null ? (members.some(m=>m.id===pilihanLama) ? pilihanLama : 'self')
+    : members.some(m=>m.id===tersimpan) ? tersimpan
+    : (cpSelectedFamily?.id && cpSelectedFamily.profileId===profile.id
     && members.some(m=>m.id===cpSelectedFamily.id)) ? cpSelectedFamily.id : 'self';
   if(cpManual.has(nama)) currentId='__manual__';
   select.value=currentId;
