@@ -13,9 +13,13 @@
      10 Jari → SEGITIGA (Financial Triangle; Leo tetap default dan
                profil dipilih lewat dropdown yang sudah ada),
      Keranjang → NEEDS, Education → PDK, Retirement → DP, Asset → R2,
-     Bekerja di Singapura → NEEDS (Analisis Kebutuhan).
+     Bekerja di Singapura → NEEDS (Analisis Kebutuhan),
+     Proteksi Kredit → CRIS (Cristal Prime).
    Konteks tidak membawa profileId dan hanya ada di memori.
    Bahas Topik Lain kembali ke pilihan Sales Idea.
+   Label tombol bawaan di atas; sebuah cerita boleh memakai label
+   sendiri lewat TUJUAN (hitung/lain) — Proteksi Kredit:
+   [ Mari Hitung Kebutuhan Anda → ]   [ Topik Lain ].
 
    Modul ini tidak mengubah pemutar maupun narator; ia hanya membaca
    status pemutar (atribut data-sip-status), posisi scene
@@ -31,8 +35,10 @@
     education: { topic: 'education', target: 'PDK' },
     retirement: { topic: 'retirement', target: 'DP' },
     asset: { topic: 'asset', target: 'R2' },
-    singapura: { topic: 'bekerja_singapura', target: 'NEEDS' }
+    singapura: { topic: 'bekerja_singapura', target: 'NEEDS' },
+    kredit: { topic: 'proteksi_kredit', target: 'CRIS', hitung: 'Mari Hitung Kebutuhan Anda', lain: 'Topik Lain' }
   };
+  var LABEL = { hitung: 'Mari Kita Hitung', lain: 'Bahas Topik Lain' };
 
   var root = null, kartu = null;
   var aktif = false;     // layar Sales Idea sedang tampil
@@ -65,6 +71,15 @@
     kartu.querySelector('#silLain').addEventListener('click', topikLain);
   }
 
+  /* Kartu dipakai bersama: label (dan data-mode untuk CSS cerita) mengikuti
+     cerita yang sedang tampil. */
+  function labeli() {
+    var k = keadaan(), t = (k && TUJUAN[k.mode]) || {};
+    kartu.setAttribute('data-mode', (k && k.mode) || '');
+    kartu.querySelector('#silHitung').firstChild.nodeValue = (t.hitung || LABEL.hitung) + ' ';
+    kartu.querySelector('#silLain').textContent = t.lain || LABEL.lain;
+  }
+
   /* Kartu melayang tepat di atas bar kontrol pemutar, tidak menutupinya. */
   function posisikan() {
     if (!kartu || !root) return;
@@ -76,6 +91,7 @@
 
   function tampilkan() {
     if (!kartu) buatKartu();
+    labeli();
     posisikan();
     if (!kartu.hidden) return;
     kartu.hidden = false;

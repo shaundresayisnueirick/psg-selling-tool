@@ -4,7 +4,8 @@
      node tests/sales-idea-singapura.test.js [--root <dir>] [--bagian A,B,...] [--ukuran 390x844,...]
 
    Yang dijaga:
-   A. registri: hub 6 kartu, Sales Idea 06 membuka 8 scene (8 langkah).
+   A. registri: hub 7 kartu (Sales Idea 07 Proteksi Kredit sesudah Singapura),
+      Sales Idea 06 membuka 8 scene (8 langkah).
    B. naskah: 27 segmen, persis versi yang disetujui; frasa & angka wajib
       terucap sebagai kata; pertanyaan risiko hanya sekali; klimaks & penutup.
    C. narasi rekaman (voice Bian, MP3): manifest 27 segmen (S05-03 dua klip,
@@ -219,7 +220,7 @@ function cek(ok, label, info) {
     const { ctx, pg } = await buka();
     await pg.evaluate(() => document.getElementById('btnSalesIdea').click()); await pg.waitForTimeout(300);
     const kartu = await pg.evaluate(() => [...document.querySelectorAll('[data-si-choice]')].map((b) => b.dataset.siChoice).join(','));
-    cek(kartu === 'jari,basket,education,retirement,asset,singapura', 'hub: 5 Sales Idea lama + Bekerja di Singapura', kartu);
+    cek(kartu === 'jari,basket,education,retirement,asset,singapura,kredit', 'hub: 5 Sales Idea lama + Bekerja di Singapura + Proteksi Kredit', kartu);
     await pg.evaluate(() => document.querySelector('[data-si-choice="singapura"]').click()); await pg.waitForTimeout(350);
     const a = await st(pg);
     const k = await pg.evaluate(() => window.SalesIdea10Jari.keadaan());
