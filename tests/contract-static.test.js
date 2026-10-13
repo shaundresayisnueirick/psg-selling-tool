@@ -68,8 +68,9 @@ const JS_DIIZINKAN = {
   }],
   'src/library-ilustrasi.js': [{
     dari: '57a58e17a4e9c117431f3d52c24e40bc11c3c26fec0be12b18a2b5d885ebc4d7',
-    ke: 'd48676bfb12d3c028201a6669541aa6f6afb6dea9f11ebfbba4b83a696d90a17',
-    alasan: 'Detail Library: tombol Preview basi (.psg-preview-btn) dan penanda data-preview-attached yang ikut tersimpan di snapshot dibuang, supaya attach() membuat satu tombol Preview baru dengan handler aktif. Tombol cetak/print/PDF di dalam snapshot (listener-nya tidak ikut tersimpan) diberi handler cetakIlustrasi yang sama dengan tombol Cetak modal. Data Library, storage, dan isi snapshot tidak berubah.',
+    ke: '908df7f91ef97df8a518f2c11dce48cdfcdea5783855d12cbf6f0302387c10f1',
+    alasan: 'Detail Library: tombol Preview basi (.psg-preview-btn) dan penanda data-preview-attached yang ikut tersimpan di snapshot dibuang, supaya attach() membuat satu tombol Preview baru dengan handler aktif. Tombol cetak/print/PDF di dalam snapshot (listener-nya tidak ikut tersimpan) diberi handler cetakIlustrasi yang sama dengan tombol Cetak modal. Data Library, storage, dan isi snapshot tidak berubah. '
+      + 'Simpan ke Library: bila dropdown tertanggung produk (cpTertanggung<PRODUK>) bernilai Ketik manual, identitas tertanggung diambil dari isian produk (nama, tanggal lahir, jenis kelamin) dengan relationship Ketik manual dan insuredPersonId manual:<nama>|<tgl> — sebelumnya tercatat self/Diri Sendiri tanpa tanggal lahir sehingga dikelompokkan sebagai profil utama dan tergabung dengannya di Ringkasan 1 Halaman. MAP produk mendapat id tanggal lahir/jenis kelamin. Isi snapshot, angka, dan storage tidak berubah.',
   }],
   'src/aktivitas-ui.js': [{
     dari: 'f79804459cb8b93f3ebbfa4380299a2f4bca485155cf79c844aa703d31aba0cf',
