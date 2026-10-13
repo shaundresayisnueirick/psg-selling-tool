@@ -43,9 +43,12 @@
    J. Sales Idea lain tetap terbuka (scene 1 siap, tanpa error).
    K. unduh video (src/sales-idea-video.js): keempat MP4 ada di repo dan
       videoSiap true; skip/lompat → putaran tidak sah, tombol tidak tampil;
-      tonton utuh waktu nyata dari scene 1 → baru sesudah scene 10 selesai
-      tampil DUA tombol: Download Video Portrait & Download Video Landscape;
+      tonton utuh waktu nyata dari scene 1 di layar HP → baru sesudah
+      scene 10 selesai tampil SATU tombol "Download Video" (aturan sama dengan
+      Sales Idea lain: smartphone → portrait), tidak tertutup kartu akhir;
       href/nama ikut tema dan berkas yang terunduh = berkas repo (SHA-256).
+      Tablet/laptop/foldable → landscape diuji di sales-idea-unduh-video
+      (PERANGKAT).
       Bagian C dan K masing-masing berjalan ±4–5 menit (waktu nyata).
 
    Playwright tidak menjadi dependensi repo: dipakai dari instalasi global
@@ -690,7 +693,7 @@ const rp = (n) => 'Rp' + Math.round(n).toLocaleString('id-ID');
     await b.ctx.close();
   }
 
-  /* ---------- K. unduh video portrait & landscape ---------- */
+  /* ---------- K. unduh video (satu tombol, berkas menurut perangkat) ---------- */
   console.log('[K] Unduh video (gerbang tonton utuh)');
   if (ikut('K')) {
     const PS = { terang: 'assets/video/kredit-terang-portrait.mp4', gelap: 'assets/video/kredit-gelap-portrait.mp4' };
@@ -704,13 +707,13 @@ const rp = (n) => 'Rp' + Math.round(n).toLocaleString('id-ID');
       const { ctx, pg } = await buka({ cepat: 16 });
       await bukaMode(pg); await pg.waitForTimeout(400);
       const a = await uv(pg);
-      cek(a.cerita === 'kredit' && a.videoSiap === true && !a.tombol && !a.tombolPotret && !a.tombolLanskap && ukuran.every((s) => s > 1e6),
+      cek(a.cerita === 'kredit' && a.videoSiap === true && !a.tombol && ukuran.every((s) => s > 1e6),
         'keempat MP4 Proteksi Kredit ada di repo (> 1 MB), videoSiap true; saat dibuka tombol unduh belum tampil', { a, ukuran });
       await keScene(pg, 10);
       await pg.evaluate(() => { if (document.getElementById('layarSalesIdea').getAttribute('data-sip-status') !== 'berputar') document.getElementById('siPlay').click(); });
       await tunggu(pg, () => document.getElementById('layarSalesIdea').getAttribute('data-sip-status') === 'selesai', 60000);
       const b = await uv(pg);
-      cek(b.status === 'tidak-sah' && !b.tombolPotret && !b.tombolLanskap, 'lompat ke scene terakhir → putaran tidak sah, tombol tidak tampil', b);
+      cek(b.status === 'tidak-sah' && !b.tombol, 'lompat ke scene terakhir → putaran tidak sah, tombol tidak tampil', b);
       await ctx.close();
     }
     /* K2. NEXT sebelum scene 1 selesai → tidak sah */
@@ -719,12 +722,13 @@ const rp = (n) => 'Rp' + Math.round(n).toLocaleString('id-ID');
       await bukaMode(pg); await pg.waitForTimeout(300);
       await klik(pg, '#siPlay'); await pg.waitForTimeout(1500); await klik(pg, '#siNext'); await pg.waitForTimeout(400);
       const a = await uv(pg);
-      cek(a.videoSiap === true && a.status === 'tidak-sah' && !a.tombolPotret && !a.tombolLanskap, 'NEXT sebelum scene 1 selesai → tidak sah, tombol tetap tersembunyi', a);
+      cek(a.videoSiap === true && a.status === 'tidak-sah' && !a.tombol, 'NEXT sebelum scene 1 selesai → tidak sah, tombol tetap tersembunyi', a);
       await ctx.close();
     }
-    /* K3. tonton utuh waktu nyata dari scene 1 (Next hanya sesudah scene selesai), lalu unduh keempat berkas */
+    /* K3. HP (390×844, sentuh): tonton utuh waktu nyata dari scene 1 (Next hanya sesudah scene selesai),
+       lalu satu tombol → video portrait sesuai tema; tombol tidak tertutup kartu akhir */
     {
-      const { ctx, pg } = await buka({ ctx: { acceptDownloads: true } });
+      const { ctx, pg } = await buka({ ctx: { acceptDownloads: true, viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true } });
       await bukaMode(pg); await pg.waitForTimeout(300);
       let ok = true, sebelumAkhir = null;
       for (let n = 1; n <= 10; n++) {
@@ -733,27 +737,29 @@ const rp = (n) => 'Rp' + Math.round(n).toLocaleString('id-ID');
         if (!selesai) { ok = false; break; }
         if (n === 9) sebelumAkhir = await uv(pg);
       }
-      await pg.waitForTimeout(500);
+      await pg.waitForTimeout(800);
       const akhir = await uv(pg);
-      cek(ok && sebelumAkhir && !sebelumAkhir.tombolPotret && !sebelumAkhir.tombolLanskap && sebelumAkhir.status === 'berjalan', 'sebelum scene 10 selesai: tombol unduh belum tampil', sebelumAkhir);
-      cek(ok && akhir.status === 'selesai' && akhir.tombolPotret && akhir.tombolLanskap && !akhir.tombol, 'tonton utuh tanpa skip → tampil dua tombol (portrait & landscape), bukan tombol tunggal', akhir);
-      const link = () => pg.evaluate(() => [...document.querySelectorAll('#layarSalesIdea .sip-unduh-dua')].map((a) => ({ teks: a.textContent, href: a.getAttribute('href'), nama: a.getAttribute('download'), tampil: !a.hidden && a.getBoundingClientRect().width > 0 })));
-      const unduh = async (sel) => {
-        const [d] = await Promise.all([pg.waitForEvent('download', { timeout: 60000 }), pg.click(sel)]);
+      cek(ok && sebelumAkhir && !sebelumAkhir.tombol && sebelumAkhir.status === 'berjalan', 'sebelum scene 10 selesai: tombol unduh belum tampil', sebelumAkhir);
+      cek(ok && akhir.status === 'selesai' && akhir.tombol && akhir.perangkat === 'smartphone', 'tonton utuh tanpa skip di HP → satu tombol unduh tampil (kelas smartphone)', akhir);
+      const link = () => pg.evaluate(() => {
+        const a = [...document.querySelectorAll('#layarSalesIdea .sip-unduh')].filter((x) => !x.hidden);
+        return a.map((x) => { const r = x.getBoundingClientRect(), atas = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2);
+          return { teks: x.textContent, href: x.getAttribute('href'), nama: x.getAttribute('download'), terlihat: r.width > 0 && r.bottom <= innerHeight, tidakTertutup: !!atas && (atas === x || x.contains(atas)) }; });
+      });
+      const unduh = async () => {
+        const [d] = await Promise.all([pg.waitForEvent('download', { timeout: 60000 }), pg.click('#layarSalesIdea .sip-unduh:not([hidden])')]);
         return { nama: d.suggestedFilename(), sha: sha(await d.path()) };
       };
       const t = await link();
-      cek(t.length === 2 && t[0].teks === '⬇ Download Video Portrait' && t[0].href === PS.terang && t[0].nama === 'PSG-Proteksi-Kredit-Portrait-Light.mp4' &&
-        t[1].teks === '⬇ Download Video Landscape' && t[1].href === LS.terang && t[1].nama === 'PSG-Proteksi-Kredit-Landscape-Light.mp4' && t.every((x) => x.tampil), 'tema terang: href & nama berkas portrait/landscape benar, keduanya terlihat', t);
-      const pT = await unduh('#layarSalesIdea .sip-unduh-potret'), lT = await unduh('#layarSalesIdea .sip-unduh-lanskap');
-      cek(pT.nama === 'PSG-Proteksi-Kredit-Portrait-Light.mp4' && pT.sha === sha(path.join(ROOT, PS.terang)) && lT.nama === 'PSG-Proteksi-Kredit-Landscape-Light.mp4' && lT.sha === sha(path.join(ROOT, LS.terang)),
-        'klik (terang) → unduhan Portrait-Light & Landscape-Light = berkas repo (SHA-256)', { pT: pT.nama, lT: lT.nama });
+      cek(t.length === 1 && t[0].teks === '⬇ Download Video' && t[0].href === PS.terang && t[0].nama === 'PSG-Proteksi-Kredit-Light-Portrait.mp4' && t[0].terlihat && t[0].tidakTertutup,
+        'HP, tema terang: satu tombol "Download Video" → portrait (PSG-Proteksi-Kredit-Light-Portrait.mp4), terlihat dan tidak tertutup kartu akhir', t);
+      const pT = await unduh();
+      cek(pT.nama === 'PSG-Proteksi-Kredit-Light-Portrait.mp4' && pT.sha === sha(path.join(ROOT, PS.terang)), 'klik (HP, terang) → unduhan Light-Portrait = berkas repo (SHA-256)', pT.nama);
       await pg.evaluate(() => document.documentElement.setAttribute('data-theme', 'dark')); await pg.waitForTimeout(500);
       const g = await link();
-      cek(g[0].href === PS.gelap && g[1].href === LS.gelap && g[0].nama === 'PSG-Proteksi-Kredit-Portrait-Dark.mp4' && g[1].nama === 'PSG-Proteksi-Kredit-Landscape-Dark.mp4', 'tema gelap: href & nama berganti ke versi gelap', g);
-      const pG = await unduh('#layarSalesIdea .sip-unduh-potret'), lG = await unduh('#layarSalesIdea .sip-unduh-lanskap');
-      cek(pG.nama === 'PSG-Proteksi-Kredit-Portrait-Dark.mp4' && pG.sha === sha(path.join(ROOT, PS.gelap)) && lG.nama === 'PSG-Proteksi-Kredit-Landscape-Dark.mp4' && lG.sha === sha(path.join(ROOT, LS.gelap)),
-        'klik (gelap) → unduhan Portrait-Dark & Landscape-Dark = berkas repo (SHA-256)', { pG: pG.nama, lG: lG.nama });
+      cek(g.length === 1 && g[0].href === PS.gelap && g[0].nama === 'PSG-Proteksi-Kredit-Dark-Portrait.mp4' && g[0].tidakTertutup, 'HP, tema gelap: tombol berganti ke portrait gelap (PSG-Proteksi-Kredit-Dark-Portrait.mp4)', g);
+      const pG = await unduh();
+      cek(pG.nama === 'PSG-Proteksi-Kredit-Dark-Portrait.mp4' && pG.sha === sha(path.join(ROOT, PS.gelap)), 'klik (HP, gelap) → unduhan Dark-Portrait = berkas repo (SHA-256)', pG.nama);
       const kartu = await pg.evaluate(() => [...document.querySelectorAll('#layarSalesIdea button')].some((x) => /Mari Hitung Kebutuhan Anda/.test(x.textContent) && x.getBoundingClientRect().height > 0));
       cek(kartu, 'kartu akhir (Mari Hitung Kebutuhan Anda / Topik Lain) tampil bersama tombol unduh');
       await ctx.close();

@@ -101,7 +101,7 @@
               dari scene 2 → masing-masing tidak sah, tombol tersembunyi.
    SG4–SG6    seperti EDU4–EDU6 untuk Singapura (HP → singapura-*-portrait.mp4,
               tablet & foldable terbuka → singapura-*.mp4).
-   PERANGKAT  untuk Asset, Basket, Retirement, Education, dan Singapura: kelas perangkat
+   PERANGKAT  untuk Asset, Basket, Retirement, Education, Singapura, dan Proteksi Kredit: kelas perangkat
               (PSGUnduhVideo.keadaan().perangkat) dan berkas
               yang dipilih SAAT KLIK pada 23 profil emulasi Chromium (HP
               Android/iPhone potret & landscape, HP diputar di halaman yang sama,
@@ -197,16 +197,17 @@ const VIDEO_KBS_P = {
   gelap: { href: 'assets/video/basket-gelap-portrait.mp4', nama: 'PSG-Basket-Dark-Portrait.mp4' }
 };
 const VIDEO_KREDIT = {
-  terang: { href: 'assets/video/kredit-terang.mp4', nama: 'PSG-Proteksi-Kredit-Landscape-Light.mp4' },
-  gelap: { href: 'assets/video/kredit-gelap.mp4', nama: 'PSG-Proteksi-Kredit-Landscape-Dark.mp4' }
+  terang: { href: 'assets/video/kredit-terang.mp4', nama: 'PSG-Proteksi-Kredit-Light.mp4' },
+  gelap: { href: 'assets/video/kredit-gelap.mp4', nama: 'PSG-Proteksi-Kredit-Dark.mp4' }
 };
 const VIDEO_KREDIT_P = {
-  terang: { href: 'assets/video/kredit-terang-portrait.mp4', nama: 'PSG-Proteksi-Kredit-Portrait-Light.mp4' },
-  gelap: { href: 'assets/video/kredit-gelap-portrait.mp4', nama: 'PSG-Proteksi-Kredit-Portrait-Dark.mp4' }
+  terang: { href: 'assets/video/kredit-terang-portrait.mp4', nama: 'PSG-Proteksi-Kredit-Light-Portrait.mp4' },
+  gelap: { href: 'assets/video/kredit-gelap-portrait.mp4', nama: 'PSG-Proteksi-Kredit-Dark-Portrait.mp4' }
 };
-/* Proteksi Kredit: MP4 menunggu render (rekaman Bian belum ada). Selama modul
-   menandai cerita ini videoSiap: false, tombolnya tidak pernah tampil, jadi berkas
-   boleh belum ada; begitu videoSiap: true, keempat MP4 wajib ada (lihat bagian R). */
+/* Proteksi Kredit: bila modul menandai cerita ini videoSiap: false, tombolnya tidak
+   pernah tampil, jadi berkas boleh belum ada; selama videoSiap: true, keempat MP4
+   wajib ada (lihat bagian R). Pemilihan berkas sama dengan cerita lain
+   (smartphone → portrait; lainnya → landscape), diuji di PERANGKAT. */
 const VIDEO_KREDIT_SEMUA = Object.values(VIDEO_KREDIT).concat(Object.values(VIDEO_KREDIT_P)).map((v) => v.href);
 /* profil emulasi Chromium (px CSS). sentuh = isMobile + hasTouch (pointer coarse, tanpa hover);
    tanpa sentuh = mouse (pointer fine + hover). putar = viewport diubah di halaman yang sama
@@ -248,7 +249,8 @@ const CER = {
   /* 10 Jari: BAB 1–2 memakai .jps[data-jps] 1–6, BAB 3 [data-jps-alasan] 1–3 →
      nomor scene global dibaca dari SalesIdea10Jari.keadaan().indeks */
   jari: { pilih: 'jari', sel: '.jps', attr: 'data-jps', jumlah: 9, indeksKeadaan: true },
-  singapura: { pilih: 'singapura', sel: '.sgs', attr: 'data-sgs', jumlah: 8 }
+  singapura: { pilih: 'singapura', sel: '.sgs', attr: 'data-sgs', jumlah: 8 },
+  kredit: { pilih: 'kredit', sel: '.pks', attr: 'data-pks', jumlah: 10 }
 };
 
 const hasil = [];
@@ -807,7 +809,7 @@ function serve() {
     },
     PERANGKAT: async () => {
       const g = 'PERANGKAT KLASIFIKASI & PEMETAAN (EMULASI)';
-      for (const [kunci, VL, VP] of [['basket', VIDEO_KBS, VIDEO_KBS_P], ['retirement', VIDEO_RET, VIDEO_RET_P], ['asset', VIDEO, VIDEO_P], ['education', VIDEO_EDU, VIDEO_EDU_P], ['singapura', VIDEO_SG, VIDEO_SG_P]])
+      for (const [kunci, VL, VP] of [['basket', VIDEO_KBS, VIDEO_KBS_P], ['retirement', VIDEO_RET, VIDEO_RET_P], ['asset', VIDEO, VIDEO_P], ['education', VIDEO_EDU, VIDEO_EDU_P], ['singapura', VIDEO_SG, VIDEO_SG_P], ['kredit', VIDEO_KREDIT, VIDEO_KREDIT_P]])
       for (const p of PROFIL) {
         const { ctx, pg, errs } = await buka(null, kunci, p.o);
         if (p.putar) { await pg.setViewportSize({ width: p.putar[0], height: p.putar[1] }); await pg.waitForTimeout(150); }
