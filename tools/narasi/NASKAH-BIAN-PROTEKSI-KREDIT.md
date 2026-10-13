@@ -3,8 +3,10 @@
 > Sumber kebenaran: `src/sales-idea-kredit.js` (`NARASI`). Teks di bawah identik
 > dengan yang dipakai aplikasi; `tests/sales-idea-kredit.test.js` memeriksanya.
 
-**Status audio: belum direkam.** Sampai berkas MP3 tersedia, aplikasi memakai
-suara browser sebagai cadangan. Tidak ada audio pengganti atau audio sunyi.
+**Status audio: terpasang (2026-10-13).** 24 rekaman Bian ada di
+`assets/narasi/kredit/` dan dipetakan di `src/sales-idea-kredit-audio.js`
+(satu berkas per segmen, diputar utuh). Suara browser hanya dipakai bila
+manifest tidak termuat.
 
 ## Cara pakai
 

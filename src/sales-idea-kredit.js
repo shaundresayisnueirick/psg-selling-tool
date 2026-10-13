@@ -49,12 +49,13 @@
 
    Narasi: narator bersama (window.PSGNarasi). Naskah tiap scene berupa
    segmen; tiap segmen punya satu ketukan visual. Lama ketukan =
-   maks(kebutuhan gerak, perkiraan lama narasi, lama rekaman bila ada)
-   + jeda. data-ketuk pada node scene memberi tahu narator ketukan mana
-   yang sudah mulai. Rekaman voice Bian belum tersedia: tanpa manifest
-   PSGKreditAudio narator memakai suara browser (Web Speech). Begitu
-   manifest dimuat, narator memakai MP3-nya (lihat
-   tools/narasi/NASKAH-BIAN-PROTEKSI-KREDIT.md).
+   maks(kebutuhan gerak, lama rekaman + jeda napas) + jeda; isyarat
+   visual per kata diskalakan ke lama rekaman. data-ketuk pada node scene
+   memberi tahu narator ketukan mana yang sudah mulai. Suara: rekaman
+   voice Bian (MP3, manifest PSGKreditAudio di
+   sales-idea-kredit-audio.js; teks = tools/narasi/NASKAH-BIAN-PROTEKSI-KREDIT.md).
+   Hanya bila manifest tidak dimuat, narator memakai suara browser
+   (Web Speech) dengan perkiraan lama bicara.
 
    API: PSGKreditStory.adegan({ langkah, header, padaLangkah })
    ============================================================ */
@@ -120,15 +121,15 @@
     return Math.round(String(t).length * MD_HURUF) + kalimat * JEDA_KALIMAT;
   }
   function lamaSegmen(t) { return lamaBicara(t) + JEDA_SEGMEN; }
-  /* Rekaman narasi (manifest PSGKreditAudio, bila kelak dimuat): lama
-     segmen SNN-MM dalam md + jeda kecil, dipakai sebagai batas minimum
-     ketukan supaya visual tidak berpindah sebelum narasinya selesai. */
-  var JEDA_REKAMAN = 300;
+  /* Rekaman narasi (manifest PSGKreditAudio): lama segmen SNN-MM dalam md.
+     Bila ada, ketukan mengikuti rekaman (+ jeda napas), bukan perkiraan
+     suara browser — rekaman Bian lebih cepat dari 80 md/huruf. */
+  var JEDA_REKAMAN = 700;
   function dua(x) { return (x < 10 ? '0' : '') + x; }
   function lamaRekaman(n, j) {
     var m = window.PSGKreditAudio, klip = m && m.segmen && m.segmen['S' + dua(n) + '-' + dua(j)];
     if (!klip || !klip.length) return 0;
-    return Math.round(klip.reduce(function (t, c) { return t + (c.end - c.start); }, 0) * 1000) + JEDA_REKAMAN;
+    return Math.round(klip.reduce(function (t, c) { return t + (c.end - c.start); }, 0) * 1000);
   }
 
   /* ---------------- utilitas ---------------- */
@@ -898,21 +899,25 @@
   }
 
   /* Ketukan scene: B = saat mulai tiap ketukan, D = lamanya, akhir = ujung
-     timeline. Lama ketukan = maks(kebutuhan gerak, perkiraan narasi, lama
-     rekaman) + jeda; "ekor" memperpanjang ujung scene. */
+     timeline. Lama ketukan = maks(kebutuhan gerak, lama narasi) + jeda;
+     lama narasi = rekaman + jeda napas bila ada, selain itu perkiraan suara
+     browser. "ekor" memperpanjang ujung scene. */
   function ketukan(n) {
-    var sc = S[n] || S[1], naskah = NARASI[n - 1] || [], vis = sc.ketuk || [], jeda = sc.jeda || [], B = [], D = [], t = sc.awal || 0;
+    var sc = S[n] || S[1], naskah = NARASI[n - 1] || [], vis = sc.ketuk || [], jeda = sc.jeda || [], B = [], D = [], R = [], t = sc.awal || 0;
     naskah.forEach(function (seg, j) {
-      var d = Math.max(vis[j] || 0, lamaSegmen(seg), lamaRekaman(n, j + 1)) + (jeda[j] || 0);
-      B.push(t); D.push(d); t += d;
+      var r = lamaRekaman(n, j + 1);
+      var d = Math.max(vis[j] || 0, r ? r + JEDA_REKAMAN : lamaSegmen(seg)) + (jeda[j] || 0);
+      B.push(t); D.push(d); R.push(r); t += d;
     });
     t += sc.ekor || 0;
     return {
       B: B, D: D, akhir: t,
-      /* perkiraan saat kata k pada segmen j mulai diucapkan */
+      /* perkiraan saat kata k pada segmen j mulai diucapkan; dengan rekaman,
+         posisi kata diskalakan ke lama rekaman segmen itu */
       kata: function (j, k) {
-        var seg = naskah[j] || '', i = seg.indexOf(k);
-        return (B[j] || 0) + JEDA_UCAP + (i > 0 ? lamaBicara(seg.slice(0, i)) : 0);
+        var seg = naskah[j] || '', i = seg.indexOf(k), awal = i > 0 ? lamaBicara(seg.slice(0, i)) : 0;
+        if (R[j] && awal) awal = Math.round(awal / lamaBicara(seg) * R[j]);
+        return (B[j] || 0) + JEDA_UCAP + awal;
       }
     };
   }

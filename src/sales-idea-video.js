@@ -120,8 +120,9 @@
         nama: { terang: 'PSG-Proteksi-Kredit-Portrait-Light.mp4', gelap: 'PSG-Proteksi-Kredit-Portrait-Dark.mp4' }
       },
       duaFormat: true,
-      /* true hanya bila assets/video/kredit-{terang,gelap}{,-portrait}.mp4 sudah ada */
-      videoSiap: false
+      /* true hanya bila assets/video/kredit-{terang,gelap}{,-portrait}.mp4 sudah ada
+         (dirender dari rekaman Bian, tools/video/render-video.mjs) */
+      videoSiap: true
     },
     singapura: {
       sel: '.sgs', attr: 'data-sgs',

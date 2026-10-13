@@ -4,11 +4,11 @@
    ------------------------------------------------------------
    Bukan bagian runtime PWA: tidak dimuat index.html / sw.js dan tidak
    mengubah berkas production. Cerita: Asset Creation, Retirement Planning,
-   Keranjang Kehidupan, Education Planning, dan Bekerja di Singapura (16:9;
-   9:16 untuk HP: asset-portrait, retirement-portrait, basket-portrait,
-   education-portrait, singapura-portrait).
+   Keranjang Kehidupan, Education Planning, Bekerja di Singapura, dan
+   Proteksi Kredit (16:9; 9:16 untuk HP: asset-portrait, retirement-portrait,
+   basket-portrait, education-portrait, singapura-portrait, kredit-portrait).
 
-     node tools/video/render-video.mjs --cerita asset|asset-portrait|retirement|retirement-portrait|basket|basket-portrait|education|education-portrait|jari|jari-portrait|singapore|singapore-portrait|singapura|singapura-portrait [--out <folder>]
+     node tools/video/render-video.mjs --cerita asset|asset-portrait|retirement|retirement-portrait|basket|basket-portrait|education|education-portrait|jari|jari-portrait|singapore|singapore-portrait|singapura|singapura-portrait|kredit|kredit-portrait [--out <folder>]
           [--fps 30] [--jeda-scene 0] [--ffmpeg <path>] [--browser <path>] [--tanpa-encode]
      node tools/video/render-video.mjs --cek <folder>/asset.json
 
@@ -365,10 +365,9 @@ CERITA['singapore-portrait'] = Object.assign({}, CERITA.singapore, {
     watermarkLebar: 116, watermarkOpasitas: 0.06, watermarkKanan: 40, watermarkBawah: 34 }
 });
 
-/* Proteksi Kredit (10 scene). Render membutuhkan manifest rekaman Bian
+/* Proteksi Kredit (10 scene). Audio: manifest rekaman Bian
    src/sales-idea-kredit-audio.js (PSGKreditAudio) dan 24 MP3 di
-   assets/narasi/kredit/ — keduanya belum ada, jadi profil ini baru bisa
-   dijalankan sesudah rekaman diintegrasikan. Keluaran: kredit-<tema>.mp4 dan
+   assets/narasi/kredit/. Keluaran: kredit-<tema>.mp4 dan
    kredit-<tema>-portrait.mp4 (nama yang dipakai tombol unduh). */
 CERITA.kredit = {
   judul: 'Proteksi Kredit', pilih: 'kredit', sel: '.pks', attr: 'data-pks', jumlah: 10,

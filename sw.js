@@ -15,7 +15,7 @@
    - Hanya jawaban yang benar-benar berhasil (status 200) yang disimpan,
      sehingga halaman error tidak pernah ikut tersimpan. */
 
-const VERSI = 'insurance-hub-v117.1.21';
+const VERSI = 'insurance-hub-v117.1.22';
 
 /* Semua berkas inti ikut disimpan sejak pemasangan, supaya aplikasi tetap
    utuh walaupun kunjungan pertama terputus di tengah jalan.
@@ -121,7 +121,8 @@ const BERKAS = [
   './src/sales-idea-lanjut.js?v=118',
   './src/sales-idea-singapura-audio.js?v=114',
   './src/sales-idea-singapura.js?v=114',
-  './src/sales-idea-kredit.js?v=118',
+  './src/sales-idea-kredit-audio.js?v=119',
+  './src/sales-idea-kredit.js?v=119',
   './assets/home-carousel/01-cemerlang-prime.webp',
   './assets/home-carousel/02-cristal-prime.webp',
   './assets/home-carousel/03-iflexyguard.webp',
@@ -229,7 +230,32 @@ const BERKAS = [
   './assets/narasi/asset/asset-S05-02.mp3',
   './assets/narasi/asset/asset-S05-03.mp3',
   './assets/narasi/asset/asset-S06-01.mp3',
-  './assets/narasi/asset/asset-S06-02.mp3'
+  './assets/narasi/asset/asset-S06-02.mp3',
+  /* rekaman narasi Proteksi Kredit (voice Bian): 24 berkas, satu per segmen */
+  './assets/narasi/kredit/kredit-S01-01.mp3',
+  './assets/narasi/kredit/kredit-S01-02.mp3',
+  './assets/narasi/kredit/kredit-S01-03.mp3',
+  './assets/narasi/kredit/kredit-S02-01.mp3',
+  './assets/narasi/kredit/kredit-S02-02.mp3',
+  './assets/narasi/kredit/kredit-S03-01.mp3',
+  './assets/narasi/kredit/kredit-S03-02.mp3',
+  './assets/narasi/kredit/kredit-S04-01.mp3',
+  './assets/narasi/kredit/kredit-S04-02.mp3',
+  './assets/narasi/kredit/kredit-S04-03.mp3',
+  './assets/narasi/kredit/kredit-S05-01.mp3',
+  './assets/narasi/kredit/kredit-S05-02.mp3',
+  './assets/narasi/kredit/kredit-S05-03.mp3',
+  './assets/narasi/kredit/kredit-S06-01.mp3',
+  './assets/narasi/kredit/kredit-S07-01.mp3',
+  './assets/narasi/kredit/kredit-S07-02.mp3',
+  './assets/narasi/kredit/kredit-S08-01.mp3',
+  './assets/narasi/kredit/kredit-S08-02.mp3',
+  './assets/narasi/kredit/kredit-S08-03.mp3',
+  './assets/narasi/kredit/kredit-S09-01.mp3',
+  './assets/narasi/kredit/kredit-S09-02.mp3',
+  './assets/narasi/kredit/kredit-S09-03.mp3',
+  './assets/narasi/kredit/kredit-S10-01.mp3',
+  './assets/narasi/kredit/kredit-S10-02.mp3'
 ];
 
 self.addEventListener('install', e => {
