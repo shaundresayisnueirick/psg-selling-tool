@@ -4,11 +4,11 @@
    ------------------------------------------------------------
    Bukan bagian runtime PWA: tidak dimuat index.html / sw.js dan tidak
    mengubah berkas production. Cerita: Asset Creation, Retirement Planning,
-   Keranjang Kehidupan, Education Planning, dan Bekerja di Singapura (16:9;
-   9:16 untuk HP: asset-portrait, retirement-portrait, basket-portrait,
-   education-portrait, singapura-portrait).
+   Keranjang Kehidupan, Education Planning, Bekerja di Singapura, dan
+   Proteksi Kredit (16:9; 9:16 untuk HP: asset-portrait, retirement-portrait,
+   basket-portrait, education-portrait, singapura-portrait, kredit-portrait).
 
-     node tools/video/render-video.mjs --cerita asset|asset-portrait|retirement|retirement-portrait|basket|basket-portrait|education|education-portrait|jari|jari-portrait|singapore|singapore-portrait|singapura|singapura-portrait [--out <folder>]
+     node tools/video/render-video.mjs --cerita asset|asset-portrait|retirement|retirement-portrait|basket|basket-portrait|education|education-portrait|jari|jari-portrait|singapore|singapore-portrait|singapura|singapura-portrait|kredit|kredit-portrait [--out <folder>]
           [--fps 30] [--jeda-scene 0] [--ffmpeg <path>] [--browser <path>] [--tanpa-encode]
      node tools/video/render-video.mjs --cek <folder>/asset.json
 
@@ -360,6 +360,42 @@ CERITA['singapore-portrait'] = Object.assign({}, CERITA.singapore, {
     '#layarSalesIdea .sgs-title{font-size:15px!important;line-height:1.16!important}',
     '#layarSalesIdea .sgs-focus{font-size:11.5px!important;line-height:1.25!important}',
     '#layarSalesIdea .sgs-isi{font-size:10.5px!important;line-height:1.3!important}'
+  ].join('\n'),
+  branding: { logo: 'assets/logo-psg.png', logoTinggi: 44, logoKanan: 24, logoAtas: 26,
+    watermarkLebar: 116, watermarkOpasitas: 0.06, watermarkKanan: 40, watermarkBawah: 34 }
+});
+
+/* Proteksi Kredit (10 scene). Audio: manifest rekaman Bian
+   src/sales-idea-kredit-audio.js (PSGKreditAudio) dan 24 MP3 di
+   assets/narasi/kredit/. Keluaran: kredit-<tema>.mp4 dan
+   kredit-<tema>-portrait.mp4 (nama yang dipakai tombol unduh). */
+CERITA.kredit = {
+  judul: 'Proteksi Kredit', pilih: 'kredit', sel: '.pks', attr: 'data-pks', jumlah: 10,
+  manifest: 'src/sales-idea-kredit-audio.js', glob: 'PSGKreditAudio',
+  input: ['index.html', 'src/styles.css', 'src/branding.css', 'src/sales-idea-player.js', 'src/sales-idea-player.css',
+    'src/sales-idea.js', 'src/sales-idea-keranjang.js', 'src/psg-karakter.js', 'src/psg-karakter.css',
+    'src/sales-idea-kredit.js', 'src/sales-idea-kredit.css', 'src/sales-idea-kredit-audio.js'],
+  css: [
+    '#layarSalesIdea .si-footer{display:none!important}',
+    '#layarSalesIdea .si-back-hub,#layarSalesIdea .si-close,#layarSalesIdea [data-kbs-suara]{visibility:hidden!important}',
+    '#layarSalesIdea .sil-kartu{display:none!important}'
+  ].join('\n'),
+  namaOutput: (tema, potret) => 'kredit-' + tema + (potret ? '-portrait' : '')
+};
+CERITA['kredit-portrait'] = Object.assign({}, CERITA.kredit, {
+  judul: 'Proteksi Kredit (9:16)', layar: { lebar: 360, tinggi: 640, skala: 2 },
+  css: CERITA.kredit.css + '\n' + [
+    '#layarSalesIdea.aktif .si-content{overflow:hidden!important;padding:0!important}',
+    '#layarSalesIdea .pks{grid-template-rows:auto minmax(0,1fr)!important;gap:6px!important}',
+    '#layarSalesIdea .pks-body{grid-template-rows:minmax(180px,1fr) auto!important;grid-template-columns:minmax(0,1fr)!important;gap:8px!important}',
+    '#layarSalesIdea .pks > .si-presentation-topbar{min-height:46px!important;padding:2px 0!important}',
+    '#layarSalesIdea .pks > .si-presentation-topbar .si-back-hub,#layarSalesIdea .pks > .si-presentation-topbar .si-close,#layarSalesIdea .pks > .si-presentation-topbar [data-kbs-suara]{display:none!important}',
+    '#layarSalesIdea .pks > .si-presentation-topbar{grid-template-columns:minmax(0,1fr)!important}',
+    '#layarSalesIdea .pks > .si-presentation-topbar .si-presentation-brand{grid-column:1!important}',
+    '#layarSalesIdea .pks-text{padding:8px 10px!important;gap:3px!important;border-radius:14px!important}',
+    '#layarSalesIdea .pks-title{font-size:15px!important;line-height:1.16!important}',
+    '#layarSalesIdea .pks-focus{font-size:11.5px!important;line-height:1.25!important}',
+    '#layarSalesIdea .pks-isi{font-size:10.5px!important;line-height:1.3!important}'
   ].join('\n'),
   branding: { logo: 'assets/logo-psg.png', logoTinggi: 44, logoKanan: 24, logoAtas: 26,
     watermarkLebar: 116, watermarkOpasitas: 0.06, watermarkKanan: 40, watermarkBawah: 34 }

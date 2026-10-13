@@ -26,9 +26,57 @@ const server = http.createServer((req, res) => {
   fs.createReadStream(file).pipe(res);
 });
 
-const customer = JSON.stringify([{ id: 'c-1', nama: 'Nasabah tersimpan' }]);
+const customer = JSON.stringify([{ id: 'c-1', nama: 'Nasabah tersimpan' }, { id: 'c-2', nama: 'Nasabah kedua' }]);
 const library = JSON.stringify([{ id: 'l-1', judul: 'Library tersimpan' }]);
-const calculator = JSON.stringify({ data: 'kalkulator lokal' });
+/* Isian kalkulator berbentuk asli src/isian-terakhir.js: { profil: { idLayar: { idIsian: nilai } } },
+   tanpa profil aktif (TANPA_PROFIL) maupun untuk profil tertentu. */
+const calculator = JSON.stringify({
+  TANPA_PROFIL: { layarCRIS: { cUp: '2700000000', cMasa: '10', cRider: true }, layarDP: { dUsiaPensiun: '55' } },
+  'p-123': { layarKPR: { pPinjaman: '1700000000', pTenor: '15' } }
+});
+const KEY_ISIAN = 'insuranceHub.isianTerakhir.v1';
+
+/* Bandingkan isian kalkulator sebelum/sesudah alur. Satu-satunya tambahan yang sah:
+   entri layarAktivitas milik profil aktif (simpan-otomatis isian-terakhir.js), berisi
+   hanya isian yang ada di layar Aktivitas, bernilai teks/centang, dan — bila nomor HP
+   ikut tersimpan — sama dengan yang diketik tes. Apa pun selain itu dilaporkan. */
+function bandingkanIsian(awal, akhir, aturan) {
+  const hasil = { hilang: [], berubah: [], tambahanTakDiizinkan: [], tambahanDiizinkan: [] };
+  const objek = (x) => x !== null && typeof x === 'object' && !Array.isArray(x);
+  const jenis = (x) => Array.isArray(x) ? 'array' : x === null ? 'null' : typeof x;
+  const telusuri = (a, b, jalur) => {
+    if (objek(a)) {
+      if (!objek(b)) { hasil.berubah.push({ jalur, awal: jenis(a), akhir: jenis(b) }); return; }
+      for (const k of Object.keys(a)) {
+        if (!(k in b)) hasil.hilang.push({ jalur: jalur.concat(k).join('/'), awal: a[k] });
+        else telusuri(a[k], b[k], jalur.concat(k));
+      }
+      for (const k of Object.keys(b)) if (!(k in a)) tambahan(jalur.concat(k), b[k]);
+    } else if (JSON.stringify(a) !== JSON.stringify(b)) hasil.berubah.push({ jalur: jalur.join('/'), awal: a, akhir: b });
+  };
+  const tambahan = (jalur, nilai) => {
+    const lokasi = jalur.join('/');
+    /* profil aktif yang belum pernah punya isian: boleh muncul bila isinya hanya layarAktivitas */
+    if (jalur.length === 1 && jalur[0] === aturan.profilAktif && objek(nilai)) {
+      for (const k of Object.keys(nilai)) tambahan(jalur.concat(k), nilai[k]);
+      return;
+    }
+    const alasan = [];
+    if (!(jalur.length === 2 && jalur[0] === aturan.profilAktif && jalur[1] === 'layarAktivitas')) alasan.push('lokasi bukan ' + aturan.profilAktif + '/layarAktivitas');
+    else if (!objek(nilai)) alasan.push('bukan objek isian');
+    else {
+      for (const [id, v] of Object.entries(nilai)) {
+        if (!aturan.isianAktivitas.includes(id)) alasan.push('isian ' + id + ' tidak ada di layar Aktivitas');
+        if (typeof v !== 'string' && typeof v !== 'boolean') alasan.push('nilai ' + id + ' bertipe ' + jenis(v));
+      }
+      if ('aktAgenHp' in nilai && nilai.aktAgenHp !== aturan.hp) alasan.push('aktAgenHp ' + JSON.stringify(nilai.aktAgenHp) + ' ≠ ' + aturan.hp);
+    }
+    if (alasan.length) hasil.tambahanTakDiizinkan.push({ jalur: lokasi, nilai, alasan });
+    else hasil.tambahanDiizinkan.push(lokasi);
+  };
+  telusuri(awal, akhir, []);
+  return hasil;
+}
 const demoAgent = { nama: 'PSG TEAM', kode: '68000001', hp: '0812000000' };
 const demoLevel = { level: 'FC', nama: 'Financial Consultant', namaAgen: 'PSG TEAM', kodeAgen: '68000001' };
 
@@ -110,13 +158,33 @@ async function main() {
 
     await ownerPage.locator('#aktAgenHp').fill('08125551234');
     await ownerPage.locator('#aktSimpanHp').click();
-    const localAfterHp = await ownerPage.evaluate(() => ({ agent: JSON.parse(localStorage.getItem('insuranceHub.agen.v1')),
-      customer: localStorage.getItem('insuranceHub.customerProfiles.v1'), library: localStorage.getItem('insuranceHub.libraryIlustrasi.v1'),
-      calc: localStorage.getItem('insuranceHub.isianTerakhir.v1') }));
+    const localAfterHp = await ownerPage.evaluate(() => ({ agent: JSON.parse(localStorage.getItem('insuranceHub.agen.v1')) }));
     check(localAfterHp.agent.nama === 'PSG TEAM' && localAfterHp.agent.kode === '68000001' && localAfterHp.agent.hp === '08125551234',
       'nomor HP lokal disimpan tanpa menimpa data demo lama atau identitas server');
-    check(localAfterHp.customer === customer && localAfterHp.library === library && localAfterHp.calc === calculator,
-      'Customer, Library, dan data kalkulator lokal tetap utuh');
+    /* simpan-otomatis isian-terakhir.js menulis 600 md sesudah ketikan terakhir: tunggu sampai
+       entri layarAktivitas profil aktif tertulis (maks 5 dtk), baru bandingkan */
+    const profilAktif = await ownerPage.evaluate(() => localStorage.getItem('insuranceHub.customerProfile.active.v1') || 'TANPA_PROFIL');
+    const simpanSelesai = await ownerPage.waitForFunction(({ key, profil }) => {
+      try { const d = JSON.parse(localStorage.getItem(key) || 'null'); return !!(d && d[profil] && d[profil].layarAktivitas); } catch (_) { return false; }
+    }, { key: KEY_ISIAN, profil: profilAktif }, { timeout: 5000 }).then(() => true, () => false);
+    const isianAktivitas = await ownerPage.evaluate(() =>
+      [...document.querySelectorAll('#layarAktivitas input, #layarAktivitas select, #layarAktivitas textarea')].map(n => n.id).filter(Boolean));
+    const lokal = await ownerPage.evaluate((key) => ({ customer: localStorage.getItem('insuranceHub.customerProfiles.v1'),
+      library: localStorage.getItem('insuranceHub.libraryIlustrasi.v1'), calc: localStorage.getItem(key) }), KEY_ISIAN);
+    const masalah = {};
+    if (lokal.customer !== customer) masalah['insuranceHub.customerProfiles.v1'] = { awal: customer, akhir: lokal.customer };
+    if (lokal.library !== library) masalah['insuranceHub.libraryIlustrasi.v1'] = { awal: library, akhir: lokal.library };
+    if (!simpanSelesai) masalah[KEY_ISIAN + ' (tunggu)'] = 'simpan-otomatis tidak menulis ' + profilAktif + '/layarAktivitas dalam 5 dtk; isi sekarang: ' + lokal.calc;
+    else {
+      let akhir = null;
+      try { akhir = JSON.parse(lokal.calc); } catch (e) { masalah[KEY_ISIAN] = { galat: 'bukan JSON valid', akhir: lokal.calc }; }
+      if (akhir !== null) {
+        const beda = bandingkanIsian(JSON.parse(calculator), akhir, { profilAktif, isianAktivitas, hp: '08125551234' });
+        if (beda.hilang.length || beda.berubah.length || beda.tambahanTakDiizinkan.length || beda.tambahanDiizinkan.length !== 1)
+          masalah[KEY_ISIAN] = { hilang: beda.hilang, berubah: beda.berubah, tambahanTakDiizinkan: beda.tambahanTakDiizinkan, tambahanDiizinkan: beda.tambahanDiizinkan };
+      }
+    }
+    check(!Object.keys(masalah).length, 'Customer, Library, dan data kalkulator lokal tetap utuh', masalah);
 
     const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/Xn8AAAAASUVORK5CYII=', 'base64');
     await ownerPage.locator('#aktFotoAgen').setInputFiles({ name: 'erwin.png', mimeType: 'image/png', buffer: png });

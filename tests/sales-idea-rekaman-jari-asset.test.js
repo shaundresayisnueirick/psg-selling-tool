@@ -570,7 +570,9 @@ function bacaMaster() {
       return hasil;
     })();
     cek(isi && isi.baru === 29 && isi.manifest === 3, 'cache service worker berisi 29 berkas rekaman baru + 3 manifest', isi);
-    cek(isi && isi.lama === 56 && isi.mp3 === 85, 'cache tetap berisi 43 rekaman lama + 13 rekaman Singapura (total 85 MP3)', isi);
+    /* + rekaman Proteksi Kredit yang ikut di-precache sw.js (total tetap dihitung persis) */
+    const nKredit = (fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8').match(/'\.\/assets\/narasi\/kredit\/[^']+\.mp3'/g) || []).length;
+    cek(isi && isi.lama === 56 && isi.mp3 === 85 + nKredit, 'cache tetap berisi 43 rekaman lama + 13 rekaman Singapura (total 85 MP3, + ' + nKredit + ' Proteksi Kredit)', isi);
     await ctx.setOffline(true); await pg.reload(); await pg.waitForTimeout(600);
     for (const c of [{ pilih: 'jari', f: 'jari-S01-01.mp3' }, { pilih: 'jari', langkah: 7, f: 'jari-alasan-S01-01.mp3' }, { pilih: 'asset', f: 'asset-S01-01.mp3' }]) {
       await bukaHub(pg); await pilihCerita(pg, c.pilih);

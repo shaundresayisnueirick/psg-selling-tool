@@ -1,6 +1,6 @@
 /* ============================================================
    Sales Idea → "⬇ Download Video" (Asset Creation, Retirement Planning,
-   Keranjang Kehidupan, Education Planning, Bekerja di Singapura)
+   Keranjang Kehidupan, Education Planning, Bekerja di Singapura, Proteksi Kredit)
    ------------------------------------------------------------
    Tombol unduh video pre-render (assets/video/<cerita>-terang.mp4 atau
    <cerita>-gelap.mp4, menurut tema aktif saat tombol diklik; cerita yang punya
@@ -34,6 +34,12 @@
    memori, tidak disimpan).
    Ini gerbang tampilan, bukan pengaman berkas: video tetap bisa diunduh
    langsung lewat URL-nya.
+
+   Proteksi Kredit memakai aturan yang sama: satu tombol, smartphone →
+   kredit-<tema>-portrait.mp4, tablet/desktop/foldable terbuka →
+   kredit-<tema>.mp4. videoSiap: false pada sebuah cerita → tombolnya tidak
+   pernah tampil (MP4 belum di-render), jadi tidak ada tautan mati; tes R di
+   tests/sales-idea-unduh-video.test.js memastikan berkas yang dirujuk ada.
    ============================================================ */
 (function () {
   'use strict';
@@ -101,6 +107,18 @@
           gelap: 'PSG-10-Jari-Dark-Portrait.mp4'
         }
       }
+    },
+    kredit: {
+      sel: '.pks', attr: 'data-pks',
+      video: { terang: 'assets/video/kredit-terang.mp4', gelap: 'assets/video/kredit-gelap.mp4' },
+      nama: { terang: 'PSG-Proteksi-Kredit-Light.mp4', gelap: 'PSG-Proteksi-Kredit-Dark.mp4' },
+      potret: {
+        video: { terang: 'assets/video/kredit-terang-portrait.mp4', gelap: 'assets/video/kredit-gelap-portrait.mp4' },
+        nama: { terang: 'PSG-Proteksi-Kredit-Light-Portrait.mp4', gelap: 'PSG-Proteksi-Kredit-Dark-Portrait.mp4' }
+      },
+      /* true hanya bila assets/video/kredit-{terang,gelap}{,-portrait}.mp4 sudah ada
+         (dirender dari rekaman Bian, tools/video/render-video.mjs) */
+      videoSiap: true
     },
     singapura: {
       sel: '.sgs', attr: 'data-sgs',
@@ -329,7 +347,8 @@
   }
   function tampilkan() {
     if (!tombol) return;
-    var tampil = !!(sesi && sesi.sah && modeAktif() === sesi.kunci);
+    /* videoSiap: false → MP4 belum ada, tombol tidak pernah tampil */
+    var tampil = !!(sesi && sesi.sah && modeAktif() === sesi.kunci && sesi.c.videoSiap !== false);
     if (tombol.hidden === tampil) tombol.hidden = !tampil;
     arahkanUnduhan();
   }
@@ -367,6 +386,7 @@
         adegan: sesi && sesi.putaran ? sesi.putaran.indeks + 1 : 0,
         total: sesi ? sesi.total : 0,
         tombol: !!(tombol && !tombol.hidden),
+        videoSiap: sesi ? sesi.c.videoSiap !== false : null,
         perangkat: kelasPerangkat()
       };
     }
