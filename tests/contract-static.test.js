@@ -49,6 +49,11 @@ const INLINE_DIIZINKAN = {
 /* Perubahan berkas JS dilindungi yang disetujui. Setiap entri menyebut hash
    lama, hash baru, dan alasannya; selain entri ini berkas JS wajib identik. */
 const JS_DIIZINKAN = {
+  'src/access-gate.js': [{
+    dari: '04535f79ce4ace7869df177ce7b1e3b989765f90a8b612839ca2ee7c545ef921',
+    ke: '3319a15ad1f7394997be0cddde574dcc12f3aa57826adebecc10f0df347f4f70',
+    alasan: 'Login kode akses lama dicabut atas permintaan pemilik (berlaku 15 Oktober 2026, PR #35): hash kode FC/BM/BD, formulir kode, dan buka-kunci lewat penanda perangkat (insuranceHub.access.v3 / access.remember.v3) dihapus; penanda itu dicabut saat dimuat tanpa menghapus data kerja. Layar hanya dibuka sesi Identity yang diakui server: index.html lewat identity-login.js, halaman ringkasan lewat GET /api/psg/me di gate ini. Logout, sambutan, dan bersihkanSesi tidak berubah. Termasuk perubahan sebelumnya di main (foto per akun Identity pada sambutan).',
+  }],
   'src/preview-cetak.js': [{
     dari: 'abe686a05ed724852a36ff89e964940514f9f719686b4e0fcd09e21fc3c92d29',
     ke: '77ddf80fa51bc45def5e1dcefee4a1efca79cb9be055331baef9ec279b789acc',

@@ -5,6 +5,7 @@
      [--screenshots <output-directory>]
 */
 'use strict';
+const { pasangSesiUji } = require('./lib/sesi-uji');
 
 const fs = require('fs');
 const http = require('http');
@@ -343,6 +344,7 @@ async function advanceToTimerElapsed(page, elapsedMs) {
       viewport: { width: 1366, height: 900 },
       reducedMotion: 'no-preference', serviceWorkers: 'block'
     });
+    await pasangSesiUji(context);
     await context.addInitScript(() => {
       try {
         sessionStorage.setItem('insuranceHub.access.v3', 'ok');

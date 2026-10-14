@@ -4,6 +4,7 @@
    node tests/education-camera-targeted.test.js [--browser <chromium-or-edge-exe>]
 */
 'use strict';
+const { pasangSesiUji } = require('./lib/sesi-uji');
 
 const fs = require('fs');
 const http = require('http');
@@ -222,6 +223,7 @@ async function checkS8Animation(page, viewport) {
         viewport: { width: viewport.width, height: viewport.height },
         reducedMotion: 'no-preference'
       });
+      await pasangSesiUji(context);
       await context.addInitScript(installTimelineHook);
       const page = await context.newPage();
       const pageErrors = [];

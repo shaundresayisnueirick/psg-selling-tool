@@ -32,11 +32,8 @@ const index = read('index.html');
 ok(index.indexOf('src/vendor/netlify-identity.js') < index.indexOf('src/identity-login.js') && index.indexOf('src/identity-login.js') < index.indexOf('src/identity-callback.js'), 'script order vendor -> login -> PR #19 callback');
 ok(index.includes('src/identity-login.css'), 'login CSS is loaded');
 
-const gate = read('src/access-gate.js');
-const baseline = JSON.parse(read('tests/contract-baseline.json'));
-const expectedGate = baseline.static && baseline.static.protectedFiles && baseline.static.protectedFiles['src/access-gate.js'];
-const gateHash = crypto.createHash('sha256').update(gate).digest('hex');
-ok(gateHash === expectedGate, 'src/access-gate.js matches protected baseline byte-for-byte');
+const legacyIssues = require('./lib/login-lama').pelanggaranLoginLama(read('src/access-gate.js'), ui);
+ok(!legacyIssues.length, 'legacy access-code login revoked (email Identity login only)' + (legacyIssues.length ? ': ' + legacyIssues.join('; ') : ''));
 
 const server = read('netlify/functions/psg-me.mts');
 ok(server.includes("path: '/api/psg/me'") && server.includes('tanganiMe'), '/api/psg/me remains present');
@@ -49,7 +46,7 @@ const swVersi = (sw.match(/const VERSI = 'insurance-hub-v(\d+)\.(\d+)\.(\d+)'/) 
 ok(swVersi.length === 3 && (swVersi[0] - 117 || swVersi[1] - 1 || swVersi[2] - 7) >= 0, 'service worker version bumped for new assets (minimal v117.1.7)');
 ok(sw.includes("'./src/identity-login.js'") && sw.includes("'./src/identity-login.css'"), 'new login assets are in the service worker precache');
 
-const requiredUi = ['type="email"','autocomplete="email"','type="password"','autocomplete="current-password"','Lupa Password?','MASUK DENGAN KODE AKSES LAMA'];
+const requiredUi = ['type="email"','autocomplete="email"','type="password"','autocomplete="current-password"','Lupa Password?'];
 for (const needle of requiredUi) ok(ui.includes(needle), 'UX marker: ' + needle);
 
 console.log(fail ? 'RESULT: FAIL (' + fail + ')' : 'RESULT: PASS');

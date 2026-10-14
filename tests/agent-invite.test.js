@@ -80,8 +80,9 @@ function gotrue(awal, opsi = {}) {
 
 const raw = (id, email, app, extra = {}) => ({ id, email, aud: '', role: '', confirmed_at: '2026-10-01T00:00:00Z',
   invited_at: '2026-09-30T00:00:00Z', app_metadata: { provider: 'email', ...app }, user_metadata: { full_name: app.psg ? app.psg.nama : email }, ...extra });
-const OWNER = raw('11111111-1111-4111-8111-111111111111', 'owner@psg.test', { roles: ['psg_owner'], psg: { nama: 'Owner Uji', level: 'BD', status: 'aktif' } });
-const ADMIN = raw('22222222-2222-4222-8222-222222222222', 'admin@psg.test', { roles: ['psg_admin'], psg: { nama: 'Admin Uji', level: 'BM', status: 'aktif' } });
+/* OWNER dan ADMIN memakai email dari daftar detail undangan; ADMIN2 tidak. */
+const OWNER = raw('11111111-1111-4111-8111-111111111111', 'erwineffendi06@gmail.com', { roles: ['psg_owner'], psg: { nama: 'Owner Uji', level: 'BD', status: 'aktif' } });
+const ADMIN = raw('22222222-2222-4222-8222-222222222222', 'askstw.f523@gmail.com', { roles: ['psg_admin'], psg: { nama: 'Admin Uji', level: 'BM', status: 'aktif' } });
 const ADMIN2 = raw('33333333-3333-4333-8333-333333333333', 'admin2@psg.test', { roles: ['psg_admin'], psg: { nama: 'Admin Dua', level: 'BM', status: 'aktif' } });
 const FC = raw('44444444-4444-4444-8444-444444444444', 'fc@psg.test', { roles: [], psg: { nama: 'FC Uji', kodeAgen: 'A1', level: 'FC', status: 'aktif' } });
 const FC_BARU = raw('55555555-5555-4555-8555-555555555555', 'fcbaru@psg.test', { roles: [], psg: { nama: 'FC Baru', level: 'FC', status: 'aktif' } }, { confirmed_at: null });
@@ -123,8 +124,8 @@ async function main() {
   cek(!/localStorage|sessionStorage/.test(libSrc + fn), 'server tidak menyentuh storage browser');
   const identity = kode(baca('netlify/functions/identity.mts'));
   cek(!/userValidate|userLogin|userSignup/.test(identity), 'identity.mts tanpa hook userValidate/userLogin/userSignup');
-  const gate = sourceHash(ROOT, 'src/access-gate.js');
-  cek(gate === JSON.parse(baca('tests/contract-baseline.json')).static.protectedFiles['src/access-gate.js'], 'src/access-gate.js tidak berubah');
+  const salahLama = require('./lib/login-lama').pelanggaranLoginLama(baca('src/access-gate.js'), baca('src/identity-login.js'));
+  cek(!salahLama.length, 'login kode akses lama dicabut: halaman hanya dibuka sesi yang diverifikasi /api/psg/me', salahLama);
 
   console.log('Alamat Identity');
   cek(lib.alamatSitus(undefined, '', 'bukan url', UTAMA + '/x?y=1') === UTAMA, 'alamatSitus: kandidat sah pertama, hanya origin');
@@ -159,7 +160,7 @@ async function main() {
     const g = gotrue(SEMUA);
     const r = await jalan(g, sesi(OWNER), 'GET');
     const emails = (r.body.users || []).map((u) => u.email);
-    cek(r.status === 200 && emails[0] === 'owner@psg.test' && emails.slice(1, 3).every((e) => /admin/.test(e)) && !emails.includes('bukan-psg@psg.test') && emails.length === 6,
+    cek(r.status === 200 && emails[0] === OWNER.email && [ADMIN.email, ADMIN2.email].every((e) => emails.slice(1, 3).includes(e)) && !emails.includes('bukan-psg@psg.test') && emails.length === 6,
       'owner: akun PSG saja, urut owner → admin → agen', emails);
     const fc = (r.body.users || []).find((u) => u.email === 'fc@psg.test') || {};
     cek(fc.level === 'FC' && fc.kodeAgen === 'A1' && fc.status === 'aktif' && fc.emailTerkonfirmasi === true && Array.isArray(fc.roles) && !('appMetadata' in fc),
@@ -242,6 +243,64 @@ async function main() {
     cek(r.status === 403, 'admin tidak bisa mengirim link ke owner', r.status);
     r = await jalan(g, sesi(OWNER), 'POST', { action: 'resend_access', id: '99999999-9999-4999-8999-999999999999' });
     cek(r.status === 404 && r.body.error === 'not_found', 'agen tidak ditemukan -> 404', r.body);
+  }
+
+  console.log('Detail undangan: hanya lima akun yang ditunjuk');
+  {
+    const IZIN = [
+      raw('a1111111-1111-4111-8111-111111111111', 'erwineffendi06@gmail.com', { roles: ['psg_owner'], psg: { nama: 'Erwin Effendi', level: 'BD', status: 'aktif' } }),
+      raw('a2222222-2222-4222-8222-222222222222', 'askstw.f523@gmail.com', { roles: ['psg_admin'], psg: { nama: 'Setiawan', level: 'BM', status: 'aktif' } }),
+      raw('a3333333-3333-4333-8333-333333333333', 'hendrago.generali@gmail.com', { roles: ['psg_admin'], psg: { nama: 'Hendra Gowanto', level: 'BM', status: 'aktif' } }),
+      /* email tersimpan dengan huruf besar dan spasi: tetap cocok setelah dinormalkan */
+      raw('a4444444-4444-4444-8444-444444444444', '  JuliXu.F523@Gmail.com ', { roles: ['psg_admin'], psg: { nama: 'Juliana', level: 'BM', status: 'aktif' } }),
+      raw('a5555555-5555-4555-8555-555555555555', 'elisawinoto.generali@gmail.com', { roles: ['psg_admin'], psg: { nama: 'Elisa Winoto', level: 'BM', status: 'aktif' } }),
+    ];
+    const LAIN = raw('a6666666-6666-4666-8666-666666666666', 'admin.lain@psg.test', { roles: ['psg_admin'], psg: { nama: 'Admin Lain', level: 'BM', status: 'aktif' } });
+    const DATA = [...IZIN, LAIN, FC, FC_BARU, FC_NONAKTIF, LUAR];
+    const total = DATA.length - 1, nonaktif = 1;
+    for (const u of IZIN) {
+      const g = gotrue(DATA);
+      const r = await jalan(g, sesi(u), 'GET');
+      const emails = (r.body.users || []).map((x) => String(x.email).trim().toLowerCase());
+      const baru = (r.body.users || []).find((x) => x.email === 'fcbaru@psg.test') || {};
+      cek(r.status === 200 && r.body.detail === true && emails.length === total && emails.includes('fcbaru@psg.test') && baru.emailTerkonfirmasi === false &&
+        r.body.ringkasan && r.body.ringkasan.total === total && r.body.ringkasan.aktif === total - nonaktif && r.body.ringkasan.nonaktif === nonaktif,
+        u.app_metadata.psg.nama + ': melihat daftar detail (email & status konfirmasi) + ringkasan', { status: r.status, detail: r.body.detail, n: emails.length, ringkasan: r.body.ringkasan });
+    }
+    const g = gotrue(DATA);
+    let r = await jalan(g, sesi(LAIN), 'GET');
+    const teksJawaban = JSON.stringify(r.body);
+    cek(r.status === 200 && r.body.detail === false && !('users' in r.body) &&
+      JSON.stringify(r.body.ringkasan) === JSON.stringify({ total, aktif: total - nonaktif, nonaktif }),
+      'PSG Admin di luar daftar: hanya total, aktif, nonaktif', r.body);
+    cek(!/@|fcbaru|emailTerkonfirmasi|invitedAt/.test(teksJawaban), 'jawaban admin di luar daftar tanpa email, nama, atau status konfirmasi per orang', teksJawaban);
+    const palsu = { ...sesi(LAIN), email: 'erwineffendi06@gmail.com' };
+    r = await jalan(g, palsu, 'GET');
+    cek(r.status === 200 && r.body.detail === false && !('users' in r.body), 'klaim sesi berisi email yang diizinkan tidak berlaku: email dibaca dari Identity (server)', r.body);
+    r = await lib.tanganiAgents(new Request(PREVIEW + '/api/psg/agents?detail=1&email=erwineffendi06@gmail.com', { method: 'GET',
+      headers: { 'x-psg-email': 'erwineffendi06@gmail.com', 'x-psg-detail': '1' } }), deps(g, sesi(LAIN)));
+    const b = await r.json();
+    cek(r.status === 200 && b.detail === false && !('users' in b), 'parameter/header permintaan tidak membuka detail', b);
+    /* Allowlist tidak memberi hak: email yang diizinkan tanpa role owner/admin tetap ditolak. */
+    const tanpaRole = raw('a7777777-7777-4777-8777-777777777777', 'hendrago.generali@gmail.com', { roles: [], psg: { nama: 'Hendra (FC)', level: 'FC', status: 'aktif' } });
+    const g3 = gotrue([tanpaRole, FC]);
+    r = await jalan(g3, sesi(tanpaRole), 'GET');
+    cek(r.status === 403, 'email yang diizinkan tanpa role PSG Owner/Admin tetap 403 (tidak ada hak baru)', r.body);
+    const nonaktifIzin = raw('a8888888-8888-4888-8888-888888888888', 'elisawinoto.generali@gmail.com', { roles: ['psg_admin'], psg: { nama: 'Elisa', level: 'BM', status: 'nonaktif' } });
+    const g4 = gotrue([nonaktifIzin, FC]);
+    r = await jalan(g4, sesi(nonaktifIzin), 'GET');
+    cek(r.status === 403 && r.body.error === 'inactive', 'email yang diizinkan tetapi akunnya nonaktif: 403', r.body);
+    /* Aksi admin lain tetap seperti sebelumnya, tetapi jawabannya tidak membawa detail akun. */
+    const g5 = gotrue(DATA);
+    r = await jalan(g5, sesi(LAIN), 'PATCH', { id: FC.id, nama: 'FC Uji', kodeAgen: 'A1', level: 'BM', status: 'aktif', role: 'agent' });
+    cek(r.status === 200 && !('user' in r.body) && g5.users.get(FC.id).app_metadata.psg.level === 'BM', 'admin di luar daftar tetap bisa mengubah agen, jawaban tanpa detail akun', r.body);
+    r = await jalan(g5, sesi(LAIN), 'POST', { action: 'resend_access', id: FC_BARU.id });
+    const r2 = await jalan(g5, sesi(LAIN), 'POST', { action: 'resend_access', id: FC.id });
+    cek(r.status === 200 && r2.status === 200 && r.body.message === r2.body.message, 'kirim ulang oleh admin di luar daftar: pesan sama, tidak membuka status konfirmasi', [r.body.message, r2.body.message]);
+    r = await jalan(g5, sesi(LAIN), 'POST', { email: 'undangan.baru@psg.test', nama: 'Undangan Baru', level: 'FC', role: 'agent' });
+    cek(r.status === 201 && lewat(g5, 'POST', '/invite').some((x) => x.body.email === 'undangan.baru@psg.test'), 'admin di luar daftar tetap bisa mengundang agen', r.status);
+    cek(typeof lib.normalEmail === 'function' && lib.normalEmail('  ErwinEffendi06@GMAIL.com ') === 'erwineffendi06@gmail.com' && lib.EMAIL_DETAIL_UNDANGAN.size === 5,
+      'normalisasi email: trim + huruf kecil; daftar berisi tepat lima email');
   }
 
   console.log('Deploy Preview terlindungi');

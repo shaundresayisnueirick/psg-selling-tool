@@ -1,7 +1,8 @@
 /* PSG Selling Tools — email/password Identity login (PR #20)
-   Jalur utama: @netlify/identity -> GET /api/psg/me (server-side source of truth).
-   Jalur lama tetap dipertahankan oleh src/access-gate.js dan hanya disembunyikan
-   di balik tombol "Masuk dengan Kode Akses Lama" saat layar Identity aktif.
+   Satu-satunya jalur masuk: @netlify/identity -> GET /api/psg/me (server-side
+   source of truth). Login kode akses lama dicabut sejak 15 Oktober 2026:
+   src/access-gate.js tidak lagi punya formulir kode, dan layar hanya dibuka
+   sesudah /api/psg/me mengakui sesi Identity (invite-only).
 
    Tidak menyimpan password/token sendiri. Sesi dikelola sepenuhnya oleh
    @netlify/identity. Data kerja nasabah/Library tidak disentuh. */
@@ -93,10 +94,8 @@
   function tampilkanStatusPemulihan(gate, status, message) {
     var node = document.getElementById(ID_RESTORE_STATUS);
     var identity = gate && gate.querySelector('.psg-identity-login');
-    var legacy = document.getElementById('psgIdentityLegacyWrap');
     if (!node) return;
     if (identity) identity.hidden = status !== 'login';
-    if (legacy) legacy.hidden = true;
     node.hidden = status === 'login';
     node.textContent = message || '';
     node.classList.toggle('psg-identity-restore-error', status === 'error');
@@ -175,8 +174,7 @@
   function pasangFormEmail(gate) {
     if (!gate || gate.dataset.psgIdentityReady === '1') return;
     var card = gate.querySelector('.insurance-access-card');
-    var legacyForm = gate.querySelector('#insuranceAccessForm');
-    if (!card || !legacyForm) return;
+    if (!card) return;
 
     gate.dataset.psgIdentityReady = '1';
 
@@ -187,7 +185,6 @@
     if (existingTitle) existingTitle.style.display = 'none';
     if (existingSub) existingSub.style.display = 'none';
 
-    var sapaan = gate.querySelector('#insuranceSapaan');
     var identity = document.createElement('section');
     identity.className = 'psg-identity-login';
     identity.setAttribute('aria-labelledby', 'psgIdentityLoginTitle');
@@ -207,8 +204,6 @@
         '<div id="psgIdentityServerError" class="insurance-access-error" aria-live="polite"></div>' +
         '<button type="button" class="psg-identity-link" id="psgIdentityForgotToggle">Lupa Password?</button>' +
       '</form>' +
-      '<div class="psg-identity-divider" aria-hidden="true"><span>atau</span></div>' +
-      '<button type="button" class="psg-identity-legacy-toggle" id="psgIdentityLegacyToggle">MASUK DENGAN KODE AKSES LAMA</button>' +
       '<form id="' + ID_FORGOT_FORM + '" novalidate hidden>' +
         '<label class="insurance-access-label" for="psgIdentityForgotEmail">Email untuk pemulihan</label>' +
         '<input id="psgIdentityForgotEmail" type="email" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false" required placeholder="nama@email.com">' +
@@ -228,37 +223,6 @@
     if (logo && logo.nextSibling) card.insertBefore(identity, logo.nextSibling);
     else card.insertBefore(identity, card.firstChild);
     card.insertBefore(restoreStatus, identity);
-
-    var legacyWrap = document.createElement('div');
-    legacyWrap.id = 'psgIdentityLegacyWrap';
-    legacyWrap.hidden = true;
-    legacyWrap.innerHTML = '<div class="psg-identity-legacy-title">Login Kode Akses Lama</div>';
-    if (sapaan) legacyWrap.appendChild(sapaan);
-    legacyWrap.appendChild(legacyForm);
-    card.insertBefore(legacyWrap, card.querySelector('.insurance-access-note') || null);
-
-    function toggleLegacy(show) {
-      legacyWrap.hidden = !show;
-      identity.hidden = show;
-      if (show) {
-        var input = document.getElementById('insuranceAccessCode');
-        if (input) setTimeout(function () { input.focus(); }, 30);
-      } else {
-        var email = document.getElementById('psgIdentityEmail');
-        if (email) setTimeout(function () { email.focus(); }, 30);
-      }
-    }
-
-    document.getElementById('psgIdentityLegacyToggle').addEventListener('click', function () {
-      toggleLegacy(true);
-    });
-
-    var legacyBack = document.createElement('button');
-    legacyBack.type = 'button';
-    legacyBack.className = 'psg-identity-link';
-    legacyBack.textContent = 'Kembali ke login email';
-    legacyBack.addEventListener('click', function () { toggleLegacy(false); });
-    legacyWrap.appendChild(legacyBack);
 
     var eye = document.getElementById('psgIdentityTogglePassword');
     var password = document.getElementById('psgIdentityPassword');
@@ -386,13 +350,10 @@
     var gate = document.getElementById(ID_GATE);
     var identityUser = null;
 
-    /* Kode akses lama boleh membuka gate lebih awal. Bila itu terjadi, cek
-       sesi Identity tetap wajib dilakukan; jangan berhenti hanya karena gate
-       sudah dihapus oleh sesi perangkat lama. */
+    /* Gate selalu dipasang access-gate.js saat dimuat. Bila karena satu dan
+       lain hal tidak ada, layar tetap dikunci dan gate dipasang ulang: tidak
+       ada jalur yang membuka aplikasi tanpa sesi Identity yang diverifikasi. */
     if (!gate) {
-      if (!api) return;
-      try { identityUser = await api.getUser(); } catch (_) { return; }
-      if (!identityUser) return;
       document.documentElement.classList.add('insurance-auth-locked');
       gate = typeof window.insuranceHubEnsureAccessGate === 'function'
         ? window.insuranceHubEnsureAccessGate() : null;

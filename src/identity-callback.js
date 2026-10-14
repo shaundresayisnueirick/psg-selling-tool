@@ -10,9 +10,9 @@
                    lewat updateUser({ password }).
      - lainnya   : cukup pemberitahuan singkat.
 
-   Login lama (src/access-gate.js, kode akses FC/BM/BD) tidak disentuh dan
-   tetap menjadi satu-satunya kunci aplikasi selama masa migrasi: token atau
-   akun Identity tidak membuka aplikasi. Password dan token hanya hidup di
+   Berkas ini tidak membuka aplikasi: sesudah password dibuat, agen masuk
+   lewat formulir email (src/identity-login.js) yang memeriksa profil di
+   /api/psg/me. Login kode akses lama sudah dicabut. Password dan token hanya hidup di
    variabel selama formulir terbuka; berkas ini tidak menulis apa pun ke
    localStorage, sessionStorage, maupun cookie. Penyimpanan sesi Identity
    sepenuhnya diurus pustaka @netlify/identity. */
@@ -164,8 +164,8 @@
           p2.value = '';
           var email = user && user.email ? '<b>' + esc(user.email) + '</b>' : 'kamu';
           tampilkanPesan('AKUN AKTIF', 'Password tersimpan',
-            'Akun ' + email + ' sudah aktif. Selama masa transisi, masuk aplikasi tetap memakai ' +
-            'kode akses seperti biasa.', 'LANJUT KE APLIKASI');
+            'Akun ' + email + ' sudah aktif. Masuk aplikasi dengan email dan password ini.',
+            'LANJUT KE APLIKASI');
         })
         .catch(function (err) {
           sibuk = false;
@@ -216,7 +216,7 @@
   }
 
   /* Dijalankan setelah DOM siap supaya kartu ini berada di atas layar masuk
-     kode akses (yang dipasang access-gate.js pada DOMContentLoaded). */
+     (yang dipasang access-gate.js pada DOMContentLoaded). */
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', mulai, { once: true });
   } else {

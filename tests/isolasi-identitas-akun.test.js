@@ -377,22 +377,18 @@ async function main() {
     k = await kartu();
     check(!k.dataLama && k.read.email === 'lama@psg.test', 'akun C: tawaran tidak muncul lagi sesudah disalin', k.read);
 
-    /* ---------- Login kode akses lama ---------- */
-    console.log('\n## Login kode akses lama');
-    await ganti(null);
-    await bukaIdentitas();
-    k = await kartu();
-    check(k.nama === 'Konsultan Lama' && k.wa === '089900000000' && k.read.email === 'lama@psg.test' && k.tim.some((x) => /Tim Lama/.test(x)) && !k.dataLama,
-      'kode akses lama: tetap memakai data lama perangkat seperti sebelumnya', k);
-    check(!bocor(seluruhTeks(k), NILAI_A.concat(NILAI_B)).length, 'kode akses lama: tidak melihat data akun Identity', bocor(seluruhTeks(k), NILAI_A.concat(NILAI_B)));
-    check(await hpAktivitas() === '089900000000', 'kode akses lama: Identitas Agen tetap HP lama');
-    check(k.read.foto === LAMA.foto, 'kode akses lama: foto lama tetap dipakai');
-    check(seluruhTeks(await penyaji()).includes('089900000000') && (await flyer()).includes('089900000000'), 'kode akses lama: kolom penyaji dan Prompt Flyer tetap memakai HP lama');
-    berkas = await namaCadangan();
-    check(/PSG TEAM/.test(berkas), 'kode akses lama: nama berkas cadangan tetap dari data login lama', berkas);
+    /* ---------- Tanpa sesi Identity (login kode akses lama dicabut) ---------- */
+    console.log('\n## Tanpa sesi Identity');
+    await masuk(null);
+    await page.evaluate(() => window.insuranceHubLogout());
+    await page.waitForLoadState('load');
+    await page.waitForSelector('#psgIdentityEmail', { state: 'visible' });
+    const kunci = await page.evaluate(() => ({ gate: !!document.getElementById('insuranceAccessGate'),
+      terkunci: document.documentElement.classList.contains('insurance-auth-locked'), kodeLama: !!document.getElementById('insuranceAccessCode') }));
+    check(kunci.gate && kunci.terkunci && !kunci.kodeLama, 'tanpa sesi Identity: aplikasi terkunci, data lama perangkat tidak bisa dibuka lewat kode akses lama', kunci);
     lama = await lokalLama();
     check(lama.agen === awalLama.agen && lama.konsultan === awalLama.konsultan && lama.atasNama === awalLama.atasNama && lama.level === awalLama.level && lama.foto === awalLama.foto,
-      'akhir skenario: agen.v1, konsultan.v1, atasNama.v1, level.v1, dan foto lama tidak berubah', lama);
+      'akhir skenario: agen.v1, konsultan.v1, atasNama.v1, level.v1, dan foto lama tidak berubah (login lama dicabut tanpa menghapus data)', lama);
 
     check(pageErrors.length === 0, 'tidak ada JavaScript error', pageErrors);
   } finally {

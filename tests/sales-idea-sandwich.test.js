@@ -33,6 +33,7 @@
      node tests/sales-idea-sandwich.test.js [--root <dir>] [--bagian A,B,...]
    Keluar 0 = lulus, 1 = gagal, 2 = dilewati. */
 'use strict';
+const { pasangSesiUji } = require('./lib/sesi-uji');
 const fs = require('fs');
 const path = require('path');
 const http = require('http');
@@ -196,6 +197,7 @@ function naskahDokumen(md) {
     if (o.rekam) await pg.addInitScript(pantauRekaman);
     if (!o.tanpaTTS) await pg.addInitScript(mockTTS);
     else await pg.addInitScript(() => { try { delete window.speechSynthesis; window.speechSynthesis = undefined; window.SpeechSynthesisUtterance = undefined; } catch (_) {} });
+    await pasangSesiUji(pg);
     await pg.addInitScript(({ t, profil }) => {
       try {
         sessionStorage.setItem('insuranceHub.access.v3', 'ok');

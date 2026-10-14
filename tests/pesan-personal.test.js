@@ -6,7 +6,7 @@
    di proses tes, dengan sesi Identity dan Netlify Blobs tiruan. Tidak ada
    permintaan ke store production maupun preview yang sebenarnya.
 
-   Cakupan: login kode akses lama, akun email A dan B di perangkat yang sama,
+   Cakupan: tanpa sesi Identity (login kode akses lama dicabut), akun email A dan B di perangkat yang sama,
    kosong vs terisi, 280 karakter dengan kata sangat panjang (HP & desktop),
    Preview/cetak, Ringkasan 1 Halaman, snapshot Library baru vs item lama,
    mode "Dibuat untuk agen lain", gagal simpan + coba lagi, offline,
@@ -181,15 +181,15 @@ async function main() {
   const kunciLokal = () => page.evaluate(() => Object.keys(localStorage).sort());
 
   try {
-    /* ---------- 1. Login kode akses lama ---------- */
-    console.log('\n## Login kode akses lama');
+    /* ---------- 1. Tanpa sesi Identity (login kode akses lama dicabut) ---------- */
+    console.log('\n## Tanpa sesi Identity');
     await masuk(null);
-    await page.goto(base + 'index.html', { waitUntil: 'load' }); await siap();
-    await bukaIdentitas();
-    let k = await keadaan();
-    check(k.status === 'tidak-tersedia' && k.nonaktif && /login email terverifikasi/i.test(k.info), 'kode akses lama: kolom nonaktif dengan keterangan login email', k);
-    check(k.pratinjauHidden && k.pratinjauTinggi === 0, 'kode akses lama: tidak ada blok pesan di bawah kartu', k);
-    check(!log.some((x) => x.method !== 'GET'), 'kode akses lama: tidak ada permintaan simpan', log);
+    await page.goto(base + 'index.html', { waitUntil: 'load' });
+    await page.waitForSelector('#psgIdentityEmail', { state: 'visible' });
+    let k = await page.evaluate(() => ({ gate: !!document.getElementById('insuranceAccessGate'),
+      terkunci: document.documentElement.classList.contains('insurance-auth-locked'), status: window.InsuranceHubPesanPersonal.status() }));
+    check(k.gate && k.terkunci && k.status === 'tidak-tersedia', 'tanpa sesi Identity: aplikasi terkunci, Pesan Personal tidak tersedia', k);
+    check(!log.length, 'tanpa sesi Identity: tidak ada permintaan ke API pribadi', log);
     const kunciAwal = await kunciLokal();
 
     /* ---------- 1b. Owner psg_owner, kasus Deploy Preview #31 ---------- */
@@ -419,7 +419,7 @@ async function main() {
     await page.goto(base + 'index.html', { waitUntil: 'load' }); await siap(A.me.email);
     await masuk(null);
     await page.evaluate(() => window.insuranceHubLogout());
-    await page.waitForLoadState('load'); await siap();
+    await page.waitForLoadState('load'); await page.waitForSelector('#psgIdentityEmail', { state: 'visible' });
     const sesudahLogout = await page.evaluate(() => ({ teks: window.InsuranceHubPesanPersonal.teks(), status: window.InsuranceHubPesanPersonal.status() }));
     check(sesudahLogout.teks === '' && sesudahLogout.status === 'tidak-tersedia', 'sesudah logout: tidak ada pesan di memori', sesudahLogout);
     await masuk(B);

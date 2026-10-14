@@ -6,6 +6,7 @@
    Playwright is optional; exit 2 means the browser dependency is unavailable.
 */
 'use strict';
+const { pasangSesiUji } = require('./lib/sesi-uji');
 const path = require('path');
 const http = require('http');
 
@@ -81,6 +82,7 @@ const educationRenderCss = [
 
 async function educationScene(browser, baseUrl, sceneNumber, rendererLayout) {
   const context = await browser.newContext({ viewport: { width: 360, height: 640 }, deviceScaleFactor: 2, reducedMotion: 'no-preference' });
+  await pasangSesiUji(context);
   await context.addInitScript(educationInit);
   const page = await context.newPage();
   await page.goto(baseUrl, { waitUntil: 'load' });
@@ -163,6 +165,7 @@ async function nilaiPensiun(page) {
     }
 
     const context = await browser.newContext({ viewport: { width: 1280, height: 900 }, reducedMotion: 'no-preference' });
+    await pasangSesiUji(context);
     await context.addInitScript(accessInit);
     const page = await context.newPage();
     const pageErrors = [];

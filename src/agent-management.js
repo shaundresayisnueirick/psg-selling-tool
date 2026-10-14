@@ -2,7 +2,7 @@
 (function(){
   'use strict';
   const ENDPOINT='/api/psg/agents';
-  const state={owner:false,admin:false,users:[],q:''};
+  const state={owner:false,admin:false,users:[],q:'',detail:false,ringkasan:null};
   const $=(id)=>document.getElementById(id);
   function nav(show){ document.querySelectorAll('.psg-admin-only[data-psg-nav="manajemen"]').forEach(b=>{b.hidden=!show;b.setAttribute('aria-hidden',show?'false':'true')}) }
   async function getMe(){ const r=await fetch('/api/psg/me',{cache:'no-store',credentials:'same-origin'}); if(!r.ok)return null; const d=await r.json().catch(()=>({})); return d.authenticated?d.user:null }
@@ -14,8 +14,13 @@
     const list=$('agentMgmtList');if(!list)return;
     const q=state.q.toLowerCase();
     const users=state.users.filter(u=>!q||[u.nama,u.email,u.kodeAgen,u.level].some(v=>String(v||'').toLowerCase().includes(q)));
-    const active=state.users.filter(u=>u.status==='aktif').length, inactive=state.users.length-active;
-    $('agentMgmtSummary').innerHTML='<div class="agent-mgmt-stat"><b>'+state.users.length+'</b><small>Total akun PSG</small></div><div class="agent-mgmt-stat"><b>'+active+'</b><small>Aktif</small></div><div class="agent-mgmt-stat"><b>'+inactive+'</b><small>Nonaktif</small></div>';
+    /* Jumlah dari server (ringkasan); detail per orang hanya dikirim server ke
+       akun yang ditunjuk. Tanpa detail, layar hanya menampilkan jumlah. */
+    const r=state.ringkasan||{total:state.users.length,aktif:state.users.filter(u=>u.status==='aktif').length};
+    const total=Number(r.total)||0, active=Number(r.aktif)||0, inactive=r.nonaktif!=null?Number(r.nonaktif)||0:total-active;
+    $('agentMgmtSummary').innerHTML='<div class="agent-mgmt-stat"><b>'+total+'</b><small>Total akun PSG</small></div><div class="agent-mgmt-stat"><b>'+active+'</b><small>Aktif</small></div><div class="agent-mgmt-stat"><b>'+inactive+'</b><small>Nonaktif</small></div>';
+    const cari=$('agentMgmtSearch');if(cari)cari.hidden=!state.detail;
+    if(!state.detail){list.innerHTML='<div class="agent-mgmt-empty" data-agent-ringkas>Daftar detail undangan hanya dapat dilihat oleh PSG Owner dan admin yang ditunjuk. Kamu tetap dapat mengundang agen baru.</div>';return}
     list.innerHTML=users.length?users.map(u=>{
       const editable=canEdit(u);
       return '<article class="agent-mgmt-card"><div><div class="agent-mgmt-name">'+esc(u.nama||'Tanpa nama')+'</div><div class="catatan">'+esc(u.email||'—')+'</div><div class="agent-mgmt-meta"><span class="agent-mgmt-pill">'+esc(role(u))+'</span>'+(u.kodeAgen?'<span class="agent-mgmt-pill">'+esc(u.kodeAgen)+'</span>':'')+'<span class="agent-mgmt-pill '+esc(u.status)+'">'+esc(u.status==='aktif'?'AKTIF':'NONAKTIF')+'</span>'+ (u.emailTerkonfirmasi?'<span class="agent-mgmt-pill">EMAIL TERKONFIRMASI</span>':'<span class="agent-mgmt-pill">EMAIL BELUM TERKONFIRMASI</span>')+'</div></div><div class="agent-mgmt-actions">'+(editable?'<button type="button" data-agent-edit="'+esc(u.id)+'">Edit</button>':'')+(editable&&u.status==='aktif'&&u.email?'<button type="button" data-agent-resend="'+esc(u.id)+'">Kirim ulang link</button>':'')+'</div></article>'
@@ -33,7 +38,7 @@
     m.hidden=false;$('agentMgmtNama').focus();
   }
   function close(){if($('agentMgmtModal'))$('agentMgmtModal').hidden=true}
-  async function load(){ $('agentMgmtList').innerHTML='<div class="agent-mgmt-empty">Memuat data agen…</div>'; try{state.users=(await api()).users||[];render()}catch(_){$('agentMgmtList').innerHTML='<div class="agent-mgmt-empty">Data agen tidak dapat dimuat. Periksa hak akses dan koneksi.</div>'} }
+  async function load(){ $('agentMgmtList').innerHTML='<div class="agent-mgmt-empty">Memuat data agen…</div>'; try{const d=await api();state.detail=d.detail!==false&&Array.isArray(d.users);state.users=state.detail?d.users:[];state.ringkasan=d.ringkasan||null;render()}catch(_){$('agentMgmtList').innerHTML='<div class="agent-mgmt-empty">Data agen tidak dapat dimuat. Periksa hak akses dan koneksi.</div>'} }
   async function authorize(){const me=await getMe();const roles=me?.roles||[];const ok=roles.includes('psg_owner')||roles.includes('psg_admin');state.owner=roles.includes('psg_owner');state.admin=roles.includes('psg_admin');nav(ok);return ok}
   function bind(){
     document.addEventListener('click',async(e)=>{

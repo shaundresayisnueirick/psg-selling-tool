@@ -219,17 +219,14 @@ async function main() {
   };
 
   try {
-    /* ---------- Login kode akses lama ---------- */
-    console.log('\n## Login kode akses lama');
+    /* ---------- Tanpa sesi Identity (login kode akses lama dicabut) ---------- */
+    console.log('\n## Tanpa sesi Identity');
     await masuk(null);
-    await page.goto(base + 'index.html', { waitUntil: 'load' }); await siap();
-    await bukaIdentitas();
-    let k = await kartu();
-    check(k.foto === FOTO_LAMA, '10. kode akses lama: Kartu Konsultan tetap memakai foto profil lama', k.foto && k.foto.slice(0, 60));
-    await simpanHpAktivitas('0812-7777-0001');
-    await bukaIdentitas();
-    k = await kartu();
-    check(k.wa === '081277770001' && k.readWa === '081277770001', '11/12. kode akses lama: HP dari Simpan identitas (aktSimpanAgen) mengisi WhatsApp tanpa refresh dan mengalahkan WhatsApp lama', k);
+    await page.goto(base + 'index.html', { waitUntil: 'load' });
+    await page.waitForSelector('#psgIdentityEmail', { state: 'visible' });
+    let k = await page.evaluate(() => ({ gate: !!document.getElementById('insuranceAccessGate'),
+      terkunci: document.documentElement.classList.contains('insurance-auth-locked') }));
+    check(k.gate && k.terkunci, '10–12. tanpa sesi Identity aplikasi terkunci: jalur foto/HP login kode akses lama tidak lagi tersedia', k);
     await page.evaluate(() => localStorage.setItem('insuranceHub.agen.v1', JSON.stringify({ nama: 'PSG TEAM', kode: '68000001', hp: '' })));
 
     /* ---------- Akun A: sesi dipulihkan ---------- */

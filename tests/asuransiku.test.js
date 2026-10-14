@@ -180,19 +180,21 @@ async function main() {
 
   try {
     /* ---------- 1. Login kode akses lama ---------- */
-    console.log('\n## Login kode akses lama');
+    console.log('\n## Tanpa sesi Identity (login kode akses lama dicabut) lalu akun A');
     const d1 = await perangkat(390);
     let page = d1.page;
     await d1.masuk(null);
-    await page.goto(base + 'index.html', { waitUntil: 'load' }); await d1.siap();
+    await page.goto(base + 'index.html', { waitUntil: 'load' });
+    await page.waitForSelector('#psgIdentityEmail', { state: 'visible' });
+    const terkunci = await page.evaluate(() => !!document.getElementById('insuranceAccessGate') && document.documentElement.classList.contains('insurance-auth-locked'));
+    check(terkunci && d1.st.log.length === 0, 'tanpa sesi Identity: aplikasi terkunci, server Asuransiku tidak dipanggil', d1.st.log);
+    await d1.masuk(A);
+    await page.reload({ waitUntil: 'load' }); await d1.siap(A.me.email);
     const kartu = await page.evaluate(() => { const b = document.getElementById('btnAsuransiku'); const prev = b && b.previousElementSibling; return b && { judul: b.querySelector('.mode-title').textContent, desc: b.querySelector('.mode-desc').textContent, sesudah: prev && prev.id }; });
     check(kartu && kartu.judul === 'Asuransiku' && kartu.desc === 'Kenali dan tampilkan perlindungan yang sudah kamu miliki.' && kartu.sesudah === 'btnKartuKonsultan', 'kartu Asuransiku di dashboard, sesudah Identitas Konsultan', kartu);
     const nav = await page.evaluate(() => [...document.querySelectorAll('[data-psg-nav="asuransiku"]')].map((n) => n.className));
     check(nav.some((c) => /psg-link/.test(c)) && nav.some((c) => /psg-sheet-item/.test(c)), 'item navigasi samping dan menu', nav);
-    await bukaKartu(page);
-    let k = await keadaan(page);
-    check(k.tampilan === 'tidak-tersedia' && /email terverifikasi/i.test(await teksLayar(page)), 'kode akses lama: keterangan login email terverifikasi', k);
-    check(d1.st.log.length === 0, 'kode akses lama: server tidak dipanggil', d1.st.log);
+    let k;
     const tanpaSimpan = await page.evaluate(() => document.getElementById('layarAsuransiku').classList.contains('tanpa-simpan'));
     check(tanpaSimpan, 'layar bertanda tanpa-simpan (tidak direkam Isian Terakhir)');
 
@@ -364,7 +366,7 @@ async function main() {
     /* ---------- 8. Berganti akun di perangkat yang sama ---------- */
     await d1.masuk(null);
     await page.evaluate(() => window.insuranceHubLogout());
-    await page.waitForLoadState('load'); await d1.siap();
+    await page.waitForLoadState('load'); await page.waitForSelector('#psgIdentityEmail', { state: 'visible' });
     k = await keadaan(page);
     check(k.polis.length === 0 && k.tampilan === 'tidak-tersedia', 'sesudah logout: tidak ada data di memori', k);
     await d1.masuk(B);

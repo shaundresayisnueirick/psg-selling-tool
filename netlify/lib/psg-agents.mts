@@ -94,6 +94,21 @@ export function keUser(raw: unknown): User | null {
   }
 }
 
+/* Detail daftar undangan (siapa yang diundang, email, status konfirmasi)
+   hanya untuk lima akun ini. Dicocokkan dengan email akun pelaku yang dibaca
+   server dari Identity Admin API (bukan dari data browser), sesudah
+   dinormalkan: spasi di ujung dibuang dan huruf kecil semua. PSG Owner/Admin
+   lain hanya menerima ringkasan jumlah (total, aktif, nonaktif). Daftar ini
+   tidak memberi role baru: pelaku tetap harus PSG Owner atau PSG Admin. */
+export const normalEmail = (v: unknown): string => (typeof v === 'string' ? v.trim().toLowerCase() : '')
+export const EMAIL_DETAIL_UNDANGAN: ReadonlySet<string> = new Set([
+  'erwineffendi06@gmail.com',       // PSG Owner — Erwin Effendi
+  'askstw.f523@gmail.com',          // PSG Admin — Setiawan
+  'hendrago.generali@gmail.com',    // PSG Admin — Hendra Gowanto
+  'julixu.f523@gmail.com',          // PSG Admin — Juliana
+  'elisawinoto.generali@gmail.com', // PSG Admin — Elisa Winoto
+].map(normalEmail))
+
 const peran = (u: User) => profilAman(u).roles
 const isOwner = (u: User) => peran(u).includes('psg_owner')
 const isAdmin = (u: User) => peran(u).includes('psg_admin')
@@ -102,6 +117,14 @@ const emailSah = (v: string) => /^\S+@\S+\.\S+$/.test(v)
 const metaPsg = (u: User) => objek(objek(u.appMetadata).psg)
 const userPsg = (u: User) => !!objek(u.appMetadata).psg || peran(u).length > 0
 const aman = (u: User) => ({ ...profilAman(u), lastSignInAt: u.lastSignInAt ?? null, invitedAt: u.invitedAt ?? null })
+export const bolehLihatDetail = (u: User) =>
+  (isOwner(u) || isAdmin(u)) && EMAIL_DETAIL_UNDANGAN.has(normalEmail(u.email))
+/* Aktif/nonaktif memakai app_metadata.psg.status yang sudah ada (profilAman):
+   'nonaktif' bila ditandai nonaktif, selain itu 'aktif'. Tidak ada status baru. */
+const ringkasan = (users: ReturnType<typeof aman>[]) => {
+  const aktif = users.filter((u) => u.status === 'aktif').length
+  return { total: users.length, aktif, nonaktif: users.length - aktif }
+}
 /* Owner: semua akun kecuali owner (termasuk dirinya). Admin: hanya FC/BM/BD. */
 const bolehKelola = (pelaku: User, target: User) =>
   target.id !== pelaku.id &&
@@ -242,13 +265,16 @@ async function kirimUlang(body: Record<string, unknown>, aktor: User, deps: Deps
   if (!userPsg(target) || !bolehKelola(aktor, target)) return gagal(403, 'forbidden_target', 'Kamu tidak berwenang mengelola akun ini.')
   if (!target.email) return gagal(409, 'missing_email', 'Akun tidak memiliki email.')
   if (metaPsg(target).status === 'nonaktif') return gagal(409, 'inactive', 'Akun nonaktif tidak dikirimi link akses.')
+  /* Pesan pembeda (undangan vs atur ulang password) membuka status konfirmasi
+     akun; hanya pelaku yang boleh melihat detail undangan yang menerimanya. */
+  const netral = bolehLihatDetail(aktor) ? null : 'Link akses sudah dikirim ke email agen.'
   try {
     if (!target.confirmedAt) {
       await mintaIdentity(deps, '/invite', { method: 'POST', body: JSON.stringify({ email: target.email }) })
-      return jawabJson(200, { ok: true, message: 'Undangan dikirim ulang. Agen akan menerima email untuk membuat password.' })
+      return jawabJson(200, { ok: true, message: netral || 'Undangan dikirim ulang. Agen akan menerima email untuk membuat password.' })
     }
     await mintaIdentity(deps, '/recover', { method: 'POST', body: JSON.stringify({ email: target.email }) }, false)
-    return jawabJson(200, { ok: true, message: 'Link untuk mengatur ulang password sudah dikirim.' })
+    return jawabJson(200, { ok: true, message: netral || 'Link untuk mengatur ulang password sudah dikirim.' })
   } catch (e) {
     return gagal(502, 'delivery_failed', `Email akses tidak dapat dikirim. ${e instanceof Error ? e.message : ''}`.trim())
   }
@@ -281,7 +307,8 @@ async function ubah(body: Record<string, unknown>, aktor: User, deps: DepsAgents
         user_metadata: { ...objek(target.userMetadata), full_name: nama },
       }),
     }))
-    return jawabJson(200, { ok: true, message: 'Data agen diperbarui.', user: aman(diperbarui || target) })
+    return jawabJson(200, { ok: true, message: 'Data agen diperbarui.',
+      ...(bolehLihatDetail(aktor) ? { user: aman(diperbarui || target) } : {}) })
   } catch (e) {
     return gagal(502, 'update_failed', `Data agen tidak dapat diperbarui. ${e instanceof Error ? e.message : ''}`.trim())
   }
@@ -291,7 +318,14 @@ async function ubah(body: Record<string, unknown>, aktor: User, deps: DepsAgents
 export async function tanganiAgents(req: Request, deps: DepsAgents): Promise<Response> {
   try {
     const aktor = await pelaku(deps)
-    if (req.method === 'GET') return jawabJson(200, { ok: true, users: await daftarAgen(deps) })
+    if (req.method === 'GET') {
+      /* Ringkasan dihitung di server; detail per orang hanya untuk daftar
+         EMAIL_DETAIL_UNDANGAN. Admin lain tidak menerima satu pun data akun. */
+      const users = await daftarAgen(deps)
+      return bolehLihatDetail(aktor)
+        ? jawabJson(200, { ok: true, detail: true, ringkasan: ringkasan(users), users })
+        : jawabJson(200, { ok: true, detail: false, ringkasan: ringkasan(users) })
+    }
     if (req.method !== 'POST' && req.method !== 'PATCH') {
       return jawabJson(405, { error: 'method_not_allowed' }, { Allow: 'GET, POST, PATCH' })
     }

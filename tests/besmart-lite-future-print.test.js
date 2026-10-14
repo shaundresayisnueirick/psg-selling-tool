@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 'use strict';
+const { pasangSesiUji } = require('./lib/sesi-uji');
 
 const fs = require('fs');
 const http = require('http');
@@ -41,13 +42,15 @@ async function main() {
   };
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
-  await page.addInitScript(() => {
-    sessionStorage.setItem('insuranceHub.access.v3', 'ok');
-    localStorage.setItem('insuranceHub.konsultan.v1', JSON.stringify({
+  const akun = await pasangSesiUji(page);
+  /* Sesi Identity: Kartu Konsultan dan foto dibaca dari key per akun email. */
+  await page.addInitScript((email) => {
+    const e = encodeURIComponent(email);
+    localStorage.setItem('insuranceHub.identitas.akun.v1.' + e, JSON.stringify({ konsultan: {
       nama:'Erwin Effendi', jabatan:'Business Director', whatsapp:'082271139393', qr:'YA'
-    }));
-    localStorage.setItem('insuranceHub.agen.foto.v1', 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64"%3E%3Ccircle cx="32" cy="32" r="32" fill="%233b7859"/%3E%3C/svg%3E');
-  });
+    } }));
+    localStorage.setItem('insuranceHub.agen.foto.identity.v1.' + e, 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64"%3E%3Ccircle cx="32" cy="32" r="32" fill="%233b7859"/%3E%3C/svg%3E');
+  }, akun.email);
   await page.route('https://quickchart.io/qr?**', route => route.fulfill({
     status:200, contentType:'image/svg+xml',
     body:'<svg xmlns="http://www.w3.org/2000/svg" width="180" height="180" viewBox="0 0 180 180"><rect width="180" height="180" fill="white"/><path fill="black" d="M8 8h48v48H8zM20 20v24h24V20zM124 8h48v48h-48zM136 20v24h24V20zM8 124h48v48H8zM20 136v24h24v-24zM72 8h12v12H72zM92 8h12v12H92zM72 28h12v12H72zM92 48h12v12H92zM68 72h12v12H68zM88 72h12v12H88zM108 72h12v12h-12zM128 72h12v12h-12zM148 72h12v12h-12zM68 92h12v12H68zM108 92h12v12h-12zM128 92h12v12h-12zM148 92h12v12h-12zM72 112h12v12H72zM92 112h12v12H92zM112 112h12v12h-12zM132 112h12v12h-12zM72 132h12v12H72zM92 152h12v12H92zM112 132h12v12h-12zM152 152h12v12h-12z"/></svg>'
@@ -55,6 +58,7 @@ async function main() {
 
   try {
     await page.goto('http://127.0.0.1:' + server.address().port + '/', { waitUntil:'load' });
+    await page.waitForFunction(() => !document.getElementById('insuranceAccessGate') && window.InsuranceHubIdentity);
     await page.evaluate(() => window.bukaLayar('LF'));
     await page.locator('#fNama').fill('Shaundre');
     await page.locator('#fTgl').fill('1984-12-31');

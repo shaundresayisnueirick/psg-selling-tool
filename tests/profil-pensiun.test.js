@@ -28,6 +28,7 @@
    Playwright tidak menjadi dependensi repo: dipakai dari instalasi global
    (NODE_PATH) bila tersedia. Keluar 0 = lulus, 1 = gagal, 2 = dilewati. */
 'use strict';
+const { pasangSesiUji } = require('./lib/sesi-uji');
 const fs = require('fs');
 const path = require('path');
 const http = require('http');
@@ -97,6 +98,7 @@ async function bukaApp(ctx, url) {
   pg.on('pageerror', (e) => errors.push('pageerror: ' + e.message));
   pg.on('console', (m) => { if (m.type() === 'error') errors.push('console: ' + m.text()); });
   pg.on('dialog', (d) => d.accept());
+  await pasangSesiUji(pg);
   await pg.addInitScript(() => { try { sessionStorage.setItem('insuranceHub.access.v3', 'ok'); } catch (_) {} });
   await pg.goto(url, { waitUntil: 'load' });
   await pg.waitForTimeout(800);
