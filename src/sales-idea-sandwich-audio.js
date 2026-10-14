@@ -12,7 +12,7 @@ window.PSGSandwichAudio = {
   suara: 'Bian — Neutral, Calm and Clear',
   folder: 'assets/narasi/sandwich/',
   segmen: {
-    'S01-01': [{ audio: 'sandwich-S01-01.mp3', start: 0.000, end: 7.706 }],
+    'S01-01': [{ audio: 'sandwich-S01-01.mp3', start: 0.000, end: 7.158 }],
     'S02-01': [{ audio: 'sandwich-S02-01.mp3', start: 0.000, end: 9.091 }],
     'S03-01': [{ audio: 'sandwich-S03-01.mp3', start: 0.000, end: 10.266 }],
     'S04-01': [{ audio: 'sandwich-S04-01.mp3', start: 0.000, end: 10.606 }],
