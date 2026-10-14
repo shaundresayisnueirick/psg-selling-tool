@@ -408,7 +408,7 @@
         hal + '<path d="M58 252v-8M152 252v-8"' + S('logam', 4) + '/>' +
         /* toples dana pensiun terisi */
         '<g' + A('muncul', 200, 800) + '>' +
-          '<g clip-path="url(#' + P + 'tg)"><rect class="sgw-isi" x="232" y="262" width="88" height="110"' + F('koin') + A('isi', 1200, 4200) + '/></g>' +
+          '<g clip-path="url(#' + P + 'tg)"><rect class="sgw-tingkat" x="232" y="262" width="88" height="110"' + F('koin') + A('isi', 1200, 4200) + '/></g>' +
           '<path d="M232 262h88v92a14 14 0 0 1-14 14h-60a14 14 0 0 1-14-14z"' + FS('kaca', 'kaca-garis', 3) + '/>' +
           '<rect x="226" y="246" width="100" height="18" rx="5"' + F('kayu') + '/>' +
           '<rect x="246" y="300" width="60" height="34" rx="4"' + F('label') + '/>' +
@@ -445,7 +445,7 @@
           '<path d="M284 336h104"' + S('tinta', 2) + '/>' + teks(284, 358, 'Total', 13, 'aksen', ' font-weight="800"') +
           '<path d="M340 354h48"' + S('aksen', 4) + PL + A('tulis', 2000, 700) + '/></g>' +
         /* tabungan menyusut & dana pendidikan goyah */
-        '<g' + A('muncul', 600, 800) + '><g clip-path="url(#' + P + 'tb)"><rect class="sgw-isi" x="436" y="290" width="72" height="80"' + F('koin') + A('kuras', 2400, 3200) + '/></g>' +
+        '<g' + A('muncul', 600, 800) + '><g clip-path="url(#' + P + 'tb)"><rect class="sgw-tingkat" x="436" y="290" width="72" height="80"' + F('koin') + A('kuras', 2400, 3200) + '/></g>' +
           '<path d="M436 290h72v66a12 12 0 0 1-12 12h-48a12 12 0 0 1-12-12z"' + FS('kaca', 'kaca-garis', 3) + '/>' +
           '<rect x="430" y="276" width="84" height="16" rx="4"' + F('kayu') + '/>' + teks(472, 330, 'Tabungan', 11, 'label-teks', ' text-anchor="middle" font-weight="800"') + '</g>' +
         '<g class="sgw-miring"' + A('miring', 3200, 1400) + '><rect x="520" y="246" width="34" height="126" rx="3"' + F('buku-2') + '/>' +
@@ -697,10 +697,16 @@
   var BOLAK = { kedip: 1, debu: 1, nafas: 1, awan: 1, getar: 1, goyang: 1 };
   var LINEAR = { hujan: 1, ekg: 1, getar: 1 };
 
-  function gerakkan(tl, el) {
+  /* gerak berulang dibatasi sepanjang scene (bukan tak berujung) sehingga ikut
+     timeline: pause/seek pemutar dan render video (tools/video/render-video.mjs)
+     menggerakkannya juga; gerak dikurangi → tidak dibuat (sama dengan ambient) */
+  function gerakkan(tl, el, akhir) {
     var j = el.getAttribute('data-a'), t = +el.getAttribute('data-t') || 0, d = +el.getAttribute('data-d') || 800;
     if (ULANG[j]) {
-      tl.loop(el, ULANG[j], { duration: d, delay: t, direction: BOLAK[j] ? 'alternate' : 'normal', easing: LINEAR[j] ? 'linear' : 'ease-in-out' });
+      if (tl.tanpaAmbient) return;
+      var kali = Math.floor((akhir - t) / d);
+      if (kali < 1) return;
+      tl.add(el, ULANG[j], { duration: d, delay: t, iterations: kali, fill: 'none', direction: BOLAK[j] ? 'alternate' : 'normal', easing: LINEAR[j] ? 'linear' : 'ease-in-out' });
       return;
     }
     if (j === 'pena') {
@@ -734,7 +740,7 @@
 
   function animasi(tl, stage, n, K) {
     var st = satu(stage, '.sgw-stage');
-    semua(st, '[data-a]').forEach(function (el) { gerakkan(tl, el); });
+    semua(st, '[data-a]').forEach(function (el) { gerakkan(tl, el, K.akhir); });
     /* kamera: dorongan pelan sepanjang scene */
     var kamera = satu(st, '.sgw-kamera');
     if (kamera) tl.add(kamera, [{ transform: 'scale(1.0)' }, { transform: 'scale(1.045)' }], { duration: K.akhir, easing: 'linear', fill: 'both' });
@@ -970,6 +976,7 @@
     /* untuk pengujian & dokumen (baca saja) */
     naskah: function () { return NARASI.map(function (s) { return s.slice(); }); },
     scene: function () { return SCENE.map(function (s) { return Object.assign({}, s); }); },
+    ketukan: function (n) { var k = ketukan(n); return { B: k.B.slice(), D: k.D.slice(), akhir: k.akhir }; },
     durasi: function () { return SCENE.map(function (_, i) { return ketukan(i + 1).akhir; }); }
   };
   window.PSGSandwichPilihan = {

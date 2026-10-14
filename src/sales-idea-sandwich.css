@@ -161,7 +161,7 @@
   .sgw-latar-svg{position:absolute;inset:0;width:100%;height:100%;display:block}
   .sgw-motif{position:absolute;z-index:3;left:5%;right:5%;top:4%;bottom:26%;width:90%;height:70%;overflow:visible;font-family:inherit}
   .sgw-stage [data-a]{transform-box:fill-box;transform-origin:center}
-  .sgw-stage .sgw-isi,.sgw-stage .sgw-isian{transform-origin:center bottom}
+  .sgw-stage .sgw-tingkat,.sgw-stage .sgw-isian{transform-origin:center bottom}
   .sgw-stage .sgw-balon{transform-origin:center bottom}
   .sgw-stage .sgw-miring{transform-origin:left bottom}
   .sgw-stage .sgw-pena{transform-box:view-box;transform-origin:0 0}

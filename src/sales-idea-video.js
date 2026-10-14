@@ -1,6 +1,7 @@
 /* ============================================================
    Sales Idea → "⬇ Download Video" (Asset Creation, Retirement Planning,
-   Keranjang Kehidupan, Education Planning, Bekerja di Singapura, Proteksi Kredit)
+   Keranjang Kehidupan, Education Planning, Bekerja di Singapura, Proteksi Kredit,
+   Sandwich Generation)
    ------------------------------------------------------------
    Tombol unduh video pre-render (assets/video/<cerita>-terang.mp4 atau
    <cerita>-gelap.mp4, menurut tema aktif saat tombol diklik; cerita yang punya
@@ -40,6 +41,12 @@
    kredit-<tema>.mp4. videoSiap: false pada sebuah cerita → tombolnya tidak
    pernah tampil (MP4 belum di-render), jadi tidak ada tautan mati; tes R di
    tests/sales-idea-unduh-video.test.js memastikan berkas yang dirujuk ada.
+
+   Sandwich Generation (duaFormat: true) memakai gerbang dan berkas yang sama,
+   tetapi memberi DUA tombol yang dipilih sendiri oleh agen, tanpa deteksi
+   perangkat: "Download Video Portrait (9:16)" → sandwich-<tema>-portrait.mp4
+   dan "Download Video Landscape (16:9)" → sandwich-<tema>.mp4. Tombol kedua
+   (portrait) hanya dipakai cerita duaFormat; cerita lain tetap satu tombol.
    ============================================================ */
 (function () {
   'use strict';
@@ -120,6 +127,18 @@
          (dirender dari rekaman Bian, tools/video/render-video.mjs) */
       videoSiap: true
     },
+    sandwich: {
+      sel: '.sgw', attr: 'data-sgw',
+      video: { terang: 'assets/video/sandwich-terang.mp4', gelap: 'assets/video/sandwich-gelap.mp4' },
+      nama: { terang: 'PSG-Sandwich-Generation-Light.mp4', gelap: 'PSG-Sandwich-Generation-Dark.mp4' },
+      potret: {
+        video: { terang: 'assets/video/sandwich-terang-portrait.mp4', gelap: 'assets/video/sandwich-gelap-portrait.mp4' },
+        nama: { terang: 'PSG-Sandwich-Generation-Light-Portrait.mp4', gelap: 'PSG-Sandwich-Generation-Dark-Portrait.mp4' }
+      },
+      /* dua tombol pilihan format (portrait 9:16 & landscape 16:9), bukan deteksi perangkat */
+      duaFormat: true,
+      videoSiap: true
+    },
     singapura: {
       sel: '.sgs', attr: 'data-sgs',
       video: { terang: 'assets/video/singapura-terang.mp4', gelap: 'assets/video/singapura-gelap.mp4' },
@@ -137,7 +156,8 @@
   var TOLERANSI_AKHIR = 100;   /* md: jam saat status 'selesai' */
   var SAMPEL = 200;            /* md */
 
-  var root = null, stage = null, tombol = null, timer = 0;
+  var root = null, stage = null, tombol = null, tombolPotret = null, timer = 0;
+  var LABEL = { satu: '⬇ Download Video', potret: '⬇ Download Video Portrait (9:16)', lanskap: '⬇ Download Video Landscape (16:9)' };
   var sesi = null;     /* { kunci, c, status, alasan, putaran, adegan, sah } */
 
   function SI() { return window.SalesIdea10Jari || null; }
@@ -293,16 +313,30 @@
         '#layarSalesIdea .sip-meta .sip-unduh[hidden]{display:none}' +
         '#layarSalesIdea .sip-meta .sip-unduh:hover{filter:brightness(1.08)}' +
         '#layarSalesIdea .sip-meta .sip-unduh:focus-visible{outline:2px solid var(--focus);outline-offset:2px}' +
-        '[data-theme="dark"] #layarSalesIdea .sip-meta .sip-unduh{border-color:var(--primary);background:var(--primary);color:var(--on-primary)}';
+        '[data-theme="dark"] #layarSalesIdea .sip-meta .sip-unduh{border-color:var(--primary);background:var(--primary);color:var(--on-primary)}' +
+        /* dua tombol (duaFormat): portrait tampil lebih dulu; di layar sempit tiap tombol selebar bar */
+        '#layarSalesIdea .sip-meta .sip-unduh-potret{order:1}' +
+        '#layarSalesIdea .sip-meta.sip-meta-dua .sip-unduh:not(.sip-unduh-potret){order:2}' +
+        '@media (max-width:620px){#layarSalesIdea .sip-meta.sip-meta-dua{flex-wrap:wrap;row-gap:8px}' +
+          '#layarSalesIdea .sip-meta.sip-meta-dua .sip-progress{flex:1 1 60%}' +
+          '#layarSalesIdea .sip-meta.sip-meta-dua .sip-unduh{flex:1 1 100%;min-height:44px}}';
       document.head.appendChild(s);
     }
     tombol = document.createElement('a');
     tombol.className = 'sip-unduh';
     tombol.hidden = true;
-    tombol.textContent = '⬇ Download Video';
+    tombol.textContent = LABEL.satu;
     /* dipanggil sebelum aksi bawaan tautan: perangkat & tema yang berlaku saat klik */
     tombol.addEventListener('click', arahkanUnduhan);
     meta.appendChild(tombol);
+    /* tombol portrait cerita duaFormat: sesudah tombol utama di DOM (tombol utama
+       tetap .sip-unduh pertama), tampil lebih dulu lewat order */
+    tombolPotret = document.createElement('a');
+    tombolPotret.className = 'sip-unduh sip-unduh-potret';
+    tombolPotret.hidden = true;
+    tombolPotret.textContent = LABEL.potret;
+    tombolPotret.addEventListener('click', arahkanUnduhan);
+    meta.appendChild(tombolPotret);
   }
   /* tema aktif (atribut dari theme-switcher.js): Dark → gelap, selain itu terang */
   function temaAktif() {
@@ -339,17 +373,32 @@
     var t = temaAktif(), v = c.potret && kelasPerangkat() === 'smartphone' ? c.potret : c;
     return { href: v.video[t], nama: v.nama[t] };
   }
+  function setel(a, href, nama, label) {
+    if (a.getAttribute('href') !== href) a.setAttribute('href', href);
+    if (a.getAttribute('download') !== nama) a.setAttribute('download', nama);
+    if (a.textContent !== label) a.textContent = label;
+  }
   function arahkanUnduhan() {
     if (!tombol || !sesi) return;
-    var b = berkasUnduh(sesi.c);
-    if (tombol.getAttribute('href') !== b.href) tombol.setAttribute('href', b.href);
-    if (tombol.getAttribute('download') !== b.nama) tombol.setAttribute('download', b.nama);
+    var c = sesi.c;
+    if (c.duaFormat && c.potret) {
+      /* pilihan agen: landscape di tombol utama, portrait di tombol kedua; tema saat klik */
+      var t = temaAktif();
+      setel(tombol, c.video[t], c.nama[t], LABEL.lanskap);
+      if (tombolPotret) setel(tombolPotret, c.potret.video[t], c.potret.nama[t], LABEL.potret);
+      return;
+    }
+    var b = berkasUnduh(c);
+    setel(tombol, b.href, b.nama, LABEL.satu);
   }
   function tampilkan() {
     if (!tombol) return;
     /* videoSiap: false → MP4 belum ada, tombol tidak pernah tampil */
     var tampil = !!(sesi && sesi.sah && modeAktif() === sesi.kunci && sesi.c.videoSiap !== false);
+    var dua = tampil && !!sesi.c.duaFormat;
     if (tombol.hidden === tampil) tombol.hidden = !tampil;
+    if (tombolPotret && tombolPotret.hidden === dua) tombolPotret.hidden = !dua;
+    if (tombol.parentNode) tombol.parentNode.classList.toggle('sip-meta-dua', dua);
     arahkanUnduhan();
   }
 
@@ -386,6 +435,7 @@
         adegan: sesi && sesi.putaran ? sesi.putaran.indeks + 1 : 0,
         total: sesi ? sesi.total : 0,
         tombol: !!(tombol && !tombol.hidden),
+        tombolPotret: !!(tombolPotret && !tombolPotret.hidden),
         videoSiap: sesi ? sesi.c.videoSiap !== false : null,
         perangkat: kelasPerangkat()
       };

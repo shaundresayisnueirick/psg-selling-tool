@@ -5,9 +5,11 @@ Naskah ini sama persis, kata per kata, dengan naskah yang dipakai aplikasi
 `tests/sales-idea-sandwich.test.js` memeriksa keduanya tetap identik. Bila
 naskah diubah, ubah di kedua tempat sekaligus.
 
-Status audio: **belum ada rekaman.** Selama manifest
-`src/sales-idea-sandwich-audio.js` belum dipasang, aplikasi memakai suara
-browser sebagai narasi sementara. Suara browser bukan hasil akhir.
+Status audio: **terpasang (2026-10-14).** Delapan rekaman Bian ada di
+`assets/narasi/sandwich/` dan dipetakan di `src/sales-idea-sandwich-audio.js`
+(satu berkas per scene, diputar utuh). Suara browser tidak dipakai selama
+manifest termuat; bila sebuah MP3 gagal dimuat, scene itu sunyi (animasi
+tetap berjalan) dan narator tidak beralih ke suara browser.
 
 ## Suara dan cara generate (mengikuti Sales Idea yang sudah final)
 
@@ -53,6 +55,8 @@ Untuk menantuku di masa depan, ada satu hal yang ingin aku pastikan: gajimu buka
 
 **Estimasi durasi:** ±7 detik.
 
+**Durasi rekaman terpasang:** 7,706 detik.
+
 **Catatan jeda:** Jeda ±0,5 detik setelah koma pertama dan ±0,4 detik setelah titik dua.
 
 ---
@@ -70,6 +74,8 @@ Kami tentu ingin saling membantu dalam keluarga. Tetapi aku tak ingin kasih saya
 ```
 
 **Estimasi durasi:** ±10 detik.
+
+**Durasi rekaman terpasang:** 9,091 detik.
 
 **Catatan jeda:** Jeda ±0,6 detik setelah kalimat pertama.
 
@@ -89,6 +95,8 @@ Saat kita berhenti bekerja, kebutuhan hidup tetap berjalan. Pensiun yang tidak d
 
 **Estimasi durasi:** ±10,5 detik.
 
+**Durasi rekaman terpasang:** 10,266 detik.
+
 **Catatan jeda:** Jeda ±0,6 detik setelah "kebutuhan hidup tetap berjalan."
 
 ---
@@ -106,6 +114,8 @@ Biaya kesehatan juga bisa datang di luar rencana. Tanpa perlindungan dan dana ya
 ```
 
 **Estimasi durasi:** ±11 detik.
+
+**Durasi rekaman terpasang:** 10,606 detik.
 
 **Catatan jeda:** Jeda ±0,6 detik setelah kalimat pertama; jeda pendek setelah "memadai".
 
@@ -125,6 +135,8 @@ Penyakit kritis dapat memengaruhi penghasilan dan kebutuhan sehari-hari. Dan bil
 
 **Estimasi durasi:** ±12,5 detik.
 
+**Durasi rekaman terpasang:** 11,468 detik.
+
 **Catatan jeda:** Jeda ±0,7 detik sebelum "Dan bila pencari nafkah meninggal".
 
 ---
@@ -142,6 +154,8 @@ Di sinilah rantai beban bisa terbentuk: anak membesarkan anaknya sendiri, sambil
 ```
 
 **Estimasi durasi:** ±11,5 detik.
+
+**Durasi rekaman terpasang:** 11,546 detik.
 
 **Catatan jeda:** Jeda ±0,4 detik setelah titik dua; ±0,6 detik sebelum "Lalu ia bisa mewariskan".
 
@@ -161,6 +175,8 @@ Kita tidak bisa mengendalikan semua hal. Tapi kita bisa mulai dengan mengenali k
 
 **Estimasi durasi:** ±11,5 detik.
 
+**Durasi rekaman terpasang:** 11,154 detik.
+
 **Catatan jeda:** Jeda ±0,6 detik setelah kalimat pertama; jeda pendek di setiap koma daftar langkah.
 
 ---
@@ -179,39 +195,29 @@ Rantai itu putus di aku. Bukan karena semua risiko hilang, tetapi karena aku mul
 
 **Estimasi durasi:** ±12 detik.
 
+**Durasi rekaman terpasang:** 12,356 detik.
+
 **Catatan jeda:** Jeda ±0,8 detik setelah "Rantai itu putus di aku." dan ±0,6 detik sebelum kalimat tanya.
 
 ---
 
-## Memasang rekaman ke aplikasi (tahap finalisasi, bukan sekarang)
+## Rekaman di aplikasi
 
-Kirimkan kedelapan berkas MP3 dengan nama di atas. Pemasangannya
-mengikuti pola Proteksi Kredit:
+Kedelapan MP3 sudah dipasang dengan pola Proteksi Kredit:
 
-1. Berkas disimpan di `assets/narasi/sandwich/`:
-   `sandwich-S01-01.mp3` … `sandwich-S08-01.mp3`.
-2. Manifest baru `src/sales-idea-sandwich-audio.js`, bentuknya sama dengan
-   `src/sales-idea-kredit-audio.js`:
+1. Berkas: `assets/narasi/sandwich/sandwich-S01-01.mp3` … `sandwich-S08-01.mp3`
+   (isi persis berkas ElevenLabs yang dikirim, tidak diubah).
+2. Manifest `src/sales-idea-sandwich-audio.js` (`window.PSGSandwichAudio`,
+   suara Bian — Neutral, Calm and Clear). `end` = durasi berkas dari decode
+   Chromium (sama dengan ffprobe sampai milidetik); total 84,193 detik.
+3. Manifest dimuat di `index.html` tepat sebelum `src/sales-idea-sandwich.js`;
+   delapan MP3 dan manifest ada di daftar precache `sw.js`.
 
-   ```js
-   window.PSGSandwichAudio = {
-     versi: 'sgw-bian-<tanggal>',
-     suara: 'Bian — Neutral, Calm and Clear',
-     folder: 'assets/narasi/sandwich/',
-     segmen: {
-       'S01-01': [{ audio: 'sandwich-S01-01.mp3', start: 0.000, end: <durasi> }],
-       /* … sampai S08-01 */
-     }
-   };
-   ```
+Narator bersama (`PSGNarasi.rekamanDari`) memutar MP3 scene yang sedang
+tampil. Lama tiap scene = durasi rekaman + jeda 700 md (minimal 3,4 dtk) +
+ekor 700 md, jadi animasi tidak memotong narasi. Halaman pilihan kebutuhan
+muncul sesudah scene 8 selesai DAN rekaman S08 tuntas.
 
-   `end` adalah durasi berkas yang diukur dari decode Chromium. Berkas
-   diputar utuh.
-3. Manifest dimuat di `index.html` tepat sebelum `src/sales-idea-sandwich.js`.
-   Kedelapan MP3 dan manifest masuk daftar precache `sw.js`, lalu `VERSI`
-   dinaikkan.
-
-Begitu manifest termuat, narator bersama (`PSGNarasi.rekamanDari`) memutar
-MP3 dan tidak pernah jatuh ke suara browser. Lama tiap scene mengikuti
-durasi rekaman ditambah jeda 700 md. Tanpa manifest, narator memakai suara
-browser sebagai pengganti sementara.
+Bila naskah diubah, rekaman scene itu harus dibuat ulang dengan nama berkas
+yang sama, lalu `end` di manifest diukur ulang dan video unduhan dirender ulang
+(`tools/video/render-video.mjs --cerita sandwich` dan `sandwich-portrait`).

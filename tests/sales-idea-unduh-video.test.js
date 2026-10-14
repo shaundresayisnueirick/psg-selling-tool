@@ -209,6 +209,16 @@ const VIDEO_KREDIT_P = {
    wajib ada (lihat bagian R). Pemilihan berkas sama dengan cerita lain
    (smartphone → portrait; lainnya → landscape), diuji di PERANGKAT. */
 const VIDEO_KREDIT_SEMUA = Object.values(VIDEO_KREDIT).concat(Object.values(VIDEO_KREDIT_P)).map((v) => v.href);
+/* Sandwich Generation: dua tombol pilihan format (duaFormat), diuji di
+   tests/sales-idea-sandwich.test.js; di sini hanya ikut daftar berkas yang dirujuk modul (R) */
+const VIDEO_SANDWICH = {
+  terang: { href: 'assets/video/sandwich-terang.mp4', nama: 'PSG-Sandwich-Generation-Light.mp4' },
+  gelap: { href: 'assets/video/sandwich-gelap.mp4', nama: 'PSG-Sandwich-Generation-Dark.mp4' }
+};
+const VIDEO_SANDWICH_P = {
+  terang: { href: 'assets/video/sandwich-terang-portrait.mp4', nama: 'PSG-Sandwich-Generation-Light-Portrait.mp4' },
+  gelap: { href: 'assets/video/sandwich-gelap-portrait.mp4', nama: 'PSG-Sandwich-Generation-Dark-Portrait.mp4' }
+};
 /* profil emulasi Chromium (px CSS). sentuh = isMobile + hasTouch (pointer coarse, tanpa hover);
    tanpa sentuh = mouse (pointer fine + hover). putar = viewport diubah di halaman yang sama
    (screen tetap, seperti iOS). Simulasi browser, bukan perangkat fisik. */
@@ -1283,7 +1293,7 @@ function serve() {
     /* tanpa 404 statis: setiap video yang dirujuk modul ada di repo, dan sebaliknya */
     const modul = fs.readFileSync(path.join(ROOT, 'src/sales-idea-video.js'), 'utf8');
     const dirujuk = [...new Set(modul.match(/assets\/video\/[\w.-]+\.mp4/g) || [])].sort();
-    const harus = Object.values(VIDEO).concat(Object.values(VIDEO_P), Object.values(VIDEO_EDU), Object.values(VIDEO_EDU_P), Object.values(VIDEO_SG), Object.values(VIDEO_SG_P), Object.values(VIDEO_RET), Object.values(VIDEO_RET_P), Object.values(VIDEO_KBS), Object.values(VIDEO_KBS_P), Object.values(VIDEO_JARI), Object.values(VIDEO_JARI_P), Object.values(VIDEO_KREDIT), Object.values(VIDEO_KREDIT_P)).map((v) => v.href).sort();
+    const harus = Object.values(VIDEO).concat(Object.values(VIDEO_P), Object.values(VIDEO_EDU), Object.values(VIDEO_EDU_P), Object.values(VIDEO_SG), Object.values(VIDEO_SG_P), Object.values(VIDEO_RET), Object.values(VIDEO_RET_P), Object.values(VIDEO_KBS), Object.values(VIDEO_KBS_P), Object.values(VIDEO_JARI), Object.values(VIDEO_JARI_P), Object.values(VIDEO_KREDIT), Object.values(VIDEO_KREDIT_P), Object.values(VIDEO_SANDWICH), Object.values(VIDEO_SANDWICH_P)).map((v) => v.href).sort();
     const ada = harus.map((h) => { const f = path.join(ROOT, h); return fs.existsSync(f) ? fs.statSync(f).size : 0; });
     const blokKredit = modul.slice(modul.indexOf('kredit: {'), modul.indexOf('singapura: {'));
     const kreditMenunggu = /videoSiap:\s*false/.test(blokKredit);

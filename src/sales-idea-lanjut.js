@@ -45,7 +45,7 @@
   };
   var LABEL = { hitung: 'Mari Kita Hitung', lain: 'Bahas Topik Lain' };
 
-  var root = null, kartu = null, pilihan = null;
+  var root = null, kartu = null, pilihan = null, footerDiamati = null;
   var aktif = false;     // layar Sales Idea sedang tampil
   var status = null;     // status pemutar terakhir yang diamati selama layar tampil
   var indeks = -1;       // scene terakhir yang diamati
@@ -89,6 +89,12 @@
   function posisikan() {
     if (!root) return;
     var footer = root.querySelector('.si-footer');
+    /* tinggi bar kontrol bisa berubah saat tampil (mis. dua tombol unduh video
+       Sandwich Generation di layar sempit) → posisi ikut disesuaikan */
+    if (footer && footer !== footerDiamati && window.ResizeObserver) {
+      footerDiamati = footer;
+      new ResizeObserver(function () { if ((kartu && !kartu.hidden) || (pilihan && !pilihan.hidden)) posisikan(); }).observe(footer);
+    }
     var r = root.getBoundingClientRect(), f = footer ? footer.getBoundingClientRect() : null;
     var bawah = f && f.height ? Math.max(0, r.bottom - f.top) : 0;
     if (kartu) kartu.style.bottom = Math.round(bawah + 10) + 'px';

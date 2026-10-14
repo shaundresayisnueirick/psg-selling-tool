@@ -15,7 +15,7 @@
    - Hanya jawaban yang benar-benar berhasil (status 200) yang disimpan,
      sehingga halaman error tidak pernah ikut tersimpan. */
 
-const VERSI = 'insurance-hub-v117.1.27';
+const VERSI = 'insurance-hub-v117.1.28';
 
 /* Semua berkas inti ikut disimpan sejak pemasangan, supaya aplikasi tetap
    utuh walaupun kunjungan pertama terputus di tengah jalan.
@@ -126,7 +126,8 @@ const BERKAS = [
   './src/sales-idea-singapura.js?v=114',
   './src/sales-idea-kredit-audio.js?v=119',
   './src/sales-idea-kredit.js?v=119',
-  './src/sales-idea-sandwich.js?v=121',
+  './src/sales-idea-sandwich-audio.js?v=123',
+  './src/sales-idea-sandwich.js?v=123',
   './assets/home-carousel/01-cemerlang-prime.webp',
   './assets/home-carousel/02-cristal-prime.webp',
   './assets/home-carousel/03-iflexyguard.webp',
@@ -235,6 +236,15 @@ const BERKAS = [
   './assets/narasi/asset/asset-S05-03.mp3',
   './assets/narasi/asset/asset-S06-01.mp3',
   './assets/narasi/asset/asset-S06-02.mp3',
+  /* rekaman narasi Sandwich Generation (voice Bian): 8 berkas, satu per scene */
+  './assets/narasi/sandwich/sandwich-S01-01.mp3',
+  './assets/narasi/sandwich/sandwich-S02-01.mp3',
+  './assets/narasi/sandwich/sandwich-S03-01.mp3',
+  './assets/narasi/sandwich/sandwich-S04-01.mp3',
+  './assets/narasi/sandwich/sandwich-S05-01.mp3',
+  './assets/narasi/sandwich/sandwich-S06-01.mp3',
+  './assets/narasi/sandwich/sandwich-S07-01.mp3',
+  './assets/narasi/sandwich/sandwich-S08-01.mp3',
   /* rekaman narasi Proteksi Kredit (voice Bian): 24 berkas, satu per segmen */
   './assets/narasi/kredit/kredit-S01-01.mp3',
   './assets/narasi/kredit/kredit-S01-02.mp3',

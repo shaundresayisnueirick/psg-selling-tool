@@ -17,8 +17,8 @@ Naskah di bawah ini sama persis dengan dokumen itu dan dengan aplikasi
 |---|---|
 | Delapan scene di pemutar Sales Idea (teks layar, naskah, ilustrasi animasi berlapis terang/gelap) | **Tersedia** di aplikasi |
 | Foto/video realistis per scene | **Belum ada, harus dibuat** (lihat daftar aset) |
-| Audio narasi ElevenLabs | **Belum ada, harus dibuat**. Sementara memakai suara browser. |
-| Video unduhan (MP4 seperti Sales Idea lain) | **Belum ada**. Tombol unduh tidak ditampilkan untuk cerita ini. |
+| Audio narasi ElevenLabs (voice Bian) | **Terpasang**: 8 MP3 di `assets/narasi/sandwich/`, manifest `src/sales-idea-sandwich-audio.js`. |
+| Video unduhan (MP4) | **Tersedia** sesudah presentasi ditonton utuh: tombol "Download Video Portrait (9:16)" (720×1280) dan "Download Video Landscape (16:9)" (1280×720), tema terang/gelap, dirender dari scene & rekaman yang sama. |
 
 Tanpa aset realistis, setiap scene tampil sebagai ilustrasi animasi
 berlapis. Arah visualnya mengikuti referensi pemilik (PDF "sandwich
@@ -178,8 +178,8 @@ Semua aset di bawah **belum tersedia** dan perlu disiapkan.
 |---|---|---|---|
 | Latar scene 1–8 (video) | MP4 H.264, tanpa audio, 16:9 (1920×1080 atau 1280×720), 6–12 detik dapat diulang, ±2–5 MB | `s01.mp4` … `s08.mp4` | Harus dibuat |
 | Poster/cadangan scene 1–8 (gambar) | JPG atau WebP 16:9, ±1600×900, ≤400 KB | `s01.jpg` … `s08.jpg` | Harus dibuat |
-| Audio narasi scene 1–8 | MP3 (lihat dokumen ElevenLabs) | `sandwich-S01-01.mp3` … `sandwich-S08-01.mp3` | Harus dibuat |
-| Video unduhan seperti Sales Idea lain | Belum direncanakan untuk cerita ini | — | Belum ada |
+| Audio narasi scene 1–8 | MP3 (lihat dokumen ElevenLabs) | `sandwich-S01-01.mp3` … `sandwich-S08-01.mp3` | Terpasang |
+| Video unduhan portrait & landscape | MP4 H.264 + AAC, terang/gelap | `assets/video/sandwich-{terang,gelap}{,-portrait}.mp4` | Tersedia |
 
 Satu scene cukup memakai gambar saja atau video saja. Video tampil
 `object-fit: cover`: bagian tengah aman, tepi bisa terpotong di HP. Simpan
