@@ -220,7 +220,7 @@ function cek(ok, label, info) {
     const { ctx, pg } = await buka();
     await pg.evaluate(() => document.getElementById('btnSalesIdea').click()); await pg.waitForTimeout(300);
     const kartu = await pg.evaluate(() => [...document.querySelectorAll('[data-si-choice]')].map((b) => b.dataset.siChoice).join(','));
-    cek(kartu === 'jari,basket,education,retirement,asset,singapura,kredit', 'hub: 5 Sales Idea lama + Bekerja di Singapura + Proteksi Kredit', kartu);
+    cek(kartu === 'jari,basket,education,retirement,asset,singapura,kredit,sandwich', 'hub: 5 Sales Idea lama + Bekerja di Singapura + Proteksi Kredit + Sandwich Generation', kartu);
     await pg.evaluate(() => document.querySelector('[data-si-choice="singapura"]').click()); await pg.waitForTimeout(350);
     const a = await st(pg);
     const k = await pg.evaluate(() => window.SalesIdea10Jari.keadaan());

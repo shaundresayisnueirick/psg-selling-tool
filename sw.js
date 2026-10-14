@@ -15,7 +15,7 @@
    - Hanya jawaban yang benar-benar berhasil (status 200) yang disimpan,
      sehingga halaman error tidak pernah ikut tersimpan. */
 
-const VERSI = 'insurance-hub-v117.1.23';
+const VERSI = 'insurance-hub-v117.1.26';
 
 /* Semua berkas inti ikut disimpan sejak pemasangan, supaya aplikasi tetap
    utuh walaupun kunjungan pertama terputus di tengah jalan.
@@ -45,6 +45,7 @@ const BERKAS = [
   './src/sales-idea-lanjut.css?v=110',
   './src/sales-idea-singapura.css?v=112',
   './src/sales-idea-kredit.css?v=118',
+  './src/sales-idea-sandwich.css?v=121',
   './src/cetak-besar.css',
   './src/psg-feedback.css',
   './src/identity-login.css',
@@ -120,11 +121,12 @@ const BERKAS = [
   './src/sales-idea-jari.js?v=117',
   './src/sales-idea-asset-audio.js?v=116',
   './src/sales-idea-asset.js?v=116',
-  './src/sales-idea-lanjut.js?v=118',
+  './src/sales-idea-lanjut.js?v=121',
   './src/sales-idea-singapura-audio.js?v=114',
   './src/sales-idea-singapura.js?v=114',
   './src/sales-idea-kredit-audio.js?v=119',
   './src/sales-idea-kredit.js?v=119',
+  './src/sales-idea-sandwich.js?v=121',
   './assets/home-carousel/01-cemerlang-prime.webp',
   './assets/home-carousel/02-cristal-prime.webp',
   './assets/home-carousel/03-iflexyguard.webp',

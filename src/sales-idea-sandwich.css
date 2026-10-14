@@ -1,0 +1,239 @@
+/* =====================================================================
+   SALES IDEA 08 — SANDWICH GENERATION
+   ---------------------------------------------------------------------
+   Pasangan src/sales-idea-sandwich.js. Hanya layar.
+   0. Token terang/gelap — palet ilustrasi --sw-* per scene (tanpa tokoh
+      kartun; manusia hanya siluet).
+   1. Tata letak satu layar (pola yang sama dengan Proteksi Kredit).
+   2. Panggung: latar, media opsional, ilustrasi berlapis (latar 960×540 +
+      objek 560×380) dengan kamera pelan, cahaya, butir, teks layar.
+   3. Halaman pilihan kebutuhan sesudah video (dipasang oleh
+      src/sales-idea-lanjut.js di #layarSalesIdea).
+   4. Sorotan kolom Analisis Kebutuhan (jalur D/E).
+   ===================================================================== */
+@media screen{
+
+  /* ---------- 0. Token ---------- */
+  .sgw,#layarSalesIdea .sgw-pilihan{
+    --sgw-hangat-1:#f6e3cf;--sgw-hangat-2:#f9eee2;--sgw-hangat-3:#fdf8f2;
+    --sgw-teduh-1:#dfe7ee;--sgw-teduh-2:#eef2f5;--sgw-teduh-3:#f8f6f2;
+    --sgw-redup-1:#d9dde4;--sgw-redup-2:#e8ebef;--sgw-redup-3:#f3f2ef;
+    --sgw-fajar-1:#fbd9b4;--sgw-fajar-2:#fde9d3;--sgw-fajar-3:#fff8ef;
+    --sgw-cahaya:rgba(255,214,150,.55);
+    --sgw-layar-teks:#2a211b;--sgw-layar-bayang:0 1px 0 rgba(255,255,255,.6);
+    --sgw-panggung-garis:#ece4da;--sgw-panggung-bayang:0 18px 40px rgba(60,40,20,.10);
+    --sgw-butir:.05;--sgw-scrim:linear-gradient(180deg,rgba(0,0,0,0) 40%,rgba(0,0,0,.55) 100%);
+    --sgw-aksen-teks:#a60101;--sgw-emas-kbs:#c8912e;
+    --sgw-sorot:rgba(166,1,1,.14);--sgw-sorot-garis:#a60101;
+    /* palet ilustrasi — terang: senja keemasan */
+    --sw-dinding-1:#f3e6d4;--sw-dinding-2:#e3cbae;--sw-langit-1:#f4b27a;--sw-langit-2:#fde2bd;
+    --sw-surya:#fff3d6;--sw-kota:#c4946c;--sw-lampu-kota:#fff4d6;--sw-kusen:#86603f;--sw-tirai:#d6ae86;
+    --sw-meja:#9a6942;--sw-meja-tepi:#7a4f32;--sw-kayu:#87593a;--sw-buku-1:#b3262c;--sw-buku-2:#3d5a80;--sw-buku-3:#c8912e;
+    --sw-lampu:#ffc969;--sw-kertas:#fffaf0;--sw-kertas-garis:#e3d5bf;--sw-tinta:#3b2b20;--sw-pena:#1f2633;--sw-logam:#8e949b;
+    --sw-bingkai:#6f4a2f;--sw-foto-1:#f7c690;--sw-foto-2:#de8c58;--sw-siluet:#4a3426;--sw-siluet-2:#7a5a44;
+    --sw-daun:#5f8a4e;--sw-aksen:#c0262d;--sw-emas:#d39b2a;--sw-kaca:rgba(255,255,255,.38);--sw-kaca-garis:rgba(110,80,55,.55);
+    --sw-koin:#e3b341;--sw-uap:rgba(255,255,255,.9);--sw-label:#fffaf0;--sw-label-teks:#3b2b20;
+    --sw-bukit-1:#c58660;--sw-bukit-2:#a8694a;--sw-tanah:#8a5a3c;--sw-hujan:rgba(80,100,135,.5);--sw-awan:rgba(255,255,255,.55);
+    --sw-perisai:#2f80c9;--sw-rantai:#7b8088;--sw-rantai-gelap:#5a5f68;--sw-atap:#7a3b2a;--sw-rumah:#e9d6bd;
+    --sw-layar:#0f1a17;--sw-ekg:#3ee08f;
+    --sw-roti-1:#f0c27e;--sw-roti-2:#cf8f47;--sw-kerak:#9a5f2a;--sw-selada:#6fae4f;--sw-tomat:#d9483b;--sw-keju:#f2c14e;
+    --sw-kulit:#f2c39b;--sw-rambut:#2b1d14;--sw-uban:#dcd8d2;--sw-uban-gelap:#8c8780;--sw-mulut:#7a1f1f;--sw-pipi:#f08c8c;--sw-putih:#ffffff;
+    --sw-hoodie:#2f4f9a;--sw-ungu:#7b5ea7;--sw-hijau-baju:#4f7d4a;--sw-pink:#e8738f;--sw-keringat:#7cc4f2;
+  }
+  [data-theme="dark"] .sgw,[data-theme="dark"] #layarSalesIdea .sgw-pilihan{
+    --sgw-hangat-1:#3a2a22;--sgw-hangat-2:#2b211c;--sgw-hangat-3:#1d1815;
+    --sgw-teduh-1:#1f2a36;--sgw-teduh-2:#18212b;--sgw-teduh-3:#12181f;
+    --sgw-redup-1:#1a1d24;--sgw-redup-2:#14171c;--sgw-redup-3:#0f1115;
+    --sgw-fajar-1:#5a3626;--sgw-fajar-2:#3a2a24;--sgw-fajar-3:#1c1714;
+    --sgw-cahaya:rgba(255,190,110,.28);
+    --sgw-layar-teks:#f5ede4;--sgw-layar-bayang:0 2px 14px rgba(0,0,0,.55);
+    --sgw-panggung-garis:rgba(255,255,255,.07);--sgw-panggung-bayang:0 24px 60px rgba(0,0,0,.55);
+    --sgw-butir:.08;
+    --sgw-aksen-teks:var(--brand);--sgw-emas-kbs:#f0c060;
+    --sgw-sorot:rgba(255,138,128,.16);--sgw-sorot-garis:#ff8a80;
+    /* palet ilustrasi — gelap: malam */
+    --sw-dinding-1:#1f2638;--sw-dinding-2:#141a27;--sw-langit-1:#0b1430;--sw-langit-2:#2c3a66;
+    --sw-surya:#f3e6c4;--sw-kota:#0c1222;--sw-lampu-kota:#ffd27a;--sw-kusen:#3b2c22;--sw-tirai:#3a2e38;
+    --sw-meja:#4a3122;--sw-meja-tepi:#33221a;--sw-kayu:#3f2b1f;--sw-buku-1:#8a2323;--sw-buku-2:#2f4766;--sw-buku-3:#8a6a2a;
+    --sw-lampu:#ffc45e;--sw-kertas:#f1e4cf;--sw-kertas-garis:#d3c2a6;--sw-tinta:#2a1f17;--sw-pena:#0d1219;--sw-logam:#6b7280;
+    --sw-bingkai:#5a3c27;--sw-foto-1:#d8a066;--sw-foto-2:#9a5a35;--sw-siluet:#1c140e;--sw-siluet-2:#4a3628;
+    --sw-daun:#4f7a4a;--sw-aksen:#ff6b5f;--sw-emas:#f0c060;--sw-kaca:rgba(255,255,255,.14);--sw-kaca-garis:rgba(255,230,190,.5);
+    --sw-koin:#f0c060;--sw-uap:rgba(255,240,220,.65);--sw-label:#2a2420;--sw-label-teks:#f5ede4;
+    --sw-bukit-1:#2a2440;--sw-bukit-2:#1c1830;--sw-tanah:#141120;--sw-hujan:rgba(170,190,230,.38);--sw-awan:rgba(170,180,220,.18);
+    --sw-perisai:#6fb3ff;--sw-rantai:#a2a8b2;--sw-rantai-gelap:#555b65;--sw-atap:#3a1f1c;--sw-rumah:#2e2a33;
+    --sw-layar:#06100d;--sw-ekg:#3ee08f;
+    --sw-roti-1:#cf9a58;--sw-roti-2:#9a6630;--sw-kerak:#6a4120;--sw-selada:#4f8a3c;--sw-tomat:#b8392f;--sw-keju:#d9a83a;
+    --sw-kulit:#dcab84;--sw-rambut:#1d130d;--sw-uban:#c9c5bf;--sw-uban-gelap:#7a756f;--sw-mulut:#5e1717;--sw-pipi:#d9737a;--sw-putih:#f6f1ea;
+    --sw-hoodie:#3a5cad;--sw-ungu:#6d539a;--sw-hijau-baju:#456f41;--sw-pink:#d4657f;--sw-keringat:#8fd0ff;
+  }
+  /* suasana per scene (langit & dinding) */
+  .sgw-a3{--sw-langit-1:#ef9358;--sw-langit-2:#fcd6a2}
+  .sgw-a4{--sw-dinding-1:#e3efed;--sw-dinding-2:#c9dfda;--sw-langit-1:#b9dcef;--sw-langit-2:#eaf6fb;--sw-meja:#b9c9c6;--sw-meja-tepi:#9fb3af;--sw-kusen:#7f9a96}
+  .sgw-a5{--sw-langit-1:#7f95b6;--sw-langit-2:#e6c3a0;--sw-surya:#ffe2b8}
+  .sgw-a6{--sw-langit-1:#b98aa3;--sw-langit-2:#f6cfa2;--sw-bukit-1:#9a6a6a;--sw-bukit-2:#7a5060;--sw-tanah:#6a4448}
+  .sgw-a7{--sw-langit-1:#a6d2ef;--sw-langit-2:#fdf0d6;--sw-dinding-1:#f7eee2;--sw-dinding-2:#e9d8c1;--sw-surya:#fff6dc}
+  .sgw-a8{--sw-langit-1:#f39a63;--sw-langit-2:#ffe6c2;--sw-bukit-1:#cf875a;--sw-bukit-2:#ad6845;--sw-tanah:#8f5638;--sw-surya:#fff1c9}
+  [data-theme="dark"] .sgw-a3{--sw-langit-1:#1a1430;--sw-langit-2:#7a3f3a}
+  [data-theme="dark"] .sgw-a4{--sw-dinding-1:#15262a;--sw-dinding-2:#0e1b1e;--sw-langit-1:#0f2233;--sw-langit-2:#1d3a52;--sw-meja:#22383a;--sw-meja-tepi:#1a2c2e;--sw-kusen:#2f4446}
+  [data-theme="dark"] .sgw-a5{--sw-langit-1:#0b1226;--sw-langit-2:#2b3352;--sw-surya:#d9cfb0}
+  [data-theme="dark"] .sgw-a6{--sw-langit-1:#120f26;--sw-langit-2:#4a2f4f;--sw-bukit-1:#2b2038;--sw-bukit-2:#1d1528;--sw-tanah:#120d1a}
+  [data-theme="dark"] .sgw-a7{--sw-langit-1:#1b2c52;--sw-langit-2:#d08a5a;--sw-dinding-1:#262c3c;--sw-dinding-2:#1a1f2c;--sw-surya:#ffe2a8}
+  [data-theme="dark"] .sgw-a8{--sw-langit-1:#2a1f45;--sw-langit-2:#e0875a;--sw-bukit-1:#3a2a40;--sw-bukit-2:#24192e;--sw-tanah:#170f1c;--sw-surya:#ffd9a0}
+
+  /* ---------- 1. Tata letak satu layar ---------- */
+  #layarSalesIdea.aktif .si-content.sip-fit > .sgw{flex:1 1 auto}
+  .sgw{min-height:0;width:100%;max-width:1500px;margin:0 auto;display:grid;grid-template-rows:auto minmax(0,1fr);gap:10px}
+  .sgw-body{min-height:0;display:grid;grid-template-rows:minmax(0,1fr) auto;gap:12px}
+  @media (min-width:1024px),(min-aspect-ratio:3/2) and (max-height:560px){
+    .sgw-body{grid-template-rows:minmax(0,1fr);grid-template-columns:minmax(0,1fr) clamp(260px,27vw,380px);gap:18px}
+  }
+  #layarSalesIdea .sgw > .si-presentation-topbar{
+    display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;align-items:center;gap:10px;
+    min-height:56px;max-width:none;margin:0;padding:6px 0;
+  }
+  #layarSalesIdea .sgw > .si-presentation-topbar .si-back-hub{grid-column:1;grid-row:1}
+  #layarSalesIdea .sgw > .si-presentation-topbar .si-presentation-brand{grid-column:2;grid-row:1;min-width:0;justify-content:center;text-align:center}
+  /* tombol Narasi: komponen & gaya dari Keranjang, warna aksen cerita ini */
+  #layarSalesIdea .sgw > .si-presentation-topbar .kbs-suara{grid-column:3;grid-row:1;--kbs-aksen-teks:var(--sgw-aksen-teks);--kbs-emas:var(--sgw-emas-kbs)}
+  #layarSalesIdea .sgw > .si-presentation-topbar .si-close{grid-column:4;grid-row:1}
+  @media (max-width:620px){
+    #layarSalesIdea .sgw > .si-presentation-topbar{min-height:50px;padding:3px 0;gap:6px}
+    #layarSalesIdea .sgw > .si-presentation-topbar .si-back-hub{padding:0 8px 0 0}
+    #layarSalesIdea .sgw > .si-presentation-topbar .si-presentation-brand{flex-wrap:nowrap;overflow:hidden}
+    #layarSalesIdea .sgw > .si-presentation-topbar .si-presentation-brand b{font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    #layarSalesIdea .sgw > .si-presentation-topbar .si-presentation-brand small{display:none}
+  }
+  @media (max-width:380px){
+    #layarSalesIdea .sgw > .si-presentation-topbar .si-presentation-brand span{display:none}
+  }
+  @media (min-aspect-ratio:3/2) and (max-height:420px){
+    #layarSalesIdea .sgw > .si-presentation-topbar{min-height:46px;padding:1px 0;gap:8px}
+    #layarSalesIdea .sgw > .si-presentation-topbar .si-presentation-brand small{display:none}
+  }
+  .sgw-text{min-width:0;min-height:0;display:grid;gap:6px;align-content:start;padding:14px 16px;border:1px solid var(--border);border-radius:18px;background:var(--surface);box-shadow:var(--shadow-sm)}
+  .sgw-kicker{font-size:10.5px;font-weight:900;letter-spacing:.12em;color:var(--sgw-aksen-teks)}
+  .sgw-title{margin:0;font-size:clamp(17px,2.1vw,26px);line-height:1.2;letter-spacing:-.015em;color:var(--text)}
+  .sgw-isi{margin:0;font-size:clamp(13px,1.12vw,15.5px);line-height:1.55;color:var(--text-2)}
+  @media (min-width:1024px),(min-aspect-ratio:3/2) and (max-height:560px){
+    .sgw-text{align-content:center;padding:20px 22px;gap:10px}
+  }
+  @media (max-width:1023px) and (max-height:760px){
+    .sgw-kicker{display:none}
+    .sgw-text{padding:11px 14px;gap:4px}
+  }
+  @media (max-width:1023px) and (max-height:620px){
+    .sgw-isi{font-size:12.5px;line-height:1.42}
+    .sgw-title{font-size:16px}
+  }
+  @media (max-width:380px) and (max-height:640px){
+    .sgw-body{gap:8px}
+    .sgw-text{padding:8px 11px;gap:2px;border-radius:14px}
+    .sgw-title{font-size:14.5px}
+    .sgw-isi{font-size:11.5px;line-height:1.36}
+  }
+  @media (min-aspect-ratio:3/2) and (max-height:560px){
+    .sgw-text{overflow:auto;padding:12px 14px}
+    .sgw-kicker{display:none}
+  }
+
+  /* ---------- 2. Panggung ---------- */
+  .sgw-stage{
+    position:relative;margin:0;min-height:0;min-width:0;overflow:hidden;isolation:isolate;
+    border-radius:22px;border:1px solid var(--sgw-panggung-garis);box-shadow:var(--sgw-panggung-bayang);
+    background:var(--sgw-teduh-2);-webkit-user-select:none;user-select:none;
+  }
+  @media (max-width:620px){.sgw-stage{border-radius:18px}}
+  .sgw-latar{position:absolute;inset:0;z-index:0}
+  .sgw-hangat .sgw-latar{background:radial-gradient(120% 90% at 78% 18%,var(--sgw-hangat-3) 0%,var(--sgw-hangat-2) 45%,var(--sgw-hangat-1) 100%)}
+  .sgw-teduh .sgw-latar{background:radial-gradient(120% 90% at 20% 15%,var(--sgw-teduh-3) 0%,var(--sgw-teduh-2) 50%,var(--sgw-teduh-1) 100%)}
+  .sgw-redup .sgw-latar{background:radial-gradient(120% 90% at 50% 10%,var(--sgw-redup-3) 0%,var(--sgw-redup-2) 50%,var(--sgw-redup-1) 100%)}
+  .sgw-fajar .sgw-latar{background:radial-gradient(130% 95% at 85% 30%,var(--sgw-fajar-3) 0%,var(--sgw-fajar-2) 45%,var(--sgw-fajar-1) 100%)}
+  /* media realistis (manifest PSGSandwichVisual) — menutupi latar penuh */
+  .sgw-media{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1}
+  .sgw-cahaya{position:absolute;inset:-12%;z-index:2;pointer-events:none;
+    background:radial-gradient(42% 38% at 72% 26%,var(--sgw-cahaya) 0%,rgba(255,255,255,0) 70%);mix-blend-mode:soft-light}
+  /* ilustrasi: latar mengisi panggung, objek menempel di garis meja (±74%) */
+  .sgw-kamera{position:absolute;inset:0;z-index:1;transform-origin:50% 62%;will-change:transform}
+  .sgw-latar-svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+  .sgw-motif{position:absolute;z-index:3;left:5%;right:5%;top:4%;bottom:26%;width:90%;height:70%;overflow:visible;font-family:inherit}
+  .sgw-stage [data-a]{transform-box:fill-box;transform-origin:center}
+  .sgw-stage .sgw-isi,.sgw-stage .sgw-isian{transform-origin:center bottom}
+  .sgw-stage .sgw-balon{transform-origin:center bottom}
+  .sgw-stage .sgw-miring{transform-origin:left bottom}
+  .sgw-stage .sgw-pena{transform-box:view-box;transform-origin:0 0}
+  .sgw-stage .sgw-gores{stroke-dasharray:1;stroke-dashoffset:0}
+  .sgw-stage .sgw-gores[data-a="ekg"]{stroke-dasharray:.42 .58}
+  .sgw-butir{position:absolute;inset:0;z-index:4;pointer-events:none;opacity:var(--sgw-butir);
+    background-image:radial-gradient(rgba(0,0,0,.9) .6px,transparent .7px),radial-gradient(rgba(255,255,255,.8) .5px,transparent .6px);
+    background-size:3px 3px,5px 5px;background-position:0 0,1px 2px}
+  /* teks layar di atas scrim gelap (ilustrasi ramai di kedua tema) */
+  .sgw-layar{position:absolute;z-index:5;left:0;right:0;bottom:0;padding:clamp(22px,4.4vw,52px) clamp(14px,3vw,34px) clamp(14px,3vw,30px);display:grid;gap:6px;text-align:center;
+    background:linear-gradient(180deg,rgba(14,9,5,0) 0%,rgba(14,9,5,.55) 46%,rgba(14,9,5,.78) 100%)}
+  .sgw-layar-utama{margin:0;font-size:clamp(20px,3.4vw,46px);line-height:1.12;font-weight:800;letter-spacing:-.02em;color:#fff8ef;text-shadow:0 2px 14px rgba(0,0,0,.55);text-wrap:balance}
+  .sgw-layar-pendukung{margin:0;font-size:clamp(13px,1.6vw,20px);font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#ffd38f}
+  .sgw-fajar .sgw-layar-utama{letter-spacing:.02em}
+  /* dengan media: motif disembunyikan, teks di atas scrim gelap */
+  .sgw-ada-media .sgw-kamera,.sgw-ada-media .sgw-motif,.sgw-ada-media .sgw-latar-svg{display:none}
+  .sgw-ada-media .sgw-layar{background:var(--sgw-scrim)}
+  .sgw-ada-media .sgw-layar-utama{color:#fff;text-shadow:0 2px 14px rgba(0,0,0,.6)}
+  .sgw-ada-media .sgw-layar-pendukung{color:#ffd9a8}
+  @media (max-width:620px){
+    .sgw-motif{top:3%;bottom:30%;height:67%}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .sgw-cahaya{animation:none}
+  }
+
+  /* ---------- 3. Halaman pilihan kebutuhan ---------- */
+  #layarSalesIdea .sgw-pilihan{
+    position:absolute;left:0;right:0;top:clamp(56px,9vh,84px);margin:0 auto;z-index:26;
+    width:min(880px,calc(100% - 20px));box-sizing:border-box;overflow:auto;overscroll-behavior:contain;
+    padding:clamp(14px,2.4vw,24px);border-radius:20px;
+    background:var(--surface,#fff);color:var(--text,#101828);border:1px solid var(--border,#e4e7ec);
+    box-shadow:0 18px 44px rgba(16,24,40,.22),0 2px 8px rgba(16,24,40,.08);
+    opacity:0;transform:translateY(12px);transition:opacity .24s ease,transform .28s cubic-bezier(.22,.8,.26,1);
+  }
+  #layarSalesIdea .sgw-pilihan[hidden]{display:none}
+  #layarSalesIdea .sgw-pilihan.sil-tampil{opacity:1;transform:none}
+  [data-theme="dark"] #layarSalesIdea .sgw-pilihan{box-shadow:0 18px 44px rgba(0,0,0,.6),0 2px 8px rgba(0,0,0,.4)}
+  #layarSalesIdea .sgw-pilihan-judul{margin:0 0 6px;font-size:clamp(18px,2.4vw,26px);line-height:1.2;letter-spacing:-.015em}
+  #layarSalesIdea .sgw-pilihan-pengantar{margin:0 0 14px;font-size:14px;line-height:1.5;color:var(--text-2,#475467)}
+  #layarSalesIdea .sgw-pilihan-daftar{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+  #layarSalesIdea .sgw-opsi{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:12px;
+    padding:12px 14px;border-radius:14px;border:1px solid var(--border,#e4e7ec);background:var(--surface-2,var(--surface,#fff))}
+  #layarSalesIdea .sgw-opsi-huruf{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;
+    font-weight:900;font-size:15px;color:#fff;background:#a60101}
+  [data-theme="dark"] #layarSalesIdea .sgw-opsi-huruf{background:var(--primary);color:var(--on-primary)}
+  #layarSalesIdea .sgw-opsi-alt{background:#5b4636}
+  #layarSalesIdea .sgw-opsi-teks h3{margin:0 0 3px;font-size:15.5px;line-height:1.3}
+  #layarSalesIdea .sgw-opsi-teks p{margin:0;font-size:13.5px;line-height:1.45;color:var(--text-2,#475467)}
+  #layarSalesIdea .sgw-opsi-kecil{display:block;font-size:11px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:var(--sgw-aksen-teks)}
+  #layarSalesIdea .sgw-opsi-catatan{margin-top:4px!important;font-size:12.5px!important;color:var(--text-3,#667085)!important}
+  #layarSalesIdea .sgw-opsi-tombol,#layarSalesIdea .sgw-lain,#layarSalesIdea .sgw-kembali{
+    min-height:46px;min-width:44px;padding:0 16px;border-radius:12px;font:inherit;font-size:14.5px;font-weight:800;cursor:pointer;
+    border:1px solid var(--border-strong,#d0d5dd);background:var(--surface,#fff);color:var(--text,#101828)}
+  #layarSalesIdea .sgw-opsi-tombol{border-color:#a60101;background:#a60101;color:#fff;white-space:nowrap}
+  [data-theme="dark"] #layarSalesIdea .sgw-opsi-tombol{border-color:var(--primary);background:var(--primary);color:var(--on-primary)}
+  #layarSalesIdea .sgw-opsi-tombol:hover{filter:brightness(1.08)}
+  #layarSalesIdea .sgw-pilihan button:focus-visible{outline:2px solid var(--focus,#2e90fa);outline-offset:2px}
+  #layarSalesIdea .sgw-pilihan-kaki{display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;margin-top:14px}
+  #layarSalesIdea .sgw-pilihan-kaki .sgw-lain{margin-left:auto}
+  @media (max-width:700px){
+    #layarSalesIdea .sgw-opsi{grid-template-columns:auto minmax(0,1fr)}
+    #layarSalesIdea .sgw-opsi-tombol{grid-column:1 / -1;width:100%;white-space:normal}
+  }
+  @media (max-width:380px){
+    #layarSalesIdea .sgw-pilihan{padding:12px;width:calc(100% - 12px)}
+    #layarSalesIdea .sgw-pilihan-kaki button{flex:1 1 100%}
+  }
+  @media (min-aspect-ratio:3/2) and (max-height:520px){
+    #layarSalesIdea .sgw-pilihan{top:52px}
+    #layarSalesIdea .sgw-pilihan-pengantar{margin-bottom:10px;font-size:13px}
+  }
+  @media (prefers-reduced-motion:reduce){
+    #layarSalesIdea .sgw-pilihan{transition:none;transform:none}
+  }
+
+  /* ---------- 4. Sorotan kolom Analisis Kebutuhan (jalur D/E) ---------- */
+  #layarNeeds .sgw-sorot{border-radius:10px;box-shadow:0 0 0 2px var(--sgw-sorot-garis,#a60101);background:var(--sgw-sorot,rgba(166,1,1,.12));transition:box-shadow .3s ease,background .3s ease}
+}

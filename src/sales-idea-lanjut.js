@@ -20,6 +20,10 @@
    Label tombol bawaan di atas; sebuah cerita boleh memakai label
    sendiri lewat TUJUAN (hitung/lain) — Proteksi Kredit:
    [ Mari Hitung Kebutuhan Anda → ]   [ Topik Lain ].
+   Sandwich Generation (pilihan: true) tidak memakai kartu ini: pada
+   saat yang sama tampil halaman pilihan kebutuhan dari
+   window.PSGSandwichPilihan (src/sales-idea-sandwich.js), dengan
+   aturan tampil/sembunyi yang sama.
 
    Modul ini tidak mengubah pemutar maupun narator; ia hanya membaca
    status pemutar (atribut data-sip-status), posisi scene
@@ -36,11 +40,12 @@
     retirement: { topic: 'retirement', target: 'DP' },
     asset: { topic: 'asset', target: 'R2' },
     singapura: { topic: 'bekerja_singapura', target: 'NEEDS' },
-    kredit: { topic: 'proteksi_kredit', target: 'CRIS', hitung: 'Mari Hitung Kebutuhan Anda', lain: 'Topik Lain' }
+    kredit: { topic: 'proteksi_kredit', target: 'CRIS', hitung: 'Mari Hitung Kebutuhan Anda', lain: 'Topik Lain' },
+    sandwich: { topic: 'sandwich_generation', pilihan: true }
   };
   var LABEL = { hitung: 'Mari Kita Hitung', lain: 'Bahas Topik Lain' };
 
-  var root = null, kartu = null;
+  var root = null, kartu = null, pilihan = null;
   var aktif = false;     // layar Sales Idea sedang tampil
   var status = null;     // status pemutar terakhir yang diamati selama layar tampil
   var indeks = -1;       // scene terakhir yang diamati
@@ -82,14 +87,31 @@
 
   /* Kartu melayang tepat di atas bar kontrol pemutar, tidak menutupinya. */
   function posisikan() {
-    if (!kartu || !root) return;
+    if (!root) return;
     var footer = root.querySelector('.si-footer');
     var r = root.getBoundingClientRect(), f = footer ? footer.getBoundingClientRect() : null;
     var bawah = f && f.height ? Math.max(0, r.bottom - f.top) : 0;
-    kartu.style.bottom = Math.round(bawah + 10) + 'px';
+    if (kartu) kartu.style.bottom = Math.round(bawah + 10) + 'px';
+    if (pilihan) pilihan.style.bottom = Math.round(bawah + 10) + 'px';
+  }
+
+  /* Halaman pilihan kebutuhan (Sandwich Generation): selalu mulai dari
+     daftar utama setiap kali tampil, jadi pilihan lama tidak terbawa. */
+  function tampilkanPilihan() {
+    var S = window.PSGSandwichPilihan;
+    if (!S || typeof S.buat !== 'function') return false;
+    if (!pilihan) { pilihan = S.buat({ lain: topikLain, tutup: sembunyikan }); root.appendChild(pilihan); }
+    posisikan();
+    if (!pilihan.hidden) return true;
+    if (typeof S.reset === 'function') S.reset();
+    pilihan.hidden = false;
+    requestAnimationFrame(function () { if (pilihan && !pilihan.hidden) pilihan.classList.add('sil-tampil'); });
+    return true;
   }
 
   function tampilkan() {
+    var k0 = keadaan(), t0 = k0 && TUJUAN[k0.mode];
+    if (t0 && t0.pilihan) { tampilkanPilihan(); return; }
     if (!kartu) buatKartu();
     labeli();
     posisikan();
@@ -99,6 +121,7 @@
   }
   function sembunyikan() {
     clearTimeout(tunggu); tunggu = 0;
+    if (pilihan && !pilihan.hidden) { pilihan.classList.remove('sil-tampil'); pilihan.hidden = true; }
     if (!kartu || kartu.hidden) return;
     kartu.classList.remove('sil-tampil');
     kartu.hidden = true;
@@ -131,7 +154,7 @@
     var berubah = st !== status;
     status = st;
     if (st === 'berputar') { diputar = diAkhir(k); sembunyikan(); return; }
-    if (st === 'selesai') { if (berubah || !kartu || kartu.hidden) cobaTampil(); return; }
+    if (st === 'selesai') { if (berubah || !(kartu && !kartu.hidden) && !(pilihan && !pilihan.hidden)) cobaTampil(); return; }
     if (st === 'siap') diputar = false;
     sembunyikan();
   }
@@ -155,7 +178,7 @@
     new MutationObserver(periksa).observe(root, { attributes: true, attributeFilter: ['class', 'data-sip-status'] });
     var hitungan = document.getElementById('siStepCount');
     if (hitungan) new MutationObserver(periksa).observe(hitungan, { childList: true, characterData: true, subtree: true });
-    window.addEventListener('resize', function () { if (kartu && !kartu.hidden) posisikan(); });
+    window.addEventListener('resize', function () { if ((kartu && !kartu.hidden) || (pilihan && !pilihan.hidden)) posisikan(); });
     periksa();
   }
 
