@@ -135,7 +135,7 @@ async function main() {
     cek(r.status === 400 && r.body.error === 'invalid_json', 'JSON rusak: 400', r);
     r = await jalan(b, A, 'PUT', '/api/psg/pribadi/pesan', JSON.stringify({ teks: 'x'.repeat(40000) }));
     cek(r.status === 413, 'body > 32 KB: 413', r);
-    cek(!b.log.some((x) => x.op !== 'get'), 'permintaan yang ditolak tidak menulis apa pun', b.log);
+    cek(!b.log.some((x) => x.op !== 'get' && x.op !== 'list'), 'permintaan yang ditolak tidak menulis apa pun', b.log);
   }
 
   console.log('Pesan personal');
@@ -188,12 +188,110 @@ async function main() {
     let r = await jalan(b, A, 'GET', '/api/psg/pribadi', undefined, { store: lib.STORE_PRODUKSI });
     cek(r.body.pesan === null && r.body.penyimpanan === 'production', 'data preview tidak terbaca dari store production', r.body);
     cek(!b.store.has(lib.STORE_PRODUKSI) || b.store.get(lib.STORE_PRODUKSI).size === 0, 'store production tetap kosong sesudah uji preview');
-    cek(b.log.filter((x) => x.op !== 'get').every((x) => x.nama === lib.STORE_PREVIEW), 'semua tulis terjadi di store preview', b.log);
+    cek(b.log.filter((x) => x.op !== 'get' && x.op !== 'list').every((x) => x.nama === lib.STORE_PREVIEW), 'semua tulis terjadi di store preview', b.log);
+  }
+
+  console.log('Asuransiku: polis');
+  {
+    const b = blobs();
+    const uuid = (n) => '00000000-0000-4000-8000-' + String(n).padStart(12, '0');
+    const P1 = uuid(1), P2 = uuid(2), P3 = uuid(3);
+    const polis = (o = {}) => ({
+      perusahaan: 'Generali', produk: 'Produk Jiwa A', jenisPolis: 'UNIT_LINK', mulai: '2019-03-01', nomorAkhir: '4821', mataUang: 'IDR',
+      perlindungan: [
+        { id: uuid(101), peran: 'DASAR', jenis: 'JIWA', manfaat: { up: 1000000000 } },
+        { id: uuid(102), peran: 'RIDER', jenis: 'PK', nama: 'Rider PK', manfaat: { up: 500000000, sifat: 'DIPERCEPAT' } },
+        { id: uuid(103), peran: 'RIDER', jenis: 'KESEHATAN', nama: 'Rider Kesehatan', manfaat: { sistem: 'TAHUNAN', plan: 'Gold', limitTahunan: 2000000000, limitBooster: 4000000000, syaratBooster: 'Setelah limit dasar habis' } },
+      ],
+      catatanPribadi: 'Jatuh tempo Maret', ...o,
+    });
+    const jalur = (id) => '/api/psg/pribadi/polis/' + id;
+    let r = await jalan(b, A, 'PUT', jalur(P1), polis());
+    cek(r.status === 201 && r.body.polis.id === P1 && r.body.polis.jenisPolis === 'UNIT_LINK' && r.body.polis.perlindungan.length === 3, 'A membuat polis Unit Link dengan rider PK dan kesehatan (201)', r);
+    const dibuat = r.body.polis.dibuat;
+    r = await jalan(b, A, 'PUT', jalur(P2), polis({ perusahaan: 'Prudential', produk: 'Produk PK B', jenisPolis: 'TRADISIONAL', mulai: '2021-07-15', nomorAkhir: '',
+      perlindungan: [{ id: uuid(201), peran: 'DASAR', jenis: 'PK', manfaat: { up: 750000000, sifat: 'BERDIRI_SENDIRI' } }], catatanPribadi: '' }));
+    cek(r.status === 201 && r.body.polis.jenisPolis === 'TRADISIONAL' && !('nomorAkhir' in r.body.polis) && !('catatanPribadi' in r.body.polis), 'A membuat polis Tradisional kedua; field opsional kosong tidak disimpan', r.body);
+    r = await jalan(b, A, 'PUT', jalur(P3), polis({ perusahaan: 'Perusahaan C', produk: 'Plan Kesehatan', jenisPolis: 'TRADISIONAL', perlindungan: [
+      { id: uuid(301), peran: 'DASAR', jenis: 'KESEHATAN', manfaat: { sistem: 'PER_KEJADIAN', limitPerKejadian: 150000000, kamarPerHari: 1500000 } },
+      { id: uuid(302), peran: 'RIDER', jenis: 'KESEHATAN', nama: 'Santunan RS', manfaat: { sistem: 'HARIAN', santunanHarian: 500000, maksHari: 180 } },
+      { id: uuid(303), peran: 'RIDER', jenis: 'KECELAKAAN', nama: 'Rider Kecelakaan', manfaat: { upMeninggal: 300000000, cacatTetap: 300000000 } },
+      { id: uuid(304), peran: 'RIDER', jenis: 'LAINNYA', nama: 'Lainnya', manfaat: { namaJenis: 'Pendidikan', manfaatUtama: 'Dana kuliah', nilai: 200000000 } }] }));
+    cek(r.status === 201, 'polis ketiga: limit per kejadian, santunan harian, kecelakaan, dan lainnya diterima', r);
+    r = await jalan(b, A, 'GET', '/api/psg/pribadi');
+    cek(r.body.polis.length === 3 && r.body.polis[0].id === P1, 'GET mengembalikan 3 polis A', r.body.polis && r.body.polis.map((x) => x.id));
+
+    /* Edit satu polis tidak mengubah polis lain. */
+    const sebelumP2 = b.store.get('psg-pribadi-preview').get('u/' + A.id + '/polis/' + P2 + '.json');
+    r = await jalan(b, A, 'PUT', jalur(P1), polis({ jenisPolis: 'TRADISIONAL', produk: 'Produk Jiwa A (revisi)' }));
+    cek(r.status === 200 && r.body.polis.dibuat === dibuat && r.body.polis.jenisPolis === 'TRADISIONAL', 'edit polis: 200, waktu dibuat dipertahankan, jenis polis ikut diedit', r.body.polis);
+    cek(b.store.get('psg-pribadi-preview').get('u/' + A.id + '/polis/' + P2 + '.json') === sebelumP2, 'edit P1 tidak menyentuh berkas P2 (jenis polis P2 tetap)');
+    const tulisEdit = b.log.filter((x) => x.op === 'set').slice(-1)[0];
+    cek(tulisEdit.key === 'u/' + A.id + '/polis/' + P1 + '.json', 'edit hanya menulis berkas polis yang diedit', tulisEdit);
+
+    /* Pemisahan antar akun. */
+    r = await jalan(b, B, 'GET', '/api/psg/pribadi');
+    cek(r.status === 200 && r.body.polis.length === 0, 'B tidak memperoleh polis A', r.body);
+    r = await jalan(b, B, 'DELETE', jalur(P1));
+    cek(r.status === 404, 'B menghapus ID polis milik A: tidak ditemukan di ruang B (404)', r);
+    r = await jalan(b, B, 'PUT', jalur(P1), polis({ produk: 'Ditimpa B' }));
+    cek(r.status === 201, 'B memakai ID yang sama hanya membuat polis di ruangnya sendiri', r.status);
+    r = await jalan(b, A, 'GET', '/api/psg/pribadi');
+    cek(r.body.polis.find((x) => x.id === P1).produk === 'Produk Jiwa A (revisi)' && r.body.polis.length === 3, 'polis A tetap utuh sesudah percobaan B', r.body.polis.map((x) => x.produk));
+    r = await jalan(b, OWNER, 'GET', '/api/psg/pribadi');
+    cek(r.body.polis.length === 0, 'owner tidak otomatis melihat polis agen', r.body.polis);
+    r = await jalan(b, B, 'PUT', jalur(uuid(9)), { ...polis(), userId: A.id });
+    cek(r.status === 400 && r.body.error === 'unknown_field', 'userId palsu di body polis ditolak', r);
+
+    /* Validasi. */
+    const tolak = async (label, isi, kode, id) => {
+      const x = await jalan(b, A, 'PUT', jalur(id || uuid(77)), isi);
+      cek(x.status === 400 && (!kode || x.body.error === kode), 'ditolak: ' + label, x);
+    };
+    await tolak('nomor polis lengkap', polis({ nomorAkhir: '1234567890123456' }), 'invalid_policy_number');
+    await tolak('nomor polis bukan angka', polis({ nomorAkhir: 'ab12' }), 'invalid_policy_number');
+    await tolak('jenis polis kosong', polis({ jenisPolis: '' }), 'required');
+    await tolak('jenis polis tidak dikenal', polis({ jenisPolis: 'INVESTASI' }), 'invalid_enum');
+    await tolak('tanggal tidak valid', polis({ mulai: '2021-02-30' }), 'invalid_date');
+    await tolak('tanggal format lain', polis({ mulai: '01/03/2019' }), 'invalid_date');
+    await tolak('tanpa perlindungan dasar', polis({ perlindungan: [{ id: uuid(401), peran: 'RIDER', jenis: 'PK', manfaat: {} }] }), 'base_coverage');
+    await tolak('dua perlindungan dasar', polis({ perlindungan: [{ id: uuid(402), peran: 'DASAR', jenis: 'JIWA', manfaat: {} }, { id: uuid(403), peran: 'DASAR', jenis: 'PK', manfaat: {} }] }), 'base_coverage');
+    await tolak('rider dengan jenis polis sendiri', polis({ perlindungan: [{ id: uuid(404), peran: 'DASAR', jenis: 'JIWA', manfaat: {} }, { id: uuid(405), peran: 'RIDER', jenis: 'PK', jenisPolis: 'UNIT_LINK', manfaat: {} }] }), 'unknown_field');
+    await tolak('11 rider', polis({ perlindungan: [{ id: uuid(500), peran: 'DASAR', jenis: 'JIWA', manfaat: {} }, ...Array.from({ length: 11 }, (_, i) => ({ id: uuid(501 + i), peran: 'RIDER', jenis: 'PK', manfaat: {} }))] }), 'too_many_riders');
+    await tolak('UP berupa teks', polis({ perlindungan: [{ id: uuid(601), peran: 'DASAR', jenis: 'JIWA', manfaat: { up: '1000000' } }] }), 'invalid_number');
+    await tolak('UP negatif', polis({ perlindungan: [{ id: uuid(602), peran: 'DASAR', jenis: 'JIWA', manfaat: { up: -1 } }] }), 'invalid_number');
+    await tolak('field limit tahunan pada sistem harian', polis({ perlindungan: [{ id: uuid(603), peran: 'DASAR', jenis: 'KESEHATAN', manfaat: { sistem: 'HARIAN', limitTahunan: 1 } }] }), 'unknown_field');
+    await tolak('kesehatan tanpa sistem', polis({ perlindungan: [{ id: uuid(604), peran: 'DASAR', jenis: 'KESEHATAN', manfaat: {} }] }), 'required');
+    await tolak('ID perlindungan ganda', polis({ perlindungan: [{ id: uuid(605), peran: 'DASAR', jenis: 'JIWA', manfaat: {} }, { id: uuid(605), peran: 'RIDER', jenis: 'PK', manfaat: {} }] }), 'duplicate_id');
+    await tolak('perusahaan terlalu panjang', polis({ perusahaan: 'x'.repeat(81) }), 'too_long');
+    await tolak('catatan pribadi terlalu panjang', polis({ catatanPribadi: 'x'.repeat(501) }), 'too_long');
+    await tolak('ID dari body', { ...polis(), id: P2 }, 'unknown_field');
+    for (const idJahat of ['..%2F..%2Fpesan', '../pesan', 'abc', uuid(1) + '.json', 'ABCDEF12-0000-4000-8000-0000000000AB']) {
+      const x = await jalan(b, A, 'PUT', '/api/psg/pribadi/polis/' + idJahat, polis());
+      cek(x.status === 400 || x.status === 404, 'ID polis tidak sah ditolak: ' + idJahat, x.status);
+    }
+    cek(![...b.store.get('psg-pribadi-preview').keys()].some((k) => /\.\.|polis\/[^/]*\/|pesan\.json\.json/.test(k)), 'tidak ada kunci di luar pola u/<uid>/polis/<uuid>.json');
+
+    /* Batas 30 polis. */
+    const C = akun('77777777-1111-4111-8111-777777777777', 'agen.c@psg.test');
+    for (let i = 0; i < 30; i++) await jalan(b, C, 'PUT', jalur(uuid(1000 + i)), polis());
+    r = await jalan(b, C, 'PUT', jalur(uuid(2000)), polis());
+    cek(r.status === 409 && r.body.error === 'too_many_policies', 'polis ke-31 ditolak (409)', r);
+    r = await jalan(b, C, 'PUT', jalur(uuid(1000)), polis({ produk: 'Edit tetap boleh' }));
+    cek(r.status === 200, 'pada batas 30, edit polis yang ada tetap boleh', r.status);
+
+    /* Hapus. */
+    r = await jalan(b, A, 'DELETE', jalur(P2));
+    cek(r.status === 200 && r.body.dihapus === P2, 'A menghapus satu polis', r);
+    r = await jalan(b, A, 'GET', '/api/psg/pribadi');
+    cek(r.body.polis.length === 2 && !r.body.polis.some((x) => x.id === P2), 'polis lain A tetap ada sesudah hapus', r.body.polis.map((x) => x.id));
+    r = await jalan(b, A, 'PATCH', jalur(P1), {});
+    cek(r.status === 405, 'metode lain pada polis: 405', r.status);
   }
 
   console.log('Penyimpanan gagal');
   {
-    const rusak = { async get() { throw new Error('blobs down'); }, async setJSON() { throw new Error('blobs down'); }, async delete() { throw new Error('blobs down'); } };
+    const rusak = { async get() { throw new Error('blobs down'); }, async setJSON() { throw new Error('blobs down'); }, async delete() { throw new Error('blobs down'); }, async list() { throw new Error('blobs down'); } };
     let r = await lib.tanganiPribadi(minta('GET', '/api/psg/pribadi'), { ambilUser: async () => A, toko: () => rusak, namaStore: 'x' });
     let isi = await r.json();
     cek(r.status === 503 && isi.error === 'storage_unavailable' && !/blobs down/.test(JSON.stringify(isi)), 'Blobs gagal: 503 tanpa membocorkan detail', isi);

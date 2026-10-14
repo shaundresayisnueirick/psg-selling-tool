@@ -36,6 +36,7 @@
     aktivitas: () => klik('btnAktivitas'),
     library: () => klik('btnLibraryIlustrasi') || buka('LIBRARY_ILUSTRASI'),
     identitas: () => klik('btnKartuKonsultan') || buka('KARTU_KONSULTAN'),
+    asuransiku: () => klik('btnAsuransiku') || buka('ASURANSIKU'),
     manajemen: () => buka('AGENT_MANAGEMENT'),
     tema: () => klik('btnThemeSwitch') || (window.PSGTheme && window.PSGTheme.toggle()),
     keluar: () => klik('btnLogout'),
@@ -53,6 +54,7 @@
     R2: 'kalkulator', R2_RINGKAS: 'kalkulator',
     SALES_IDEA: 'salesidea', AKTIVITAS: 'aktivitas', AKT_REKAP: 'aktivitas', SLIP_KOMISI: 'aktivitas',
     LIBRARY_ILUSTRASI: 'library', KARTU_KONSULTAN: 'identitas', AGENT_MANAGEMENT: 'manajemen',
+    ASURANSIKU: 'asuransiku',
   };
   const DI_TABBAR = ['beranda', 'produk', 'nasabah', 'library'];
 
