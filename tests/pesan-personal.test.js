@@ -47,6 +47,11 @@ const check = (ok, message, detail) => {
   if (!ok) failures.push(message);
 };
 
+/* Cookie nf_jwt berbentuk JWT seperti yang ditulis @netlify/identity
+   (header.payload.tanda); halaman ringkasan membaca klaim email-nya. */
+const b64u = (o) => Buffer.from(JSON.stringify(o)).toString('base64').replace(/=+$/, '').replace(/\+/g, '-').replace(/\//g, '_');
+const jwt = (a) => b64u({ alg: 'HS256', typ: 'JWT' }) + '.' + b64u({ sub: a.me.id, email: a.me.email, exp: 4102444800 }) + '.tanda-uji';
+
 /* Akun fiktif. me = jawaban /api/psg/me, user = bentuk User @netlify/identity. */
 function akun(id, email, nama, opsi = {}) {
   return {
@@ -98,7 +103,7 @@ async function main() {
   page.on('pageerror', (e) => pageErrors.push(e.message));
   page.on('dialog', (d) => d.accept());
 
-  await context.addInitScript(({ profil, konsultan, itemLama }) => {
+  await context.addInitScript(({ profil, konsultan, itemLama, emailA }) => {
     try {
       sessionStorage.setItem('insuranceHub.access.v3', 'ok');
       if (!localStorage.getItem('uji.disemai')) {
@@ -106,11 +111,14 @@ async function main() {
         localStorage.setItem('insuranceHub.customerProfiles.v1', JSON.stringify([profil]));
         localStorage.setItem('insuranceHub.customerProfile.active.v1', profil.id);
         localStorage.setItem('insuranceHub.konsultan.v1', JSON.stringify(konsultan));
+        /* Kartu Konsultan akun A sendiri (catatan per email); key lama di atas
+           hanya untuk login kode akses lama. */
+        localStorage.setItem('insuranceHub.identitas.akun.v1.' + encodeURIComponent(emailA), JSON.stringify({ konsultan }));
         localStorage.setItem('insuranceHub.libraryIlustrasi.v1', JSON.stringify([itemLama]));
         localStorage.setItem('uji.disemai', '1');
       }
     } catch (_) {}
-  }, { profil: PROFIL, konsultan: KONSULTAN, itemLama: ITEM_LAMA });
+  }, { profil: PROFIL, konsultan: KONSULTAN, itemLama: ITEM_LAMA, emailA: A.me.email });
 
   await context.route('**/src/vendor/netlify-identity.js', (route) => route.fulfill({ status: 200, contentType: 'application/javascript', body: `
     window.PSGNetlifyIdentity = { login: async () => ({}), logout: async () => {}, requestPasswordRecovery: async () => {},
@@ -135,7 +143,7 @@ async function main() {
   /* Seperti src/vendor/netlify-identity.js: login menulis cookie nf_jwt. */
   const masuk = async (a) => {
     sesi = a;
-    if (a) await context.addCookies([{ name: 'nf_jwt', value: 'jwt-uji-' + a.me.id, url: base }]);
+    if (a) await context.addCookies([{ name: 'nf_jwt', value: jwt(a), url: base }]);
     else await context.clearCookies();
     await context.addInitScript((s) => { window.__ujiSesi = s; }, a ? { id: a.me.id, email: a.me.email } : null);
   };

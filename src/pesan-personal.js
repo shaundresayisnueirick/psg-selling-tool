@@ -30,7 +30,9 @@
     try {
       var an = window.InsuranceHubAtasNama;
       if (an && typeof an.aktif === 'function') return !!an.aktif();
-      var v = JSON.parse(localStorage.getItem('insuranceHub.konsultan.atasNama.v1') || '{}') || {};
+      /* Halaman ringkasan: mode atas nama milik akun yang sedang masuk. */
+      var d = window.InsuranceHubDataAkun;
+      var v = (d ? d.baca('atasNama') : JSON.parse(localStorage.getItem('insuranceHub.konsultan.atasNama.v1') || '{}')) || {};
       return !!(v.aktif && v.nama);
     } catch (_) { return false; }
   }

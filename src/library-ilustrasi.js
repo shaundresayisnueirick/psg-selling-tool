@@ -259,7 +259,7 @@
     const p=window.InsuranceHubPesanPersonal;
     return p&&typeof p.untukIdentitasSendiri==='function'?String(p.untukIdentitasSendiri()||''):'';
   }catch(_){return ''}}
-  function consultantData(){try{return window.InsuranceHubConsultantCard?.read?.()||JSON.parse(localStorage.getItem('insuranceHub.konsultan.v1')||'{}')}catch(_){return {}}}
+  function consultantData(){try{return window.InsuranceHubConsultantCard?.read?.()||(window.InsuranceHubDataAkun?window.InsuranceHubDataAkun.baca('konsultan'):{})}catch(_){return {}}}
   function closeSummary(){const m=el('libraryOnePageModal');if(m)m.remove();document.documentElement.classList.remove('psg-library-summary-open');document.body.classList.remove('psg-library-summary-open')}
   function openSummary(){
     const all=read(), items=all.filter(x=>selectedBatch.has(x.id));

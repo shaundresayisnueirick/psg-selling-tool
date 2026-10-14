@@ -384,7 +384,9 @@ el.addEventListener('pointerdown',function(){tutup(true);});})();</script>
       <div id="kartuKonsultanPreview"></div>
       <div id="kkPesanPratinjau" class="kk-pesan-pratinjau" hidden></div>
     </div>
-    <div class="blok">
+    <!-- tanpa-simpan: Kartu Konsultan dan mode atas nama punya penyimpanan
+         sendiri per akun; Isian Terakhir tidak boleh membawanya ke akun lain. -->
+    <div class="blok tanpa-simpan">
       <h2>Identitas yang tampil di dokumen nasabah</h2>
       <div class="baris">
         <div><label for="kkNama">Nama konsultan</label><input id="kkNama" type="text" placeholder="Nama agen"></div>

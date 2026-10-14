@@ -158,9 +158,13 @@ async function main() {
 
     await ownerPage.locator('#aktAgenHp').fill('08125551234');
     await ownerPage.locator('#aktSimpanHp').click();
-    const localAfterHp = await ownerPage.evaluate(() => ({ agent: JSON.parse(localStorage.getItem('insuranceHub.agen.v1')) }));
-    check(localAfterHp.agent.nama === 'PSG TEAM' && localAfterHp.agent.kode === '68000001' && localAfterHp.agent.hp === '08125551234',
-      'nomor HP lokal disimpan tanpa menimpa data demo lama atau identitas server');
+    /* Nomor HP akun Identity disimpan di catatan per email; key lama milik
+       perangkat (demo) tidak disentuh sama sekali. */
+    const localAfterHp = await ownerPage.evaluate((email) => ({ agent: JSON.parse(localStorage.getItem('insuranceHub.agen.v1')),
+      akun: JSON.parse(localStorage.getItem('insuranceHub.identitas.akun.v1.' + encodeURIComponent(email)) || '{}') }), profile.email);
+    check(localAfterHp.agent.nama === 'PSG TEAM' && localAfterHp.agent.kode === '68000001' && localAfterHp.agent.hp === demoAgent.hp &&
+      localAfterHp.akun.agen && localAfterHp.akun.agen.hp === '08125551234',
+      'nomor HP lokal disimpan untuk akun ini tanpa menimpa data demo lama atau identitas server', localAfterHp);
     /* simpan-otomatis isian-terakhir.js menulis 600 md sesudah ketikan terakhir: tunggu sampai
        entri layarAktivitas profil aktif tertulis (maks 5 dtk), baru bandingkan */
     const profilAktif = await ownerPage.evaluate(() => localStorage.getItem('insuranceHub.customerProfile.active.v1') || 'TANPA_PROFIL');

@@ -86,7 +86,13 @@
     return awalan + '-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2);
   }
 
-  const agenLokalBaca = () => baca(K_AGEN, { nama: '', kode: '', hp: '' });
+  /* Identitas agen milik akun yang sedang masuk (window.InsuranceHubDataAkun,
+     src/preview-cetak.js): key lama untuk login kode akses lama, key per email
+     untuk sesi Identity, supaya Nomor HP tidak terbaca atau tertimpa akun lain. */
+  const dataAkun = () => window.InsuranceHubDataAkun;
+  const agenLokalBaca = () => dataAkun()
+    ? Object.assign({ nama: '', kode: '', hp: '' }, dataAkun().baca('agen'))
+    : baca(K_AGEN, { nama: '', kode: '', hp: '' });
   const agenBaca = () => {
     const a = agenLokalBaca();
     const identity = window.InsuranceHubIdentity;
@@ -96,7 +102,10 @@
     }
     return a;
   };
-  const agenTulis = (a) => tulis(K_AGEN, a);
+  const agenTulis = (a) => {
+    if (!dataAkun()) return tulis(K_AGEN, a);
+    try { return dataAkun().tulis('agen', a); } catch (_) { return false; }
+  };
   const agenHpTulis = (hp) => {
     const a = agenLokalBaca();
     a.hp = rapikanHp(hp);

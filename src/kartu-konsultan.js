@@ -1,12 +1,22 @@
 /* Insurance Hub — Identitas Konsultan / identitas materi nasabah */
 (function(){
   'use strict';
-  const KEY='insuranceHub.konsultan.v1';
   const el=id=>document.getElementById(id);
   const esc=v=>String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-  function read(){try{return JSON.parse(localStorage.getItem(KEY)||'{}')||{}}catch(_){return {}}}
-  function level(){try{return JSON.parse(localStorage.getItem('insuranceHub.level.v1')||'{}')||{}}catch(_){return {}}}
-  function agent(){try{return JSON.parse(localStorage.getItem('insuranceHub.agen.v1')||'{}')||{}}catch(_){return {}}}
+  /* Data Kartu Konsultan, Nomor HP Identitas Agen, dan mode atas nama milik
+     akun yang sedang masuk (window.InsuranceHubDataAkun, src/preview-cetak.js):
+     key lama untuk login kode akses lama, key per email untuk sesi Identity. */
+  const DATA=()=>window.InsuranceHubDataAkun;
+  const sesi=()=>{try{return DATA().sesi()}catch(_){return {mode:'menunggu',email:''}}};
+  function bacaData(b){try{return Object.assign({},DATA().baca(b))}catch(_){return {}}}
+  function read(){return bacaData('konsultan')}
+  /* Nama dan level: login kode akses lama dari level.v1; sesi Identity dari
+     profil /api/psg/me (InsuranceHubLevel), bukan level.v1 milik perangkat. */
+  function level(){const m=sesi().mode;
+    if(m==='identity')return Object.assign({},window.InsuranceHubLevel||{});
+    if(m!=='lama')return {};
+    try{return JSON.parse(localStorage.getItem('insuranceHub.level.v1')||'{}')||{}}catch(_){return {}}}
+  function agent(){return bacaData('agen')}
   /* Foto profil akun yang sedang masuk. Aturannya satu, di src/preview-cetak.js
      (dimuat juga oleh halaman ringkasan): key foto per email untuk sesi
      Identity, kosong selama sesi Identity belum siap, key lama hanya untuk
@@ -61,12 +71,14 @@
       return;
     }
     const data={nama:el('kkNama')?.value.trim()||'',jabatan:el('kkJabatan')?.value.trim()||'',whatsapp:el('kkWhatsApp')?.value.trim()||'',email:el('kkEmail')?.value.trim()||'',instagram:el('kkInstagram')?.value.trim()||'',tiktok:el('kkTikTok')?.value.trim()||'',facebook:el('kkFacebook')?.value.trim()||'',linkedin:el('kkLinkedIn')?.value.trim()||'',youtube:el('kkYouTube')?.value.trim()||'',qr:el('kkQr')?.value||'TIDAK',updatedAt:new Date().toISOString()};
-    try{localStorage.setItem(KEY,JSON.stringify(data));}catch(_){if(el('kkStatus'))el('kkStatus').textContent='Gagal menyimpan identitas di perangkat.';return;}
-    // Keep the existing global agent identity in sync so all legacy presenter fields continue to autofill.
-    try{const a=agent(); if(data.nama)a.nama=data.nama; if(data.whatsapp)a.hp=data.whatsapp; localStorage.setItem('insuranceHub.agen.v1',JSON.stringify(a));}catch(_){}
+    try{if(!DATA().tulis('konsultan',data))throw 0;}catch(_){if(el('kkStatus'))el('kkStatus').textContent='Gagal menyimpan identitas di perangkat.';return;}
+    // Keep the agent identity of this account in sync so all presenter fields continue to autofill.
+    try{const a=agent(); if(data.nama)a.nama=data.nama; if(data.whatsapp)a.hp=data.whatsapp; DATA().tulis('agen',a);}catch(_){}
     render(); if(el('kkStatus'))el('kkStatus').textContent='Identitas konsultan tersimpan di perangkat ini.';
   }
-  function render(){const d=get();
+  let sesiDigambar='';
+  const kunciSesi=()=>{const x=sesi();return x.mode+':'+x.email};
+  function render(){const d=get(); sesiDigambar=kunciSesi(); dataLama();
     /* PENTING: formulir diisi dari getSendiri(), BUKAN dari get().
        Sebelumnya formulir ikut terisi identitas agen yang dibantu, sehingga
        menekan "Simpan identitas dokumen" akan menimpa identitasmu sendiri
@@ -88,6 +100,56 @@
       : '';
     if(el('kartuKonsultanPreview')) el('kartuKonsultanPreview').innerHTML=tandaAtasNama+'<div class="kartu-konsultan-preview"><div class="kk-avatar">'+(f?'<img src="'+esc(f)+'" alt="Foto konsultan">':'<span>👤</span>')+'</div><div class="kk-main"><div class="kk-label">KONSULTAN ANDA</div><h3>'+esc(d.nama||'Nama konsultan')+'</h3><p>'+esc(d.jabatan||'Financial Consultant')+'</p><div class="kk-socials">'+(socials||'<span class="catatan">Media sosial belum diisi.</span>')+'</div>'+qrNote+'</div></div>';
   }
+  /* ---------- Data lama perangkat ----------
+     Key lama (login kode akses lama / versi sebelum akun email) tidak punya
+     catatan pemilik, sehingga tidak pernah dipakai otomatis oleh akun
+     Identity. Selama akun ini belum punya Kartu Konsultan sendiri, data itu
+     hanya ditawarkan dalam bentuk samaran; menyalinnya adalah pilihan
+     pengguna. Data lama tidak dipindahkan, diubah, atau dihapus. */
+  function samar(v,belakang){v=String(v||'').trim(); if(!v)return '';
+    return belakang?'…'+v.replace(/\D/g,'').slice(-4):v.charAt(0)+'…'}
+  function dataLama(){
+    const blok=el('kkNama')&&el('kkNama').closest('.blok'); if(!blok)return;
+    let box=el('kkDataLama');
+    const d=DATA(), s=sesi();
+    let k={}, a={}, an={};
+    const tampil=s.mode==='identity'&&!!d&&!d.ada('konsultan')&&(()=>{
+      k=d.lama('konsultan'); a=d.lama('agen'); an=d.lama('atasNama');
+      return ['nama','whatsapp','email','instagram','tiktok','facebook','linkedin','youtube'].some(x=>String(k[x]||'').trim())
+        ||String(a.hp||'').trim()||(Array.isArray(an.daftar)&&an.daftar.length);
+    })();
+    if(!tampil){if(box)box.hidden=true;return}
+    if(!box){
+      box=document.createElement('div'); box.id='kkDataLama'; box.className='blok tanpa-cetak';
+      blok.parentNode.insertBefore(box,blok);
+      box.addEventListener('click',e=>{
+        const b=e.target.closest('button'); if(!b)return;
+        if(b.id==='kkDataLamaSalin')salinDataLama(); else if(b.id==='kkDataLamaAbaikan')abaikanDataLama();
+      });
+    }
+    const rincian=[k.nama&&('nama berawalan '+samar(k.nama)),(a.hp||k.whatsapp)&&('nomor berakhiran '+samar(a.hp||k.whatsapp,1)),
+      Array.isArray(an.daftar)&&an.daftar.length&&(an.daftar.length+' agen di daftar tim')].filter(Boolean).join(', ');
+    box.hidden=false;
+    box.innerHTML='<h2>Data identitas lama di perangkat ini</h2><p class="catatan">Perangkat ini masih menyimpan identitas dokumen dari login sebelumnya'
+      +(rincian?' ('+esc(rincian)+')':'')+'. Pemiliknya tidak tercatat, jadi tidak dipakai otomatis untuk akun ini. Salin hanya bila data itu milikmu; data lama tetap utuh.</p>'
+      +'<button type="button" class="sakelar" id="kkDataLamaSalin">Salin ke akun saya</button> <button type="button" class="sakelar" id="kkDataLamaAbaikan">Abaikan</button>';
+  }
+  function salinDataLama(){
+    const d=DATA(); if(!d||sesi().mode!=='identity')return;
+    try{
+      d.tulis('konsultan',Object.assign({},d.lama('konsultan')));
+      const lamaAgen=d.lama('agen'), ag=agent();
+      if(!ag.hp&&lamaAgen.hp){ag.hp=lamaAgen.hp; d.tulis('agen',ag);}
+      const lamaAn=d.lama('atasNama'), an=anBaca();
+      if(!an.daftar.length&&Array.isArray(lamaAn.daftar)&&lamaAn.daftar.length){an.daftar=lamaAn.daftar.slice(); an.aktif=false; d.tulis('atasNama',an);}
+    }catch(_){if(el('kkStatus'))el('kkStatus').textContent='Penyimpanan perangkat penuh. Data lama belum tersalin seluruhnya.';}
+    render(); anRender(); anSegarkanPenyaji();
+    if(el('kkStatus'))el('kkStatus').textContent='Data lama disalin ke akun ini. Periksa lalu Simpan bila ada yang perlu diubah.';
+  }
+  function abaikanDataLama(){
+    try{DATA().tulis('konsultan',read())}catch(_){}
+    dataLama();
+  }
   function init(){if(!el('kkSimpan'))return; const d=getSendiri(); ['kkNama','kkJabatan','kkWhatsApp','kkEmail','kkInstagram','kkTikTok','kkFacebook','kkLinkedIn','kkYouTube'].forEach(id=>{const key=id.replace(/^kk/,'').toLowerCase();if(el(id))el(id).value=d[key]||''}); if(el('kkQr'))el('kkQr').value=d.qr||'TIDAK'; el('kkSimpan').addEventListener('click',save); el('kkReset').addEventListener('click',()=>{
       if(!confirm('Pulihkan identitas konsultan ke data login kamu?\n\nMode "Dibuat untuk agen lain" akan dimatikan. Daftar tim dan foto profile tetap tersimpan.'))return;
       /* Pemulihan menyeluruh. Tidak cukup menghapus konsultan.v1 saja:
@@ -96,7 +158,7 @@
          dan identitasmu terasa "tidak bisa kembali". Nama dan nomor
          dikembalikan ke data login (level.v1), satu-satunya sumber yang tidak
          pernah tersentuh mode atas nama. */
-      try{localStorage.removeItem(KEY)}catch(_){}
+      try{DATA().hapus('konsultan')}catch(_){}
       try{
         const an=anBaca(); an.aktif=false; anTulis(an);
         anSetSegmen('Tidak'); anSpanduk();
@@ -106,7 +168,7 @@
       try{
         const l=level(), a=agent();
         a.nama=l.namaAgen||'';
-        localStorage.setItem('insuranceHub.agen.v1',JSON.stringify(a));
+        DATA().tulis('agen',a);
       }catch(_){}
       render(); anRender(); anSegarkanPenyaji();
       if(el('kkStatus'))el('kkStatus').textContent='Identitas dipulihkan ke '+(level().namaAgen||'data login')+'. Silakan lengkapi lalu Simpan. Foto profile dan daftar tim tidak dihapus.';
@@ -115,10 +177,9 @@
      Kamu tetap masuk sebagai dirimu sendiri. Yang berubah hanya identitas
      yang tercetak di dokumen nasabah, supaya ilustrasi yang kamu bantu
      buatkan untuk anggota tim keluar dengan nama mereka. */
-  const AN_KEY='insuranceHub.konsultan.atasNama.v1';
-  function anBaca(){try{const v=JSON.parse(localStorage.getItem(AN_KEY)||'{}')||{};
-    if(!Array.isArray(v.daftar))v.daftar=[]; return v;}catch(_){return {aktif:false,daftar:[]}}}
-  function anTulis(v){try{localStorage.setItem(AN_KEY,JSON.stringify(v))}catch(_){}}
+  function anBaca(){const v=bacaData('atasNama');
+    if(!Array.isArray(v.daftar))v.daftar=[]; return v;}
+  function anTulis(v){try{DATA().tulis('atasNama',v)}catch(_){}}
   /* Kolom penyaji di seluruh layar kalkulator ikut disegarkan setiap kali
      mode berganti, supaya nama pada dokumen berubah saat itu juga. */
   function anSegarkanPenyaji(){
@@ -253,7 +314,7 @@
             const an=anBaca(); an.foto=data;
             try{ anTulis(an); }
             catch(_){ anStatus('Penyimpanan perangkat penuh. Foto tidak tersimpan.'); return; }
-            if(localStorage.getItem(AN_KEY)===null||!anBaca().foto){
+            if(!anBaca().foto){
               anStatus('Penyimpanan perangkat penuh. Foto tidak tersimpan.'); return; }
             anFotoPratinjau(an); render();
             anStatus('Foto agen tersimpan. Tekan "Simpan ke tim" agar ikut tersimpan di daftar.');
@@ -288,7 +349,13 @@
   /* Foto akun baru diketahui sesudah sesi Identity siap, dan bisa berganti
      dari halaman depan atau Identitas Agen. Hanya pratinjau yang digambar
      ulang; isian formulir yang belum disimpan tidak disentuh. */
-  window.addEventListener('psg:identity-ready',()=>pratinjau());
+  window.addEventListener('psg:identity-ready',()=>{
+    /* Akun berganti (atau sesi baru siap): formulir, mode atas nama, dan
+       daftar tim diisi ulang dari data akun itu. Akun sama: hanya pratinjau,
+       supaya isian yang belum disimpan tidak hilang. */
+    if(kunciSesi()===sesiDigambar){pratinjau();return}
+    render(); anRender(); anSegarkanPenyaji();
+  });
   window.addEventListener('psg:identity-photo-updated',()=>pratinjau());
   /* Nomor HP disimpan di Aktivitas & Poin tanpa event. Sesudah handler
      simpannya selesai, kolom WhatsApp dan pratinjau mengikuti nomor terbaru. */

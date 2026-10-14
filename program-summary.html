@@ -483,10 +483,13 @@ if(programLogout)programLogout.addEventListener('click',()=>{
   /* Identitas konsultan ikut dipotret, termasuk mode "dibuat untuk agen lain",
      supaya dokumen yang sudah jadi tidak berubah identitas di kemudian hari. */
   function potretKonsultan(){
-    var k=ambil('insuranceHub.konsultan.v1',{})||{};
-    var a=ambil('insuranceHub.agen.v1',{})||{};
-    var l=ambil('insuranceHub.level.v1',{})||{};
-    var an=ambil('insuranceHub.konsultan.atasNama.v1',{})||{};
+    /* Identitas milik akun yang sedang masuk (src/preview-cetak.js): key
+       lama untuk login kode akses lama, key per email untuk sesi Identity. */
+    var d=window.InsuranceHubDataAkun;
+    var k=d?d.baca('konsultan'):ambil('insuranceHub.konsultan.v1',{})||{};
+    var a=d?d.baca('agen'):ambil('insuranceHub.agen.v1',{})||{};
+    var l=(!d||d.sesi().mode==='lama')?ambil('insuranceHub.level.v1',{})||{}:{};
+    var an=d?d.baca('atasNama'):ambil('insuranceHub.konsultan.atasNama.v1',{})||{};
     /* Foto akun yang sedang masuk, dengan aturan yang sama seperti cetak
        (src/preview-cetak.js): sesi Identity memakai key foto per email. */
     var foto='';

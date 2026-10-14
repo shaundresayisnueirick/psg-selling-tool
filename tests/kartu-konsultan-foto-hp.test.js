@@ -11,7 +11,7 @@
 
    Nomor HP: nomor yang disimpan di Aktivitas & Poin → Identitas Agen
    (insuranceHub.agen.v1.hp) mengisi WhatsApp Kartu Konsultan tanpa refresh,
-   mengalahkan nilai lama insuranceHub.konsultan.v1.whatsapp, ikut ke QR,
+   mengalahkan WhatsApp lama di Kartu Konsultan akun itu, ikut ke QR,
    cetak, dan Library; "Pulihkan identitas saya" tidak menghapusnya.
 
    /api/psg/pribadi dijawab logika server asli dengan Blobs tiruan, supaya
@@ -101,7 +101,7 @@ async function main() {
   page.on('pageerror', (e) => pageErrors.push(e.message));
   page.on('dialog', (d) => d.accept());
 
-  await context.addInitScript(({ profil, konsultan, itemLama, fotoLama }) => {
+  await context.addInitScript(({ profil, konsultan, itemLama, fotoLama, emailA }) => {
     try {
       sessionStorage.setItem('insuranceHub.access.v3', 'ok');
       if (!localStorage.getItem('uji.disemai')) {
@@ -112,11 +112,14 @@ async function main() {
         localStorage.setItem('insuranceHub.agen.v1', JSON.stringify({ nama: 'PSG TEAM', kode: '68000001', hp: '' }));
         localStorage.setItem('insuranceHub.agen.foto.v1', fotoLama);
         localStorage.setItem('insuranceHub.konsultan.v1', JSON.stringify(konsultan));
+        /* Kartu Konsultan akun A sendiri (catatan per email) dengan WhatsApp
+           lama; key lama di atas hanya untuk login kode akses lama. */
+        localStorage.setItem('insuranceHub.identitas.akun.v1.' + encodeURIComponent(emailA), JSON.stringify({ konsultan }));
         localStorage.setItem('insuranceHub.libraryIlustrasi.v1', JSON.stringify([itemLama]));
         localStorage.setItem('uji.disemai', '1');
       }
     } catch (_) {}
-  }, { profil: PROFIL, konsultan: KONSULTAN, itemLama: ITEM_LAMA, fotoLama: FOTO_LAMA });
+  }, { profil: PROFIL, konsultan: KONSULTAN, itemLama: ITEM_LAMA, fotoLama: FOTO_LAMA, emailA: A.me.email });
 
   await context.route('**/src/vendor/netlify-identity.js', (route) => route.fulfill({ status: 200, contentType: 'application/javascript', body: `
     window.PSGNetlifyIdentity = { login: async () => ({}), logout: async () => {}, requestPasswordRecovery: async () => {},
@@ -163,14 +166,15 @@ async function main() {
       instagram: document.getElementById('kkInstagram').value, pesan: document.getElementById('kkPesan')?.value ?? null,
       readWa: r.whatsapp, readFoto: r.foto, readAtasNama: !!r.atasNama };
   });
-  const lokal = () => page.evaluate((k) => ({
-    agen: JSON.parse(localStorage.getItem('insuranceHub.agen.v1') || '{}'),
-    konsultan: JSON.parse(localStorage.getItem('insuranceHub.konsultan.v1') || 'null'),
-    atasNama: JSON.parse(localStorage.getItem('insuranceHub.konsultan.atasNama.v1') || '{}'),
+  /* Data identitas akun A (catatan per email). */
+  const lokal = () => page.evaluate((k) => { const akun = JSON.parse(localStorage.getItem(k.akunA) || '{}'); return {
+    agen: akun.agen || {},
+    konsultan: akun.konsultan || null,
+    atasNama: akun.atasNama || {},
     fotoLama: localStorage.getItem('insuranceHub.agen.foto.v1'),
     fotoA: localStorage.getItem(k.a), fotoB: localStorage.getItem(k.b),
     kunci: Object.keys(localStorage).sort()
-  }), { a: kunciFoto(A.me.email), b: kunciFoto(B.me.email) });
+  }; }, { a: kunciFoto(A.me.email), b: kunciFoto(B.me.email), akunA: 'insuranceHub.identitas.akun.v1.' + encodeURIComponent(A.me.email) });
   const cetak = (sel) => page.evaluate((s) => {
     window.dispatchEvent(new Event('beforeprint'));
     const n = document.querySelector(s + ' .psg-consultant-print');
@@ -324,9 +328,9 @@ async function main() {
     /* ---------- Atas nama agen lain ---------- */
     console.log('\n## Dibuat untuk agen lain');
     await page.evaluate((f) => {
-      const an = JSON.parse(localStorage.getItem('insuranceHub.konsultan.atasNama.v1') || '{}');
+      const an = window.InsuranceHubDataAkun.baca('atasNama');
       an.aktif = true; an.nama = 'Agen Dibantu'; an.kode = '6899'; an.whatsapp = ''; an.foto = f; an.daftar = [{ nama: 'Agen Dibantu', kode: '6899', foto: f, qr: 'TIDAK' }];
-      localStorage.setItem('insuranceHub.konsultan.atasNama.v1', JSON.stringify(an));
+      window.InsuranceHubDataAkun.tulis('atasNama', an);
       window.InsuranceHubAtasNama.spanduk();
       window.dispatchEvent(new Event('insurancehub:consultant-refresh'));
     }, FOTO_AGEN_LAIN);
@@ -344,8 +348,8 @@ async function main() {
     const itemAn = await simpanLibrary();
     check(itemAn.konsultan.foto === FOTO_AGEN_LAIN && itemAn.konsultan.whatsapp === '', '8/16. snapshot Library atas nama: foto agen tersebut, tanpa HP pemilik', itemAn.konsultan);
     await page.evaluate(() => {
-      const an = JSON.parse(localStorage.getItem('insuranceHub.konsultan.atasNama.v1'));
-      an.foto = ''; localStorage.setItem('insuranceHub.konsultan.atasNama.v1', JSON.stringify(an));
+      const an = window.InsuranceHubDataAkun.baca('atasNama');
+      an.foto = ''; window.InsuranceHubDataAkun.tulis('atasNama', an);
       window.dispatchEvent(new Event('insurancehub:consultant-refresh'));
     });
     await page.waitForTimeout(200);

@@ -12,7 +12,11 @@
      diambil dari potret yang tersimpan bersama ilustrasi itu. */
   const consultant=()=>{try{
     if(window.__psgKonsultanCetak) return window.__psgKonsultanCetak;
-    return window.InsuranceHubConsultantCard?.read?.()||JSON.parse(localStorage.getItem('insuranceHub.konsultan.v1')||'{}')}catch(_){return {}}};
+    if(window.InsuranceHubConsultantCard?.read) return window.InsuranceHubConsultantCard.read();
+    /* Halaman ringkasan: Kartu Konsultan akun yang sedang masuk, WhatsApp
+       mengikuti Nomor HP Identitas Agen seperti di Kartu Konsultan. */
+    const d=window.InsuranceHubDataAkun, k=Object.assign({},d.baca('konsultan'));
+    k.whatsapp=d.baca('agen').hp||k.whatsapp||''; return k}catch(_){return {}}};
   /* Foto profil akun yang sedang masuk (identitas sendiri, bukan atas nama).
      - index.html: sesi Identity memakai key foto per email dari
        identity-login.js. Selama sesi Identity masih dipulihkan (cookie nf_jwt
@@ -33,6 +37,50 @@
     }else if(t){const e=emailSesi(t); key=e?'insuranceHub.agen.foto.identity.v1.'+encodeURIComponent(e):'';}
     return key?localStorage.getItem(key)||'':''}catch(_){return ''}};
   window.InsuranceHubFotoSendiri=fotoSendiri;
+  /* Identitas dokumen per akun: Nomor HP Identitas Agen (agen), Kartu
+     Konsultan (konsultan), dan mode "Dibuat untuk agen lain" beserta daftar
+     tim (atasNama). Dulu ketiganya satu key global per perangkat, sehingga
+     akun lain di browser yang sama ikut membaca dan menimpanya.
+     - Login kode akses lama: key lama apa adanya, perilaku tidak berubah.
+     - Sesi Identity: satu key per email, insuranceHub.identitas.akun.v1.<email>,
+       berisi {agen, konsultan, atasNama} dengan bentuk data yang sama.
+     - Sesi Identity yang belum siap: tidak ada data (baca kosong, tulis ditolak).
+     Sesi Identity tidak pernah membaca atau mengubah key lama; pemiliknya
+     tidak diketahui. lama() hanya dipakai untuk penyalinan yang dipilih sendiri
+     oleh pengguna di Kartu Konsultan. */
+  const KUNCI_LAMA={agen:'insuranceHub.agen.v1',konsultan:'insuranceHub.konsultan.v1',atasNama:'insuranceHub.konsultan.atasNama.v1'};
+  const sesiAkun=()=>{
+    const id=window.InsuranceHubIdentity;
+    if(id&&id.source==='server:/api/psg/me'){const e=String(id.email||'').trim().toLowerCase();return e?{mode:'identity',email:e}:{mode:'menunggu',email:''}}
+    const t=cookieSesi();
+    if(!t) return {mode:'lama',email:''};
+    if(typeof window.InsuranceHubCurrentPhotoKey==='function') return {mode:'menunggu',email:''};
+    const e=emailSesi(t); return e?{mode:'identity',email:e}:{mode:'menunggu',email:''};
+  };
+  const kunciAkun=e=>'insuranceHub.identitas.akun.v1.'+encodeURIComponent(e);
+  const bacaJson=k=>{try{const v=JSON.parse(localStorage.getItem(k)||'null');return v&&typeof v==='object'&&!Array.isArray(v)?v:{}}catch(_){return {}}};
+  window.InsuranceHubDataAkun={
+    sesi:sesiAkun,
+    baca(bagian){const s=sesiAkun();
+      if(s.mode==='lama') return bacaJson(KUNCI_LAMA[bagian]);
+      if(s.mode!=='identity') return {};
+      const v=bacaJson(kunciAkun(s.email))[bagian]; return v&&typeof v==='object'?v:{}},
+    /* Akun ini sudah punya data sendiri untuk bagian tersebut. */
+    ada(bagian){const s=sesiAkun();
+      if(s.mode==='lama') return localStorage.getItem(KUNCI_LAMA[bagian])!==null;
+      return s.mode==='identity'&&Object.prototype.hasOwnProperty.call(bacaJson(kunciAkun(s.email)),bagian)},
+    /* Melempar galat bila penyimpanan penuh; false bila sesi belum siap. */
+    tulis(bagian,isi){const s=sesiAkun();
+      if(s.mode==='lama'){localStorage.setItem(KUNCI_LAMA[bagian],JSON.stringify(isi));return true}
+      if(s.mode!=='identity') return false;
+      const k=kunciAkun(s.email), v=bacaJson(k); v[bagian]=isi; localStorage.setItem(k,JSON.stringify(v)); return true},
+    /* Kode akses lama: key lama dihapus seperti dulu. Identity: dikosongkan,
+       catatan akun tetap ada. */
+    hapus(bagian){const s=sesiAkun();
+      if(s.mode==='lama'){localStorage.removeItem(KUNCI_LAMA[bagian]);return true}
+      return this.tulis(bagian,{})},
+    lama:bagian=>bacaJson(KUNCI_LAMA[bagian])
+  };
   const photo=()=>{try{ const c=consultant();
     if(c&&typeof c.foto==='string') return c.foto;
     if(c&&c.atasNama) return c.fotoAgen||'';
