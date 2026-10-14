@@ -14,6 +14,7 @@
 <meta name="description" content="Alat kerja internal agen.">
 <title>PSG Selling Tools — Insurance Hub</title>
 <link rel="stylesheet" href="src/styles.css">
+<link rel="stylesheet" href="src/psg-informasi.css">
 <link rel="stylesheet" href="src/branding.css">
 <link rel="stylesheet" href="src/home-carousel.css">
 <link rel="stylesheet" href="src/home-carousel-modal.css">
@@ -140,8 +141,30 @@ el.addEventListener('pointerdown',function(){tutup(true);});})();</script>
       <h1 id="judul">Insurance Hub</h1>
     </div>
   </div>
-  <div class="header-actions"><button class="kanan" id="tblKanan">Ringkasan</button><button class="logout-btn" type="button" id="btnLogout">Logout</button></div>
+  <div class="header-actions"><button class="psg-informasi-bell" id="btnPsgInformasi" type="button" aria-label="Buka Pusat Informasi PSG" aria-haspopup="dialog" aria-controls="psgInformasiDialog"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg></button><button class="kanan" id="tblKanan">Ringkasan</button><button class="logout-btn" type="button" id="btnLogout">Logout</button></div>
 </header>
+
+<dialog class="psg-informasi-dialog" id="psgInformasiDialog" aria-labelledby="psgInformasiTitle">
+  <section class="psg-informasi-panel">
+    <header class="psg-informasi-head"><div><p class="psg-informasi-eyebrow">UNTUK ANGGOTA PSG</p><h2 id="psgInformasiTitle">Pusat Informasi</h2></div><button type="button" class="psg-informasi-close" data-pi-close aria-label="Tutup">×</button></header>
+    <nav class="psg-informasi-categories" aria-label="Kategori informasi" id="psgInformasiCategories"></nav>
+    <p class="psg-informasi-status" id="psgInformasiStatus" role="status" aria-live="polite"></p>
+    <div class="psg-informasi-layout"><div class="psg-informasi-list" id="psgInformasiList" aria-label="Daftar informasi"></div><article class="psg-informasi-detail" id="psgInformasiDetail" hidden></article></div>
+    <section class="psg-informasi-admin" id="psgInformasiAdmin" hidden>
+      <div class="psg-informasi-admin-head"><h3 id="psgInformasiFormTitle">Kelola informasi</h3><button type="button" class="pi-button pi-secondary" id="psgInformasiNew">Informasi baru</button></div>
+      <form id="psgInformasiForm">
+        <input type="hidden" name="id">
+        <label>Judul<input name="judul" maxlength="140" required></label>
+        <div class="psg-informasi-form-grid"><label>Kategori<select name="kategori" required></select></label><label>Tanggal<input name="tanggal" type="date" required></label></div>
+        <label>Ringkasan / isi<textarea name="isi" rows="5" maxlength="12000" required></textarea></label>
+        <label>Status<select name="status"><option value="draft">Draft</option><option value="published">Terbitkan</option><option value="archived">Arsipkan</option></select></label>
+        <div class="psg-informasi-attachments" id="psgInformasiExistingFiles"></div>
+        <label>Lampiran PDF atau flyer<input name="file" type="file" accept="application/pdf,image/png,image/jpeg,image/webp"><small>PDF, PNG, JPEG, atau WebP; maksimal 4 MB per file dan 5 file per informasi.</small></label>
+        <div class="psg-informasi-admin-actions"><button class="pi-button" type="submit">Simpan</button><button class="pi-button pi-secondary" type="button" id="psgInformasiCancel">Batal</button></div>
+      </form>
+    </section>
+  </section>
+</dialog>
 
 <img class="logo-cetak" src="assets/logo-psg.png" alt="PSG — Patriot Shining Generation">
 <main>
@@ -2590,5 +2613,6 @@ el.addEventListener('pointerdown',function(){tutup(true);});})();</script>
 <script src="src/pesan-personal.js"></script>
 <script src="src/asuransiku-rekap.js"></script>
 <script src="src/asuransiku.js"></script>
+<script src="src/psg-informasi.js"></script>
 </body>
 </html>
