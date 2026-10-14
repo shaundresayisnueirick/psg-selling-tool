@@ -208,6 +208,16 @@ function naskahDokumen(md) {
     cek(urut.join('|') === LAYAR.map((t, i) => (i + 1) + ':' + t).join('|'), '8 scene berurutan dengan teks layar yang benar', urut);
     const s8 = await pg.evaluate(() => (document.querySelector('.sgw-layar-pendukung') || {}).textContent);
     cek(s8 === PENDUKUNG_8, 'scene 8: teks pendukung "Tiga Generasi. Satu Keputusan."', s8);
+    await bukaHub(pg);
+    const ikon = await pg.evaluate(() => {
+      const v = document.querySelector('[data-si-choice="sandwich"] .si-choice-visual'), svg = v && v.querySelector('svg.si-sandwich-ikon');
+      const r = svg ? svg.getBoundingClientRect() : { width: 0, height: 0 };
+      const lain = [...document.querySelectorAll('[data-si-choice]:not([data-si-choice="sandwich"]) .si-choice-visual')].map((x) => x.textContent.trim());
+      return { svg: !!svg, rantai: /⛓/.test(v ? v.textContent : ''), w: r.width, h: r.height, lapis: svg ? svg.querySelectorAll('path,rect').length : 0, lain };
+    });
+    cek(ikon.svg && !ikon.rantai && ikon.w >= 60 && ikon.h >= 50 && ikon.lapis >= 5 && ikon.lain.join(' ') === '🖐️ 🧺 🎓 ⌛ 🏠 ✈️ 🛡️',
+      'kartu hub Sandwich: ikon sandwich bertumpuk (SVG, bukan rantai); ikon kartu lain tetap', ikon);
+    await pg.evaluate(() => document.querySelector('[data-si-choice="sandwich"]').click()); await pg.waitForTimeout(400);
     const tanpaTokoh = await pg.evaluate(() => !document.querySelector('#salesIdeaContent .psg-k, #salesIdeaContent [class*="karakter"]'));
     cek(tanpaTokoh, 'tidak memakai komponen PSGKarakter (ilustrasi khusus Sandwich)');
     await ctx.close();
@@ -228,6 +238,13 @@ function naskahDokumen(md) {
     cek(tiapScene.length === 8 && tiapScene.every((b) => /\*\*Arahan suara:\*\*/.test(b) && /\*\*Estimasi durasi:\*\*/.test(b) && /\*\*Catatan jeda:\*\*/.test(b)),
       'dokumen ElevenLabs: tiap scene punya arahan suara, estimasi durasi, catatan jeda');
     cek(!/voice[_ ]?id\s*[:=]/i.test(md), 'dokumen ElevenLabs tidak menetapkan voice ID');
+    /* nama berkas mengikuti pola rekaman yang dipakai narator: <cerita>-SNN-MM.mp3, satu segmen per scene */
+    cek(tiapScene.every((b, i) => b.includes('**Nama file:** `sandwich-S' + String(i + 1).padStart(2, '0') + '-01.mp3`')) && /assets\/narasi\/sandwich\//.test(md),
+      'dokumen ElevenLabs: tiap scene punya nama file sandwich-SNN-01.mp3 dan folder assets/narasi/sandwich/');
+    /* suara = suara yang tercatat di semua manifest rekaman Sales Idea lain */
+    const suaraLain = [...new Set(fs.readdirSync(path.join(ROOT, 'src')).filter((f) => /^sales-idea-.*-audio\.js$/.test(f))
+      .map((f) => (fs.readFileSync(path.join(ROOT, 'src', f), 'utf8').match(/suara:\s*'([^']+)'/) || [])[1]))];
+    cek(suaraLain.length === 1 && md.includes(suaraLain[0]), 'dokumen ElevenLabs memakai suara yang sama dengan semua Sales Idea berekaman (' + suaraLain.join(' | ') + ')', suaraLain);
     const sb = fs.readFileSync(path.join(ROOT, 'docs/sales-idea-sandwich-generation-storyboard.md'), 'utf8');
     cek(NASKAH.every((t) => sb.includes(t)) && LAYAR.every((t) => sb.includes(t)) && /Prompt visual/.test(sb) && /Daftar aset visual/.test(sb) && /Harus dibuat/.test(sb),
       'storyboard: naskah, teks layar, prompt visual, daftar aset dengan status');

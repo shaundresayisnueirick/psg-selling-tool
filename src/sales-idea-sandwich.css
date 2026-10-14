@@ -80,6 +80,10 @@
   [data-theme="dark"] .sgw-a7{--sw-langit-1:#1b2c52;--sw-langit-2:#d08a5a;--sw-dinding-1:#262c3c;--sw-dinding-2:#1a1f2c;--sw-surya:#ffe2a8}
   [data-theme="dark"] .sgw-a8{--sw-langit-1:#2a1f45;--sw-langit-2:#e0875a;--sw-bukit-1:#3a2a40;--sw-bukit-2:#24192e;--sw-tanah:#170f1c;--sw-surya:#ffd9a0}
 
+  /* ikon kartu hub (sandwich bertumpuk, ukuran mengikuti font-size kartu seperti ikon emoji kartu lain) */
+  .si-choice-card[data-si-choice="sandwich"] .si-choice-visual{background:linear-gradient(145deg,#fff6e6,#eef7ee)}
+  .si-sandwich-ikon{display:block;width:1.36em;height:1.13em;filter:drop-shadow(0 6px 10px rgba(80,40,10,.16))}
+
   /* ---------- 1. Tata letak satu layar ---------- */
   #layarSalesIdea.aktif .si-content.sip-fit > .sgw{flex:1 1 auto}
   .sgw{min-height:0;width:100%;max-width:1500px;margin:0 auto;display:grid;grid-template-rows:auto minmax(0,1fr);gap:10px}

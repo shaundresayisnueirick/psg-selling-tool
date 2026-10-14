@@ -5,27 +5,43 @@ Naskah ini sama persis, kata per kata, dengan naskah yang dipakai aplikasi
 `tests/sales-idea-sandwich.test.js` memeriksa keduanya tetap identik. Bila
 naskah diubah, ubah di kedua tempat sekaligus.
 
-Cara pakai: salin isi kotak **NASKAH AUDIO** setiap scene apa adanya ke
-ElevenLabs (tanpa tanda kutip dan tanpa catatan lain). Satu scene = satu
-berkas audio.
+Status audio: **belum ada rekaman.** Selama manifest
+`src/sales-idea-sandwich-audio.js` belum dipasang, aplikasi memakai suara
+browser sebagai narasi sementara. Suara browser bukan hasil akhir.
 
-## Rekomendasi suara (berlaku untuk semua scene)
+## Suara dan cara generate (mengikuti Sales Idea yang sudah final)
 
-- Suara dewasa, hangat, tenang, reflektif, dan natural dalam bahasa Indonesia.
-- Sudut pandang orang pertama ("aku"): orang tua yang menulis surat untuk
-  generasi berikutnya. Bukan nada iklan dan tidak menggurui.
-- Kecepatan bicara normal. Jangan dipercepat; biarkan jeda alami di tanda
-  titik dan koma.
-- Pakai suara yang sama untuk kedelapan scene.
-- Tidak ada voice ID atau preset khusus yang diwajibkan.
+- **Suara:** Bian — Neutral, Calm and Clear (ElevenLabs). Suara ini sama
+  dengan semua Sales Idea berekaman: 10 Jari, 3 Alasan, Keranjang
+  Kehidupan, Education Planning, Retirement Planning, Asset Creation,
+  Bekerja di Singapura, dan Proteksi Kredit. Kedelapan manifest
+  `src/sales-idea-*-audio.js` mencatat `suara: 'Bian — Neutral, Calm and Clear'`.
+- **Pengaturan acuan:** sama dengan rekaman Bian sebelumnya, yaitu
+  `pvc_sp100_s50_sb75_v4` (diambil dari nama berkas rekaman lama, seperti
+  dicatat di `tools/narasi/NASKAH-BIAN-PROTEKSI-KREDIT.md`). Voice ID dan
+  API key tidak disimpan di repository.
+- **Satu scene = satu generate = satu berkas MP3.** Salin **hanya** isi
+  kotak NASKAH AUDIO, tanpa judul, arahan, atau tanda kutip.
+- **Nama berkas** persis seperti tertulis di tiap scene (huruf kecil,
+  tanda hubung): `sandwich-SNN-01.mp3`. `SNN` adalah nomor scene, `01`
+  adalah segmen tunggal per scene. Polanya sama dengan Proteksi Kredit
+  (`kredit-SNN-MM.mp3`).
+- **Konsistensi:** pakai suara dan pengaturan yang sama untuk kedelapan
+  scene, dalam satu sesi bila memungkinkan. Dengarkan satu scene dulu,
+  lalu bandingkan dengan rekaman Proteksi Kredit di aplikasi sebelum
+  melanjutkan.
 
-Estimasi durasi dihitung dari kecepatan rekaman narasi yang sudah ada di
-aplikasi (sekitar 14–15 karakter per detik). Total suara ±86 detik, ±90–95
+8 scene · 1.252 karakter · perkiraan total suara ±86 detik.
+
+Estimasi durasi dihitung dari kecepatan rekaman Bian Proteksi Kredit
+(24 rekaman, rata-rata 14,6 karakter per detik). Total suara ±86 detik, ±90–95
 detik termasuk jeda antar-scene.
 
 ---
 
 ## SCENE 01 — SURAT UNTUK MENANTUKU DI MASA DEPAN
+
+**Nama file:** `sandwich-S01-01.mp3`
 
 **Arahan suara:** Hangat dan reflektif, seperti membaca surat pribadi. Jeda singkat sesudah "Untuk menantuku di masa depan", lalu jeda kecil sebelum "gajimu bukan rencana masa tuaku" agar kalimat itu terasa.
 
@@ -43,6 +59,8 @@ Untuk menantuku di masa depan, ada satu hal yang ingin aku pastikan: gajimu buka
 
 ## SCENE 02 — KASIH SAYANG, BUKAN BEBAN TANPA RENCANA
 
+**Nama file:** `sandwich-S02-01.mp3`
+
 **Arahan suara:** Lembut dan tulus. Kalimat pertama hangat; kalimat kedua sedikit lebih pelan dan tegas, tanpa nada menyalahkan.
 
 **NASKAH AUDIO**
@@ -58,6 +76,8 @@ Kami tentu ingin saling membantu dalam keluarga. Tetapi aku tak ingin kasih saya
 ---
 
 ## SCENE 03 — MASA PENSIUN PERLU DISIAPKAN
+
+**Nama file:** `sandwich-S03-01.mp3`
 
 **Arahan suara:** Tenang dan realistis, bermartabat. Bukan sedih.
 
@@ -75,6 +95,8 @@ Saat kita berhenti bekerja, kebutuhan hidup tetap berjalan. Pensiun yang tidak d
 
 ## SCENE 04 — KESEHATAN BISA MENGUBAH RENCANA
 
+**Nama file:** `sandwich-S04-01.mp3`
+
 **Arahan suara:** Serius tetapi menenangkan. Hindari nada dramatis atau menakut-nakuti.
 
 **NASKAH AUDIO**
@@ -90,6 +112,8 @@ Biaya kesehatan juga bisa datang di luar rencana. Tanpa perlindungan dan dana ya
 ---
 
 ## SCENE 05 — LINDUNGI KELUARGA DARI RISIKO
+
+**Nama file:** `sandwich-S05-01.mp3`
 
 **Arahan suara:** Tenang dan jelas. Dua risiko disebut terpisah; beri ruang di antara keduanya. Kata "meninggal" diucapkan lembut, tidak ditekan.
 
@@ -107,6 +131,8 @@ Penyakit kritis dapat memengaruhi penghasilan dan kebutuhan sehari-hari. Dan bil
 
 ## SCENE 06 — RANTAI TIGA GENERASI
 
+**Nama file:** `sandwich-S06-01.mp3`
+
 **Arahan suara:** Reflektif, sedikit lebih berat. Setelah titik dua, baca bagian tiga generasi dengan ritme yang jelas.
 
 **NASKAH AUDIO**
@@ -122,6 +148,8 @@ Di sinilah rantai beban bisa terbentuk: anak membesarkan anaknya sendiri, sambil
 ---
 
 ## SCENE 07 — MULAI DENGAN PERENCANAAN
+
+**Nama file:** `sandwich-S07-01.mp3`
 
 **Arahan suara:** Nada mulai terangkat: realistis, memberi harapan, tidak menggurui.
 
@@ -139,6 +167,8 @@ Kita tidak bisa mengendalikan semua hal. Tapi kita bisa mulai dengan mengenali k
 
 ## SCENE 08 — RANTAI ITU PUTUS DI AKU
 
+**Nama file:** `sandwich-S08-01.mp3`
+
 **Arahan suara:** Penutup yang hangat dan mantap. "Rantai itu putus di aku" diucapkan pelan dan yakin. Kalimat tanya terakhir diucapkan lembut, mengajak berpikir.
 
 **NASKAH AUDIO**
@@ -153,37 +183,35 @@ Rantai itu putus di aku. Bukan karena semua risiko hilang, tetapi karena aku mul
 
 ---
 
-## Memasang rekaman ke aplikasi (setelah audio dibuat)
+## Memasang rekaman ke aplikasi (tahap finalisasi, bukan sekarang)
 
-Saat ini belum ada berkas audio. Selama rekaman belum dipasang, aplikasi
-memakai suara browser sebagai narasi sementara, dan pemutar tetap berjalan
-normal.
+Kirimkan kedelapan berkas MP3 dengan nama di atas. Pemasangannya
+mengikuti pola Proteksi Kredit:
 
-Pola yang didukung aplikasi (sama dengan Proteksi Kredit):
-
-1. Satu berkas MP3 per scene, diberi nama:
-   `sandwich-S01-01.mp3`, `sandwich-S02-01.mp3`, …, `sandwich-S08-01.mp3`
-   (`SNN` = nomor scene, `-01` = satu segmen per scene).
-2. Lokasi berkas: `assets/narasi/sandwich/`.
-3. Manifest `src/sales-idea-sandwich-audio.js` dengan bentuk yang sama
-   seperti `src/sales-idea-kredit-audio.js`:
+1. Berkas disimpan di `assets/narasi/sandwich/`:
+   `sandwich-S01-01.mp3` … `sandwich-S08-01.mp3`.
+2. Manifest baru `src/sales-idea-sandwich-audio.js`, bentuknya sama dengan
+   `src/sales-idea-kredit-audio.js`:
 
    ```js
    window.PSGSandwichAudio = {
-     versi: '<tanggal rekaman>',
-     suara: '<nama suara ElevenLabs>',
+     versi: 'sgw-bian-<tanggal>',
+     suara: 'Bian — Neutral, Calm and Clear',
      folder: 'assets/narasi/sandwich/',
      segmen: {
-       'S01-01': [{ audio: 'sandwich-S01-01.mp3', start: 0.000, end: <durasi detik> }],
+       'S01-01': [{ audio: 'sandwich-S01-01.mp3', start: 0.000, end: <durasi> }],
        /* … sampai S08-01 */
      }
    };
    ```
 
-4. Manifest dimuat di `index.html` tepat sebelum `src/sales-idea-sandwich.js`,
-   dan kesembilan berkas (8 MP3 + manifest) ditambahkan ke daftar precache
-   `sw.js` (lalu `VERSI` dinaikkan).
+   `end` adalah durasi berkas yang diukur dari decode Chromium. Berkas
+   diputar utuh.
+3. Manifest dimuat di `index.html` tepat sebelum `src/sales-idea-sandwich.js`.
+   Kedelapan MP3 dan manifest masuk daftar precache `sw.js`, lalu `VERSI`
+   dinaikkan.
 
-Durasi (`end`) diukur dari berkas MP3 yang sebenarnya. Pemutar menyesuaikan
-lama tiap scene dengan durasi rekaman, jadi audio tidak perlu dipotong agar
-pas dengan animasi.
+Begitu manifest termuat, narator bersama (`PSGNarasi.rekamanDari`) memutar
+MP3 dan tidak pernah jatuh ke suara browser. Lama tiap scene mengikuti
+durasi rekaman ditambah jeda 700 md. Tanpa manifest, narator memakai suara
+browser sebagai pengganti sementara.

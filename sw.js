@@ -15,7 +15,7 @@
    - Hanya jawaban yang benar-benar berhasil (status 200) yang disimpan,
      sehingga halaman error tidak pernah ikut tersimpan. */
 
-const VERSI = 'insurance-hub-v117.1.26';
+const VERSI = 'insurance-hub-v117.1.27';
 
 /* Semua berkas inti ikut disimpan sejak pemasangan, supaya aplikasi tetap
    utuh walaupun kunjungan pertama terputus di tengah jalan.
@@ -45,7 +45,7 @@ const BERKAS = [
   './src/sales-idea-lanjut.css?v=110',
   './src/sales-idea-singapura.css?v=112',
   './src/sales-idea-kredit.css?v=118',
-  './src/sales-idea-sandwich.css?v=121',
+  './src/sales-idea-sandwich.css?v=122',
   './src/cetak-besar.css',
   './src/psg-feedback.css',
   './src/identity-login.css',
