@@ -256,10 +256,27 @@ async function main() {
     const badge = await page.evaluate(() => [...document.querySelectorAll('.as-badge')].map((n) => n.textContent));
     check(badge.filter((b) => b === 'Unit Link').length === 1 && badge.filter((b) => b === 'Tradisional').length === 2, 'badge Jenis Polis per kartu', badge);
     teks = await teksLayar(page);
-    check(/Total UP Penyakit Kritis tercatat\s*Rp1\.250\.000\.000/.test(teks), 'total UP penyakit kritis (500 jt + 750 jt) dalam satu kategori', teks.match(/Total UP[^\n]*\n?[^\n]*/g));
-    check(!/Total UP Jiwa/.test(teks), 'total UP jiwa tidak ditampilkan untuk satu entri');
-    check(!/Total[^\n]*Kesehatan|Total[^\n]*Kecelakaan/i.test(teks), 'manfaat kesehatan dan kecelakaan tidak dijumlahkan');
-    check(/dipercepat[\s\S]*mengurangi UP jiwa/i.test(teks), 'penjelasan manfaat PK dipercepat tampil');
+    /* Rekap Total Perlindungan: posisi, angka pasti, dan pemisahan kategori. */
+    const rekap = await page.evaluate(() => {
+      const r = document.querySelector('.as-rekap'), isi = document.getElementById('asuransikuIsi');
+      const urutan = [...isi.children].map((n) => n.className.split(' ')[0]);
+      const baris = [...document.querySelectorAll('.as-rekap-baris')].map((n) => ({ label: n.querySelector('.as-rekap-label').textContent, angka: (n.querySelector('.as-rekap-angka') || {}).textContent || '', kurang: n.classList.contains('kurang') }));
+      return { ada: !!r, teks: r ? r.innerText : '', urutan, baris, kartu: [...document.querySelectorAll('.as-rekap-kartu h4')].map((h) => h.textContent) };
+    });
+    check(rekap.ada && rekap.urutan.indexOf('as-rekap') > rekap.urutan.indexOf('as-statistik') && rekap.urutan.indexOf('as-rekap') < rekap.urutan.indexOf('as-daftar'),
+      'REKAP TOTAL PERLINDUNGAN berada sesudah statistik dan sebelum kartu polis', rekap.urutan);
+    const angkaDari = (label) => (rekap.baris.find((b) => b.label === label) || {}).angka;
+    check(angkaDari('Total UP Jiwa Tercatat') === 'Rp1.000.000.000', 'Total UP Jiwa Tercatat Rp1.000.000.000 (satu manfaat jiwa)', rekap.baris);
+    check(angkaDari('Total UP Penyakit Kritis Berdiri Sendiri') === 'Rp750.000.000' && angkaDari('UP Penyakit Kritis Dipercepat') === 'Rp500.000.000',
+      'PK berdiri sendiri (750 jt) dan dipercepat (500 jt) dipisah', rekap.baris);
+    check(!/1\.250\.000\.000|1\.500\.000\.000/.test(rekap.teks), 'tidak ada angka gabungan PK dipercepat + berdiri sendiri, atau jiwa + PK');
+    check(angkaDari('UP meninggal karena kecelakaan') === 'Rp300.000.000', 'rekap kecelakaan: UP meninggal Rp300.000.000', rekap.baris);
+    check(/Limit tahunan[\s\S]*Generali[\s\S]*Limit dasar Rp2\.000\.000\.000[\s\S]*Booster Rp4\.000\.000\.000 \(Setelah limit dasar habis\)/.test(rekap.teks) &&
+      /Limit per tindakan[\s\S]*Perusahaan C[\s\S]*Rp150\.000\.000 per tindakan/.test(rekap.teks) && /Santunan harian[\s\S]*Santunan Rp500\.000\/hari/.test(rekap.teks),
+      'breakdown kesehatan per sistem dengan sumber dan nilai', rekap.teks.slice(0, 900));
+    check(/Limit kesehatan tidak dijumlahkan/.test(rekap.teks) && /Ketiga kategori tidak dijumlahkan/.test(rekap.teks), 'penjelasan mengapa kesehatan dan kecelakaan tidak dijumlahkan');
+    check(/dipercepat[\s\S]*mengurangi UP jiwa/i.test(rekap.teks), 'penjelasan manfaat PK dipercepat tampil di rekap');
+    check(!rekap.teks.includes('RAHASIA-catatan') && !/4821/.test(rekap.teks), 'rekap tanpa catatan pribadi dan nomor polis');
     check(/Aktif sejak 1 Maret 2019/.test(teks) && /Limit tahunan\s*Rp2\.000\.000\.000/.test(teks) && /Limit booster\s*Rp4\.000\.000\.000/.test(teks), 'tanggal mulai dan limit tahunan/booster tampil', teks.slice(0, 600));
 
     /* ---------- 4. Edit satu polis tidak mengubah polis lain ---------- */
@@ -276,6 +293,8 @@ async function main() {
     await page.click('#asSimpan'); await tunggu(page, 'ringkasan');
     const gen = JSON.parse(blob(A, idGen));
     check(gen.jenisPolis === 'TRADISIONAL' && gen.perlindungan.length === 2 && gen.perlindungan[1].nama === 'Rider PK', 'polis diedit: Jenis Polis berubah, rider kesehatan terhapus, rider PK tetap', gen);
+    const rekapEdit = await page.evaluate(() => document.querySelector('.as-rekap').innerText);
+    check(!/Limit tahunan/.test(rekapEdit) && /Limit per tindakan/.test(rekapEdit), 'rekap diperbarui sesudah edit: limit tahunan dari rider yang dihapus hilang', rekapEdit.slice(0, 400));
     check(blob(A, idPru) === blobPru && blob(A, idC) === blobC, 'polis lain identik byte per byte (termasuk Jenis Polis)');
 
     /* Batal dengan perubahan: data tersimpan tidak berubah. */
@@ -294,6 +313,8 @@ async function main() {
     await page.click('.as-hapus[data-id="' + idC + '"]');
     await page.waitForFunction(() => window.PSGAsuransiku.keadaan().polis.length === 2);
     check(/Rider yang ikut terhapus[\s\S]*Santunan RS/.test(d1.st.dialog || '') && !blob(A, idC) && blob(A, idPru) === blobPru, 'hapus polis: konfirmasi menyebut rider, polis lain tetap', d1.st.dialog);
+    const rekapHapus = await page.evaluate(() => ({ kartu: [...document.querySelectorAll('.as-rekap-kartu h4')].map((h) => h.textContent), judul: document.getElementById('asRekapJudul').textContent }));
+    check(!rekapHapus.kartu.some((k) => /Kecelakaan|Kesehatan/.test(k)) && /2 polis/.test(rekapHapus.judul), 'rekap diperbarui sesudah hapus: kecelakaan dan kesehatan hilang, 2 polis', rekapHapus);
 
     /* ---------- 5. Gagal simpan, coba lagi tanpa duplikat ---------- */
     console.log('\n## Gagal simpan dan offline');
@@ -324,7 +345,8 @@ async function main() {
       await page.setViewportSize({ width: w, height: h }); await page.waitForTimeout(300);
       const m = await page.evaluate(() => ({ dok: document.documentElement.scrollWidth <= window.innerWidth + 1,
         kartu: [...document.querySelectorAll('.as-polis')].every((n) => n.scrollWidth <= n.clientWidth + 1) }));
-      check(m.dok && m.kartu, 'ringkasan tidak meluber pada lebar ' + w, m);
+      const mr = await page.evaluate(() => [...document.querySelectorAll('.as-rekap, .as-rekap-kartu')].every((n) => n.scrollWidth <= n.clientWidth + 1));
+      check(m.dok && m.kartu && mr, 'ringkasan dan rekap tidak meluber pada lebar ' + w, { m, mr });
       if (shots) await page.screenshot({ path: path.join(shots, 'asuransiku-ringkasan-' + w + '.png'), fullPage: true });
     }
     await page.setViewportSize({ width: 390, height: 844 });
@@ -371,7 +393,31 @@ async function main() {
     await kelola(page);
     check(await page.evaluate(() => document.getElementById('asTambah').disabled) && /Batas 30 polis/.test(await teksLayar(page)), '30 polis: tombol Tambah Polis nonaktif dengan keterangan');
     teks = await teksLayar(page);
-    check(/Total UP Jiwa tercatat\s*Rp30\.000\.000/.test(teks), 'total UP jiwa satu kategori satu mata uang saat semua terisi', teks.match(/Total UP[^\n]*\n?[^\n]*/g));
+    const r30 = await page.evaluate(() => { const b = [...document.querySelectorAll('.as-rekap-baris')].find((n) => n.querySelector('.as-rekap-label').textContent === 'Total UP Jiwa Tercatat'); return b ? b.innerText : ''; });
+    check(/Rp30\.000\.000/.test(r30) && /dari 30 manfaat jiwa · 30 polis/.test(r30), 'Total UP Jiwa Tercatat 30 × Rp1.000.000 = Rp30.000.000 dari 30 polis', r30);
+
+    /* ---------- 9b. Rekap: data tidak lengkap dan mata uang berbeda ---------- */
+    console.log('\n## Rekap: data belum lengkap dan USD');
+    const D = akun('dddddddd-4444-4444-8444-dddddddddddd', 'agen.d@psg.test', 'Agen Dara');
+    const simpanD = (n, o) => { const id = '00000000-0000-4000-8000-' + String(500 + n).padStart(12, '0');
+      store.set('u/' + D.me.id + '/polis/' + id + '.json', JSON.stringify({ versi: 1, id, perusahaan: 'Q' + n, produk: 'Produk Q' + n, jenisPolis: 'TRADISIONAL', mulai: '2021-0' + n + '-01', mataUang: 'IDR',
+        dibuat: '2026-01-01T00:00:00Z', diperbarui: '2026-01-01T00:00:00Z', ...o })); };
+    simpanD(1, { perlindungan: [{ id: '00000000-0000-4000-9000-000000000501', peran: 'DASAR', jenis: 'JIWA', manfaat: { up: 1000000000 } }] });
+    simpanD(2, { perlindungan: [{ id: '00000000-0000-4000-9000-000000000502', peran: 'DASAR', jenis: 'JIWA', manfaat: {} }] });
+    simpanD(3, { mataUang: 'USD', jenisPolis: 'UNIT_LINK', perlindungan: [{ id: '00000000-0000-4000-9000-000000000503', peran: 'DASAR', jenis: 'JIWA', manfaat: { up: 100000 } }] });
+    simpanD(4, { perlindungan: [{ id: '00000000-0000-4000-9000-000000000504', peran: 'DASAR', jenis: 'PK', manfaat: { up: 250000000 } }] });
+    await d1.masuk(D);
+    await page.reload({ waitUntil: 'load' }); await d1.siap(D.me.email);
+    await bukaKartu(page); await tunggu(page, 'ringkasan');
+    const rd = await page.evaluate(() => ({ teks: document.querySelector('.as-rekap').innerText,
+      baris: [...document.querySelectorAll('.as-rekap-baris')].map((n) => ({ label: n.querySelector('.as-rekap-label').textContent, angka: (n.querySelector('.as-rekap-angka') || {}).textContent || '', kurang: n.classList.contains('kurang'), teks: n.innerText })) }));
+    const idr = rd.baris.find((b) => b.label === 'Subtotal UP Jiwa Tercatat'), usd = rd.baris.find((b) => b.label === 'Total UP Jiwa Tercatat (USD)');
+    check(idr && idr.kurang && idr.angka === 'Rp1.000.000.000' && /Data Belum Lengkap/i.test(idr.teks) && /bukan total keseluruhan/.test(idr.teks) && !rd.baris.some((b) => b.label === 'Total UP Jiwa Tercatat'), 'UP jiwa IDR sebagian kosong: berlabel Subtotal, Data Belum Lengkap, bukan total keseluruhan', idr);
+    check(usd && !usd.kurang && usd.angka === 'US$100.000', 'UP jiwa USD terpisah: US$100.000', usd);
+    check(/tanpa konversi kurs/.test(rd.teks), 'penjelasan IDR dan USD tanpa konversi');
+    const pkTak = rd.baris.find((b) => /sifat manfaat belum diketahui/.test(b.label));
+    check(pkTak && pkTak.angka === '' && /Tidak dijumlahkan/.test(pkTak.teks), 'PK sifat belum diketahui: tidak dijumlahkan, dengan penjelasan', pkTak);
+    if (shots) { await page.setViewportSize({ width: 390, height: 844 }); await page.evaluate(() => document.querySelector('.as-rekap').scrollIntoView()); await page.screenshot({ path: path.join(shots, 'asuransiku-rekap-hp.png'), fullPage: false }); }
 
     /* ---------- 10. Tidak ada salinan di browser ---------- */
     const lokal = await page.evaluate(() => Object.keys(localStorage).filter((x) => /Generali|Prudential|Allianz|Produk Jiwa A|Produk PK B|Produk 29|4821|RAHASIA-catatan/.test(localStorage.getItem(x) || '') || /asuransi|pribadi/i.test(x)));

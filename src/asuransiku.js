@@ -124,29 +124,132 @@
     return out;
   }
 
-  /* Total UP hanya dalam satu jenis (Jiwa / Penyakit Kritis) dan satu mata
-     uang, minimal dua entri, dan hanya bila semuanya mencantumkan UP. */
-  function totalUP() {
-    var hasil = [];
-    ['JIWA', 'PK'].forEach(function (j) {
-      var grup = {};
-      semuaPerlindungan().forEach(function (e) {
-        if (e.x.jenis !== j) return;
-        var mu = e.polis.mataUang || 'IDR';
-        (grup[mu] = grup[mu] || []).push(e);
+  /* ---------- Rekap Total Perlindungan ----------
+     Angka dihitung src/asuransiku-rekap.js dari polis di memori. Di sini
+     hanya digambar; semua teks dari agen lewat esc(). */
+
+  function labelSumber(s) {
+    return s.perusahaan + ' · ' + s.produk + (s.peran === 'RIDER' ? ' · Rider' + (s.namaRider ? ' ' + s.namaRider : '') : '');
+  }
+
+  function htmlBelumLengkap(teks) { return '<span class="as-rekap-badge">Data Belum Lengkap</span>' + (teks ? '<small class="as-rekap-kurang">' + esc(teks) + '</small>' : ''); }
+
+  /* Satu baris angka per mata uang untuk kelompok yang boleh dijumlahkan. */
+  function htmlKelompok(judul, kelompok, satuanManfaat) {
+    return kelompok.map(function (g) {
+      var mu = g.mataUang === 'USD' ? ' (USD)' : '';
+      var angka = g.total === null
+        ? '<b class="as-rekap-angka as-rekap-kosong">Belum ada nilai tercatat</b>'
+        : '<b class="as-rekap-angka">' + esc(uang(g.total, g.mataUang)) + '</b>';
+      var keterangan = g.lengkap
+        ? '<small>dari ' + g.tercatat + ' ' + satuanManfaat + ' · ' + g.jumlahPolis + ' polis</small>'
+        : htmlBelumLengkap(g.total === null
+          ? g.tanpaNilai + ' ' + satuanManfaat + ' belum mencantumkan nilai.'
+          : 'Subtotal dari ' + g.tercatat + ' ' + satuanManfaat + ' yang mencantumkan nilai; ' + g.tanpaNilai + ' lainnya belum mencantumkan nilai, jadi ini bukan total keseluruhan.');
+      /* Angka parsial tidak boleh berlabel "Total". */
+      var label = g.lengkap ? judul : judul.replace(/^Total /, 'Subtotal ');
+      return '<div class="as-rekap-baris' + (g.lengkap ? '' : ' kurang') + '"><span class="as-rekap-label">' + esc(label) + mu + '</span>' + angka + keterangan + '</div>' +
+        htmlSumber(g.sumber.map(function (e) { return [labelSumber(e.sumber), e.nilai === undefined || e.nilai === null ? 'Nilai belum dicatat' : uang(e.nilai, e.sumber.mataUang)]; }));
+    }).join('');
+  }
+
+  /* Rincian sumber dilipat supaya layar HP tidak terlalu panjang. */
+  function htmlSumber(baris) {
+    if (!baris.length) return '';
+    return '<details class="as-rekap-sumber"><summary>Lihat sumber (' + baris.length + ')</summary><ul>' +
+      baris.map(function (b) { return '<li><span>' + esc(b[0]) + '</span><b>' + esc(b[1]) + '</b></li>'; }).join('') + '</ul></details>';
+  }
+
+  function htmlRekap() {
+    var R = window.PSGAsuransikuRekap;
+    if (!R) return '';
+    var r = R.hitung(st.polis);
+    var kartu = [];
+
+    if (r.jiwa.length) {
+      kartu.push('<article class="as-rekap-kartu"><h4>' + JENIS.JIWA.ikon + ' Jiwa</h4>' +
+        htmlKelompok('Total UP Jiwa Tercatat', r.jiwa, 'manfaat jiwa') + '</article>');
+    }
+
+    if (r.adaPk) {
+      var isiPk = '';
+      if (r.pk.BERDIRI_SENDIRI.length) isiPk += htmlKelompok('Total UP Penyakit Kritis Berdiri Sendiri', r.pk.BERDIRI_SENDIRI, 'manfaat');
+      if (r.pk.DIPERCEPAT.length) isiPk += htmlKelompok('UP Penyakit Kritis Dipercepat', r.pk.DIPERCEPAT, 'manfaat');
+      if (r.pk.TIDAK_DIKETAHUI.length) {
+        var semuaTak = [];
+        r.pk.TIDAK_DIKETAHUI.forEach(function (g) { g.sumber.forEach(function (e) { semuaTak.push(e); }); });
+        isiPk += '<div class="as-rekap-baris kurang"><span class="as-rekap-label">Penyakit Kritis, sifat manfaat belum diketahui</span>' +
+          htmlBelumLengkap('Tidak dijumlahkan sampai diketahui apakah berdiri sendiri atau dipercepat.') + '</div>' +
+          htmlSumber(semuaTak.map(function (e) { return [labelSumber(e.sumber), e.nilai === undefined || e.nilai === null ? 'Nilai belum dicatat' : uang(e.nilai, e.sumber.mataUang)]; }));
+      }
+      if (r.adaDipercepat) isiPk += '<p class="as-rekap-catatan">Manfaat penyakit kritis <b>dipercepat</b> dibayarkan dari UP jiwa polis yang sama, sehingga dapat mengurangi UP jiwa sesuai ketentuan polis. Angka ini tidak dijumlahkan dengan UP jiwa maupun dengan penyakit kritis berdiri sendiri.</p>';
+      kartu.push('<article class="as-rekap-kartu"><h4>' + JENIS.PK.ikon + ' Penyakit Kritis</h4>' + isiPk + '</article>');
+    }
+
+    if (r.kecelakaan.ada) {
+      var LABEL_KC = { upMeninggal: 'UP meninggal karena kecelakaan', cacatTetap: 'Cacat tetap (nilai maksimum tercatat)', biayaMedis: 'Biaya medis kecelakaan' };
+      var isiKc = '';
+      R.KATEGORI_KECELAKAAN.forEach(function (k) {
+        if (r.kecelakaan.kategori[k].length) isiKc += htmlKelompok(LABEL_KC[k], r.kecelakaan.kategori[k], 'manfaat');
       });
-      Object.keys(grup).forEach(function (mu) {
-        var g = grup[mu];
-        if (g.length < 2) return;
-        var terisi = g.filter(function (e) { return typeof (e.x.manfaat || {}).up === 'number'; });
-        if (terisi.length === g.length) {
-          hasil.push({ jenis: j, mu: mu, lengkap: true, jumlah: g.length, total: g.reduce(function (s, e) { return s + e.x.manfaat.up; }, 0) });
-        } else {
-          hasil.push({ jenis: j, mu: mu, lengkap: false, jumlah: g.length, terisi: terisi.length });
-        }
+      if (r.kecelakaan.tanpaNilai.length) {
+        isiKc += '<div class="as-rekap-baris kurang"><span class="as-rekap-label">Manfaat kecelakaan tanpa nilai</span>' +
+          htmlBelumLengkap(r.kecelakaan.tanpaNilai.length + ' manfaat kecelakaan belum mencantumkan nilai.') + '</div>' +
+          htmlSumber(r.kecelakaan.tanpaNilai.map(function (e) { return [labelSumber(e.sumber), e.catatan || 'Nilai belum dicatat']; }));
+      }
+      var catatanKc = [];
+      R.KATEGORI_KECELAKAAN.forEach(function (k) { r.kecelakaan.kategori[k].forEach(function (g) { g.sumber.forEach(function (e) { if (e.catatan) catatanKc.push([labelSumber(e.sumber), e.catatan]); }); }); });
+      catatanKc = catatanKc.filter(function (c, i, a) { return a.findIndex(function (d) { return d[0] === c[0] && d[1] === c[1]; }) === i; });
+      if (catatanKc.length) isiKc += '<div class="as-rekap-sub">Batas dan ketentuan yang dicatat</div>' + htmlSumber(catatanKc);
+      isiKc += '<p class="as-rekap-catatan">Ketiga kategori tidak dijumlahkan karena fungsinya berbeda. Manfaat cacat tetap biasanya dibayar sesuai persentase tabel cacat dan batas maksimum polis, jadi nilainya tidak selalu dibayarkan penuh.</p>';
+      kartu.push('<article class="as-rekap-kartu"><h4>' + JENIS.KECELAKAAN.ikon + ' Rekap Manfaat Kecelakaan</h4>' + isiKc + '</article>');
+    }
+
+    if (r.kesehatan.ada) {
+      var LABEL_SISTEM = { TAHUNAN: 'Limit tahunan', PER_KEJADIAN: 'Limit per tindakan / kejadian', HARIAN: 'Santunan harian rawat inap', LAINNYA: 'Sistem lain / belum diketahui' };
+      var isiKs = '';
+      R.SISTEM_KESEHATAN.forEach(function (sx) {
+        var daftar = r.kesehatan.sistem[sx];
+        if (!daftar.length) return;
+        isiKs += '<div class="as-rekap-sub">' + esc(LABEL_SISTEM[sx]) + ' <small>(' + daftar.length + ' manfaat)</small></div><ul class="as-rekap-daftar">' +
+          daftar.map(function (it) {
+            var mu = it.sumber.mataUang, nilai = [];
+            if (it.plan) nilai.push('Plan ' + it.plan);
+            if (sx === 'TAHUNAN') {
+              nilai.push('Limit dasar ' + (it.limitTahunan !== null ? uang(it.limitTahunan, mu) : 'belum dicatat'));
+              if (it.limitBooster !== null) nilai.push('Booster ' + uang(it.limitBooster, mu) + (it.syaratBooster ? ' (' + it.syaratBooster + ')' : ' (syarat booster belum dicatat)'));
+            } else if (sx === 'PER_KEJADIAN') {
+              nilai.push('Limit ' + (it.limitPerKejadian !== null ? uang(it.limitPerKejadian, mu) + ' per tindakan/kejadian' : 'belum dicatat'));
+              if (it.kamarPerHari !== null) nilai.push('Kamar ' + uang(it.kamarPerHari, mu) + '/hari');
+            } else if (sx === 'HARIAN') {
+              nilai.push('Santunan ' + (it.santunanHarian !== null ? uang(it.santunanHarian, mu) + '/hari' : 'belum dicatat'));
+              if (it.maksHari !== null) nilai.push('maks. ' + it.maksHari + ' hari');
+            } else if (it.catatan) nilai.push(it.catatan);
+            if (it.kamar) nilai.push('Kamar ' + it.kamar);
+            return '<li><span>' + esc(labelSumber(it.sumber)) + '</span><b>' + esc(nilai.join(' · ') || 'Manfaat belum dicatat') + '</b></li>';
+          }).join('') + '</ul>';
       });
-    });
-    return hasil;
+      isiKs += '<p class="as-rekap-catatan">Limit kesehatan tidak dijumlahkan, baik antarsistem maupun antarpolis dengan sistem yang sama, karena syarat klaim, koordinasi manfaat, dan urutan klaim setiap polis berbeda.</p>';
+      kartu.push('<article class="as-rekap-kartu"><h4>' + JENIS.KESEHATAN.ikon + ' Breakdown Perlindungan Kesehatan</h4>' + isiKs + '</article>');
+    }
+
+    if (r.lainnya.length) {
+      kartu.push('<article class="as-rekap-kartu"><h4>' + JENIS.LAINNYA.ikon + ' Manfaat Lainnya</h4><ul class="as-rekap-daftar">' +
+        r.lainnya.map(function (it) {
+          var nilai = [it.namaJenis, it.manfaatUtama, it.nilai !== null ? uang(it.nilai, it.sumber.mataUang) : ''].filter(Boolean).join(' · ');
+          return '<li><span>' + esc(labelSumber(it.sumber)) + '</span><b>' + esc(nilai || 'Manfaat belum dicatat') + '</b></li>';
+        }).join('') + '</ul><p class="as-rekap-catatan">Ditampilkan per manfaat dan tidak dijumlahkan karena fungsi dan syaratnya berbeda.</p></article>');
+    }
+
+    if (!kartu.length) return '';
+    return '<section class="as-rekap" aria-labelledby="asRekapJudul">' +
+      '<div class="as-rekap-kepala"><div class="as-kicker">REKAP TOTAL PERLINDUNGAN</div>' +
+      '<h3 id="asRekapJudul">Gabungan dari ' + r.jumlahPolis + ' polis · ' + r.jumlahManfaat + ' manfaat</h3>' +
+      '<p>Hanya manfaat sejenis dengan mata uang yang sama yang dijumlahkan. Nilai kosong tidak dianggap nol, dan rider dihitung satu kali bersama polis induknya.' +
+      (r.multiMataUang ? ' <b>IDR dan USD ditampilkan terpisah tanpa konversi kurs.</b>' : '') + '</p></div>' +
+      '<div class="as-rekap-grid">' + kartu.join('') + '</div>' +
+      '<p class="as-rekap-sangkalan">Total tercatat bukan jaminan seluruh manfaat dibayarkan bersamaan; pembayaran mengikuti ketentuan setiap polis.</p>' +
+      '</section>';
   }
 
   function barisManfaat(x, mu) {
@@ -215,8 +318,6 @@
     var kategori = URUT_JENIS.filter(function (j) { return semua.some(function (e) { return e.x.jenis === j; }); });
     var perusahaan = {};
     st.polis.forEach(function (p) { perusahaan[String(p.perusahaan).trim().toLowerCase()] = 1; });
-    var totals = totalUP();
-    var dipercepat = semua.some(function (e) { return e.x.jenis === 'PK' && (e.x.manfaat || {}).sifat === 'DIPERCEPAT'; });
     var urut = st.polis.slice().sort(function (a, b) { return String(a.mulai).localeCompare(String(b.mulai)); });
     return '<div class="as-hero"><div><div class="as-kicker">ASURANSIKU</div>' +
       '<h2>Perlindungan yang saya miliki</h2>' +
@@ -227,13 +328,7 @@
       '<div class="as-stat"><b>' + kategori.length + '</b><span>Kategori perlindungan</span></div>' +
       '<div class="as-stat"><b>' + Object.keys(perusahaan).length + '</b><span>Perusahaan</span></div></div>' +
       '<div class="as-kategori">' + kategori.map(function (j) { return '<span class="as-chip as-chip-besar">' + JENIS[j].ikon + ' ' + esc(JENIS[j].label) + '</span>'; }).join('') + '</div>' +
-      (totals.length ? '<div class="as-total">' + totals.map(function (t) {
-        var nama = t.jenis === 'JIWA' ? 'Total UP Jiwa tercatat' : 'Total UP Penyakit Kritis tercatat';
-        return t.lengkap
-          ? '<div class="as-total-baris"><span>' + nama + (t.mu === 'USD' ? ' (USD)' : '') + '</span><b>' + esc(uang(t.total, t.mu)) + '</b><small>dari ' + t.jumlah + ' perlindungan</small></div>'
-          : '<div class="as-total-baris as-total-kurang"><span>' + nama + (t.mu === 'USD' ? ' (USD)' : '') + '</span><small>' + t.terisi + ' dari ' + t.jumlah + ' perlindungan mencantumkan UP, total tidak ditampilkan.</small></div>';
-      }).join('') + '</div>' : '') +
-      (dipercepat ? '<p class="as-catatan-penting">Manfaat penyakit kritis yang <b>dipercepat</b> dapat mengurangi UP jiwa sesuai ketentuan polis. Total di atas tidak berarti seluruhnya dapat dicairkan bersamaan.</p>' : '') +
+      htmlRekap() +
       (st.kelola ? '<div class="aksi-row as-kelola-bar"><button type="button" class="aksi" id="asTambah"' + (st.polis.length >= MAKS_POLIS ? ' disabled' : '') + '>+ Tambah Polis</button>' +
         (st.polis.length >= MAKS_POLIS ? '<span class="catatan">Batas ' + MAKS_POLIS + ' polis tercapai.</span>' : '') + '</div>' : '') +
       '<div class="as-daftar">' + urut.map(htmlKartuPolis).join('') + '</div>' +
