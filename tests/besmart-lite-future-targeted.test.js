@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 'use strict';
+const { pasangSesiUji } = require('./lib/sesi-uji');
 
 const fs = require('fs');
 const http = require('http');
@@ -40,6 +41,7 @@ async function main() {
   };
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
+  await pasangSesiUji(page);
   await page.addInitScript(() => sessionStorage.setItem('insuranceHub.access.v3', 'ok'));
   await page.clock.setFixedTime(new Date('2026-09-24T10:00:00+07:00'));
   try {

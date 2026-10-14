@@ -21,6 +21,7 @@
    - tidak ada error console */
 'use strict';
 const fs = require('fs');
+const { pasangSesiUji } = require('./lib/sesi-uji');
 const path = require('path');
 const http = require('http');
 const os = require('os');
@@ -40,7 +41,6 @@ const ROOT = path.resolve(ri >= 0 ? args[ri + 1] : path.join(__dirname, '..'));
 const BASE_FILE = path.join(__dirname, 'contract-baseline.json');
 const NOW = new Date('2026-09-24T10:00:00+07:00');
 const VIEWPORTS = [360, 390, 430, 768, 1024, 1366];
-const FC_HASH = '9e8209fdd3b744bec823f769d4f920104a976b15891718b2d7d5f63b00fe9afa';
 const GLOBALS = ['bukaLayar', 'kembaliLayar', 'tekanKembali', 'InsuranceHubNavigation', 'InsuranceHubEngine',
   'InsuranceHubEngines', 'RayaProMaximaEngine', 'InsuranceHubBSL2', 'InsuranceHubGHP', 'InsuranceHubCustomerProfile',
   'InsuranceHubConsultantCard', 'InsuranceHubAtasNama', 'InsuranceHubLibrary', 'InsuranceHubAktivitas', 'PSGPrintPreview',
@@ -105,13 +105,14 @@ async function newContext(browser, width, opts = {}) {
 }
 
 async function openApp(ctx, url, { login = true, stubPrint = true } = {}) {
+  /* Login kode akses lama sudah dicabut: aplikasi dibuka dengan sesi Identity tiruan. */
+  if (login) await pasangSesiUji(ctx);
   const pg = await ctx.newPage();
   const errors = [];
   pg.on('pageerror', (e) => errors.push('pageerror: ' + e.message));
   pg.on('console', (m) => { if (m.type() === 'error') errors.push('console: ' + m.text()); });
   pg.on('dialog', (d) => d.accept());
   await pg.addInitScript(([login, stubPrint]) => {
-    if (login) try { sessionStorage.setItem('insuranceHub.access.v3', 'ok'); } catch (_) {}
     if (stubPrint) window.print = function () { window.__printCount = (window.__printCount || 0) + 1; };
   }, [login, stubPrint]);
   await pg.goto(url, { waitUntil: 'load' });
@@ -158,44 +159,41 @@ async function main() {
   const ok = (c, m) => { if (!c) fails.push(m); };
   const R = {};
 
-  /* 1. Login gate */
+  /* 1. Login gate: kode akses lama dicabut, hanya login email (Identity) */
   {
     const ctx = await newContext(browser, 390);
-    await ctx.addInitScript((FC_HASH) => {
-      const asli = crypto.subtle.digest.bind(crypto.subtle);
-      crypto.subtle.digest = function (alg, data) {
-        try {
-          if (new TextDecoder().decode(data) === 'uji-kontrak-fc') {
-            const b = new Uint8Array(32); for (let i = 0; i < 32; i++) b[i] = parseInt(FC_HASH.substr(i * 2, 2), 16);
-            return Promise.resolve(b.buffer);
-          }
-        } catch (_) {}
-        return asli(alg, data);
-      };
-    }, FC_HASH);
+    await ctx.addInitScript(() => {
+      if (!sessionStorage.getItem('__uji_awal')) {
+        sessionStorage.setItem('__uji_awal', '1');
+        /* penanda perangkat lama + sesi Identity yang sudah logout */
+        localStorage.setItem('insuranceHub.access.remember.v3', 'ok');
+        document.cookie = 'uji_keluar=1; path=/';
+      }
+    });
+    await pasangSesiUji(ctx);
     const { pg, errors } = await openApp(ctx, url + 'index.html', { login: false });
-    const legacyToggle = pg.locator('#psgIdentityLegacyToggle');
-    if (await legacyToggle.isVisible()) await legacyToggle.click();
+    await pg.waitForSelector('#psgIdentityEmail', { state: 'visible', timeout: 15000 });
     const locked = await pg.evaluate(() => ({ gate: !!document.getElementById('insuranceAccessGate'),
       cls: document.documentElement.classList.contains('insurance-auth-locked'),
-      mainHidden: getComputedStyle(document.querySelector('main')).visibility === 'hidden' }));
-    ok(locked.gate && locked.cls && locked.mainHidden, 'Login gate tidak mengunci aplikasi: ' + JSON.stringify(locked));
-    await pg.fill('#insuranceAgenNama', 'Agen Uji'); await pg.fill('#insuranceAgenKode', 'UJI001');
-    await pg.fill('#insuranceAccessCode', 'salah'); await pg.click('#psgIdentityLegacyWrap .insurance-access-btn'); await pg.waitForTimeout(250);
-    ok(/tidak valid/i.test(await pg.textContent('#insuranceAccessError')), 'Kode salah tidak ditolak');
-    await pg.fill('#insuranceAccessCode', 'uji-kontrak-fc'); await pg.click('#psgIdentityLegacyWrap .insurance-access-btn'); await pg.waitForTimeout(500);
+      mainHidden: getComputedStyle(document.querySelector('main')).visibility === 'hidden',
+      kodeLama: !!document.getElementById('insuranceAccessCode') || !!document.getElementById('psgIdentityLegacyToggle'),
+      remember: localStorage.getItem('insuranceHub.access.remember.v3') }));
+    ok(locked.gate && locked.cls && locked.mainHidden && !locked.kodeLama && locked.remember === null,
+      'Login gate tidak mengunci aplikasi / jalur kode akses lama masih ada: ' + JSON.stringify(locked));
+    await pg.fill('#psgIdentityEmail', 'agen.uji@psg.test'); await pg.fill('#psgIdentityPassword', 'RahasiaUji#2026');
+    await pg.click('#psgIdentityMasuk');
+    await pg.waitForFunction(() => !document.getElementById('insuranceAccessGate'), null, { timeout: 15000 }).catch(() => {});
     const after = await pg.evaluate(() => ({ gate: !!document.getElementById('insuranceAccessGate'),
-      cls: document.documentElement.classList.contains('insurance-auth-locked'), welcome: !!document.getElementById('insuranceWelcome'),
-      level: JSON.parse(localStorage.getItem('insuranceHub.level.v1') || '{}').level, remember: localStorage.getItem('insuranceHub.access.remember.v3') }));
-    ok(!after.gate && !after.cls && after.welcome && after.level === 'FC' && after.remember === 'ok', 'Login berhasil tidak berjalan normal: ' + JSON.stringify(after));
-    await pg.click('#insuranceWelcomeStart'); await pg.waitForTimeout(400);
-    ok(!(await pg.$('#insuranceWelcome')), 'Sambutan tidak tertutup');
-    /* logout mencabut otorisasi */
+      cls: document.documentElement.classList.contains('insurance-auth-locked'),
+      level: window.InsuranceHubLevel && window.InsuranceHubLevel.level, email: window.InsuranceHubIdentity && window.InsuranceHubIdentity.email }));
+    ok(!after.gate && !after.cls && after.level === 'FC' && after.email === 'agen.uji@psg.test', 'Login email tidak berjalan normal: ' + JSON.stringify(after));
+    /* logout mengakhiri sesi Identity, data kerja tetap */
+    await pg.evaluate(() => localStorage.setItem('insuranceHub.customerProfiles.v1', '[]'));
     await Promise.all([pg.waitForNavigation({ waitUntil: 'load' }), pg.evaluate(() => window.insuranceHubLogout())]);
-    await pg.waitForTimeout(500);
-    const lo = await pg.evaluate(() => ({ gate: !!document.getElementById('insuranceAccessGate'), remember: localStorage.getItem('insuranceHub.access.remember.v3'),
-      level: JSON.parse(localStorage.getItem('insuranceHub.level.v1') || '{}').level }));
-    ok(lo.gate && lo.remember === null && lo.level === 'FC', 'Logout tidak mencabut otorisasi / data kerja hilang: ' + JSON.stringify(lo));
+    await pg.waitForSelector('#psgIdentityEmail', { state: 'visible', timeout: 15000 });
+    const lo = await pg.evaluate(() => ({ gate: !!document.getElementById('insuranceAccessGate'),
+      cls: document.documentElement.classList.contains('insurance-auth-locked'), data: localStorage.getItem('insuranceHub.customerProfiles.v1') }));
+    ok(lo.gate && lo.cls && lo.data === '[]', 'Logout tidak mengunci kembali / data kerja hilang: ' + JSON.stringify(lo));
     errors.forEach((e) => fails.push('[login] ' + e));
     await ctx.close();
   }

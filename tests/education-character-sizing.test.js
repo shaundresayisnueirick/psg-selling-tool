@@ -5,6 +5,7 @@
      [--screenshots <output-directory>]
 */
 'use strict';
+const { pasangSesiUji } = require('./lib/sesi-uji');
 
 const fs = require('fs');
 const http = require('http');
@@ -256,6 +257,7 @@ async function checkS8Camera(page, orientation) {
         deviceScaleFactor: cases[0].dpr,
         reducedMotion: 'no-preference', serviceWorkers: 'block'
       });
+      await pasangSesiUji(context);
       await context.addInitScript(timelineHook);
       const page = await context.newPage();
       const pageErrors = [];

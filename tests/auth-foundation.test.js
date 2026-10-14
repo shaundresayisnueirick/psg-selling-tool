@@ -135,10 +135,9 @@ async function main() {
   cek(ditangani('https://psg.test/assets/logo-psg.png'), 'asset tetap ditangani SW');
   cek(ditangani('https://psg.test/apiku.png') && ditangani('https://psg.test/src/api/x.js'), 'path mirip /api tidak ikut di-bypass');
 
-  console.log('Login lama');
-  const hash = crypto.createHash('sha256').update(fs.readFileSync(path.join(ROOT, 'src/access-gate.js'))).digest('hex');
-  const base = JSON.parse(baca('tests/contract-baseline.json')).static.protectedFiles['src/access-gate.js'];
-  cek(hash === base, 'src/access-gate.js identik dengan baseline');
+  console.log('Login lama (dicabut)');
+  const salahLama = require('./lib/login-lama').pelanggaranLoginLama(baca('src/access-gate.js'), baca('src/identity-login.js'));
+  cek(!salahLama.length, 'login kode akses lama dicabut: hanya sesi Identity yang diverifikasi server membuka aplikasi', salahLama);
 
   console.log('\nAUTH FOUNDATION: ' + (gagal ? 'GAGAL — ' + gagal : 'LULUS — ' + cekJumlah) + ' pemeriksaan');
   process.exit(gagal ? 1 : 0);

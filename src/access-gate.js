@@ -1,44 +1,18 @@
-/* Insurance Hub — Offline Access Gate */
+/* Insurance Hub — Access Gate */
 (function(){
   'use strict';
 
+  /* Login kode akses lama (FC/BM/BD) DICABUT sejak 15 Oktober 2026.
+     Aplikasi hanya terbuka lewat login email Netlify Identity (invite-only)
+     yang diverifikasi server di GET /api/psg/me:
+       - index.html: src/identity-login.js memeriksa sesi dan membuka layar;
+       - halaman ringkasan: gate ini sendiri memeriksa /api/psg/me.
+     Tidak ada lagi kode akses, hash kode, atau penanda "perangkat diingat"
+     yang bisa membuka layar. Penanda lama di bawah hanya dihapus (dicabut);
+     data kerja agen tidak disentuh. */
   const SESSION_KEY = 'insuranceHub.access.v3';
   const REMEMBER_KEY = 'insuranceHub.access.remember.v3';
-  /* Tiga kata sandi, satu per jenjang. Tidak ada pilihan level di layar masuk:
-     kata sandi yang diketik itulah yang menentukan levelnya, sehingga agen
-     tidak bisa mengubah levelnya sendiri. */
-  const SANDI_LEVEL = [
-    { level: 'FC', nama: 'Financial Consultant',
-      hash: '9e8209fdd3b744bec823f769d4f920104a976b15891718b2d7d5f63b00fe9afa' },
-    { level: 'BM', nama: 'Business Manager',
-      hash: 'eb4dda38adebde8da2c577a6a58583f434d43c4b765561e597bbe988bc412c01' },
-    { level: 'BD', nama: 'Business Director',
-      hash: '8d2c60f81e04f6be48c1a9337d03425adcb9e52e1ca165541b9ece8988918093' }
-  ];
-  const LEVEL_KEY = 'insuranceHub.level.v1';
-
-  // Level dipulihkan saat aplikasi dibuka kembali dengan sesi tersimpan.
-  try {
-    const simpan = JSON.parse(localStorage.getItem(LEVEL_KEY) || 'null');
-    if (simpan && simpan.level) window.InsuranceHubLevel = simpan;
-  } catch (e) {}
-
-  function digest(text){
-    if(window.crypto && crypto.subtle){
-      return crypto.subtle.digest('SHA-256',new TextEncoder().encode(text))
-        .then(buf=>Array.from(new Uint8Array(buf))
-          .map(b=>b.toString(16).padStart(2,'0')).join(''));
-    }
-    return Promise.resolve('');
-  }
-
-  function isUnlocked(){
-    try{
-      return sessionStorage.getItem(SESSION_KEY)==='ok' ||
-             localStorage.getItem(REMEMBER_KEY)==='ok';
-    }catch(e){ return false; }
-  }
-
+  const LEVEL_KEY = 'insuranceHub.level.v1';   // data lama: hanya dibaca, tidak lagi memberi akses
 
   /* Logout hanya mengakhiri sesi. Tidak ada data kerja agen yang dihapus:
      profil nasabah, Kartu Konsultan, Library, poin, Segitiga, Program Builder,
@@ -67,15 +41,9 @@
     }catch(e){}
   }
 
-  /* Mencabut otorisasi perangkat. Ini yang benar-benar membuat layar masuk
-     muncul lagi: selama REMEMBER_KEY masih ada, isUnlocked() mengembalikan
-     true dan gate langsung dilewati.
-
-     Dulu kunci ini terhapus sebagai efek samping — logout menghapus semua
-     insuranceHub.* kecuali daftar KEEP, dan REMEMBER_KEY tidak ada di daftar
-     itu. Begitu penghapusan borongan dihentikan, logout ikut berhenti
-     bekerja. Sekarang pencabutannya eksplisit, tidak menumpang pada
-     penghapusan data. */
+  /* Mencabut penanda kode akses lama (sesi tab dan "ingat perangkat").
+     Penanda ini tidak lagi membuka layar; dihapus saat halaman dimuat dan saat
+     logout supaya tidak tersisa di perangkat. Data kerja agen tidak disentuh. */
   function cabutOtorisasi(){
     try{
       localStorage.removeItem(REMEMBER_KEY);
@@ -211,6 +179,9 @@
     document.documentElement.classList.add('insurance-auth-locked');
     if(document.getElementById('insuranceAccessGate')) return;
 
+    /* Kartu masuk tanpa formulir kode akses. Di index.html formulir email
+       dipasang src/identity-login.js; di halaman ringkasan kartu ini hanya
+       menampilkan hasil pemeriksaan sesi server. */
     const gate=document.createElement('div');
     gate.id='insuranceAccessGate';
     gate.innerHTML=`
@@ -222,46 +193,10 @@
         <div class="insurance-access-kicker">AKSES INTERNAL</div>
         <h1 id="insuranceAccessTitle">Insurance Hub</h1>
         <p class="insurance-access-sub">
-          Masukkan kode akses untuk menggunakan aplikasi.
+          Masuk dengan email akun PSG yang sudah diundang.
         </p>
-        <div id="insuranceSapaan"></div>
-        <form id="insuranceAccessForm" autocomplete="off">
-          <label class="insurance-access-label" for="insuranceAgenNama">
-            Nama Tenaga Pemasar
-          </label>
-          <input id="insuranceAgenNama"
-                 type="text"
-                 autocomplete="off"
-                 placeholder="Nama lengkap">
-          <label class="insurance-access-label" for="insuranceAgenKode">
-            Kode Agen
-          </label>
-          <input id="insuranceAgenKode"
-                 type="text"
-                 autocomplete="off"
-                 autocapitalize="characters"
-                 placeholder="Kode keagenan">
-          <label class="insurance-access-label" for="insuranceAccessCode">
-            Kode Akses
-          </label>
-          <input id="insuranceAccessCode"
-                 type="password"
-                 inputmode="text"
-                 autocomplete="off"
-                 autocapitalize="off"
-                 spellcheck="false"
-                 placeholder="Masukkan kode akses"
-                 aria-describedby="insuranceAccessError">
-          <label class="insurance-remember">
-            <input id="insuranceRememberDevice" type="checkbox" checked>
-            <span class="insurance-kotak" aria-hidden="true"></span>
-            <span>Ingat saya di perangkat ini</span>
-          </label>
-          <button type="submit" class="insurance-access-btn">MASUK</button>
-          <div id="insuranceAccessError"
-               class="insurance-access-error"
-               aria-live="polite"></div>
-        </form>
+        <div id="insuranceGateStatus" class="insurance-access-error"
+             role="status" aria-live="polite"></div>
         <div class="insurance-access-note">
           &copy; 2026 PSG Selling Tools • Internal Use Only <span id="psgVersiLogin"></span>
         </div>
@@ -269,123 +204,6 @@
 
     document.body.appendChild(gate);
 
-    const form=document.getElementById('insuranceAccessForm');
-    const input=document.getElementById('insuranceAccessCode');
-    const error=document.getElementById('insuranceAccessError');
-
-    form.addEventListener('submit',async function(ev){
-      ev.preventDefault();
-      error.textContent='';
-      const code=input.value || '';
-      if(!code){
-        error.textContent='Masukkan kode akses.';
-        input.focus();
-        return;
-      }
-
-      const ok=await digest(code);
-      const cocok=SANDI_LEVEL.find(x=>x.hash===ok);
-      if(cocok){
-        const namaAgen=(document.getElementById('insuranceAgenNama')||{}).value||'';
-        const kodeAgen=(document.getElementById('insuranceAgenKode')||{}).value||'';
-
-        /* Perangkat ini masih menyimpan data agen sebelumnya. Pemisahan data
-           antaragen belum tersedia di versi ini, jadi kalau kode agennya
-           berbeda, keadaan itu ditampilkan apa adanya — bukan didiamkan. */
-        const sebelumnya = identitasTersimpan();
-        if(sebelumnya.kode && kodeAgen.trim() && !kodeSama(sebelumnya.kode, kodeAgen)){
-          const lanjut = window.confirm(
-            'Perangkat ini menyimpan data milik '
-            + (sebelumnya.nama || 'agen lain') + ' (' + sebelumnya.kode + ').\n\n'
-            + 'Pemisahan data antaragen belum aktif di versi ini, jadi data '
-            + 'tersebut masih akan terlihat dan bisa tercampur.\n\n'
-            + 'Lanjutkan masuk sebagai ' + (namaAgen.trim() || 'agen baru')
-            + ' (' + kodeAgen.trim() + ')?');
-          if(!lanjut){
-            error.textContent='Masuk dibatalkan.';
-            input.value='';
-            return;
-          }
-        }
-
-        try{ localStorage.setItem(LEVEL_KEY, JSON.stringify({
-          level:cocok.level, nama:cocok.nama,
-          namaAgen:namaAgen.trim(), kodeAgen:kodeAgen.trim()
-        })); }catch(e){}
-        window.InsuranceHubLevel = { level: cocok.level, nama: cocok.nama,
-          namaAgen: namaAgen.trim(), kodeAgen: kodeAgen.trim() };
-        /* Identitas agen dipakai bersama kotak Aktivitas & Poin supaya tidak
-           diketik dua kali. Nomor HP tidak diminta di layar masuk, jadi kalau
-           sudah pernah diisi nilainya dipertahankan. */
-        try{
-          const K='insuranceHub.agen.v1';
-          const lama=JSON.parse(localStorage.getItem(K)||'{}');
-          localStorage.setItem(K, JSON.stringify({
-            nama: namaAgen.trim() || lama.nama || '',
-            kode: kodeAgen.trim() || lama.kode || '',
-            hp: lama.hp || ''
-          }));
-        }catch(e){}
-        try{
-          /* Bila kotak centangnya tidak ditemukan karena satu dan lain hal,
-             perangkat tetap diingat. Meminta kode akses berulang kali pada
-             perangkat milik agen sendiri lebih merugikan daripada risiko
-             kelewat mengingat. */
-          const kotak=document.getElementById('insuranceRememberDevice');
-          const remember = kotak ? kotak.checked : true;
-          if(remember){
-            // Opt-in: persist authorization on this browser/device.
-            localStorage.setItem(REMEMBER_KEY,'ok');
-            sessionStorage.setItem(SESSION_KEY,'ok');
-          }else{
-            // Not remembered: authorization exists only for the current
-            // browser tab/session and is gone when the session ends.
-            localStorage.removeItem(REMEMBER_KEY);
-            sessionStorage.setItem(SESSION_KEY,'ok');
-          }
-        }catch(e){}
-        /* Tema diingat per kode agen. Agen yang sama kembali masuk mendapat
-           temanya yang terakhir; agen yang belum punya catatan mulai dari
-           tema bawaan (terang). */
-        try{
-          if(window.PSGTheme && typeof window.PSGTheme.pakaiAgen==='function'){
-            window.PSGTheme.pakaiAgen(kodeAgen.trim());
-          }
-        }catch(e){}
-        reveal();
-        setTimeout(tampilkanSambutan, 60);
-      }else{
-        error.textContent='Kode akses tidak valid.';
-        input.value='';
-        input.focus();
-      }
-    });
-
-    setTimeout(()=>input.focus(),60);
-
-    /* Kalau agen pernah masuk dan mengunggah foto, foto dan sapaannya muncul
-       di layar masuk. Isian nama dan kode agen ikut terisi supaya tidak
-       diketik ulang setiap kali logout. */
-    try{
-      const sapaan=document.getElementById('insuranceSapaan');
-      const foto=localStorage.getItem('insuranceHub.agen.foto.v1')||'';
-      const simpan=JSON.parse(localStorage.getItem('insuranceHub.level.v1')||'null');
-      let agen={};
-      try{ agen=JSON.parse(localStorage.getItem('insuranceHub.agen.v1')||'{}'); }catch(e){}
-      const nama=((simpan&&simpan.namaAgen)||agen.nama||'').trim();
-      const kode=((simpan&&simpan.kodeAgen)||agen.kode||'').trim();
-      if(sapaan&&(foto||nama)){
-        sapaan.className='insurance-sapaan';
-        sapaan.innerHTML=
-          (foto?'<img src="'+foto+'" alt="Foto agen">':'<span class="insurance-sapaan-ikon">\u{1F464}</span>')+
-          '<div class="insurance-sapaan-teks">Hi, <b>'+
-          String(nama||'Tenaga Pemasar').replace(/</g,'&lt;')+'</b></div>';
-      }
-      const nNama=document.getElementById('insuranceAgenNama');
-      const nKode=document.getElementById('insuranceAgenKode');
-      if(nNama&&!nNama.value&&nama) nNama.value=nama;
-      if(nKode&&!nKode.value&&kode) nKode.value=kode;
-    }catch(e){}
     /* Versi ditulis di sini juga: gate bisa tampil sebelum umum.js sempat
        menjalankan segarkan(), sehingga badge versinya akan kosong. */
     try{
@@ -395,11 +213,51 @@
     }catch(e){}
   }
 
-  /* Kode agen dibandingkan tanpa membedakan huruf besar/kecil dan spasi di
-     ujung, supaya "12345 " dan "12345" tidak dianggap dua agen berbeda. */
-  function kodeSama(a,b){
-    return String(a==null?'':a).trim().toUpperCase()
-        === String(b==null?'':b).trim().toUpperCase();
+  /* Halaman ringkasan (program-summary.html, comparison-summary.html) tidak
+     memuat identity-login.js. Layarnya hanya dibuka bila server mengakui sesi
+     Identity yang sah (cookie nf_jwt diverifikasi getUser() di /api/psg/me)
+     dengan aturan hak akses yang sama dengan index.html. */
+  function sesiServerDiizinkan(p){
+    if(!p || p.status==='nonaktif') return false;
+    const roles=Array.isArray(p.roles)?p.roles:[];
+    return roles.indexOf('psg_owner')>=0 || roles.indexOf('psg_admin')>=0 ||
+      ['FC','BM','BD'].indexOf(p.level)>=0;
+  }
+
+  function statusGate(pesan, kembali){
+    const node=document.getElementById('insuranceGateStatus');
+    if(!node) return;
+    node.textContent=pesan||'';
+    if(kembali){
+      const a=document.createElement('a');
+      a.href='index.html';
+      a.className='insurance-access-btn';
+      a.textContent='MASUK DENGAN EMAIL';
+      a.style.display='block';
+      a.style.marginTop='12px';
+      a.style.textAlign='center';
+      node.appendChild(a);
+    }
+  }
+
+  function verifikasiSesiServer(){
+    statusGate('Memeriksa sesi login…');
+    fetch('/api/psg/me',{method:'GET',credentials:'same-origin',cache:'no-store',
+      headers:{'Accept':'application/json'}})
+      .then(function(r){
+        return r.json().catch(function(){ return {}; })
+          .then(function(d){ return { ok:r.ok, data:d }; });
+      })
+      .then(function(x){
+        if(x.ok && x.data && x.data.authenticated && sesiServerDiizinkan(x.data.user)){
+          reveal();
+          return;
+        }
+        statusGate('Sesi login tidak ditemukan atau sudah berakhir. Masuk kembali dengan email akun PSG.', true);
+      })
+      .catch(function(){
+        statusGate('Sesi belum dapat diverifikasi. Periksa koneksi, lalu muat ulang halaman.', true);
+      });
   }
 
   function identitasTersimpan(){
@@ -426,18 +284,19 @@
     if(document.getElementById('insuranceWelcome')) tampilkanSambutan();
   });
 
-  if(isUnlocked()){
-    if(document.readyState==='loading'){
-      document.addEventListener('DOMContentLoaded',reveal,{once:true});
-    }else{
-      reveal();
-    }
+  /* Selalu terkunci saat dimuat. Penanda kode akses lama yang masih
+     tersimpan di perangkat dicabut, sehingga tidak ada jalur yang membuka
+     layar tanpa sesi Identity yang diverifikasi server. */
+  cabutOtorisasi();
+  document.documentElement.classList.add('insurance-auth-locked');
+  function mulai(){
+    renderGate();
+    /* index.html: identity-login.js (dimuat di akhir body) yang memeriksa sesi. */
+    if(typeof window.InsuranceHubRefreshIdentityProfile!=='function') verifikasiSesiServer();
+  }
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',mulai,{once:true});
   }else{
-    document.documentElement.classList.add('insurance-auth-locked');
-    if(document.readyState==='loading'){
-      document.addEventListener('DOMContentLoaded',renderGate,{once:true});
-    }else{
-      renderGate();
-    }
+    mulai();
   }
 })();

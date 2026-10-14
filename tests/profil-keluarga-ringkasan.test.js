@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 'use strict';
+const { pasangSesiUji } = require('./lib/sesi-uji');
 /* Tertanggung keluarga tetap konsisten di semua produk yang punya dropdown
    "Data tertanggung" (src/core.js: cpRenderInsuredSelector):
      1. sesudah memilih anggota: nama, tanggal lahir, dan jenis kelamin form
@@ -164,6 +165,7 @@ async function main() {
       const page = await context.newPage();
       page.setDefaultTimeout(15000);
       page.on('pageerror', (e) => pageErrors.push(sk.label + ': ' + e.message));
+      await pasangSesiUji(context);
       await context.addInitScript(({ profil, lain }) => {
         try {
           sessionStorage.setItem('insuranceHub.access.v3', 'ok');

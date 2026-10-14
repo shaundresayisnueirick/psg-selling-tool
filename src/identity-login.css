@@ -15,7 +15,7 @@
   font-size:18px;padding:0
 }
 .psg-identity-eye:focus-visible{outline:2px solid currentColor;outline-offset:2px}
-.psg-identity-link,.psg-identity-legacy-toggle{
+.psg-identity-link{
   appearance:none;background:transparent;border:0;cursor:pointer;
   color:inherit;font:inherit;text-decoration:none
 }
@@ -24,28 +24,9 @@
   opacity:.9
 }
 .psg-identity-link:hover{text-decoration:underline}
-.psg-identity-legacy-toggle{
-  width:100%;margin-top:2px;padding:12px 14px;
-  border:1px solid rgba(184,144,74,.55);border-radius:12px;
-  background:transparent;font-weight:700;letter-spacing:.02em
-}
-.psg-identity-legacy-toggle:hover{filter:brightness(1.05)}
-.psg-identity-divider{
-  display:flex;align-items:center;gap:12px;margin:16px 0 12px;
-  color:inherit;opacity:.55;font-size:12px;text-transform:uppercase;letter-spacing:.12em
-}
-.psg-identity-divider::before,.psg-identity-divider::after{
-  content:"";height:1px;flex:1;background:currentColor;opacity:.35
-}
-.psg-identity-divider span{white-space:nowrap}
 #psgIdentityForgotForm{margin-top:14px;text-align:left}
 .psg-identity-success{opacity:1}
-.psg-identity-legacy-title{
-  margin:12px 0 8px;font-size:12px;font-weight:700;
-  text-transform:uppercase;letter-spacing:.1em;opacity:.7
-}
-#psgIdentityLegacyWrap{margin-top:14px}
-#psgIdentityLegacyWrap[hidden],#psgIdentityForgotForm[hidden],.psg-identity-login[hidden]{display:none!important}
+#psgIdentityForgotForm[hidden],.psg-identity-login[hidden]{display:none!important}
 @media(max-width:560px){
   .psg-identity-login h2{font-size:24px}
   .psg-identity-eye{right:6px}

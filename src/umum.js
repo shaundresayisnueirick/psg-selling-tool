@@ -180,9 +180,13 @@
   /* ---------- 2. Identitas agen ---------- */
 
   function agenTersimpan() {
+    /* Data agen akun yang sedang masuk (src/preview-cetak.js): key lama
+       untuk login kode akses lama, key per email untuk sesi Identity. */
     let a = {};
-    try { a = JSON.parse(localStorage.getItem('insuranceHub.agen.v1') || '{}') || {}; }
-    catch (_) {}
+    try {
+      const d = window.InsuranceHubDataAkun;
+      a = Object.assign({}, d ? d.baca('agen') : JSON.parse(localStorage.getItem('insuranceHub.agen.v1') || '{}') || {});
+    } catch (_) {}
     const identity = window.InsuranceHubIdentity;
     if (identity && identity.source === 'server:/api/psg/me') {
       a.nama = identity.nama || '';

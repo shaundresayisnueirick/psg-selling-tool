@@ -15,7 +15,7 @@
    - Hanya jawaban yang benar-benar berhasil (status 200) yang disimpan,
      sehingga halaman error tidak pernah ikut tersimpan. */
 
-const VERSI = 'insurance-hub-v117.1.22';
+const VERSI = 'insurance-hub-v117.1.32';
 
 /* Semua berkas inti ikut disimpan sejak pemasangan, supaya aplikasi tetap
    utuh walaupun kunjungan pertama terputus di tengah jalan.
@@ -45,6 +45,7 @@ const BERKAS = [
   './src/sales-idea-lanjut.css?v=110',
   './src/sales-idea-singapura.css?v=112',
   './src/sales-idea-kredit.css?v=118',
+  './src/sales-idea-sandwich.css?v=122',
   './src/cetak-besar.css',
   './src/psg-feedback.css',
   './src/identity-login.css',
@@ -57,6 +58,11 @@ const BERKAS = [
   './src/kartu-konsultan.js',
   './src/library-ilustrasi.js',
   './src/preview-cetak.js',
+  './src/psg-pribadi-api.js',
+  './src/pesan-personal.js',
+  './src/asuransiku-rekap.js',
+  './src/asuransiku.js',
+  './src/asuransiku.css',
   './src/app-version.js',
   './src/data/catalog.js',
   './src/data/rizqia.js',
@@ -118,11 +124,13 @@ const BERKAS = [
   './src/sales-idea-jari.js?v=117',
   './src/sales-idea-asset-audio.js?v=116',
   './src/sales-idea-asset.js?v=116',
-  './src/sales-idea-lanjut.js?v=118',
+  './src/sales-idea-lanjut.js?v=121',
   './src/sales-idea-singapura-audio.js?v=114',
   './src/sales-idea-singapura.js?v=114',
   './src/sales-idea-kredit-audio.js?v=119',
   './src/sales-idea-kredit.js?v=119',
+  './src/sales-idea-sandwich-audio.js?v=124',
+  './src/sales-idea-sandwich.js?v=124',
   './assets/home-carousel/01-cemerlang-prime.webp',
   './assets/home-carousel/02-cristal-prime.webp',
   './assets/home-carousel/03-iflexyguard.webp',
@@ -231,6 +239,15 @@ const BERKAS = [
   './assets/narasi/asset/asset-S05-03.mp3',
   './assets/narasi/asset/asset-S06-01.mp3',
   './assets/narasi/asset/asset-S06-02.mp3',
+  /* rekaman narasi Sandwich Generation (voice Bian): 8 berkas, satu per scene */
+  './assets/narasi/sandwich/sandwich-S01-01.mp3',
+  './assets/narasi/sandwich/sandwich-S02-01.mp3',
+  './assets/narasi/sandwich/sandwich-S03-01.mp3',
+  './assets/narasi/sandwich/sandwich-S04-01.mp3',
+  './assets/narasi/sandwich/sandwich-S05-01.mp3',
+  './assets/narasi/sandwich/sandwich-S06-01.mp3',
+  './assets/narasi/sandwich/sandwich-S07-01.mp3',
+  './assets/narasi/sandwich/sandwich-S08-01.mp3',
   /* rekaman narasi Proteksi Kredit (voice Bian): 24 berkas, satu per segmen */
   './assets/narasi/kredit/kredit-S01-01.mp3',
   './assets/narasi/kredit/kredit-S01-02.mp3',

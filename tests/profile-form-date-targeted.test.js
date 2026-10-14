@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 'use strict';
+const { pasangSesiUji } = require('./lib/sesi-uji');
 
 const fs = require('fs');
 const http = require('http');
@@ -38,6 +39,7 @@ async function main() {
     if (!ok) failures.push(label);
   };
   page.on('pageerror', error => errors.push(error.message));
+  await pasangSesiUji(page);
   await page.addInitScript(() => {
     const now = new Date().toISOString();
     const ali = { id: 'ali-id', nama: 'Ali', tglLahir: '1984-08-06', jk: 'PRIA', status: 'Menikah', pekerjaan: 'Guru', penghasilan: 12000000,

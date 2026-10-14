@@ -71,6 +71,24 @@ tanpa suara: jeda dramatis, awal & ekor scene). Klip rekaman Singapura dipotong 
 berkas MP3 lewat start/end manifest; label SINGAPURA/INDONESIA yang kadang terpotong di
 tepi panggung berasal dari framing kamera, sama dengan 16:9.
 
+## Sandwich Generation (`sandwich` 16:9, `sandwich-portrait` 9:16)
+
+8 scene, audio dari manifest rekaman Bian `src/sales-idea-sandwich-audio.js`
+(8 MP3 di `assets/narasi/sandwich/`, satu per scene). Halaman pilihan kebutuhan
+sesudah scene 8 bukan bagian video (disembunyikan di halaman render). Gerak
+berulang scene (uap, kedip, gemetar, hujan, EKG) dibuat berhingga sepanjang
+scene, jadi ikut di-seek dan tampil hidup di video. Keluaran resmi:
+`assets/video/sandwich-{terang,gelap}.mp4` (1280×720) dan
+`sandwich-{terang,gelap}-portrait.mp4` (720×1280). Di aplikasi keduanya dipilih
+sendiri oleh agen lewat dua tombol ("Download Video Portrait (9:16)" dan
+"Download Video Landscape (16:9)"), bukan lewat deteksi perangkat.
+
+```sh
+node tools/video/render-video.mjs --cerita sandwich --tema terang --branding --ffmpeg <ffmpeg> --out <folder>
+node tools/video/render-video.mjs --cerita sandwich-portrait --tema gelap --branding --ffmpeg <ffmpeg> --out <folder>
+node tests/sales-idea-video.test.js --cerita sandwich --hasil <folder>
+```
+
 ## `--cek`: render masih segar?
 
 Render dinyatakan **usang** (keluar 3) bila salah satu input berubah (sumber scene,

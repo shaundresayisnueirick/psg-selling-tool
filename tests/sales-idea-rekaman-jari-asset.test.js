@@ -38,6 +38,7 @@
    Playwright tidak menjadi dependensi repo: dipakai dari instalasi global
    (NODE_PATH) bila tersedia. Keluar 0 = lulus, 1 = gagal, 2 = dilewati. */
 'use strict';
+const { pasangSesiUji } = require('./lib/sesi-uji');
 const fs = require('fs');
 const path = require('path');
 const http = require('http');
@@ -215,6 +216,7 @@ function bacaMaster() {
     pg.on('console', (m) => { if (m.type() === 'error') errs.push(m.text()); });
     await pg.addInitScript(mockTTS);
     await pg.addInitScript(pantauRekaman);
+    await pasangSesiUji(pg);
     await pg.addInitScript(() => { try { sessionStorage.setItem('insuranceHub.access.v3', 'ok'); } catch (_) {} });
     await pg.goto(URL);
     await pg.waitForTimeout(500);
@@ -570,9 +572,11 @@ function bacaMaster() {
       return hasil;
     })();
     cek(isi && isi.baru === 29 && isi.manifest === 3, 'cache service worker berisi 29 berkas rekaman baru + 3 manifest', isi);
-    /* + rekaman Proteksi Kredit yang ikut di-precache sw.js (total tetap dihitung persis) */
-    const nKredit = (fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8').match(/'\.\/assets\/narasi\/kredit\/[^']+\.mp3'/g) || []).length;
-    cek(isi && isi.lama === 56 && isi.mp3 === 85 + nKredit, 'cache tetap berisi 43 rekaman lama + 13 rekaman Singapura (total 85 MP3, + ' + nKredit + ' Proteksi Kredit)', isi);
+    /* + rekaman Proteksi Kredit & Sandwich Generation yang ikut di-precache sw.js (total tetap dihitung persis) */
+    const SW = fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8');
+    const nKredit = (SW.match(/'\.\/assets\/narasi\/kredit\/[^']+\.mp3'/g) || []).length;
+    const nSandwich = (SW.match(/'\.\/assets\/narasi\/sandwich\/[^']+\.mp3'/g) || []).length;
+    cek(isi && isi.lama === 56 && isi.mp3 === 85 + nKredit + nSandwich, 'cache tetap berisi 43 rekaman lama + 13 rekaman Singapura (total 85 MP3, + ' + nKredit + ' Proteksi Kredit + ' + nSandwich + ' Sandwich Generation)', isi);
     await ctx.setOffline(true); await pg.reload(); await pg.waitForTimeout(600);
     for (const c of [{ pilih: 'jari', f: 'jari-S01-01.mp3' }, { pilih: 'jari', langkah: 7, f: 'jari-alasan-S01-01.mp3' }, { pilih: 'asset', f: 'asset-S01-01.mp3' }]) {
       await bukaHub(pg); await pilihCerita(pg, c.pilih);

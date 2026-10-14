@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 'use strict';
+const { pasangSesiUji } = require('./lib/sesi-uji');
 /* Tertanggung yang tersimpan di Library sama dengan tertanggung produk yang
    disimpan (src/library-ilustrasi.js saveCurrent + dropdown tertanggung
    src/core.js). Untuk tiap simpanan dibandingkan, menurut ID anggota (bukan
@@ -89,6 +90,7 @@ async function main() {
       page.setDefaultTimeout(15000);
       page.on('pageerror', (e) => pageErrors.push(sk.label + ': ' + e.message));
       page.on('dialog', (d) => d.accept());
+      await pasangSesiUji(context);
       await context.addInitScript((profil) => {
         try {
           sessionStorage.setItem('insuranceHub.access.v3', 'ok');

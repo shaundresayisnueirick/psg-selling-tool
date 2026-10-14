@@ -6,6 +6,7 @@
    Playwright is optional; exit 2 means the browser dependency is unavailable.
 */
 'use strict';
+const { pasangSesiUji } = require('./lib/sesi-uji');
 const fs = require('fs');
 const path = require('path');
 const http = require('http');
@@ -84,6 +85,7 @@ async function bacaBadge(pg, id) {
     await ctxLogin.close();
 
     const ctxApp = await br.newContext({ viewport: ukuran, serviceWorkers: 'block' });
+    await pasangSesiUji(ctxApp);
     await ctxApp.addInitScript(accessInit);
     const pgApp = await ctxApp.newPage();
     pgApp.on('pageerror', (e) => errors.push(String(e)));

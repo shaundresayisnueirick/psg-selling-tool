@@ -3,6 +3,7 @@
   "private": true,
   "description": "PSG Selling Tools — situs statis + Netlify Functions untuk autentikasi.",
   "dependencies": {
+    "@netlify/blobs": "^11.1.4",
     "@netlify/identity": "^2.0.0"
   },
   "devDependencies": {

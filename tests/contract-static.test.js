@@ -37,16 +37,30 @@ const INLINE_DIIZINKAN = {
     dari: 'a677e3718adabddb70d89776b699908b108cd7c3cccc030d915ac7e539819893',
     ke: 'bf869d58a69fb4adebf048754824d61944312dc39660a5960b5b3d7342061889',
     alasan: 'Tabel Manfaat Gabungan dibungkus <table> bila isinya hanya <thead>/<tbody>/<tr> (sebelumnya tampil sebagai teks menyambung). Tidak menyentuh angka. Detail komponen pembentuk program tetap bagian dokumen nasabah: <details> diberi data-cetak-buka (dibuka preview-cetak.js di Preview dan saat mencetak, termasuk dari Library) dan tabelnya data-print-label=Polis yang disusun untuk judul pecahan cetak. catatanSlot tidak lagi dimasukkan ke Prompt Flyer AI. Tidak menyentuh angka.',
+  }, {
+    dari: 'c5fa2283ac48102750b9d897db33c23bbf3ebef2f89f9dae1b6a786dddfaec6c',
+    ke: '49e9a6cbba5608a5a4a7a5e9b97db5f4b6493fc3bfca453fc6f3be9efcf18fc2',
+    alasan: 'Pesan Personal: potretKonsultan (Simpan ke Library) menambah field pesan pada potret identitas — pesan akun yang sedang masuk dari src/pesan-personal.js, string kosong pada mode atas nama agen lain. Field lain dan alur simpan tidak berubah. '
+      + 'Sesudah hash d24e2c50…: foto potret diambil dari window.InsuranceHubFotoSendiri (src/preview-cetak.js; key foto per email untuk sesi Identity, key lama hanya untuk kode akses lama) dan WhatsApp mengikuti Nomor HP Identitas Agen (a.hp||k.whatsapp), sama dengan Kartu Konsultan. Tanpa storage key baru. '
+      + 'Sesudah hash 4bc8a15c…: Isolasi identitas antarakun: potret membaca Kartu Konsultan, data agen, dan mode atas nama akun yang sedang masuk lewat window.InsuranceHubDataAkun; level.v1 hanya untuk login kode akses lama.',
   }],
 };
 
 /* Perubahan berkas JS dilindungi yang disetujui. Setiap entri menyebut hash
    lama, hash baru, dan alasannya; selain entri ini berkas JS wajib identik. */
 const JS_DIIZINKAN = {
+  'src/access-gate.js': [{
+    dari: '04535f79ce4ace7869df177ce7b1e3b989765f90a8b612839ca2ee7c545ef921',
+    ke: '3319a15ad1f7394997be0cddde574dcc12f3aa57826adebecc10f0df347f4f70',
+    alasan: 'Login kode akses lama dicabut atas permintaan pemilik (berlaku 15 Oktober 2026, PR #35): hash kode FC/BM/BD, formulir kode, dan buka-kunci lewat penanda perangkat (insuranceHub.access.v3 / access.remember.v3) dihapus; penanda itu dicabut saat dimuat tanpa menghapus data kerja. Layar hanya dibuka sesi Identity yang diakui server: index.html lewat identity-login.js, halaman ringkasan lewat GET /api/psg/me di gate ini. Logout, sambutan, dan bersihkanSesi tidak berubah. Termasuk perubahan sebelumnya di main (foto per akun Identity pada sambutan).',
+  }],
   'src/preview-cetak.js': [{
     dari: 'abe686a05ed724852a36ff89e964940514f9f719686b4e0fcd09e21fc3c92d29',
-    ke: 'f80fa13fcbb7facfb9af39a91f8ac581758cd1857c471397c9a0c2565f220987',
-    alasan: 'Pemecah tabel cetak memetakan sel menurut posisi kolom (colspan), bukan urutan DOM. Sebelumnya baris Total ber-colspan mendapat kolom lebih banyak dari judulnya: angka bertumpuk dan Total bergeser ke kolom yang salah. Tidak menyentuh nilai. cleanClone membuang tombol kontrol kecuali yang ditandai data-preview-preserve (atap dan lapis Segitiga Financial, yang sekaligus gambar dokumen); tombol itu dibuat tidak bisa difokus/diklik di Preview. Sebelumnya seluruh button dibuang sehingga Segitiga kosong di Preview. <details data-cetak-buka> dibuka di Preview dan selama mencetak (beforeprint/afterprint) karena browser hanya mencetak judul <details> yang tertutup. makePrintSplit memakai data-print-label tabel sebagai judul pecahan bila ada (bawaan tetap Timeline Program).',
+    ke: '77ddf80fa51bc45def5e1dcefee4a1efca79cb9be055331baef9ec279b789acc',
+    alasan: 'Pemecah tabel cetak memetakan sel menurut posisi kolom (colspan), bukan urutan DOM. Sebelumnya baris Total ber-colspan mendapat kolom lebih banyak dari judulnya: angka bertumpuk dan Total bergeser ke kolom yang salah. Tidak menyentuh nilai. cleanClone membuang tombol kontrol kecuali yang ditandai data-preview-preserve (atap dan lapis Segitiga Financial, yang sekaligus gambar dokumen); tombol itu dibuat tidak bisa difokus/diklik di Preview. Sebelumnya seluruh button dibuang sehingga Segitiga kosong di Preview. <details data-cetak-buka> dibuka di Preview dan selama mencetak (beforeprint/afterprint) karena browser hanya mencetak judul <details> yang tertutup. makePrintSplit memakai data-print-label tabel sebagai judul pecahan bila ada (bawaan tetap Timeline Program). '
+      + 'Pesan Personal Identitas Konsultan: consultantNode menambah satu baris .psg-consultant-pesan (textContent) di bawah identitas. Sumbernya potret item Library yang sedang dibuka (item lama tanpa field pesan tetap tanpa pesan), selain itu InsuranceHubPesanPersonal.untukIdentitasSendiri() dari src/pesan-personal.js yang kosong selama mode atas nama agen lain aktif. Tanpa pesan, blok identitas identik dengan sebelumnya. Tidak ada storage key baru. '
+      + 'Sesudah hash c80907a0…: foto konsultan akun sendiri lewat satu aturan fotoSendiri() yang juga diekspos sebagai window.InsuranceHubFotoSendiri — sesi Identity memakai key foto per email (InsuranceHubCurrentPhotoKey di index.html, email klaim cookie nf_jwt di halaman ringkasan), kosong selama sesi Identity belum siap, key foto lama hanya untuk login kode akses lama. Snapshot Library dan mode atas nama tidak berubah. Tanpa storage key baru. '
+      + 'Sesudah hash c0220179…: Isolasi identitas antarakun: window.InsuranceHubDataAkun memilih tempat data identitas dokumen (agen, konsultan, atasNama): key lama untuk login kode akses lama, insuranceHub.identitas.akun.v1.<email> untuk sesi Identity, kosong selama sesi belum siap. Halaman ringkasan memakai Kartu Konsultan akun tersebut dengan WhatsApp mengikuti Nomor HP Identitas Agen.',
   }],
   'src/core.js': [{
     dari: '385c5f77851f6b5b5c94b6e3bf6d65d3df77faef9b21a1c9cd4aa137c1833c7c',
@@ -58,8 +72,9 @@ const JS_DIIZINKAN = {
   }],
   'src/app.js': [{
     dari: '34593519c233710ed358d93f3392c048f3b6614be086daef8f0f50dffcf69164',
-    ke: 'ac9d21f76b26c90a84d7e475f06f14557e385791ff6de8c36cf63877cb749f14',
-    alasan: 'BeSMART Lite Future: usia yang tidak tersedia disembunyikan dari kalkulator dan ringkasan; kontrol tampil ON/OFF dan ringkasan/cetak hanya memuat usia tersedia yang aktif. Rumus premi LF tidak diubah. Tambahan perbaikan Kombinasi Produk: diskon 25% diterapkan hanya ke tarif rider Lite UP 400% saat total UP paket >= Rp2,5 miliar; premi UP dasar tidak didiskon. Regresi khusus disediakan di tests/combo-bsl-lite-up-discount.test.js.',
+    ke: '22e0d499c9293eac828f3779cea270665929f79fa1dbd1f54e34f70c06933163',
+    alasan: 'BeSMART Lite Future: usia yang tidak tersedia disembunyikan dari kalkulator dan ringkasan; kontrol tampil ON/OFF dan ringkasan/cetak hanya memuat usia tersedia yang aktif. Rumus premi LF tidak diubah. Tambahan perbaikan Kombinasi Produk: diskon 25% diterapkan hanya ke tarif rider Lite UP 400% saat total UP paket >= Rp2,5 miliar; premi UP dasar tidak didiskon. Regresi khusus disediakan di tests/combo-bsl-lite-up-discount.test.js. '
+      + 'Sesudah hash ac9d21f7…: Isolasi identitas antarakun: cadangan identitas penyaji (kakiAgenHtml, fpIsiIdentitasKonsultan, dGambar) membaca data agen/Kartu Konsultan akun yang sedang masuk lewat window.InsuranceHubDataAkun, dan level.v1 hanya untuk login kode akses lama. Tidak menyentuh tarif atau rumus.',
   }],
   'src/umum.js': [{
     dari: '8b9f2031e17ec447660806c40c3a52e2ec0c0d2d9a07d582ac665f4e6c2b5b14',
@@ -68,19 +83,34 @@ const JS_DIIZINKAN = {
   }],
   'src/library-ilustrasi.js': [{
     dari: '57a58e17a4e9c117431f3d52c24e40bc11c3c26fec0be12b18a2b5d885ebc4d7',
-    ke: '908df7f91ef97df8a518f2c11dce48cdfcdea5783855d12cbf6f0302387c10f1',
+    ke: 'c8537a901a0c095e7c30a0049dd3c963286d7398c8710f32605aa892b0913125',
     alasan: 'Detail Library: tombol Preview basi (.psg-preview-btn) dan penanda data-preview-attached yang ikut tersimpan di snapshot dibuang, supaya attach() membuat satu tombol Preview baru dengan handler aktif. Tombol cetak/print/PDF di dalam snapshot (listener-nya tidak ikut tersimpan) diberi handler cetakIlustrasi yang sama dengan tombol Cetak modal. Data Library, storage, dan isi snapshot tidak berubah. '
-      + 'Simpan ke Library: bila dropdown tertanggung produk (cpTertanggung<PRODUK>) bernilai Ketik manual, identitas tertanggung diambil dari isian produk (nama, tanggal lahir, jenis kelamin) dengan relationship Ketik manual dan insuredPersonId manual:<nama>|<tgl> — sebelumnya tercatat self/Diri Sendiri tanpa tanggal lahir sehingga dikelompokkan sebagai profil utama dan tergabung dengannya di Ringkasan 1 Halaman. MAP produk mendapat id tanggal lahir/jenis kelamin. Isi snapshot, angka, dan storage tidak berubah.',
+      + 'Simpan ke Library: bila dropdown tertanggung produk (cpTertanggung<PRODUK>) bernilai Ketik manual, identitas tertanggung diambil dari isian produk (nama, tanggal lahir, jenis kelamin) dengan relationship Ketik manual dan insuredPersonId manual:<nama>|<tgl> — sebelumnya tercatat self/Diri Sendiri tanpa tanggal lahir sehingga dikelompokkan sebagai profil utama dan tergabung dengannya di Ringkasan 1 Halaman. MAP produk mendapat id tanggal lahir/jenis kelamin. Isi snapshot, angka, dan storage tidak berubah. '
+      + 'Pesan Personal: potret konsultan item Library baru menyimpan field pesan (string, kosong pada mode atas nama) sehingga mengubah pesan sesudahnya tidak mengubah item; Ringkasan 1 Halaman menampilkan pesan dari potret item (item lama tanpa field pesan tidak menampilkan apa pun) atau dari akun yang sedang masuk bila item tidak punya potret, di-escape. Data Library lain, storage key, dan isi snapshot ilustrasi tidak berubah. '
+      + 'Sesudah hash b98de59f…: foto potret konsultan item Library baru dan Ringkasan 1 Halaman memakai foto akun aktif (field foto dari InsuranceHubConsultantCard.read(), cadangan window.InsuranceHubFotoSendiri), bukan key foto global lama. Item lama tidak diubah; mode atas nama tetap foto agen tersebut. '
+      + 'Sesudah hash 6912cc2a…: Isolasi identitas antarakun: cadangan consultantData() memakai Kartu Konsultan akun yang sedang masuk (window.InsuranceHubDataAkun), bukan key global.',
   }],
   'src/aktivitas-ui.js': [{
     dari: 'f79804459cb8b93f3ebbfa4380299a2f4bca485155cf79c844aa703d31aba0cf',
     ke: 'b5d89aa3053620d5d50412694f300f375036d3977917c99b422b250a78eca9ef',
     alasan: 'Janji temu → Profil prospek (profil baru): form Profil dikosongkan dulu lewat cpFillForm({}) sebelum nama dan HP prospek diisi, supaya prospek tidak mewarisi isian profil lain (mis. profil yang tadi diedit lalu ditinggalkan).',
   }],
+  'src/kartu-konsultan.js': [{
+    dari: '7a153b1aabe40da2fe28beebda2cb80c9f783cd05a0113790d9bfe4249a3bcbf',
+    ke: 'c586298da1ff66f068f9042dd008bf9ee1a7379b28815b61e94a7ee68e212ab7',
+    alasan: 'Foto Kartu Konsultan memakai foto akun aktif (window.InsuranceHubFotoSendiri: key foto per email untuk sesi Identity, placeholder selama sesi belum siap, key lama hanya untuk kode akses lama), ikut di read() sebagai field foto (atas nama: foto agen tersebut), dan pratinjau digambar ulang pada psg:identity-ready dan psg:identity-photo-updated tanpa menyentuh isian formulir. '
+      + 'WhatsApp mengikuti Nomor HP Identitas Agen (a.hp||k.whatsapp; dulu WhatsApp lama di konsultan.v1 selalu menang) dan diperbarui sesudah Simpan nomor HP / Simpan identitas di Aktivitas & Poin. Pulihkan identitas saya tidak lagi mengosongkan Nomor HP Identitas Agen. get() memakai getSendiri() (field identik). Tanpa storage key baru. '
+      + 'Sesudah hash f95c577b…: Isolasi identitas antarakun: Kartu Konsultan, Nomor HP Identitas Agen, dan mode atas nama/daftar tim dibaca dan ditulis per akun lewat window.InsuranceHubDataAkun (key lama untuk kode akses lama, key per email untuk Identity); nama/level akun Identity dari InsuranceHubLevel, bukan level.v1; formulir diisi ulang saat akun berganti; data lama perangkat hanya ditawarkan dalam bentuk samaran dan disalin bila pengguna memilih Salin, tanpa diubah atau dihapus.',
+  }],
+  'src/prompt-flyer.js': [{
+    dari: 'bee563b26ffb511321678361366e3497c04d60acdaa7e6eb751a6211b3f740fb',
+    ke: '8399655cfaf1f9dce59759aa34c6acf81c2bf6fcba7ec47fd9435d471ff9d6a8',
+    alasan: 'Isolasi identitas antarakun: penyaji flyer memakai Nomor HP akun yang sedang masuk (window.InsuranceHubDataAkun) dan nama profil Identity, bukan insuranceHub.agen.v1 global milik perangkat. Isi prompt lain tidak berubah.',
+  }],
   'src/sales-idea.js': [{
     dari: 'dfd143970d9e79bc8ec46687724748da98147b9ae78985619a71c83c7a0c747f',
-    ke: '11bae06951aa926a33f6a8ccc7d974f32cc423a1e131740dff6189c2da01043a',
-    alasan: 'Sales Idea memakai pemutar interaktif (src/sales-idea-player.js): tiap langkah yang ada menjadi scene dengan Play/Pause/Replay/Next/Back. init() kini idempoten sehingga listener klik dokumen tidak lagi menumpuk tiap kali layar dibuka. Retirement Planning memakai cerita interaktif (src/sales-idea-retirement.js) dengan data retirementSteps yang sama. Keranjang Kehidupan memakai cerita interaktif (src/sales-idea-keranjang.js) dengan data basketSteps yang sama. Education Planning memakai cerita interaktif (src/sales-idea-education.js) dengan data educationSteps yang sama. 10 Jari memakai cerita tangan interaktif (src/sales-idea-jari.js) dalam 9 langkah (BAB 1: 5 risiko dalam satu scene, BAB 2: 5 pertanyaan, BAB 3: 3 alasan dengan renderer lama) dengan data fingers dan reasons yang sama; teks fokus/inti jari dipindah ke teksJari() tanpa perubahan isi. Asset Creation memakai cerita interaktif (src/sales-idea-asset.js) dengan data assetCreationSteps yang sama; renderer lama tetap sebagai cadangan. SalesIdea10Jari.keadaan() (hanya dibaca: mode, indeks scene, jumlah scene) dipakai kartu akhir "Mari Kita Hitung" (src/sales-idea-lanjut.js). Data, ID, kelas, dan API SalesIdea10Jari tidak berubah. Sales Idea 06 "Bekerja di Singapura": data singapuraSteps (12 langkah), kartu hub, dispatch adeganMode ke PSGSingapuraStory (src/sales-idea-singapura.js), mode baru di setMode dan jumlahLangkah. Sales Idea lain tidak berubah. Sales Idea 06 V2: data singapuraSteps menjadi 8 langkah (storyboard final); pemutaran, dispatch, dan hub tidak berubah. Pembersihan catatan internal agen dari tampilan: catatan .si-hub-note di hub, paragraf pengantar 3 Alasan, body/insight jari 10 (dikosongkan), kalimat "Untuk Sales Idea ini…" di Retirement S1, dan label "Inti percakapan:" di Asset S6; ID, data lain, dan API tidak berubah. Sales Idea 07 "Proteksi Kredit": data kreditSteps (10 langkah), kartu hub, dispatch adeganMode ke PSGKreditStory (src/sales-idea-kredit.js), mode baru di setMode dan jumlahLangkah. Sales Idea lain, ID, dan API SalesIdea10Jari tidak berubah.',
+    ke: '35a8494120687e033c3ea5488a3fa3d3f39da4f4fe319672fbd81090c2befffe',
+    alasan: 'Sales Idea memakai pemutar interaktif (src/sales-idea-player.js): tiap langkah yang ada menjadi scene dengan Play/Pause/Replay/Next/Back. init() kini idempoten sehingga listener klik dokumen tidak lagi menumpuk tiap kali layar dibuka. Retirement Planning memakai cerita interaktif (src/sales-idea-retirement.js) dengan data retirementSteps yang sama. Keranjang Kehidupan memakai cerita interaktif (src/sales-idea-keranjang.js) dengan data basketSteps yang sama. Education Planning memakai cerita interaktif (src/sales-idea-education.js) dengan data educationSteps yang sama. 10 Jari memakai cerita tangan interaktif (src/sales-idea-jari.js) dalam 9 langkah (BAB 1: 5 risiko dalam satu scene, BAB 2: 5 pertanyaan, BAB 3: 3 alasan dengan renderer lama) dengan data fingers dan reasons yang sama; teks fokus/inti jari dipindah ke teksJari() tanpa perubahan isi. Asset Creation memakai cerita interaktif (src/sales-idea-asset.js) dengan data assetCreationSteps yang sama; renderer lama tetap sebagai cadangan. SalesIdea10Jari.keadaan() (hanya dibaca: mode, indeks scene, jumlah scene) dipakai kartu akhir "Mari Kita Hitung" (src/sales-idea-lanjut.js). Data, ID, kelas, dan API SalesIdea10Jari tidak berubah. Sales Idea 06 "Bekerja di Singapura": data singapuraSteps (12 langkah), kartu hub, dispatch adeganMode ke PSGSingapuraStory (src/sales-idea-singapura.js), mode baru di setMode dan jumlahLangkah. Sales Idea lain tidak berubah. Sales Idea 06 V2: data singapuraSteps menjadi 8 langkah (storyboard final); pemutaran, dispatch, dan hub tidak berubah. Pembersihan catatan internal agen dari tampilan: catatan .si-hub-note di hub, paragraf pengantar 3 Alasan, body/insight jari 10 (dikosongkan), kalimat "Untuk Sales Idea ini…" di Retirement S1, dan label "Inti percakapan:" di Asset S6; ID, data lain, dan API tidak berubah. Sales Idea 07 "Proteksi Kredit": data kreditSteps (10 langkah), kartu hub, dispatch adeganMode ke PSGKreditStory (src/sales-idea-kredit.js), mode baru di setMode dan jumlahLangkah. Sales Idea lain, ID, dan API SalesIdea10Jari tidak berubah. Sesudah hash 11bae069…: Sales Idea 08 "Sandwich Generation": kartu hub sesudah Proteksi Kredit, dispatch adeganMode ke PSGSandwichStory (src/sales-idea-sandwich.js, 8 scene), mode sandwich di setMode dan jumlahLangkah. Tanpa storage key baru; Sales Idea lain, ID, dan API SalesIdea10Jari tidak berubah. Sesudah hash 6cb67b14…: ikon kartu hub Sandwich Generation diganti dari emoji rantai menjadi ikon SVG sandwich roti tawar bertumpuk (dekoratif, aria-hidden); kartu dan ikon Sales Idea lain tidak berubah.',
   }],
   'src/segitiga-solusi.js': [{
     dari: '5b966b2719a2edf471e097e56cca6058a03e08aeca6d895a9bcd370b6c4a6af7',
@@ -99,6 +129,12 @@ const JS_DIIZINKAN = {
   }],
 };
 
+/* Storage key baru yang disetujui. Setiap entri menyebut alasannya; selain
+   entri ini storage key baru tetap dilarang. */
+const KEY_DIIZINKAN = {
+  'insuranceHub.identitas.akun.v1.': 'Isolasi identitas antarakun: awalan key per email akun Identity (seperti foto per email) berisi {agen, konsultan, atasNama} dengan bentuk data yang sama dengan key lama. Key lama insuranceHub.agen.v1 / konsultan.v1 / konsultan.atasNama.v1 tidak cukup: beberapa penulis lama (Simpan identitas Aktivitas, login kode akses lama, Simpan dan Pulihkan Kartu Konsultan) menulis ulang seluruh objek sehingga data per akun di dalamnya akan terhapus. Login kode akses lama tetap memakai key lama.',
+};
+
 /* 1. Berkas JS dilindungi */
 for (const [f, h0] of Object.entries(base.protectedFiles)) {
   const z = (JS_DIIZINKAN[f] || []).find((x) => x.dari === h0);
@@ -111,7 +147,10 @@ Object.keys(cur.protectedFiles).filter((f) => !base.protectedFiles[f]).forEach((
 
 /* 2. Storage key */
 for (const k of base.storageKeys) ok(cur.storageKeys.includes(k), 'Storage key hilang: ' + k);
-cur.storageKeys.filter((k) => !base.storageKeys.includes(k)).forEach((k) => fails.push('Storage key BARU (tidak boleh): ' + k));
+cur.storageKeys.filter((k) => !base.storageKeys.includes(k)).forEach((k) => {
+  if (KEY_DIIZINKAN[k]) notes.push('Storage key baru dengan izin — ' + k + ': ' + KEY_DIIZINKAN[k]);
+  else fails.push('Storage key BARU (tidak boleh): ' + k);
+});
 
 /* 3. Halaman */
 for (const [name, b] of Object.entries(base.pages)) {

@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 /* Test terarah callback Netlify Identity: undangan (Buat Password), atur
-   ulang password, dan login kode akses lama yang tetap berjalan.
+   ulang password, dan login kode akses lama yang sudah dicabut (15 Oktober
+   2026): tidak ada formulir kode, penanda perangkat lama tidak membuka layar.
 
    node tests/identity-invite.test.js [--browser <chromium-or-edge-exe>] [--root <dir>]
 
@@ -55,9 +56,6 @@ const ACCESS = 'JWT-RAHASIA-ACCESS';
 const REFRESH = 'REFRESH-RAHASIA';
 const PASSWORD = 'RahasiaBaru#2026';
 const EMAIL = 'agen.baru@psg.test';
-/* Hash kode akses FC di access-gate.js; digest dipalsukan untuk kode uji
-   seperti tests/contract-browser.test.js. */
-const FC_HASH = '9e8209fdd3b744bec823f769d4f920104a976b15891718b2d7d5f63b00fe9afa';
 const DATA_LAMA = {
   'insuranceHub.customerProfiles.v1': JSON.stringify([{ id: 'p1', nama: 'Nasabah Uji' }]),
   'insuranceHub.libraryIlustrasi.v1': JSON.stringify([{ id: 'l1', judul: 'Ilustrasi Uji' }]),
@@ -91,24 +89,14 @@ async function pasangIdentityTiruan(ctx, log) {
 
 async function bukaKonteks(br, opsi) {
   const ctx = await br.newContext({ viewport: { width: 390, height: 844 }, serviceWorkers: 'block' });
-  await ctx.addInitScript(({ FC_HASH, data, ingat }) => {
+  await ctx.addInitScript(({ data, ingat }) => {
     if (!sessionStorage.getItem('__uji_awal')) {
       sessionStorage.setItem('__uji_awal', '1');
       Object.keys(data).forEach((k) => localStorage.setItem(k, data[k]));
-      if (ingat) localStorage.setItem('insuranceHub.access.remember.v3', 'ok');
+      /* penanda perangkat dari login kode akses lama yang masih tersimpan */
+      if (ingat) { localStorage.setItem('insuranceHub.access.remember.v3', 'ok'); sessionStorage.setItem('insuranceHub.access.v3', 'ok'); }
     }
-    const asli = crypto.subtle.digest.bind(crypto.subtle);
-    crypto.subtle.digest = function (alg, d) {
-      try {
-        if (new TextDecoder().decode(d) === 'uji-kontrak-fc') {
-          const b = new Uint8Array(32);
-          for (let i = 0; i < 32; i++) b[i] = parseInt(FC_HASH.substr(i * 2, 2), 16);
-          return Promise.resolve(b.buffer);
-        }
-      } catch (_) {}
-      return asli(alg, d);
-    };
-  }, { FC_HASH, data: DATA_LAMA, ingat: !!(opsi && opsi.ingat) });
+  }, { data: DATA_LAMA, ingat: !!(opsi && opsi.ingat) });
   const log = [];
   await pasangIdentityTiruan(ctx, log);
   const pg = await ctx.newPage();
@@ -147,20 +135,15 @@ async function isiPassword(pg, a, b) {
   await pg.waitForTimeout(300);
 }
 
-async function loginLama(pg) {
-  const toggle = pg.locator('#psgIdentityLegacyToggle');
-  if (await toggle.isVisible()) await toggle.click();
-  await pg.waitForSelector('#insuranceAccessCode', { timeout: 10000 });
-  await pg.fill('#insuranceAgenNama', 'Agen Uji');
-  await pg.fill('#insuranceAgenKode', 'A001');
-  await pg.fill('#insuranceAccessCode', 'uji-kontrak-fc');
-  await pg.click('#psgIdentityLegacyWrap .insurance-access-btn');
-  await pg.waitForTimeout(500);
-  return pg.evaluate(() => ({ gate: !!document.getElementById('insuranceAccessGate'),
-    terkunci: document.documentElement.classList.contains('insurance-auth-locked'),
-    level: (JSON.parse(localStorage.getItem('insuranceHub.level.v1') || '{}')).level,
-    ingat: localStorage.getItem('insuranceHub.access.remember.v3') }));
-}
+/* Login kode akses lama sudah dicabut: tidak ada formulir/tombol kode, dan
+   penanda perangkat lama tidak membuka aplikasi. */
+const cekLoginLama = (pg) => pg.evaluate(() => ({
+  formKode: !!document.getElementById('insuranceAccessCode') || !!document.getElementById('insuranceAccessForm'),
+  tombolLama: !!document.getElementById('psgIdentityLegacyToggle'),
+  gate: !!document.getElementById('insuranceAccessGate'),
+  terkunci: document.documentElement.classList.contains('insurance-auth-locked'),
+  ingat: localStorage.getItem('insuranceHub.access.remember.v3'), sesiLama: sessionStorage.getItem('insuranceHub.access.v3') }));
+const lamaDicabut = (x) => !x.formKode && !x.tombolLama && x.gate && x.terkunci && x.ingat === null && x.sesiLama === null;
 
 const RAHASIA = [ACCESS, REFRESH, PASSWORD, TOKEN_UNDANGAN, TOKEN_RECOVERY];
 function bocorDi(teks) { return RAHASIA.filter((r) => String(teks).includes(r)); }
@@ -210,9 +193,8 @@ function dataLamaUtuh(st) {
   cek(vendor.startsWith('/* @netlify/identity ' + vId + ' + gotrue-js ' + vGt + ' '),
     'bundel vendor sesuai versi package-lock (@netlify/identity ' + vId + ', gotrue-js ' + vGt + ')');
   cek(!/https?:\/\/(cdn|unpkg|jsdelivr|esm\.sh)/i.test(vendor + cb), 'tanpa CDN eksternal');
-  const hashGate = sourceHash(ROOT, 'src/access-gate.js');
-  cek(hashGate === JSON.parse(baca('tests/contract-baseline.json')).static.protectedFiles['src/access-gate.js'],
-    'src/access-gate.js (login lama) identik dengan baseline');
+  const salahLama = require('./lib/login-lama').pelanggaranLoginLama(baca('src/access-gate.js'), baca('src/identity-login.js'));
+  cek(!salahLama.length, 'login kode akses lama dicabut di access-gate.js dan identity-login.js', salahLama);
 
   const srv = await serve();
   const base = 'http://127.0.0.1:' + srv.address().port + '/index.html';
@@ -230,8 +212,8 @@ function dataLamaUtuh(st) {
     cek(api.every((t) => t === 'function'), 'window.PSGNetlifyIdentity menyediakan handleAuthCallback/acceptInvite/updateUser', api);
     cek(!st.kartu && st.gateLama && st.terkunci && log.length === 0,
       'tanpa token: tidak ada kartu Identity, tidak ada permintaan Identity, layar masuk lama tampil', { kartu: st.kartu, log });
-    const lama = await loginLama(pg);
-    cek(!lama.gate && !lama.terkunci && lama.level === 'FC' && lama.ingat === 'ok', 'login kode akses lama tetap berhasil', lama);
+    const lama = await cekLoginLama(pg);
+    cek(lamaDicabut(lama), 'login kode akses lama tidak tersedia: tanpa formulir/tombol kode, aplikasi tetap terkunci', lama);
     cek(!errors.length, 'tanpa error halaman', errors);
     await ctx.close();
   }
@@ -270,8 +252,8 @@ function dataLamaUtuh(st) {
     cek(verify.length === 1 && verify[0].body.type === 'signup' && verify[0].body.token === TOKEN_UNDANGAN &&
       verify[0].body.password === PASSWORD, 'acceptInvite: satu POST /verify {token, password, type: signup}',
     verify.map((r) => ({ type: r.body && r.body.type })));
-    cek(/Password tersimpan/.test(st.judul) && st.teksKartu.includes(EMAIL) && /kode akses/.test(st.teksKartu),
-      'sukses: email akun tampil, agen diberi tahu login kode akses masih dipakai', st.teksKartu);
+    cek(/Password tersimpan/.test(st.judul) && st.teksKartu.includes(EMAIL) && /email dan password/.test(st.teksKartu) && !/kode akses/.test(st.teksKartu),
+      'sukses: email akun tampil, agen diarahkan masuk dengan email dan password', st.teksKartu);
     cek(!bocorDi(st.html).length, 'token/password tidak muncul di DOM', bocorDi(st.html));
     cek(!penyimpananAman(st).length, 'password tidak disimpan; token hanya di sesi milik pustaka (gotrue.user)', penyimpananAman(st));
     cek(dataLamaUtuh(st), 'data lama (nasabah, Library, agen) tidak berubah');
@@ -282,13 +264,10 @@ function dataLamaUtuh(st) {
     await pg.waitForTimeout(200);
     st = await keadaan(pg);
     cek(!st.kartu && st.gateLama && st.terkunci, 'LANJUT: kartu ditutup, aplikasi tetap di layar masuk lama (tanpa bypass)');
-    const lama = await loginLama(pg);
-    cek(!lama.gate && !lama.terkunci && lama.level === 'FC', 'sesudah undangan, login kode akses lama tetap berhasil', lama);
-    /* Login lama memang menulis ulang nama/kode di insuranceHub.agen.v1 dari
-       isian formulirnya; data nasabah dan Library harus tetap utuh. */
-    const stLama = await keadaan(pg);
-    cek(['insuranceHub.customerProfiles.v1', 'insuranceHub.libraryIlustrasi.v1'].every((k) => stLama.ls[k] === DATA_LAMA[k]),
-      'data nasabah & Library tetap utuh sesudah login lama');
+    const lama = await cekLoginLama(pg);
+    cek(lamaDicabut(lama) && await pg.locator('#psgIdentityEmail').isVisible(),
+      'sesudah undangan: hanya formulir login email yang tersedia (tanpa kode akses lama)', lama);
+    cek(dataLamaUtuh(await keadaan(pg)), 'data nasabah, Library & agen tetap utuh');
     cek(!errors.length, 'tanpa error halaman', errors);
     await ctx.close();
   }
@@ -329,21 +308,21 @@ function dataLamaUtuh(st) {
     await ctx.close();
   }
 
-  console.log('[E] Perangkat yang sudah "diingat" (login lama aktif)');
+  console.log('[E] Perangkat dengan penanda login kode akses lama');
   {
     const { ctx, pg, errors } = await bukaKonteks(br, { ingat: true });
     await pg.goto(base + '#invite_token=' + TOKEN_UNDANGAN);
     await pg.waitForSelector('#psgIdentityGate #psgIdentityPassword', { timeout: 10000 });
     let st = await keadaan(pg);
-    cek(st.kartuTerlihat && st.kartuDiAtas && !st.gateLama && !st.terkunci,
-      'kartu undangan tampil di atas aplikasi yang sudah terbuka oleh login lama');
+    cek(st.kartuTerlihat && st.kartuDiAtas && st.gateLama && st.terkunci && !('insuranceHub.access.remember.v3' in st.ls) && !('insuranceHub.access.v3' in st.ss),
+      'penanda lama tidak membuka aplikasi: kartu undangan di atas layar masuk yang terkunci, penanda dicabut');
     await isiPassword(pg, PASSWORD, PASSWORD);
     await pg.waitForSelector('#psgIdentityLanjut', { timeout: 10000 });
     await pg.click('#psgIdentityLanjut');
     await pg.waitForTimeout(200);
     st = await keadaan(pg);
-    cek(!st.kartu && !st.gateLama && !st.terkunci && st.ls['insuranceHub.access.remember.v3'] === 'ok' && dataLamaUtuh(st),
-      'sesudah LANJUT: aplikasi tetap terbuka seperti sebelumnya, otorisasi & data lama utuh');
+    cek(!st.kartu && st.gateLama && st.terkunci && !('insuranceHub.access.remember.v3' in st.ls) && dataLamaUtuh(st),
+      'sesudah LANJUT: aplikasi tetap terkunci sampai login email, data lama utuh');
     cek(!errors.length, 'tanpa error halaman', errors);
     await ctx.close();
   }

@@ -8,6 +8,7 @@
    Playwright opsional; exit 2 berarti dependensi browser tidak tersedia.
 */
 'use strict';
+const { pasangSesiUji } = require('./lib/sesi-uji');
 const fs = require('fs');
 const path = require('path');
 const http = require('http');
@@ -62,6 +63,7 @@ const tglUsia = (n) => { const d = new Date(); return new Date(Date.UTC(d.getUTC
 
 async function konteks(browser, opsi = {}) {
   const ctx = await browser.newContext({ viewport: { width: opsi.lebar || 1280, height: 900 }, serviceWorkers: 'block' });
+  await pasangSesiUji(ctx);
   await ctx.addInitScript((o) => {
     try {
       sessionStorage.setItem('insuranceHub.access.v3', 'ok');

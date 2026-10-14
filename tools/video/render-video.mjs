@@ -5,10 +5,11 @@
    Bukan bagian runtime PWA: tidak dimuat index.html / sw.js dan tidak
    mengubah berkas production. Cerita: Asset Creation, Retirement Planning,
    Keranjang Kehidupan, Education Planning, Bekerja di Singapura, dan
-   Proteksi Kredit (16:9; 9:16 untuk HP: asset-portrait, retirement-portrait,
-   basket-portrait, education-portrait, singapura-portrait, kredit-portrait).
+   Proteksi Kredit, Sandwich Generation (16:9; 9:16 untuk HP: asset-portrait,
+   retirement-portrait, basket-portrait, education-portrait, singapura-portrait,
+   kredit-portrait, sandwich-portrait).
 
-     node tools/video/render-video.mjs --cerita asset|asset-portrait|retirement|retirement-portrait|basket|basket-portrait|education|education-portrait|jari|jari-portrait|singapore|singapore-portrait|singapura|singapura-portrait|kredit|kredit-portrait [--out <folder>]
+     node tools/video/render-video.mjs --cerita asset|asset-portrait|retirement|retirement-portrait|basket|basket-portrait|education|education-portrait|jari|jari-portrait|singapore|singapore-portrait|singapura|singapura-portrait|kredit|kredit-portrait|sandwich|sandwich-portrait [--out <folder>]
           [--fps 30] [--jeda-scene 0] [--ffmpeg <path>] [--browser <path>] [--tanpa-encode]
      node tools/video/render-video.mjs --cek <folder>/asset.json
 
@@ -396,6 +397,44 @@ CERITA['kredit-portrait'] = Object.assign({}, CERITA.kredit, {
     '#layarSalesIdea .pks-title{font-size:15px!important;line-height:1.16!important}',
     '#layarSalesIdea .pks-focus{font-size:11.5px!important;line-height:1.25!important}',
     '#layarSalesIdea .pks-isi{font-size:10.5px!important;line-height:1.3!important}'
+  ].join('\n'),
+  branding: { logo: 'assets/logo-psg.png', logoTinggi: 44, logoKanan: 24, logoAtas: 26,
+    watermarkLebar: 116, watermarkOpasitas: 0.06, watermarkKanan: 40, watermarkBawah: 34 }
+});
+
+/* Sandwich Generation (8 scene). Audio: manifest rekaman Bian
+   src/sales-idea-sandwich-audio.js (PSGSandwichAudio) dan 8 MP3 di
+   assets/narasi/sandwich/ (satu per scene). Halaman pilihan kebutuhan sesudah
+   scene 8 bukan bagian video. Keluaran: sandwich-<tema>.mp4 dan
+   sandwich-<tema>-portrait.mp4 (nama yang dipakai tombol unduh). */
+CERITA.sandwich = {
+  judul: 'Sandwich Generation', pilih: 'sandwich', sel: '.sgw', attr: 'data-sgw', jumlah: 8,
+  manifest: 'src/sales-idea-sandwich-audio.js', glob: 'PSGSandwichAudio',
+  input: ['index.html', 'src/styles.css', 'src/branding.css', 'src/sales-idea-player.js', 'src/sales-idea-player.css',
+    'src/sales-idea.js', 'src/sales-idea-keranjang.js',
+    'src/sales-idea-sandwich.js', 'src/sales-idea-sandwich.css', 'src/sales-idea-sandwich-audio.js'],
+  css: [
+    '#layarSalesIdea .si-footer{display:none!important}',
+    '#layarSalesIdea .si-back-hub,#layarSalesIdea .si-close,#layarSalesIdea [data-kbs-suara]{visibility:hidden!important}',
+    '#layarSalesIdea .sil-kartu,#layarSalesIdea .sgw-pilihan{display:none!important}'
+  ].join('\n'),
+  namaOutput: (tema, potret) => 'sandwich-' + tema + (potret ? '-portrait' : '')
+};
+/* 9:16 (720×1280) untuk HP: tata letak ponsel PWA (panggung di atas, teks di
+   bawah), bukan 16:9 yang dipotong. Tombol topbar keluar dari tata letak,
+   panggung mengisi sisa layar, panel teks mengikuti isi dengan zona watermark. */
+CERITA['sandwich-portrait'] = Object.assign({}, CERITA.sandwich, {
+  judul: 'Sandwich Generation (9:16)', layar: { lebar: 360, tinggi: 640, skala: 2 },
+  css: CERITA.sandwich.css + '\n' + [
+    '#layarSalesIdea.aktif .si-content{overflow:hidden!important;padding:0!important}',
+    '#layarSalesIdea .sgw{grid-template-rows:auto minmax(0,1fr)!important;gap:6px!important}',
+    '#layarSalesIdea .sgw > .si-presentation-topbar .si-back-hub,#layarSalesIdea .sgw > .si-presentation-topbar .si-close,#layarSalesIdea .sgw > .si-presentation-topbar [data-kbs-suara]{display:none!important}',
+    '#layarSalesIdea .sgw > .si-presentation-topbar{grid-template-columns:minmax(0,1fr)!important;min-height:48px!important;padding:2px 0!important}',
+    '#layarSalesIdea .sgw > .si-presentation-topbar .si-presentation-brand{grid-column:1!important}',
+    '#layarSalesIdea .sgw-body{grid-template-rows:minmax(0,1fr) auto!important;grid-template-columns:minmax(0,1fr)!important;gap:10px!important}',
+    '#layarSalesIdea .sgw-text{padding:12px 16px 36px!important;gap:6px!important}',
+    '#layarSalesIdea .sgw-title{font-size:18px!important;line-height:1.2!important}',
+    '#layarSalesIdea .sgw-text .sgw-isi{font-size:13px!important;line-height:1.45!important}'
   ].join('\n'),
   branding: { logo: 'assets/logo-psg.png', logoTinggi: 44, logoKanan: 24, logoAtas: 26,
     watermarkLebar: 116, watermarkOpasitas: 0.06, watermarkKanan: 40, watermarkBawah: 34 }
