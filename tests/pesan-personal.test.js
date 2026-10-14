@@ -56,6 +56,10 @@ function akun(id, email, nama, opsi = {}) {
 }
 const A = akun('aaaaaaaa-1111-4111-8111-aaaaaaaaaaaa', 'agen.a@psg.test', 'Agen Alfa');
 const B = akun('bbbbbbbb-2222-4222-8222-bbbbbbbbbbbb', 'agen.b@psg.test', 'Agen Beta');
+/* Owner seperti di Deploy Preview #31: getUser() di server hanya membaca klaim
+   JWT (tanpa confirmedAt/createdAt) karena profil lengkap gagal diambil. */
+const OWNER = akun('cccccccc-3333-4333-8333-cccccccccccc', 'erwin.owner@psg.test', 'ERWIN EFFENDI', { roles: ['psg_owner'], level: 'BD' });
+delete OWNER.user.confirmedAt;
 
 const PROFIL = { id: 'fx-pesan-01', nama: 'Prospek Pesan', tglLahir: '1985-03-14', jk: 'PRIA', status: 'Belum menikah',
   family: [{ id: 'self', nama: 'Prospek Pesan', tglLahir: '1985-03-14', jk: 'PRIA', hubungan: 'Diri Sendiri' }], children: [] };
@@ -84,6 +88,9 @@ async function main() {
     async list(o) { return { blobs: [...store.keys()].filter((k) => k.startsWith(o.prefix)).map((key) => ({ key, etag: '' })) }; } };
   let sesi = null;                 // akun yang dianggap sedang login di server
   let gangguan = 0;                // jumlah permintaan berikutnya yang dijawab 503
+  let hasilCek = 'ya';             // jawaban verifikasi ulang konfirmasi email ke Identity (URL utama)
+  let paksa = null;                // jawaban paksa untuk /api/psg/pribadi: { status, error }
+  let tundaMe = 0;                 // tunda /api/psg/me (sesi belum siap saat modul diinisialisasi)
   const log = [];
 
   const context = await browser.newContext({ viewport: { width: 390, height: 844 }, serviceWorkers: 'block' });
@@ -109,17 +116,19 @@ async function main() {
   await context.route('**/src/vendor/netlify-identity.js', (route) => route.fulfill({ status: 200, contentType: 'application/javascript', body: `
     window.PSGNetlifyIdentity = { login: async () => ({}), logout: async () => {}, requestPasswordRecovery: async () => {},
       getUser: async () => (window.__ujiSesi || null) };` }));
-  await context.route('**/api/psg/me', (route) => sesi
+  await context.route('**/api/psg/me', async (route) => { if (tundaMe) await new Promise((r) => setTimeout(r, tundaMe)); return sesi
     ? route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ authenticated: true, user: sesi.me }) })
-    : route.fulfill({ status: 401, contentType: 'application/json', body: JSON.stringify({ authenticated: false }) }));
+    : route.fulfill({ status: 401, contentType: 'application/json', body: JSON.stringify({ authenticated: false }) }); });
   await context.route('**/api/psg/pribadi**', async (route) => {
     const rq = route.request();
     const h = await rq.allHeaders();
     log.push({ method: rq.method(), url: rq.url(), header: h['x-psg-request'], sesi: sesi && sesi.me.email });
+    if (paksa) return route.fulfill({ status: paksa.status, contentType: 'application/json', body: JSON.stringify({ error: paksa.error, message: 'dipaksa tes' }) });
     if (gangguan > 0) { gangguan--; return route.fulfill({ status: 503, contentType: 'application/json', body: JSON.stringify({ error: 'storage_unavailable', message: 'x' }) }); }
     const headers = {}; for (const [k, v] of Object.entries(h)) if (!/^(content-length|connection|accept-encoding)$/i.test(k) && !k.startsWith(':')) headers[k] = v;
     const req = new Request(rq.url(), { method: rq.method(), headers, body: /^(GET|HEAD)$/.test(rq.method()) ? undefined : (rq.postData() || '') });
-    const r = await lib.tanganiPribadi(req, { ambilUser: async () => (sesi ? sesi.user : null), toko: () => toko, namaStore: lib.STORE_PREVIEW });
+    const r = await lib.tanganiPribadi(req, { ambilUser: async () => (sesi ? sesi.user : null), toko: () => toko, namaStore: lib.STORE_PREVIEW,
+      cekKonfirmasi: async () => hasilCek });
     const hdr = {}; r.headers.forEach((v, k) => { hdr[k] = v; });
     return route.fulfill({ status: r.status, headers: hdr, body: await r.text() });
   });
@@ -174,6 +183,56 @@ async function main() {
     check(k.pratinjauHidden && k.pratinjauTinggi === 0, 'kode akses lama: tidak ada blok pesan di bawah kartu', k);
     check(!log.some((x) => x.method !== 'GET'), 'kode akses lama: tidak ada permintaan simpan', log);
     const kunciAwal = await kunciLokal();
+
+    /* ---------- 1b. Owner psg_owner, kasus Deploy Preview #31 ---------- */
+    console.log('\n## Owner psg_owner: sesi email valid, profil dari klaim JWT');
+    const info = () => page.evaluate(() => ({ status: window.InsuranceHubPesanPersonal.status(), nonaktif: document.getElementById('kkPesan').disabled,
+      info: document.getElementById('kkPesanInfo').textContent, ulang: !document.getElementById('kkPesanUlang').hidden, identity: !!window.InsuranceHubIdentity }));
+    tundaMe = 2500;
+    await masuk(OWNER);
+    await page.reload({ waitUntil: 'load' });
+    await page.waitForFunction(() => window.InsuranceHubPesanPersonal && document.getElementById('kkPesan'));
+    let o = await info();
+    check(!o.identity && o.status === 'tidak-tersedia' && o.nonaktif, 'sesi belum siap saat modul diinisialisasi: kolom nonaktif, belum memanggil server', o);
+    await siap(OWNER.me.email);
+    tundaMe = 0;
+    await bukaIdentitas();
+    o = await info();
+    check(o.status === 'siap' && !o.nonaktif && !o.ulang, 'sesudah psg:identity-ready: owner psg_owner bisa mengisi kolom', o);
+    await page.fill('#kkPesan', 'Pesan owner dari Deploy Preview');
+    check(await page.inputValue('#kkPesan') === 'Pesan owner dari Deploy Preview', 'kolom benar-benar bisa diketik');
+    await page.click('#kkSimpan');
+    await page.waitForFunction(() => window.InsuranceHubPesanPersonal.teks() === 'Pesan owner dari Deploy Preview');
+    await page.reload({ waitUntil: 'load' }); await siap(OWNER.me.email); await bukaIdentitas();
+    o = await info();
+    check(o.status === 'siap' && await page.inputValue('#kkPesan') === 'Pesan owner dari Deploy Preview', 'refresh: sesi dipulihkan dan pesan owner kembali dari server', o);
+    const kasus = [
+      ['gagal', null, 'gagal', /identity_unavailable/, 'Identity tidak terjangkau (503)'],
+      ['tidak', null, 'tidak-tersedia', /email_unverified/, 'Identity menyatakan email belum terkonfirmasi (403)'],
+      ['sesi-tidak-sah', null, 'tidak-tersedia', /Sesi login berakhir[\s\S]*unauthenticated/, 'token ditolak (401)'],
+      ['ya', { status: 403, error: 'psg_access_missing' }, 'tidak-tersedia', /hak akses PSG[\s\S]*psg_access_missing/, 'tanpa hak akses PSG (403)'],
+      ['ya', { status: 503, error: 'storage_unavailable' }, 'gagal', /storage_unavailable/, 'penyimpanan gagal (503)'],
+    ];
+    for (const [cekan, paksaan, status, pola, label] of kasus) {
+      hasilCek = cekan; paksa = paksaan;
+      await page.reload({ waitUntil: 'load' }); await siap(); await page.waitForFunction(() => window.InsuranceHubPesanPersonal.status() !== 'memuat' && window.InsuranceHubIdentity);
+      await bukaIdentitas();
+      o = await info();
+      check(o.status === status && o.nonaktif && o.ulang && pola.test(o.info), label + ': kolom tidak dipaksa aktif, alasan jelas, tombol muat ulang', o);
+    }
+    hasilCek = 'ya'; paksa = null;
+    await page.click('#kkPesanUlang');
+    await page.waitForFunction(() => window.InsuranceHubPesanPersonal.status() === 'siap');
+    o = await info();
+    check(!o.nonaktif && await page.inputValue('#kkPesan') === 'Pesan owner dari Deploy Preview', 'muat ulang sesudah server pulih: kolom aktif dan pesan kembali', o);
+    await page.fill('#kkAnNama', 'Agen Dibantu'); await page.dispatchEvent('#kkAnNama', 'input');
+    await page.click('#kkAnMode [data-nilai="Ya"]'); await page.waitForTimeout(300);
+    o = await info();
+    check(o.status === 'siap' && o.nonaktif && /agen lain/i.test(o.info), 'owner dengan mode atas nama aktif: kolom dikunci walau sesi valid', o);
+    await page.evaluate(() => document.getElementById('kkAnMatikan').click()); await page.waitForTimeout(300);
+    o = await info();
+    check(!o.nonaktif, 'mode atas nama dimatikan: kolom aktif lagi', o);
+    check(store.has('u/' + OWNER.me.id + '/pesan.json') && !store.has('u/' + A.me.id + '/pesan.json'), 'pesan owner tersimpan di kunci owner, tidak di akun lain');
 
     /* ---------- 2. Akun A, pesan kosong ---------- */
     console.log('\n## Akun email A');

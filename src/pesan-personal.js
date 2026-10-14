@@ -20,7 +20,7 @@
 
   /* Keadaan di memori. pemilik = email sesi yang datanya sedang dipegang;
      berganti akun membuang semuanya sebelum memuat yang baru. */
-  var st = { status: 'menunggu', pemilik: '', teks: '', penyimpanan: '', urutan: 0 };
+  var st = { status: 'menunggu', pemilik: '', teks: '', penyimpanan: '', alasan: '', kode: '', urutan: 0 };
   var aksiUlang = '';
 
   function api() { return window.PSGPribadi; }
@@ -53,7 +53,7 @@
   }
 
   function kosongkan(status) {
-    st.status = status; st.pemilik = ''; st.teks = ''; st.penyimpanan = '';
+    st.status = status; st.pemilik = ''; st.teks = ''; st.penyimpanan = ''; st.alasan = ''; st.kode = '';
     st.urutan++;
   }
 
@@ -61,7 +61,7 @@
     var p = api();
     if (!p) { kosongkan('gagal'); gambar(); return; }
     var email = emailSesi();
-    if (halamanIdentitas() ? !email : !adaSesiIdentity()) { kosongkan('tidak-tersedia'); gambar(); return; }
+    if (halamanIdentitas() ? !email : !adaSesiIdentity()) { kosongkan('tidak-tersedia'); status(''); gambar(); return; }
     kosongkan('memuat');
     st.pemilik = email;
     var nomor = st.urutan;
@@ -75,9 +75,14 @@
       gambar();
     }).catch(function (e) {
       if (nomor !== st.urutan) return;
+      /* Server menolak (401/403) = fitur tidak tersedia untuk sesi ini, dengan
+         alasan dari server; selain itu (503, jaringan) = gagal sementara. Di
+         kedua keadaan kolom tetap nonaktif dan tombol muat ulang tersedia. */
       st.status = (e && (e.status === 401 || e.status === 403)) ? 'tidak-tersedia' : 'gagal';
       st.teks = '';
-      status(st.status === 'gagal' ? 'Pesan personal belum bisa dimuat. ' + ((e && e.message) || '') : '', st.status === 'gagal' ? 'muat' : '');
+      st.kode = (e && e.kode) || '';
+      st.alasan = (e && e.message) || '';
+      status('', 'muat');
       gambar();
     });
   }
@@ -121,9 +126,11 @@
     var bisa = st.status === 'siap' && !an;
     t.disabled = !bisa;
     if (!info) return;
-    if (st.status === 'tidak-tersedia') info.textContent = 'Pesan personal hanya tersedia untuk login email terverifikasi. Masuk dengan email untuk memakainya.';
+    var kode = st.kode ? ' (kode: ' + st.kode + ')' : '';
+    if (st.status === 'tidak-tersedia' && st.alasan) info.textContent = 'Pesan personal tidak tersedia untuk sesi ini: ' + st.alasan + kode;
+    else if (st.status === 'tidak-tersedia') info.textContent = 'Pesan personal hanya tersedia untuk login email terverifikasi. Masuk dengan email untuk memakainya.';
     else if (st.status === 'memuat' || st.status === 'menunggu') info.textContent = 'Memuat pesan personal…';
-    else if (st.status === 'gagal') info.textContent = 'Pesan personal belum bisa dimuat. Koneksi internet diperlukan.';
+    else if (st.status === 'gagal') info.textContent = 'Pesan personal belum bisa dimuat: ' + (st.alasan || 'koneksi internet diperlukan.') + kode;
     else if (an) info.textContent = 'Mode "Dibuat untuk agen lain" aktif: pesan personalmu tidak ditampilkan dan tidak bisa diubah.';
     else info.textContent = 'Tampil di bawah identitasmu dan ikut tercetak pada dokumen nasabah. Boleh dikosongkan.';
   }

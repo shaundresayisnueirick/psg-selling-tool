@@ -37,10 +37,18 @@ export interface TokoPribadi {
   list(opsi: { prefix: string }): Promise<{ blobs: { key: string }[] }>
 }
 
+/* Hasil verifikasi ulang status konfirmasi email ke Identity:
+   ya / tidak (Identity menyatakan belum terkonfirmasi) / sesi-tidak-sah
+   (token ditolak atau milik akun lain) / gagal (Identity tidak terjangkau). */
+export type HasilKonfirmasi = 'ya' | 'tidak' | 'sesi-tidak-sah' | 'gagal'
+
 export interface DepsPribadi {
   ambilUser: () => Promise<User | null>
   toko: () => TokoPribadi
   namaStore: string
+  /* Dipanggil hanya bila getUser() mengembalikan user dari klaim JWT saja
+     (tanpa confirmedAt), lihat pemilik(). Menerima user.id hasil verifikasi. */
+  cekKonfirmasi?: (userId: string) => Promise<HasilKonfirmasi>
 }
 
 export const BATAS = {
@@ -70,12 +78,69 @@ async function pemilik(deps: DepsPribadi): Promise<string> {
   try { user = await deps.ambilUser() } catch { user = null }
   if (!user || !user.id) throw new Galat(401, 'unauthenticated', 'Sesi login tidak ditemukan. Masuk dengan email terlebih dahulu.')
   const p = profilAman(user)
-  if (!p.emailTerkonfirmasi) throw new Galat(403, 'email_unverified', 'Email akun belum terkonfirmasi.')
+  /* getUser() di server mengambil profil lengkap dari GoTrue (/user) lewat
+     URL Identity konteks. Bila panggilan itu gagal — misalnya Deploy Preview
+     di balik login tim Netlify menjawab 401 untuk permintaan server-ke-server
+     (lihat psg-agents.mts) — getUser() jatuh ke klaim JWT yang sudah
+     diverifikasi platform tetapi TIDAK memuat confirmed_at maupun created_at.
+     Dalam keadaan itu status konfirmasi bukan "belum", melainkan "tidak
+     diketahui", sehingga diverifikasi ulang ke Identity lewat URL utama situs. */
+  if (!p.emailTerkonfirmasi) {
+    const klaimSaja = !user.createdAt
+    if (!klaimSaja || !deps.cekKonfirmasi) throw new Galat(403, 'email_unverified', 'Email akun belum terkonfirmasi.')
+    let hasil: HasilKonfirmasi = 'gagal'
+    try { hasil = await deps.cekKonfirmasi(String(user.id)) } catch { hasil = 'gagal' }
+    if (hasil === 'sesi-tidak-sah') throw new Galat(401, 'unauthenticated', 'Sesi login tidak dapat diverifikasi. Masuk lagi dengan email.')
+    if (hasil === 'gagal') throw new Galat(503, 'identity_unavailable', 'Status akun belum bisa diverifikasi. Coba lagi sebentar lagi.')
+    if (hasil !== 'ya') throw new Galat(403, 'email_unverified', 'Email akun belum terkonfirmasi.')
+  }
   if (p.status === 'nonaktif') throw new Galat(403, 'account_inactive', 'Akun PSG berstatus nonaktif.')
   const berhak = p.roles.includes('psg_owner') || p.roles.includes('psg_admin') || p.level !== null
   if (!berhak) throw new Galat(403, 'psg_access_missing', 'Akun belum mendapat hak akses PSG.')
   if (!ID_PENGGUNA.test(p.id)) throw new Galat(403, 'invalid_user', 'Identitas akun tidak dikenali.')
   return p.id
+}
+
+/* Token sesi dari permintaan: header Authorization atau cookie nf_jwt yang
+   ditulis klien Identity saat login. Hanya diteruskan ke Identity milik situs
+   ini untuk membaca profil pemiliknya sendiri. */
+export function tokenSesi(req: Request): string {
+  const auth = req.headers.get('authorization') || ''
+  const m = auth.match(/^Bearer\s+(\S+)$/i)
+  if (m) return m[1]
+  const cookie = req.headers.get('cookie') || ''
+  for (const bagian of cookie.split(';')) {
+    const i = bagian.indexOf('=')
+    if (i > 0 && bagian.slice(0, i).trim() === 'nf_jwt') {
+      try { return decodeURIComponent(bagian.slice(i + 1).trim()) } catch { return '' }
+    }
+  }
+  return ''
+}
+
+/* GET <URL utama>/.netlify/identity/user dengan token sesi. Identity situs
+   sama untuk production dan Deploy Preview; URL utama dipakai karena URL
+   Deploy Preview bisa berada di balik login tim Netlify. */
+export async function cekKonfirmasiIdentity(urlUtama: string | null, token: string, userId: string, f: typeof fetch = fetch): Promise<HasilKonfirmasi> {
+  if (!token) return 'sesi-tidak-sah'
+  if (!urlUtama) return 'gagal'
+  let r: Response
+  try {
+    r = await f(urlUtama.replace(/\/+$/, '') + '/.netlify/identity/user', {
+      headers: { Authorization: 'Bearer ' + token, Accept: 'application/json' },
+      signal: AbortSignal.timeout(5000),
+    })
+  } catch { return 'gagal' }
+  if (r.status === 401 || r.status === 403) {
+    /* Halaman login tim Netlify (HTML) bukan penolakan token oleh Identity. */
+    const ct = r.headers.get('content-type') || ''
+    return /json/i.test(ct) ? 'sesi-tidak-sah' : 'gagal'
+  }
+  if (!r.ok) return 'gagal'
+  let d: Objek = {}
+  try { d = await r.json() as Objek } catch { return 'gagal' }
+  if (typeof d.id !== 'string' || d.id !== userId) return 'sesi-tidak-sah'
+  return typeof d.confirmed_at === 'string' && d.confirmed_at ? 'ya' : 'tidak'
 }
 
 /* ---------- Pengaman permintaan ----------
