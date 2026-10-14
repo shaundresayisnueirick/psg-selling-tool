@@ -22,9 +22,10 @@
   function pesanGagal(status, kode, pesanServer) {
     if (status === 0) return 'Koneksi internet diperlukan. Periksa koneksi lalu coba lagi.';
     if (status === 401) return 'Sesi login berakhir. Masuk lagi dengan email untuk melanjutkan.';
-    if (kode === 'email_unverified') return 'Email akun belum terkonfirmasi.';
+    if (kode === 'email_unverified') return 'Server menyatakan email akun belum terkonfirmasi.';
     if (kode === 'account_inactive') return 'Akun PSG kamu berstatus nonaktif.';
     if (kode === 'psg_access_missing') return 'Akun belum mendapat hak akses PSG.';
+    if (kode === 'identity_unavailable') return 'Status akun belum bisa diverifikasi ke server login. Coba lagi sebentar lagi.';
     if (status === 400 || status === 413) return pesanServer || 'Data tidak valid.';
     return 'Server belum bisa menyimpan atau membaca data. Coba lagi sebentar lagi.';
   }
