@@ -459,6 +459,8 @@ if(programLogout)programLogout.addEventListener('click',()=>{
 </style>
 <script src="src/preview-cetak.js"></script>
 <script src="src/theme-switcher.js"></script>
+<script src="src/psg-pribadi-api.js"></script>
+<script src="src/pesan-personal.js"></script>
 
 <script>
 /* Simpan ke Library dari halaman Program Perlindungan Nasabah.
@@ -491,11 +493,14 @@ if(programLogout)programLogout.addEventListener('click',()=>{
       return {nama:an.nama,jabatan:an.jabatan||'Financial Consultant',whatsapp:an.whatsapp||'',
         email:an.email||'',instagram:an.instagram||'',tiktok:an.tiktok||'',facebook:an.facebook||'',
         linkedin:an.linkedin||'',youtube:an.youtube||'',qr:an.qr||'TIDAK',foto:an.foto||'',
-        _atasNama:an.nama,_atasNamaKode:an.kode||''};
+        pesan:'',_atasNama:an.nama,_atasNamaKode:an.kode||''};
     }
     return {nama:k.nama||a.nama||l.namaAgen||'',jabatan:k.jabatan||l.nama||'Financial Consultant',
       whatsapp:k.whatsapp||a.hp||'',email:k.email||'',instagram:k.instagram||'',tiktok:k.tiktok||'',
-      facebook:k.facebook||'',linkedin:k.linkedin||'',youtube:k.youtube||'',qr:k.qr||'TIDAK',foto:foto};
+      facebook:k.facebook||'',linkedin:k.linkedin||'',youtube:k.youtube||'',qr:k.qr||'TIDAK',foto:foto,
+      /* Pesan personal dari server (src/pesan-personal.js), dipotret saat disimpan. */
+      pesan:(function(){try{var p=window.InsuranceHubPesanPersonal;
+        return p&&typeof p.untukIdentitasSendiri==='function'?String(p.untukIdentitasSendiri()||''):'';}catch(_){return '';}})()};
   }
 
   tombol.addEventListener('click',function(){

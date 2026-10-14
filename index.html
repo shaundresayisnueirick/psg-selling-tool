@@ -382,6 +382,7 @@ el.addEventListener('pointerdown',function(){tutup(true);});})();</script>
     </div>
     <div class="blok">
       <div id="kartuKonsultanPreview"></div>
+      <div id="kkPesanPratinjau" class="kk-pesan-pratinjau" hidden></div>
     </div>
     <div class="blok">
       <h2>Identitas yang tampil di dokumen nasabah</h2>
@@ -404,6 +405,15 @@ el.addEventListener('pointerdown',function(){tutup(true);});})();</script>
       <div class="baris">
         <div><label for="kkYouTube">YouTube</label><input id="kkYouTube" type="url" placeholder="Opsional" inputmode="url"></div>
         <div><label for="kkQr">QR WhatsApp di dokumen</label><select id="kkQr"><option value="TIDAK">Tidak ditampilkan</option><option value="YA">Tampilkan bila ada WhatsApp</option></select></div>
+      </div>
+      <!-- Pesan personal disimpan di server per akun email (src/pesan-personal.js).
+           tanpa-simpan: tidak ikut direkam Isian Terakhir. -->
+      <div class="tanpa-simpan kk-pesan-blok" id="kkPesanBlok">
+        <label for="kkPesan">Pesan Personal / Quote / Prestasi</label>
+        <textarea id="kkPesan" rows="3" maxlength="280" placeholder="Tuliskan quote, pencapaian, atau pesan personal yang ingin ditampilkan…" disabled></textarea>
+        <div class="kk-pesan-info"><span class="catatan" id="kkPesanInfo">Memuat pesan personal…</span><span class="kk-pesan-hitung" id="kkPesanHitung" aria-live="polite">0/280</span></div>
+        <p class="catatan" id="kkPesanStatus" role="status" aria-live="polite"></p>
+        <button class="sakelar" id="kkPesanUlang" type="button" hidden>Coba simpan lagi</button>
       </div>
       <p class="catatan">Identitas ini akan ditempel pada materi client-facing saat dicetak/PDF. Foto otomatis memakai foto profile agen yang sudah tersimpan; tidak perlu upload foto kedua.</p>
       <div class="aksi-row">
@@ -2560,5 +2570,7 @@ el.addEventListener('pointerdown',function(){tutup(true);});})();</script>
 <script src="src/agent-management.js?v=21.13"></script>
 <script src="src/identity-callback.js"></script>
 <script src="src/psg-feedback.js"></script>
+<script src="src/psg-pribadi-api.js"></script>
+<script src="src/pesan-personal.js"></script>
 </body>
 </html>

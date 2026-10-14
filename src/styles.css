@@ -1003,6 +1003,9 @@ html.psg-library-summary-open,html.psg-library-summary-open body{overflow:hidden
 .psg-consultant-print.psg-consultant-preview .psg-consultant-contact{font-size:8.5pt}
 .psg-consultant-print.psg-consultant-preview .psg-consultant-qr{width:54px;height:54px;object-fit:contain}
 .psg-consultant-social{font-size:11px;line-height:1.4;opacity:.85;margin-top:2px}
+/* Pesan personal: baris kutipan di bawah identitas, layar Preview dan cetak.
+   Teks panjang dibungkus, baris baru dipertahankan. */
+.psg-consultant-pesan{margin-top:4px;font-size:8.5pt;font-style:italic;line-height:1.4;white-space:pre-line;overflow-wrap:anywhere;word-break:break-word}
 
 /* fungsional: bahan cetak yang tidak tampil di layar */
 .print-split{display:none}
@@ -1193,6 +1196,18 @@ details.quick-group > summary{
 .kk-qr{grid-row:span 2;width:88px;height:88px;padding:4px;background:#fff;border-radius:var(--r-sm)}
 #kkAtasNamaBlok{background:var(--surface-2);box-shadow:none}
 #kkAnFotoPratinjau img{max-width:96px;border-radius:var(--r-md)}
+/* Pesan personal di bawah kartu konsultan. Elemen disembunyikan (hidden)
+   saat kosong sehingga tidak meninggalkan ruang. */
+.kk-pesan-pratinjau{margin-top:var(--s-4)}
+.kk-pesan-pratinjau[hidden]{display:none}
+.kk-pesan-kutipan{margin:0;padding:var(--s-3) var(--s-4);border-left:3px solid var(--gold);border-radius:0 var(--r-md) var(--r-md) 0;background:var(--surface-2);color:var(--text);font-style:italic;line-height:1.5;white-space:pre-line;overflow-wrap:anywhere;word-break:break-word}
+.kk-pesan-blok{margin:var(--s-2) 0 var(--s-4)}
+.kk-pesan-blok textarea{width:100%;resize:vertical;min-height:84px}
+.kk-pesan-info{display:flex;justify-content:space-between;gap:var(--s-3);align-items:flex-start;margin-top:4px}
+.kk-pesan-info .catatan{margin:0}
+.kk-pesan-hitung{flex:0 0 auto;font-size:var(--fs-xs);color:var(--text-3);font-variant-numeric:tabular-nums}
+.kk-pesan-hitung.kk-pesan-hampir{color:var(--gold);font-weight:700}
+#kkPesanStatus:empty{display:none}
 
 
 /* =====================================================================
@@ -1269,6 +1284,7 @@ details.quick-group > summary{
 .summary-consultant h3{margin:3px 0}
 .summary-consultant p{margin:3px 0;font-size:var(--fs-sm);color:var(--text-2)}
 .summary-socials{margin-top:5px;font-size:var(--fs-xs);color:var(--text-3)}
+.summary-consultant .summary-pesan{margin-top:6px;font-size:var(--fs-sm);font-style:italic;line-height:1.45;color:var(--text-2);white-space:pre-line;overflow-wrap:anywhere;word-break:break-word}
 
 
 /* =====================================================================

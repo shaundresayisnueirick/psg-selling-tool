@@ -30,6 +30,19 @@
     t=t.replace(/\/+$/,'');
     return t||String(v||'');
   }
+  /* Pesan personal di bawah identitas.
+     - Ilustrasi Library yang dibuka: dari potret tersimpan (item lama tanpa
+       field pesan tetap tercetak tanpa pesan).
+     - Selain itu: pesan milik akun yang sedang masuk (src/pesan-personal.js),
+       kosong selama mode "Dibuat untuk agen lain" aktif. */
+  function pesanKonsultan(c){
+    try{
+      if(window.__psgKonsultanCetak) return typeof c.pesan==='string'?c.pesan:'';
+      if(c&&c.atasNama) return '';
+      const p=window.InsuranceHubPesanPersonal;
+      return p&&typeof p.untukIdentitasSendiri==='function'?String(p.untukIdentitasSendiri()||''):'';
+    }catch(_){return ''}
+  }
   function consultantNode(){
     const c=consultant();
     if(!c.nama&&!c.whatsapp&&!c.email)return null;
@@ -53,6 +66,8 @@
       so.textContent=sosial.join('  ·  ');
       meta.appendChild(so);
     }
+    const pesan=pesanKonsultan(c);
+    if(pesan){const ps=document.createElement('div');ps.className='psg-consultant-pesan';ps.textContent=pesan;meta.appendChild(ps)}
     wrap.appendChild(meta);
     if(c.qr==='YA'&&c.whatsapp){const src=qrSrc(c.whatsapp);if(src){const q=document.createElement('img');q.className='psg-consultant-qr';q.src=src;q.alt='QR WhatsApp';wrap.appendChild(q)}}
     return wrap;
