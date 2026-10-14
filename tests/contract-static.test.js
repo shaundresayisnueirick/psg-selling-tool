@@ -39,8 +39,9 @@ const INLINE_DIIZINKAN = {
     alasan: 'Tabel Manfaat Gabungan dibungkus <table> bila isinya hanya <thead>/<tbody>/<tr> (sebelumnya tampil sebagai teks menyambung). Tidak menyentuh angka. Detail komponen pembentuk program tetap bagian dokumen nasabah: <details> diberi data-cetak-buka (dibuka preview-cetak.js di Preview dan saat mencetak, termasuk dari Library) dan tabelnya data-print-label=Polis yang disusun untuk judul pecahan cetak. catatanSlot tidak lagi dimasukkan ke Prompt Flyer AI. Tidak menyentuh angka.',
   }, {
     dari: 'c5fa2283ac48102750b9d897db33c23bbf3ebef2f89f9dae1b6a786dddfaec6c',
-    ke: 'd24e2c500b778af9938d340bf0f3c175017b55b83021ac528c494b7ad396dd61',
-    alasan: 'Pesan Personal: potretKonsultan (Simpan ke Library) menambah field pesan pada potret identitas — pesan akun yang sedang masuk dari src/pesan-personal.js, string kosong pada mode atas nama agen lain. Field lain dan alur simpan tidak berubah.',
+    ke: '4bc8a15ce3dfd18d338049931bfb5604497d113c3ac59c4ad99dbdc953eab6a8',
+    alasan: 'Pesan Personal: potretKonsultan (Simpan ke Library) menambah field pesan pada potret identitas — pesan akun yang sedang masuk dari src/pesan-personal.js, string kosong pada mode atas nama agen lain. Field lain dan alur simpan tidak berubah. '
+      + 'Sesudah hash d24e2c50…: foto potret diambil dari window.InsuranceHubFotoSendiri (src/preview-cetak.js; key foto per email untuk sesi Identity, key lama hanya untuk kode akses lama) dan WhatsApp mengikuti Nomor HP Identitas Agen (a.hp||k.whatsapp), sama dengan Kartu Konsultan. Tanpa storage key baru.',
   }],
 };
 
@@ -49,9 +50,10 @@ const INLINE_DIIZINKAN = {
 const JS_DIIZINKAN = {
   'src/preview-cetak.js': [{
     dari: 'abe686a05ed724852a36ff89e964940514f9f719686b4e0fcd09e21fc3c92d29',
-    ke: 'c80907a07c820e0072b262433b36895ecf6dd8a437b4bd18ff718abbdbbc1431',
+    ke: 'c02201792f226231f90a02116efa556f30a769283e6c63a9b2451a987fde0c7d',
     alasan: 'Pemecah tabel cetak memetakan sel menurut posisi kolom (colspan), bukan urutan DOM. Sebelumnya baris Total ber-colspan mendapat kolom lebih banyak dari judulnya: angka bertumpuk dan Total bergeser ke kolom yang salah. Tidak menyentuh nilai. cleanClone membuang tombol kontrol kecuali yang ditandai data-preview-preserve (atap dan lapis Segitiga Financial, yang sekaligus gambar dokumen); tombol itu dibuat tidak bisa difokus/diklik di Preview. Sebelumnya seluruh button dibuang sehingga Segitiga kosong di Preview. <details data-cetak-buka> dibuka di Preview dan selama mencetak (beforeprint/afterprint) karena browser hanya mencetak judul <details> yang tertutup. makePrintSplit memakai data-print-label tabel sebagai judul pecahan bila ada (bawaan tetap Timeline Program). '
-      + 'Pesan Personal Identitas Konsultan: consultantNode menambah satu baris .psg-consultant-pesan (textContent) di bawah identitas. Sumbernya potret item Library yang sedang dibuka (item lama tanpa field pesan tetap tanpa pesan), selain itu InsuranceHubPesanPersonal.untukIdentitasSendiri() dari src/pesan-personal.js yang kosong selama mode atas nama agen lain aktif. Tanpa pesan, blok identitas identik dengan sebelumnya. Tidak ada storage key baru.',
+      + 'Pesan Personal Identitas Konsultan: consultantNode menambah satu baris .psg-consultant-pesan (textContent) di bawah identitas. Sumbernya potret item Library yang sedang dibuka (item lama tanpa field pesan tetap tanpa pesan), selain itu InsuranceHubPesanPersonal.untukIdentitasSendiri() dari src/pesan-personal.js yang kosong selama mode atas nama agen lain aktif. Tanpa pesan, blok identitas identik dengan sebelumnya. Tidak ada storage key baru. '
+      + 'Sesudah hash c80907a0…: foto konsultan akun sendiri lewat satu aturan fotoSendiri() yang juga diekspos sebagai window.InsuranceHubFotoSendiri — sesi Identity memakai key foto per email (InsuranceHubCurrentPhotoKey di index.html, email klaim cookie nf_jwt di halaman ringkasan), kosong selama sesi Identity belum siap, key foto lama hanya untuk login kode akses lama. Snapshot Library dan mode atas nama tidak berubah. Tanpa storage key baru.',
   }],
   'src/core.js': [{
     dari: '385c5f77851f6b5b5c94b6e3bf6d65d3df77faef9b21a1c9cd4aa137c1833c7c',
@@ -73,15 +75,22 @@ const JS_DIIZINKAN = {
   }],
   'src/library-ilustrasi.js': [{
     dari: '57a58e17a4e9c117431f3d52c24e40bc11c3c26fec0be12b18a2b5d885ebc4d7',
-    ke: 'b98de59f9c2cc02ef96b69e4b41a4cb6dfad10bfd34b3ade342353ec20897e55',
+    ke: '6912cc2abbcba26c1504d3f4c92c68d62d5fc52742bef1ea586bada2eb31c5ca',
     alasan: 'Detail Library: tombol Preview basi (.psg-preview-btn) dan penanda data-preview-attached yang ikut tersimpan di snapshot dibuang, supaya attach() membuat satu tombol Preview baru dengan handler aktif. Tombol cetak/print/PDF di dalam snapshot (listener-nya tidak ikut tersimpan) diberi handler cetakIlustrasi yang sama dengan tombol Cetak modal. Data Library, storage, dan isi snapshot tidak berubah. '
       + 'Simpan ke Library: bila dropdown tertanggung produk (cpTertanggung<PRODUK>) bernilai Ketik manual, identitas tertanggung diambil dari isian produk (nama, tanggal lahir, jenis kelamin) dengan relationship Ketik manual dan insuredPersonId manual:<nama>|<tgl> — sebelumnya tercatat self/Diri Sendiri tanpa tanggal lahir sehingga dikelompokkan sebagai profil utama dan tergabung dengannya di Ringkasan 1 Halaman. MAP produk mendapat id tanggal lahir/jenis kelamin. Isi snapshot, angka, dan storage tidak berubah. '
-      + 'Pesan Personal: potret konsultan item Library baru menyimpan field pesan (string, kosong pada mode atas nama) sehingga mengubah pesan sesudahnya tidak mengubah item; Ringkasan 1 Halaman menampilkan pesan dari potret item (item lama tanpa field pesan tidak menampilkan apa pun) atau dari akun yang sedang masuk bila item tidak punya potret, di-escape. Data Library lain, storage key, dan isi snapshot ilustrasi tidak berubah.',
+      + 'Pesan Personal: potret konsultan item Library baru menyimpan field pesan (string, kosong pada mode atas nama) sehingga mengubah pesan sesudahnya tidak mengubah item; Ringkasan 1 Halaman menampilkan pesan dari potret item (item lama tanpa field pesan tidak menampilkan apa pun) atau dari akun yang sedang masuk bila item tidak punya potret, di-escape. Data Library lain, storage key, dan isi snapshot ilustrasi tidak berubah. '
+      + 'Sesudah hash b98de59f…: foto potret konsultan item Library baru dan Ringkasan 1 Halaman memakai foto akun aktif (field foto dari InsuranceHubConsultantCard.read(), cadangan window.InsuranceHubFotoSendiri), bukan key foto global lama. Item lama tidak diubah; mode atas nama tetap foto agen tersebut.',
   }],
   'src/aktivitas-ui.js': [{
     dari: 'f79804459cb8b93f3ebbfa4380299a2f4bca485155cf79c844aa703d31aba0cf',
     ke: 'b5d89aa3053620d5d50412694f300f375036d3977917c99b422b250a78eca9ef',
     alasan: 'Janji temu → Profil prospek (profil baru): form Profil dikosongkan dulu lewat cpFillForm({}) sebelum nama dan HP prospek diisi, supaya prospek tidak mewarisi isian profil lain (mis. profil yang tadi diedit lalu ditinggalkan).',
+  }],
+  'src/kartu-konsultan.js': [{
+    dari: '7a153b1aabe40da2fe28beebda2cb80c9f783cd05a0113790d9bfe4249a3bcbf',
+    ke: 'f95c577b4dcdd7b5e739ebdc289ac03c330dc6179f96c2e5ce4f4cc862d6c590',
+    alasan: 'Foto Kartu Konsultan memakai foto akun aktif (window.InsuranceHubFotoSendiri: key foto per email untuk sesi Identity, placeholder selama sesi belum siap, key lama hanya untuk kode akses lama), ikut di read() sebagai field foto (atas nama: foto agen tersebut), dan pratinjau digambar ulang pada psg:identity-ready dan psg:identity-photo-updated tanpa menyentuh isian formulir. '
+      + 'WhatsApp mengikuti Nomor HP Identitas Agen (a.hp||k.whatsapp; dulu WhatsApp lama di konsultan.v1 selalu menang) dan diperbarui sesudah Simpan nomor HP / Simpan identitas di Aktivitas & Poin. Pulihkan identitas saya tidak lagi mengosongkan Nomor HP Identitas Agen. get() memakai getSendiri() (field identik). Tanpa storage key baru.',
   }],
   'src/sales-idea.js': [{
     dari: 'dfd143970d9e79bc8ec46687724748da98147b9ae78985619a71c83c7a0c747f',

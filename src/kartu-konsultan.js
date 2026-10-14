@@ -1,23 +1,33 @@
 /* Insurance Hub — Identitas Konsultan / identitas materi nasabah */
 (function(){
   'use strict';
-  const KEY='insuranceHub.konsultan.v1', FOTO='insuranceHub.agen.foto.v1';
+  const KEY='insuranceHub.konsultan.v1';
   const el=id=>document.getElementById(id);
   const esc=v=>String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   function read(){try{return JSON.parse(localStorage.getItem(KEY)||'{}')||{}}catch(_){return {}}}
   function level(){try{return JSON.parse(localStorage.getItem('insuranceHub.level.v1')||'{}')||{}}catch(_){return {}}}
   function agent(){try{return JSON.parse(localStorage.getItem('insuranceHub.agen.v1')||'{}')||{}}catch(_){return {}}}
-  function foto(){try{return localStorage.getItem(FOTO)||''}catch(_){return ''}}
+  /* Foto profil akun yang sedang masuk. Aturannya satu, di src/preview-cetak.js
+     (dimuat juga oleh halaman ringkasan): key foto per email untuk sesi
+     Identity, kosong selama sesi Identity belum siap, key lama hanya untuk
+     login kode akses lama. */
+  function foto(){try{return typeof window.InsuranceHubFotoSendiri==='function'?window.InsuranceHubFotoSendiri()||'':''}catch(_){return ''}}
   function normalizeUrl(v){v=String(v||'').trim(); if(!v)return ''; return /^https?:\/\//i.test(v)?v:'https://'+v}
   /* Identitas MILIKMU SENDIRI. Inilah yang mengisi formulir Kartu Konsultan,
-     dan tidak pernah terpengaruh mode "dibuat untuk agen lain". */
+     dan tidak pernah terpengaruh mode "dibuat untuk agen lain".
+     Nomor WhatsApp mengikuti Nomor HP Identitas Agen (insuranceHub.agen.v1.hp,
+     yang juga ikut diperbarui setiap kali kartu ini disimpan). WhatsApp yang
+     pernah tersimpan di kartu hanya cadangan bila Nomor HP kosong; dulu
+     urutannya terbalik sehingga nomor lama selalu mengalahkan nomor baru. */
   function getSendiri(){const k=read(), a=agent(), l=level();
-    return {nama:k.nama||a.nama||l.namaAgen||'',jabatan:k.jabatan||l.nama||'Financial Consultant',whatsapp:k.whatsapp||a.hp||'',email:k.email||'',instagram:k.instagram||'',tiktok:k.tiktok||'',facebook:k.facebook||'',linkedin:k.linkedin||'',youtube:k.youtube||'',qr:k.qr||'TIDAK'};}
+    return {nama:k.nama||a.nama||l.namaAgen||'',jabatan:k.jabatan||l.nama||'Financial Consultant',whatsapp:a.hp||k.whatsapp||'',email:k.email||'',instagram:k.instagram||'',tiktok:k.tiktok||'',facebook:k.facebook||'',linkedin:k.linkedin||'',youtube:k.youtube||'',qr:k.qr||'TIDAK'};}
 
   /* Identitas yang TERCETAK di dokumen. Sama dengan getSendiri(), kecuali
      saat mode "dibuat untuk agen lain" aktif. */
-  function get(){const k=read(), a=agent(), l=level();
-    const d={nama:k.nama||a.nama||l.namaAgen||'',jabatan:k.jabatan||l.nama||'Financial Consultant',whatsapp:k.whatsapp||a.hp||'',email:k.email||'',instagram:k.instagram||'',tiktok:k.tiktok||'',facebook:k.facebook||'',linkedin:k.linkedin||'',youtube:k.youtube||'',qr:k.qr||'TIDAK'};
+  function get(){const d=getSendiri();
+    /* Foto ikut di identitas cetak supaya Preview/cetak dan snapshot Library
+       memakai foto akun yang sama dengan kartu ini. */
+    d.foto=foto();
     /* Mode "atas nama agen lain" hanya menimpa identitas yang TERCETAK.
        Media sosial dan QR ikut dikosongkan supaya dokumen tidak mencampur
        nama agen lain dengan kontak milikmu. */
@@ -37,6 +47,7 @@
       d.atasNama=true;
       d.kodeAgen=an.kode||'';
       d.fotoAgen=an.foto||'';        // foto milik agen tersebut
+      d.foto=d.fotoAgen;
       d.tanpaFoto=!an.foto;          // fotomu sendiri tetap tidak dipakai
       d.atasNamaLabel='Ilustrasi atas nama '+an.nama+(an.kode?' ('+an.kode+')':'');
     }
@@ -63,7 +74,10 @@
        tidak bisa kembali karena aslinya sudah tertulis ulang. */
     const sendiri=getSendiri();
     ['kkNama','kkJabatan','kkWhatsApp','kkEmail','kkInstagram','kkTikTok','kkFacebook','kkLinkedIn','kkYouTube'].forEach(id=>{if(el(id))el(id).value=sendiri[id.replace(/^kk/,'').toLowerCase()]||''}); if(el('kkQr'))el('kkQr').value=sendiri.qr||'TIDAK';
-    const f=d.atasNama?(d.fotoAgen||''):foto(); const links=[['📱','WhatsApp',d.whatsapp?'https://wa.me/'+d.whatsapp.replace(/\D/g,'').replace(/^0/,'62'):'' ],['📷','Instagram',normalizeUrl(d.instagram)],['🎵','TikTok',normalizeUrl(d.tiktok)],['📘','Facebook',normalizeUrl(d.facebook)],['💼','LinkedIn',normalizeUrl(d.linkedin)],['▶️','YouTube',normalizeUrl(d.youtube)]].filter(x=>x[2]);
+    pratinjau(d);
+  }
+  function pratinjau(d){d=d||get();
+    const f=d.atasNama?(d.fotoAgen||''):(d.foto||''); const links=[['📱','WhatsApp',d.whatsapp?'https://wa.me/'+d.whatsapp.replace(/\D/g,'').replace(/^0/,'62'):'' ],['📷','Instagram',normalizeUrl(d.instagram)],['🎵','TikTok',normalizeUrl(d.tiktok)],['📘','Facebook',normalizeUrl(d.facebook)],['💼','LinkedIn',normalizeUrl(d.linkedin)],['▶️','YouTube',normalizeUrl(d.youtube)]].filter(x=>x[2]);
     const socials=links.map(x=>'<a href="'+esc(x[2])+'" target="_blank" rel="noopener">'+x[0]+' '+esc(x[1])+'</a>').join('');
     const qrDigits=(d.whatsapp||'').replace(/\D/g,'').replace(/^0/,'62');
     const waLink=qrDigits?'https://wa.me/'+qrDigits:'';
@@ -87,9 +101,11 @@
         const an=anBaca(); an.aktif=false; anTulis(an);
         anSetSegmen('Tidak'); anSpanduk();
       }catch(_){}
+      /* Nomor HP tidak dikosongkan: itu milik Identitas Agen (Aktivitas &
+         Poin), dan sesudah pemulihan kartu kembali memakainya. */
       try{
         const l=level(), a=agent();
-        a.nama=l.namaAgen||''; a.hp='';
+        a.nama=l.namaAgen||'';
         localStorage.setItem('insuranceHub.agen.v1',JSON.stringify(a));
       }catch(_){}
       render(); anRender(); anSegarkanPenyaji();
@@ -269,6 +285,17 @@
   window.InsuranceHubAtasNama={baca:anBaca,aktif:()=>{const a=anBaca();return !!(a.aktif&&a.nama)},spanduk:anSpanduk};
   window.InsuranceHubConsultantCard={read:get,readSendiri:getSendiri,render,save};
   window.addEventListener('insurancehub:consultant-refresh',render);
+  /* Foto akun baru diketahui sesudah sesi Identity siap, dan bisa berganti
+     dari halaman depan atau Identitas Agen. Hanya pratinjau yang digambar
+     ulang; isian formulir yang belum disimpan tidak disentuh. */
+  window.addEventListener('psg:identity-ready',()=>pratinjau());
+  window.addEventListener('psg:identity-photo-updated',()=>pratinjau());
+  /* Nomor HP disimpan di Aktivitas & Poin tanpa event. Sesudah handler
+     simpannya selesai, kolom WhatsApp dan pratinjau mengikuti nomor terbaru. */
+  document.addEventListener('click',e=>{
+    if(!(e.target instanceof Element)||!e.target.closest('#aktSimpanHp,#aktSimpanAgen'))return;
+    setTimeout(()=>{if(el('kkWhatsApp'))el('kkWhatsApp').value=getSendiri().whatsapp||''; pratinjau();},0);
+  });
   function anPasang(){ anInit(); anSpanduk(); }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',anPasang,{once:true});
   else anPasang();

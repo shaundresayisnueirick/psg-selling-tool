@@ -487,8 +487,10 @@ if(programLogout)programLogout.addEventListener('click',()=>{
     var a=ambil('insuranceHub.agen.v1',{})||{};
     var l=ambil('insuranceHub.level.v1',{})||{};
     var an=ambil('insuranceHub.konsultan.atasNama.v1',{})||{};
+    /* Foto akun yang sedang masuk, dengan aturan yang sama seperti cetak
+       (src/preview-cetak.js): sesi Identity memakai key foto per email. */
     var foto='';
-    try{ foto=localStorage.getItem('insuranceHub.agen.foto.v1')||''; }catch(_){}
+    try{ foto=typeof window.InsuranceHubFotoSendiri==='function'?window.InsuranceHubFotoSendiri()||'':''; }catch(_){}
     if(an.aktif && an.nama){
       return {nama:an.nama,jabatan:an.jabatan||'Financial Consultant',whatsapp:an.whatsapp||'',
         email:an.email||'',instagram:an.instagram||'',tiktok:an.tiktok||'',facebook:an.facebook||'',
@@ -496,7 +498,7 @@ if(programLogout)programLogout.addEventListener('click',()=>{
         pesan:'',_atasNama:an.nama,_atasNamaKode:an.kode||''};
     }
     return {nama:k.nama||a.nama||l.namaAgen||'',jabatan:k.jabatan||l.nama||'Financial Consultant',
-      whatsapp:k.whatsapp||a.hp||'',email:k.email||'',instagram:k.instagram||'',tiktok:k.tiktok||'',
+      whatsapp:a.hp||k.whatsapp||'',email:k.email||'',instagram:k.instagram||'',tiktok:k.tiktok||'',
       facebook:k.facebook||'',linkedin:k.linkedin||'',youtube:k.youtube||'',qr:k.qr||'TIDAK',foto:foto,
       /* Pesan personal dari server (src/pesan-personal.js), dipotret saat disimpan. */
       pesan:(function(){try{var p=window.InsuranceHubPesanPersonal;
