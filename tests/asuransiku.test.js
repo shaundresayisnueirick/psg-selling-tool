@@ -313,6 +313,7 @@ async function main() {
     await bukaKartu(page); await tunggu(page, 'gagal');
     teks = await teksLayar(page);
     check(/Koneksi internet diperlukan/.test(teks) && !/Generali/.test(teks), 'offline: pesan koneksi, data lama tidak ditampilkan', teks.slice(0, 300));
+    check(/kode: offline/.test(teks), 'alasan kegagalan menyertakan kode untuk diagnosa', teks.slice(0, 300));
     check(await page.evaluate(() => !!document.getElementById('asMuatUlang')), 'offline: tombol Coba lagi tersedia');
     await d1.context.setOffline(false);
     await tunggu(page, 'ringkasan');

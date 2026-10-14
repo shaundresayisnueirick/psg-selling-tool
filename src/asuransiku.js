@@ -41,7 +41,7 @@
   var st = {
     tampilan: 'tidak-tersedia',  // tidak-tersedia | memuat | gagal | pengantar | ringkasan | form
     pemilik: '', urutan: 0,
-    polis: [], penyimpanan: '', pesanGagal: '',
+    polis: [], penyimpanan: '', pesanGagal: '', kodeGagal: '',
     kelola: false,
     draf: null, idEdit: null, idDraf: '', langkah: 0, ubah: false, galat: '', statusSimpan: '', simpanGagal: false, sedangSimpan: false
   };
@@ -82,7 +82,7 @@
 
   function bersihkan(tampilan) {
     st.urutan++;
-    st.pemilik = ''; st.polis = []; st.penyimpanan = ''; st.pesanGagal = '';
+    st.pemilik = ''; st.polis = []; st.penyimpanan = ''; st.pesanGagal = ''; st.kodeGagal = '';
     st.kelola = false; st.draf = null; st.idEdit = null; st.idDraf = ''; st.langkah = 0; st.ubah = false; st.galat = '';
     st.statusSimpan = ''; st.simpanGagal = false; st.sedangSimpan = false; st.pengumuman = '';
     st.tampilan = tampilan;
@@ -108,8 +108,10 @@
       gambar();
     }).catch(function (e) {
       if (nomor !== st.urutan) return;
-      if (e && (e.status === 401 || e.status === 403)) { bersihkan('tidak-tersedia'); st.pesanGagal = e.message || ''; }
-      else { st.tampilan = 'gagal'; st.pesanGagal = (e && e.message) || 'Data belum bisa dimuat.'; if (draf && draf.draf) pulihkanDraf(draf); }
+      /* Penolakan server (401/403) dan kegagalan sementara (503, jaringan)
+         sama-sama menampilkan alasan + kode dari server dan tombol coba lagi. */
+      if (e && (e.status === 401 || e.status === 403)) { bersihkan('tidak-tersedia'); st.pemilik = email; st.pesanGagal = e.message || ''; st.kodeGagal = e.kode || ''; }
+      else { st.tampilan = 'gagal'; st.pesanGagal = (e && e.message) || 'Data belum bisa dimuat.'; st.kodeGagal = (e && e.kode) || ''; if (draf && draf.draf) pulihkanDraf(draf); }
       gambar();
     });
   }
@@ -498,12 +500,13 @@
     if (st.tampilan === 'tidak-tersedia') {
       html = '<div class="as-kosong-besar"><div class="as-ikon-besar" aria-hidden="true">🔒</div><h2>Khusus akun email terverifikasi</h2>' +
         '<p>Asuransiku menyimpan data pribadimu di akun PSG. Masuk dengan email dan password akun PSG kamu untuk memakainya.</p>' +
-        (st.pesanGagal ? '<p class="catatan">' + esc(st.pesanGagal) + '</p>' : '') + '</div>';
+        (st.pesanGagal ? '<p class="catatan">' + esc(st.pesanGagal) + (st.kodeGagal ? ' (kode: ' + esc(st.kodeGagal) + ')' : '') + '</p>' +
+          '<button type="button" class="sakelar" id="asMuatUlang">Muat ulang</button>' : '') + '</div>';
     } else if (st.tampilan === 'memuat') {
       html = '<div class="as-kosong-besar"><p>Memuat Asuransiku…</p></div>';
     } else if (st.tampilan === 'gagal') {
-      html = '<div class="as-kosong-besar"><div class="as-ikon-besar" aria-hidden="true">📶</div><h2>Asuransiku belum bisa dimuat</h2><p>' + esc(st.pesanGagal) + '</p>' +
-        '<p class="catatan">Koneksi internet diperlukan. Data tidak ditampilkan dari salinan lama.</p>' +
+      html = '<div class="as-kosong-besar"><div class="as-ikon-besar" aria-hidden="true">📶</div><h2>Asuransiku belum bisa dimuat</h2><p>' + esc(st.pesanGagal) + (st.kodeGagal ? ' (kode: ' + esc(st.kodeGagal) + ')' : '') + '</p>' +
+        '<p class="catatan">Data tidak ditampilkan dari salinan lama.</p>' +
         '<button type="button" class="aksi" id="asMuatUlang">Coba lagi</button></div>';
     } else if (st.tampilan === 'pengantar') {
       html = '<div class="as-hero as-hero-pengantar"><div><div class="as-kicker">ASURANSIKU</div><h2>Kenali dan tampilkan perlindungan yang sudah kamu miliki.</h2>' +
