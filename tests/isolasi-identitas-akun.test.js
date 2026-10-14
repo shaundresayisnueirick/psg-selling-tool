@@ -198,6 +198,15 @@ async function main() {
   };
   const ringkasanProgram = async () => {
     await page.evaluate(() => sessionStorage.setItem('insuranceHub.comparisonSummary', JSON.stringify({ customerName: 'Prospek Isolasi', targets: { life: 1000000000 }, scenarios: [] })));
+    await page.goto(base + 'comparison-summary.html', { waitUntil: 'load' });
+    await page.waitForTimeout(700);
+    const perbandingan = await page.evaluate(() => {
+      window.dispatchEvent(new Event('beforeprint'));
+      const n = document.querySelector('.psg-consultant-print');
+      const t = n ? n.textContent : '';
+      window.dispatchEvent(new Event('afterprint'));
+      return t;
+    });
     await page.goto(base + 'program-summary.html', { waitUntil: 'load' });
     await page.waitForTimeout(700);
     const hasil = await page.evaluate(() => {
@@ -209,6 +218,7 @@ async function main() {
       const x = JSON.parse(localStorage.getItem('insuranceHub.libraryIlustrasi.v1') || '[]')[0];
       return { cetak, potret: x && x.screenKey === 'PROGRAM_SUMMARY' ? x.konsultan : null };
     });
+    hasil.perbandingan = perbandingan;
     await page.goto(base + 'index.html', { waitUntil: 'load' });
     return hasil;
   };
@@ -216,6 +226,12 @@ async function main() {
     agen: localStorage.getItem('insuranceHub.agen.v1'), konsultan: localStorage.getItem('insuranceHub.konsultan.v1'),
     atasNama: localStorage.getItem('insuranceHub.konsultan.atasNama.v1'), level: localStorage.getItem('insuranceHub.level.v1'),
     foto: localStorage.getItem('insuranceHub.agen.foto.v1') }));
+  const catatanAkun = (a) => page.evaluate((e) => JSON.parse(localStorage.getItem('insuranceHub.identitas.akun.v1.' + encodeURIComponent(e)) || 'null'), a.me.email);
+  /* Nama berkas Cadangan (Aktivitas & Poin). */
+  const namaCadangan = async () => {
+    const [d] = await Promise.all([page.waitForEvent('download'), page.evaluate(() => window.InsuranceHubAktivitas.cadangkan())]);
+    return d.suggestedFilename();
+  };
   const seluruhTeks = (o) => JSON.stringify(o);
   const bocor = (teks, nilai) => nilai.filter((x) => teks.includes(x));
 
@@ -233,6 +249,9 @@ async function main() {
     await page.waitForFunction(() => window.InsuranceHubConsultantCard && document.getElementById('kkNama'));
     let k = await kartu();
     check(!bocor(seluruhTeks(k), NILAI_LAMA).length, 'sesi belum siap: Kartu tidak memuat data lama perangkat', bocor(seluruhTeks(k), NILAI_LAMA));
+    let lama0 = await lokalLama();
+    check(lama0.agen === awalLama.agen && lama0.konsultan === awalLama.konsultan && lama0.atasNama === awalLama.atasNama && lama0.level === awalLama.level
+      && await catatanAkun(A) === null, 'sesi belum siap: tidak ada penulisan ke data lama maupun catatan akun', lama0);
     await siap(A.me.email);
     tundaMe = 0;
     await bukaIdentitas();
@@ -284,7 +303,10 @@ async function main() {
     let snap = await simpanLibrary();
     check(!bocor(seluruhTeks(snap), NILAI_A.concat(NILAI_LAMA)).length && snap.foto !== FOTO_A, 'akun B: snapshot Library tanpa data A', snap);
     let ps = await ringkasanProgram(); await siap(B.me.email);
-    check(!bocor(seluruhTeks(ps), NILAI_A.concat(NILAI_LAMA)).length, 'akun B: program-summary.html (cetak dan Library) tanpa data A atau data lama', ps);
+    check(!bocor(seluruhTeks(ps), NILAI_A.concat(NILAI_LAMA)).length, 'akun B: program-summary.html dan comparison-summary.html (cetak dan Library) tanpa data A atau data lama', ps);
+    check(await page.evaluate(() => window.InsuranceHubAtasNama.aktif()) === false, 'akun B: InsuranceHubAtasNama.aktif() false (Pesan Personal tidak dikunci oleh mode A)');
+    let berkas = await namaCadangan();
+    check(/Agen Beta/.test(berkas) && !/PSG TEAM|Konsultan Lama|Agen Alfa/.test(berkas), 'akun B: nama berkas cadangan memakai nama akun B', berkas);
 
     await simpanHp('0813 2222 2222');
     await bukaIdentitas();
@@ -318,6 +340,15 @@ async function main() {
     const fl = await flyer();
     check(fl.includes('081211111111') && !bocor(fl, NILAI_B.concat(NILAI_LAMA)).length, 'akun A: Prompt Flyer memakai HP A', fl.split('\n').find((x) => /Disajikan/.test(x)));
     check(seluruhTeks(await penyaji()).includes('081211111111'), 'akun A: kolom penyaji memakai HP A', await penyaji());
+    check(ps.perbandingan.includes('alfa@kontak.test') && ps.perbandingan.includes('081211111111') && !bocor(ps.perbandingan, NILAI_B.concat(NILAI_LAMA)).length,
+      'akun A: comparison-summary.html mencetak identitas A', ps.perbandingan);
+    berkas = await namaCadangan();
+    check(/Agen Alfa/.test(berkas) && !/PSG TEAM|Konsultan Lama/.test(berkas), 'akun A: nama berkas cadangan memakai nama akun A, bukan nama demo lama', berkas);
+    const recA = await catatanAkun(A), recB = await catatanAkun(B);
+    check(recB && recB.agen && recB.agen.hp === '081322222222' && recB.konsultan.email === 'beta@kontak.test' && !bocor(seluruhTeks(recB), NILAI_A).length,
+      'catatan akun B tetap milik B sesudah A kembali (tidak tertukar)', recB);
+    check(recA && recA.agen && recA.agen.hp === '081211111111' && !bocor(seluruhTeks(recA), NILAI_B.concat(NILAI_LAMA)).length,
+      'catatan akun A hanya berisi data A', recA);
 
     /* Isian Terakhir tidak menyimpan isian Kartu Konsultan (punya penyimpanan sendiri per akun). */
     await bukaIdentitas();
@@ -356,6 +387,12 @@ async function main() {
     check(!bocor(seluruhTeks(k), NILAI_A.concat(NILAI_B)).length, 'kode akses lama: tidak melihat data akun Identity', bocor(seluruhTeks(k), NILAI_A.concat(NILAI_B)));
     check(await hpAktivitas() === '089900000000', 'kode akses lama: Identitas Agen tetap HP lama');
     check(k.read.foto === LAMA.foto, 'kode akses lama: foto lama tetap dipakai');
+    check(seluruhTeks(await penyaji()).includes('089900000000') && (await flyer()).includes('089900000000'), 'kode akses lama: kolom penyaji dan Prompt Flyer tetap memakai HP lama');
+    berkas = await namaCadangan();
+    check(/PSG TEAM/.test(berkas), 'kode akses lama: nama berkas cadangan tetap dari data login lama', berkas);
+    lama = await lokalLama();
+    check(lama.agen === awalLama.agen && lama.konsultan === awalLama.konsultan && lama.atasNama === awalLama.atasNama && lama.level === awalLama.level && lama.foto === awalLama.foto,
+      'akhir skenario: agen.v1, konsultan.v1, atasNama.v1, level.v1, dan foto lama tidak berubah', lama);
 
     check(pageErrors.length === 0, 'tidak ada JavaScript error', pageErrors);
   } finally {

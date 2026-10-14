@@ -544,10 +544,10 @@
       aplikasi: 'PSG Selling Tools',
       data: data
     };
+    /* Nama berkas memakai agen yang sedang masuk (nama profil Identity atau
+       data login kode akses lama), bukan nama tersimpan di key lama perangkat. */
     let namaAgen = 'Agen';
-    try {
-      namaAgen = JSON.parse(data['insuranceHub.agen.v1'] || '{}').nama || 'Agen';
-    } catch (_) {}
+    try { namaAgen = agenBaca().nama || 'Agen'; } catch (_) {}
     const nama = 'Cadangan PSG Selling Tools ' + namaAgen + ' ' +
       tglIso(new Date()) + '.json';
     unduh(nama, JSON.stringify(isi, null, 2), 'application/json');
