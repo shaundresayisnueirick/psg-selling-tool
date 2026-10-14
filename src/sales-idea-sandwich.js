@@ -3,7 +3,7 @@
    ------------------------------------------------------------
    Delapan scene untuk pemutar bersama (src/sales-idea-player.js):
 
-     1. Surat untuk menantuku di masa depan  — hook reflektif
+     1. Surat untuk anakku kelak  — hook reflektif
      2. Kasih sayang, bukan beban tanpa rencana
      3. Masa pensiun perlu disiapkan
      4. Kesehatan bisa mengubah rencana
@@ -73,7 +73,7 @@
 
   /* Judul scene (kartu teks), teks layar, dan teks pendukung. */
   var SCENE = [
-    { judul: 'Surat untuk Menantuku di Masa Depan', layar: 'Untuk Menantuku di Masa Depan', suasana: 'hangat', motif: 'surat' },
+    { judul: 'Surat untuk Anakku Kelak', layar: 'Untuk Anakku Kelak', suasana: 'hangat', motif: 'surat' },
     { judul: 'Kasih Sayang, Bukan Beban Tanpa Rencana', layar: 'Kasih Sayang, Bukan Beban Tanpa Rencana', suasana: 'hangat', motif: 'keluarga' },
     { judul: 'Masa Pensiun Perlu Disiapkan', layar: 'Kebutuhan Hidup Tetap Berjalan', suasana: 'teduh', motif: 'pensiun' },
     { judul: 'Kesehatan Bisa Mengubah Rencana', layar: 'Kesehatan Dapat Mengubah Rencana', suasana: 'redup', motif: 'kesehatan' },
@@ -86,7 +86,7 @@
   /* Naskah narasi — satu segmen per scene, sama persis dengan dokumen
      ElevenLabs. */
   var NARASI = [
-    ['Untuk menantuku di masa depan, ada satu hal yang ingin aku pastikan: gajimu bukan rencana masa tuaku.'],
+    ['Untuk anakku kelak, ada satu hal yang ingin aku pastikan: gajimu bukan rencana masa tuaku.'],
     ['Kami tentu ingin saling membantu dalam keluarga. Tetapi aku tak ingin kasih sayang berubah menjadi beban finansial yang tidak pernah direncanakan.'],
     ['Saat kita berhenti bekerja, kebutuhan hidup tetap berjalan. Pensiun yang tidak disiapkan bisa membuat anak harus ikut menanggung biaya hidup orang tuanya.'],
     ['Biaya kesehatan juga bisa datang di luar rencana. Tanpa perlindungan dan dana yang memadai, tabungan keluarga bahkan rencana pendidikan anak bisa ikut terganggu.'],
@@ -98,7 +98,7 @@
 
   /* teks alternatif panggung (role="img") */
   var ARIA = [
-    'Meja kerja di malam hari dengan lampu menyala. Sebuah buku terbuka bertuliskan "Untuk menantuku," ditulis perlahan dengan pena, di samping amplop bersegel hati, foto keluarga, dan secangkir minuman hangat.',
+    'Meja kerja di malam hari dengan lampu menyala. Sebuah buku terbuka bertuliskan "Untuk anakku," ditulis perlahan dengan pena, di samping amplop bersegel hati, foto keluarga, dan secangkir minuman hangat.',
     'Jendela rumah yang hangat memperlihatkan siluet tiga generasi di meja makan, hati melayang naik. Di sebelahnya ponsel menampilkan pengeluaran rutin yang bertambah: kiriman bulanan orang tua, cicilan rumah, biaya sekolah.',
     'Matahari terbenam di jendela. Kalender di meja berganti bulan, koin jatuh mengisi toples Dana Pensiun, dan catatan kebutuhan bulanan tetap berjalan: makan, listrik dan air, obat, transportasi.',
     'Ruang perawatan yang tenang: monitor detak jantung, infus, dan lembar rincian biaya perawatan. Toples tabungan menyusut dan buku dana pendidikan ikut goyah.',
@@ -299,7 +299,7 @@
 
   /* ----- objek utama 560×380 (garis meja/tanah di y≈372) ----- */
   var ADEGAN = [];
-  /* 1. Surat untuk menantuku */
+  /* 1. Surat untuk anakku */
   ADEGAN[1] = {
     latar: function (P) { return latarKamar(P, { jendela: 'kanan', lampuX: 260, surya: 110, benih: 11 }); },
     objek: function (P) {
@@ -330,7 +330,7 @@
           '<path d="M280 266V370"' + S('kertas-garis', 2) + '/>' +
           '<path d="M146 312h124M146 326h124M146 340h124M146 354h124M294 298h118M294 312h118M294 326h118M294 340h118"' + S('kertas-garis', 1) + '/>' +
         '</g>' +
-        teks(148, 292, 'Untuk menantuku,', 15, 'tinta', ' font-style="italic" font-weight="700"' + A('muncul', 700, 700)) +
+        teks(148, 292, 'Untuk anakku,', 15, 'tinta', ' font-style="italic" font-weight="700"' + A('muncul', 700, 700)) +
         baris.join('') +
         /* pena mengikuti baris tulisan */
         '<g class="sgw-pena"' + A('pena') + ' data-titik="' + titik.join(' ') + '"><path d="M0 0l4-10 70-52 6 8-70 52z"' + F('pena') + '/><path d="M0 0l4-10 6 8z"' + F('emas') + '/></g>' +

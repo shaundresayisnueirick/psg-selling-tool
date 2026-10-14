@@ -41,21 +41,21 @@ detik termasuk jeda antar-scene.
 
 ---
 
-## SCENE 01 — SURAT UNTUK MENANTUKU DI MASA DEPAN
+## SCENE 01 — SURAT UNTUK ANAKKU KELAK
 
 **Nama file:** `sandwich-S01-01.mp3`
 
-**Arahan suara:** Hangat dan reflektif, seperti membaca surat pribadi. Jeda singkat sesudah "Untuk menantuku di masa depan", lalu jeda kecil sebelum "gajimu bukan rencana masa tuaku" agar kalimat itu terasa.
+**Arahan suara:** Hangat dan reflektif, seperti membaca surat pribadi. Jeda singkat sesudah "Untuk anakku kelak", lalu jeda kecil sebelum "gajimu bukan rencana masa tuaku" agar kalimat itu terasa.
 
 **NASKAH AUDIO**
 
 ```text
-Untuk menantuku di masa depan, ada satu hal yang ingin aku pastikan: gajimu bukan rencana masa tuaku.
+Untuk anakku kelak, ada satu hal yang ingin aku pastikan: gajimu bukan rencana masa tuaku.
 ```
 
 **Estimasi durasi:** ±7 detik.
 
-**Durasi rekaman terpasang:** 7,706 detik.
+**Durasi rekaman terpasang:** 7,158 detik.
 
 **Catatan jeda:** Jeda ±0,5 detik setelah koma pertama dan ±0,4 detik setelah titik dua.
 
@@ -209,7 +209,7 @@ Kedelapan MP3 sudah dipasang dengan pola Proteksi Kredit:
    (isi persis berkas ElevenLabs yang dikirim, tidak diubah).
 2. Manifest `src/sales-idea-sandwich-audio.js` (`window.PSGSandwichAudio`,
    suara Bian — Neutral, Calm and Clear). `end` = durasi berkas dari decode
-   Chromium (sama dengan ffprobe sampai milidetik); total 84,193 detik.
+   Chromium (sama dengan ffprobe sampai milidetik); total 83,645 detik.
 3. Manifest dimuat di `index.html` tepat sebelum `src/sales-idea-sandwich.js`;
    delapan MP3 dan manifest ada di daftar precache `sw.js`.
 

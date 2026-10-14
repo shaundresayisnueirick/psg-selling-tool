@@ -73,7 +73,7 @@ ditambahkan oleh aplikasi). Tanpa logo produk atau perusahaan.
 
 | # | Judul | Teks layar | Durasi suara ± | Transisi ke scene berikutnya |
 |---|---|---|---|---|
-| 1 | Surat untuk Menantuku di Masa Depan | Untuk Menantuku di Masa Depan | 7 dtk | Crossfade lembut |
+| 1 | Surat untuk Anakku Kelak | Untuk Anakku Kelak | 7 dtk | Crossfade lembut |
 | 2 | Kasih Sayang, Bukan Beban Tanpa Rencana | Kasih Sayang, Bukan Beban Tanpa Rencana | 10 dtk | Crossfade |
 | 3 | Masa Pensiun Perlu Disiapkan | Kebutuhan Hidup Tetap Berjalan | 10,5 dtk | Crossfade ke suasana lebih redup |
 | 4 | Kesehatan Bisa Mengubah Rencana | Kesehatan Dapat Mengubah Rencana | 11 dtk | Crossfade |
@@ -87,14 +87,14 @@ mengikuti lama narasi (rekaman bila sudah dipasang), ditambah jeda singkat.
 
 ---
 
-## Scene 1 — Surat untuk Menantuku di Masa Depan
+## Scene 1 — Surat untuk Anakku Kelak
 
 - **Tujuan:** Hook emosional untuk menarik perhatian calon nasabah.
-- **Teks layar:** Untuk Menantuku di Masa Depan
-- **Naskah audio:** Untuk menantuku di masa depan, ada satu hal yang ingin aku pastikan: gajimu bukan rencana masa tuaku.
+- **Teks layar:** Untuk Anakku Kelak
+- **Naskah audio:** Untuk anakku kelak, ada satu hal yang ingin aku pastikan: gajimu bukan rencana masa tuaku.
 - **Estimasi durasi:** ±7 detik (scene ±8 detik).
 - **Arahan visual:** Andi duduk di meja kayu ruang keluarga pada sore hari, menulis surat dengan pulpen. Di dekatnya ada foto keluarga berbingkai. Suasana hangat, tenang, intim, reflektif.
-- **Ilustrasi aplikasi (tanpa aset):** meja malam berlampu, buku terbuka bertuliskan "Untuk menantuku," yang ditulis perlahan dengan pena, amplop bersegel hati, foto keluarga, minuman hangat beruap.
+- **Ilustrasi aplikasi (tanpa aset):** meja malam berlampu, buku terbuka bertuliskan "Untuk anakku," yang ditulis perlahan dengan pena, amplop bersegel hati, foto keluarga, minuman hangat beruap.
 - **Prompt visual:** `Cinematic realistic short film shot, Indonesian man in his early 40s wearing a short-sleeve navy batik shirt and thin glasses, sitting at a wooden dining table in a warm middle-class Indonesian living room, writing a handwritten letter with a pen, framed family photo beside him, soft late-afternoon window light, shallow depth of field, slow dolly-in, warm natural color grade, no text, no logos`
 
 ## Scene 2 — Kasih Sayang, Bukan Beban Tanpa Rencana

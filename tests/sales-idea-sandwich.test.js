@@ -53,11 +53,11 @@ const BAGIAN = bi >= 0 ? args[bi + 1].split(',') : null;
 const ikut = (b) => !BAGIAN || BAGIAN.includes(b);
 
 /* Naskah & teks layar dari prompt pemilik proyek (kontrak). */
-const LAYAR = ['Untuk Menantuku di Masa Depan', 'Kasih Sayang, Bukan Beban Tanpa Rencana', 'Kebutuhan Hidup Tetap Berjalan', 'Kesehatan Dapat Mengubah Rencana',
+const LAYAR = ['Untuk Anakku Kelak', 'Kasih Sayang, Bukan Beban Tanpa Rencana', 'Kebutuhan Hidup Tetap Berjalan', 'Kesehatan Dapat Mengubah Rencana',
   'Siapkan Perlindungan Keluarga', 'Tiga Generasi. Satu Rantai.', 'Mulai dari Kebutuhan yang Nyata', 'RANTAI ITU PUTUS DI AKU'];
 const PENDUKUNG_8 = 'Tiga Generasi. Satu Keputusan.';
 const NASKAH = [
-  'Untuk menantuku di masa depan, ada satu hal yang ingin aku pastikan: gajimu bukan rencana masa tuaku.',
+  'Untuk anakku kelak, ada satu hal yang ingin aku pastikan: gajimu bukan rencana masa tuaku.',
   'Kami tentu ingin saling membantu dalam keluarga. Tetapi aku tak ingin kasih sayang berubah menjadi beban finansial yang tidak pernah direncanakan.',
   'Saat kita berhenti bekerja, kebutuhan hidup tetap berjalan. Pensiun yang tidak disiapkan bisa membuat anak harus ikut menanggung biaya hidup orang tuanya.',
   'Biaya kesehatan juga bisa datang di luar rencana. Tanpa perlindungan dan dana yang memadai, tabungan keluarga bahkan rencana pendidikan anak bisa ikut terganggu.',
