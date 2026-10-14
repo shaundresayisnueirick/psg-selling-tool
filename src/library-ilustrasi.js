@@ -137,7 +137,9 @@
         email:k.email||'',instagram:k.instagram||'',tiktok:k.tiktok||'',
         facebook:k.facebook||'',linkedin:k.linkedin||'',youtube:k.youtube||'',
         qr:k.qr||'TIDAK',
-        foto:(k.atasNama?(k.fotoAgen||''):(localStorage.getItem('insuranceHub.agen.foto.v1')||'')),
+        /* Foto akun aktif yang sama dengan Kartu Konsultan (read() membawa
+           field foto); bukan key foto global lama. */
+        foto:(k.atasNama?(k.fotoAgen||''):(typeof k.foto==='string'?k.foto:(typeof window.InsuranceHubFotoSendiri==='function'?window.InsuranceHubFotoSendiri()||'':''))),
         /* Pesan personal dipotret saat ilustrasi disimpan. Mengubah pesan
            sesudahnya tidak mengubah item ini; item lama tanpa field ini
            tetap tampil tanpa pesan. */
@@ -282,7 +284,7 @@
     const photo=(()=>{try{
       if(c&&typeof c.foto==='string') return c.foto;       // potret tersimpan
       if(c&&c.atasNama) return c.fotoAgen||'';
-      return localStorage.getItem('insuranceHub.agen.foto.v1')||''}catch(_){return ''}})();
+      return (typeof window.InsuranceHubFotoSendiri==='function'?window.InsuranceHubFotoSendiri()||'':'')}catch(_){return ''}})();
     body.innerHTML='<div class="summary-page">'+
       '<div class="summary-brand"><div><div class="summary-kicker">RINGKASAN KONSULTASI</div><h1>'+esc(family)+'</h1><p>'+items.length+' materi terpilih · dibuat '+now.toLocaleDateString('id-ID')+'</p></div><div class="summary-mark">INSURANCE HUB</div></div>'+
       '<div class="summary-grid"><div class="summary-box"><h2>👨‍👩‍👧 Tertanggung yang dibahas</h2>'+people.map(p=>'<div class="summary-person"><b>'+esc(p.name)+'</b><span>'+esc(p.rel)+'</span></div>').join('')+'</div><div class="summary-box"><h2>📂 Materi konsultasi</h2><p>'+categories.map(esc).join(' · ')+'</p><div class="summary-items">'+items.map((x,i)=>'<div class="summary-item"><div><b>'+(i+1)+'. '+esc(x.title)+'</b><span>'+esc(x.category||'Ilustrasi')+' · '+esc(x.relationship||'Diri Sendiri')+'</span></div></div>').join('')+'</div></div></div>'+

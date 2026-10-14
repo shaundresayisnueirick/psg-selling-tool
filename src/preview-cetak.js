@@ -13,10 +13,30 @@
   const consultant=()=>{try{
     if(window.__psgKonsultanCetak) return window.__psgKonsultanCetak;
     return window.InsuranceHubConsultantCard?.read?.()||JSON.parse(localStorage.getItem('insuranceHub.konsultan.v1')||'{}')}catch(_){return {}}};
+  /* Foto profil akun yang sedang masuk (identitas sendiri, bukan atas nama).
+     - index.html: sesi Identity memakai key foto per email dari
+       identity-login.js. Selama sesi Identity masih dipulihkan (cookie nf_jwt
+       ada, profil /api/psg/me belum siap) hasilnya kosong: placeholder, bukan
+       foto global lama.
+     - Halaman ringkasan tidak memuat identity-login.js; email sesi dibaca dari
+       klaim cookie nf_jwt yang ditulis @netlify/identity saat login.
+     - Tanpa sesi Identity (login kode akses lama): key foto lama. */
+  const cookieSesi=()=>{try{const m=/(?:^|;\s*)nf_jwt=([^;]*)/.exec(document.cookie||'');return m?decodeURIComponent(m[1]):''}catch(_){return ''}};
+  const emailSesi=t=>{try{const p=String(t).split('.')[1];
+    return p?String(JSON.parse(atob(p.replace(/-/g,'+').replace(/_/g,'/'))).email||'').trim().toLowerCase():''}catch(_){return ''}};
+  const fotoSendiri=()=>{try{
+    const t=cookieSesi(), id=window.InsuranceHubIdentity;
+    let key='insuranceHub.agen.foto.v1';
+    if(typeof window.InsuranceHubCurrentPhotoKey==='function'){
+      if(t&&!(id&&id.source==='server:/api/psg/me')) return '';
+      key=window.InsuranceHubCurrentPhotoKey();
+    }else if(t){const e=emailSesi(t); key=e?'insuranceHub.agen.foto.identity.v1.'+encodeURIComponent(e):'';}
+    return key?localStorage.getItem(key)||'':''}catch(_){return ''}};
+  window.InsuranceHubFotoSendiri=fotoSendiri;
   const photo=()=>{try{ const c=consultant();
     if(c&&typeof c.foto==='string') return c.foto;
     if(c&&c.atasNama) return c.fotoAgen||'';
-    return localStorage.getItem('insuranceHub.agen.foto.v1')||''}catch(_){return ''}};
+    return fotoSendiri()}catch(_){return ''}};
   const waDigits=v=>String(v||'').replace(/\D/g,'').replace(/^0/,'62');
   const waLink=v=>{const d=waDigits(v);return d?'https://wa.me/'+d:''};
   const qrSrc=v=>{const u=waLink(v);return u?'https://quickchart.io/qr?size=180&margin=2&text='+encodeURIComponent(u):''};
