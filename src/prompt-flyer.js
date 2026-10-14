@@ -76,8 +76,12 @@
      flyer memuat siapa yang menyajikan beserta nomor yang bisa dihubungi. */
   function penyaji() {
     try {
-      const a = JSON.parse(localStorage.getItem('insuranceHub.agen.v1') || '{}') || {};
-      const nama = escText(a.nama || '');
+      /* Data agen akun yang sedang masuk (src/preview-cetak.js); nama akun
+         Identity dari profilnya, bukan nama tersimpan di perangkat. */
+      const d = window.InsuranceHubDataAkun;
+      const a = (d ? d.baca('agen') : JSON.parse(localStorage.getItem('insuranceHub.agen.v1') || '{}')) || {};
+      const id = window.InsuranceHubIdentity;
+      const nama = escText((id && id.source === 'server:/api/psg/me' ? id.nama : a.nama) || '');
       const hp = escText(a.hp || a.telepon || '');
       if (!nama && !hp) return '';
       return nama + (hp ? ' \u00b7 ' + hp : '');

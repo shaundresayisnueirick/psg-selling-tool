@@ -325,10 +325,13 @@ function kakiAgenHtml(na, hp) {
   if (!nama || !kontak) {
     try {
       const k = (window.InsuranceHubConsultantCard && window.InsuranceHubConsultantCard.read()) || {};
+      /* Data agen akun yang sedang masuk (src/preview-cetak.js); level.v1
+         hanya milik login kode akses lama. */
+      const dataAkun = window.InsuranceHubDataAkun;
       let a = {};
-      try { a = JSON.parse(localStorage.getItem('insuranceHub.agen.v1') || '{}') || {}; } catch (_) {}
+      try { a = dataAkun ? dataAkun.baca('agen') : JSON.parse(localStorage.getItem('insuranceHub.agen.v1') || '{}') || {}; } catch (_) {}
       let l = {};
-      try { l = JSON.parse(localStorage.getItem('insuranceHub.level.v1') || '{}') || {}; } catch (_) {}
+      try { if (!dataAkun || dataAkun.sesi().mode === 'lama') l = JSON.parse(localStorage.getItem('insuranceHub.level.v1') || '{}') || {}; } catch (_) {}
       if (!nama) nama = String(k.nama || a.nama || l.namaAgen || '').trim();
       if (!kontak) kontak = String(k.whatsapp || a.hp || '').trim();
     } catch (_) {}
@@ -2441,10 +2444,11 @@ function fpIsiIdentitasKonsultan(prefix) {
     let k = {};
     /* Lewat InsuranceHubConsultantCard.read() supaya mode "atas nama agen
        lain" ikut berlaku. Membaca localStorage langsung akan melewatkannya. */
+    const dataAkun = window.InsuranceHubDataAkun;
     try { k = (window.InsuranceHubConsultantCard && window.InsuranceHubConsultantCard.read())
-      || JSON.parse(localStorage.getItem('insuranceHub.konsultan.v1') || '{}') || {}; } catch (_) {}
+      || (dataAkun ? dataAkun.baca('konsultan') : JSON.parse(localStorage.getItem('insuranceHub.konsultan.v1') || '{}')) || {}; } catch (_) {}
     let a = {};
-    try { a = JSON.parse(localStorage.getItem('insuranceHub.agen.v1') || '{}') || {}; } catch (_) {}
+    try { a = dataAkun ? dataAkun.baca('agen') : JSON.parse(localStorage.getItem('insuranceHub.agen.v1') || '{}') || {}; } catch (_) {}
     const nama = String(k.nama || a.nama || '').trim();
     const hp = String(k.whatsapp || a.hp || '').trim();
     if (!String(namaEl.value || '').trim() && nama) namaEl.value = nama;
@@ -5136,9 +5140,10 @@ function lfIsiIdentitasKonsultan(){
   const namaEl=el('fAgenNama'), hpEl=el('fAgenHP');
   if(!namaEl && !hpEl) return;
   try{
+    const dataAkun=window.InsuranceHubDataAkun;
     let k={}; try{k=(window.InsuranceHubConsultantCard&&window.InsuranceHubConsultantCard.read())
-      ||JSON.parse(localStorage.getItem('insuranceHub.konsultan.v1')||'{}')||{}}catch(_){}
-    let a={}; try{a=JSON.parse(localStorage.getItem('insuranceHub.agen.v1')||'{}')||{}}catch(_){}
+      ||(dataAkun?dataAkun.baca('konsultan'):JSON.parse(localStorage.getItem('insuranceHub.konsultan.v1')||'{}'))||{}}catch(_){}
+    let a={}; try{a=dataAkun?dataAkun.baca('agen'):JSON.parse(localStorage.getItem('insuranceHub.agen.v1')||'{}')||{}}catch(_){}
     const nama=String(k.nama||a.nama||'').trim();
     const hp=String(k.whatsapp||a.hp||'').trim();
     if(namaEl && !String(namaEl.value||'').trim() && nama){namaEl.value=nama;}

@@ -5,7 +5,7 @@
    `singapura`; 9:16 `asset-portrait` / `retirement-portrait` / `basket-portrait` /
    `education-portrait` / `singapura-portrait`).
 
-     node tests/sales-idea-video.test.js [--cerita asset|asset-portrait|retirement|retirement-portrait|basket|basket-portrait|education|education-portrait|singapura|singapura-portrait] [--hasil <folder>] [--out <folder>]
+     node tests/sales-idea-video.test.js [--cerita asset|asset-portrait|retirement|retirement-portrait|basket|basket-portrait|education|education-portrait|singapura|singapura-portrait|sandwich|sandwich-portrait] [--hasil <folder>] [--out <folder>]
 
    Tanpa --hasil: cerita di-render ke folder di luar repo (bawaan: folder
    sementara sistem), lalu hasilnya diperiksa. Dengan --hasil: hanya
@@ -77,7 +77,9 @@ const HARAP = {
   education: { manifest: 'src/sales-idea-education-audio.js', glob: 'PSGEducationAudio', scene: 10, segmen: 27, totalMin: 225000, totalMaks: 250000, kira: '≈ 237 dtk' },
   'education-portrait': { manifest: 'src/sales-idea-education-audio.js', glob: 'PSGEducationAudio', scene: 10, segmen: 27, totalMin: 225000, totalMaks: 250000, kira: '≈ 237 dtk', lebar: 720, tinggi: 1280 },
   singapura: { manifest: 'src/sales-idea-singapura-audio.js', glob: 'PSGSingapuraAudio', scene: 8, segmen: 27, totalMin: 295000, totalMaks: 320000, kira: '≈ 307 dtk' },
-  'singapura-portrait': { manifest: 'src/sales-idea-singapura-audio.js', glob: 'PSGSingapuraAudio', scene: 8, segmen: 27, totalMin: 295000, totalMaks: 320000, kira: '≈ 307 dtk', lebar: 720, tinggi: 1280 }
+  'singapura-portrait': { manifest: 'src/sales-idea-singapura-audio.js', glob: 'PSGSingapuraAudio', scene: 8, segmen: 27, totalMin: 295000, totalMaks: 320000, kira: '≈ 307 dtk', lebar: 720, tinggi: 1280 },
+  sandwich: { manifest: 'src/sales-idea-sandwich-audio.js', glob: 'PSGSandwichAudio', scene: 8, segmen: 8, totalMin: 90000, totalMaks: 100000, kira: '≈ 95 dtk' },
+  'sandwich-portrait': { manifest: 'src/sales-idea-sandwich-audio.js', glob: 'PSGSandwichAudio', scene: 8, segmen: 8, totalMin: 90000, totalMaks: 100000, kira: '≈ 95 dtk', lebar: 720, tinggi: 1280 }
 }[K];
 if (!HARAP) { console.log('cerita tidak dikenal: ' + K); process.exit(1); }
 const LB = HARAP.lebar || 1280, TG = HARAP.tinggi || 720, UK = LB + '×' + TG;
@@ -94,7 +96,11 @@ const MP4_RESMI = ['assets/video/asset-terang.mp4', 'assets/video/asset-gelap.mp
   'assets/video/jari-terang.mp4', 'assets/video/jari-gelap.mp4',
   'assets/video/jari-terang-portrait.mp4', 'assets/video/jari-gelap-portrait.mp4',
   'assets/video/singapura-terang.mp4', 'assets/video/singapura-gelap.mp4',
-  'assets/video/singapura-terang-portrait.mp4', 'assets/video/singapura-gelap-portrait.mp4'];
+  'assets/video/singapura-terang-portrait.mp4', 'assets/video/singapura-gelap-portrait.mp4',
+  'assets/video/kredit-terang.mp4', 'assets/video/kredit-gelap.mp4',
+  'assets/video/kredit-terang-portrait.mp4', 'assets/video/kredit-gelap-portrait.mp4',
+  'assets/video/sandwich-terang.mp4', 'assets/video/sandwich-gelap.mp4',
+  'assets/video/sandwich-terang-portrait.mp4', 'assets/video/sandwich-gelap-portrait.mp4'];
 const bukanResmi = (berkas) => berkas.filter((f) => !MP4_RESMI.includes(f));
 
 let gagal = 0;

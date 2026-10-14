@@ -137,7 +137,13 @@
         email:k.email||'',instagram:k.instagram||'',tiktok:k.tiktok||'',
         facebook:k.facebook||'',linkedin:k.linkedin||'',youtube:k.youtube||'',
         qr:k.qr||'TIDAK',
-        foto:(k.atasNama?(k.fotoAgen||''):(localStorage.getItem('insuranceHub.agen.foto.v1')||''))};
+        /* Foto akun aktif yang sama dengan Kartu Konsultan (read() membawa
+           field foto); bukan key foto global lama. */
+        foto:(k.atasNama?(k.fotoAgen||''):(typeof k.foto==='string'?k.foto:(typeof window.InsuranceHubFotoSendiri==='function'?window.InsuranceHubFotoSendiri()||'':''))),
+        /* Pesan personal dipotret saat ilustrasi disimpan. Mengubah pesan
+           sesudahnya tidak mengubah item ini; item lama tanpa field ini
+           tetap tampil tanpa pesan. */
+        pesan:pesanSendiri(k)};
     }catch(_){}
     const a=read(); a.unshift(item); write(a.slice(0,200));
     render();
@@ -246,7 +252,14 @@
     const h=el('libBatchHint'); if(h) h.textContent=selectedBatch.size ? selectedBatch.size+' hasil dipilih untuk paket meeting.' : 'Pilih beberapa hasil di Library untuk menyusun satu paket meeting. Tidak perlu menghitung ulang.';
   }
   function closeBatch(){const m=el('libraryBatchModal');if(m)m.remove();document.documentElement.classList.remove('psg-library-batch-open');document.body.classList.remove('psg-library-batch-open')}
-  function consultantData(){try{return window.InsuranceHubConsultantCard?.read?.()||JSON.parse(localStorage.getItem('insuranceHub.konsultan.v1')||'{}')}catch(_){return {}}}
+  /* Pesan personal akun yang sedang masuk (src/pesan-personal.js). Kosong
+     bila identitas yang dipakai milik agen lain (mode atas nama). */
+  function pesanSendiri(k){try{
+    if(k&&k.atasNama) return '';
+    const p=window.InsuranceHubPesanPersonal;
+    return p&&typeof p.untukIdentitasSendiri==='function'?String(p.untukIdentitasSendiri()||''):'';
+  }catch(_){return ''}}
+  function consultantData(){try{return window.InsuranceHubConsultantCard?.read?.()||(window.InsuranceHubDataAkun?window.InsuranceHubDataAkun.baca('konsultan'):{})}catch(_){return {}}}
   function closeSummary(){const m=el('libraryOnePageModal');if(m)m.remove();document.documentElement.classList.remove('psg-library-summary-open');document.body.classList.remove('psg-library-summary-open')}
   function openSummary(){
     const all=read(), items=all.filter(x=>selectedBatch.has(x.id));
@@ -257,6 +270,7 @@
     /* Identitas diambil dari potret yang tersimpan bersama ilustrasi, bukan
        dari identitas yang sedang aktif sekarang. */
     const c=(items[0]&&items[0].konsultan)||consultantData();
+    const pesan=(items[0]&&items[0].konsultan)?(typeof c.pesan==='string'?c.pesan:''):pesanSendiri(c);
     const family=items[0].familyName||items[0].customerName||'Nasabah';
     const people=[...new Map(items.map(x=>[String(x.insuredPersonId||x.customerName),{name:x.customerName||'Nasabah',rel:x.relationship||'Diri Sendiri'}])).values()];
     const categories=[...new Set(items.map(x=>x.category||'Ilustrasi'))];
@@ -270,12 +284,12 @@
     const photo=(()=>{try{
       if(c&&typeof c.foto==='string') return c.foto;       // potret tersimpan
       if(c&&c.atasNama) return c.fotoAgen||'';
-      return localStorage.getItem('insuranceHub.agen.foto.v1')||''}catch(_){return ''}})();
+      return (typeof window.InsuranceHubFotoSendiri==='function'?window.InsuranceHubFotoSendiri()||'':'')}catch(_){return ''}})();
     body.innerHTML='<div class="summary-page">'+
       '<div class="summary-brand"><div><div class="summary-kicker">RINGKASAN KONSULTASI</div><h1>'+esc(family)+'</h1><p>'+items.length+' materi terpilih · dibuat '+now.toLocaleDateString('id-ID')+'</p></div><div class="summary-mark">INSURANCE HUB</div></div>'+
       '<div class="summary-grid"><div class="summary-box"><h2>👨‍👩‍👧 Tertanggung yang dibahas</h2>'+people.map(p=>'<div class="summary-person"><b>'+esc(p.name)+'</b><span>'+esc(p.rel)+'</span></div>').join('')+'</div><div class="summary-box"><h2>📂 Materi konsultasi</h2><p>'+categories.map(esc).join(' · ')+'</p><div class="summary-items">'+items.map((x,i)=>'<div class="summary-item"><div><b>'+(i+1)+'. '+esc(x.title)+'</b><span>'+esc(x.category||'Ilustrasi')+' · '+esc(x.relationship||'Diri Sendiri')+'</span></div></div>').join('')+'</div></div></div>'+
       '<div class="summary-note"><b>Catatan:</b> Ringkasan ini hanya merangkum materi yang dipilih dari Library Nasabah. Angka/manfaat tidak dihitung ulang dan tidak menambahkan informasi yang tidak tersimpan pada materi.</div>'+
-      '<div class="summary-consultant">'+(photo?'<img src="'+esc(photo)+'" alt="Foto konsultan">':'<div class="summary-avatar">👤</div>')+'<div><div class="summary-kicker">KONSULTAN</div><h3>'+esc(c.nama||'Nama konsultan')+'</h3><p>'+esc(c.jabatan||'Financial Consultant')+'</p><p>'+[c.whatsapp&&('WhatsApp: '+c.whatsapp),c.email&&('Email: '+c.email)].filter(Boolean).map(esc).join(' · ')+'</p><div class="summary-socials">'+social.join(' · ')+'</div></div></div>'+
+      '<div class="summary-consultant">'+(photo?'<img src="'+esc(photo)+'" alt="Foto konsultan">':'<div class="summary-avatar">👤</div>')+'<div><div class="summary-kicker">KONSULTAN</div><h3>'+esc(c.nama||'Nama konsultan')+'</h3><p>'+esc(c.jabatan||'Financial Consultant')+'</p><p>'+[c.whatsapp&&('WhatsApp: '+c.whatsapp),c.email&&('Email: '+c.email)].filter(Boolean).map(esc).join(' · ')+'</p><div class="summary-socials">'+social.join(' · ')+'</div>'+(pesan?'<p class="summary-pesan">'+esc(pesan)+'</p>':'')+'</div></div>'+
       '</div>';
     card.append(head,body);modal.appendChild(card);document.body.appendChild(modal);document.documentElement.classList.add('psg-library-summary-open');document.body.classList.add('psg-library-summary-open');
     el('summaryClose').onclick=closeSummary; modal.addEventListener('click',e=>{if(e.target===modal)closeSummary()});

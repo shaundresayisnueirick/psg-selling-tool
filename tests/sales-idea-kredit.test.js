@@ -269,7 +269,7 @@ const rp = (n) => 'Rp' + Math.round(n).toLocaleString('id-ID');
     const { ctx, pg } = await buka();
     await pg.evaluate(() => document.getElementById('btnSalesIdea').click()); await pg.waitForTimeout(300);
     const kartu = await pg.evaluate(() => [...document.querySelectorAll('[data-si-choice]')].map((b) => b.dataset.siChoice).join(','));
-    cek(kartu === LAIN.concat('kredit').join(','), 'hub: 6 Sales Idea lama tetap + Proteksi Kredit di akhir', kartu);
+    cek(kartu === LAIN.concat('kredit', 'sandwich').join(','), 'hub: 6 Sales Idea lama tetap + Proteksi Kredit + Sandwich Generation', kartu);
     const label = await pg.evaluate(() => { const b = document.querySelector('[data-si-choice="kredit"]'); return { span: b.querySelector('span').textContent, h3: b.querySelector('h3').textContent }; });
     cek(label.span === 'SALES IDEA 07' && label.h3 === 'Proteksi Kredit', 'kartu hub: SALES IDEA 07 — Proteksi Kredit', label);
     await pg.evaluate(() => document.querySelector('[data-si-choice="kredit"]').click()); await pg.waitForTimeout(400);
@@ -564,7 +564,7 @@ const rp = (n) => 'Rp' + Math.round(n).toLocaleString('id-ID');
     await b.pg.waitForTimeout(350);
     const hub = await b.pg.evaluate(() => ({ mode: window.SalesIdea10Jari.keadaan().mode, layar: (document.querySelector('.layar.aktif') || {}).id,
       kartu: [...document.querySelectorAll('[data-si-choice]')].filter((x) => x.getBoundingClientRect().height > 0).length }));
-    cek(hub.mode === 'hub' && hub.layar === 'layarSalesIdea' && hub.kartu === 7, 'Topik Lain → hub Sales Idea dengan 7 kartu (bukan dashboard)', hub);
+    cek(hub.mode === 'hub' && hub.layar === 'layarSalesIdea' && hub.kartu === 8, 'Topik Lain → hub Sales Idea dengan 8 kartu (bukan dashboard)', hub);
     /* kartu akhir dipakai bersama: Sales Idea lain sesudah Proteksi Kredit kembali ke label bawaan */
     await bukaMode(b.pg, 'asset');
     for (let i = 0; i < 12; i++) { const k2 = await b.pg.evaluate(() => window.SalesIdea10Jari.keadaan()); if (k2.indeks >= k2.total - 1) break; await b.pg.keyboard.press('ArrowRight'); await b.pg.waitForTimeout(150); }
