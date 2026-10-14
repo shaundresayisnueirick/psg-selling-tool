@@ -69,6 +69,9 @@
     sesiEmail: sesiEmail,
     ambil: function () { return minta('GET', ''); },
     simpanPesan: function (teks) { return minta('PUT', '/pesan', { teks: String(teks == null ? '' : teks) }); },
+    /* Asuransiku: satu polis per permintaan; ID polis berupa UUID. */
+    simpanPolis: function (id, polis) { return minta('PUT', '/polis/' + encodeURIComponent(id), polis); },
+    hapusPolis: function (id) { return minta('DELETE', '/polis/' + encodeURIComponent(id)); },
     minta: minta,
     pesanGagal: pesanGagal
   };

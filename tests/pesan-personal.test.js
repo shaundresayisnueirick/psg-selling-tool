@@ -89,7 +89,8 @@ async function main() {
 
   /* Netlify Blobs tiruan + sesi yang sedang aktif (diatur tes). */
   const store = new Map();
-  const toko = { async get(k) { return store.has(k) ? JSON.parse(store.get(k)) : null; }, async setJSON(k, v) { store.set(k, JSON.stringify(v)); }, async delete(k) { store.delete(k); } };
+  const toko = { async get(k) { return store.has(k) ? JSON.parse(store.get(k)) : null; }, async setJSON(k, v) { store.set(k, JSON.stringify(v)); }, async delete(k) { store.delete(k); },
+    async list(o) { return { blobs: [...store.keys()].filter((k) => k.startsWith(o.prefix)).map((key) => ({ key, etag: '' })) }; } };
   let sesi = null;                 // akun yang dianggap sedang login di server
   let gangguan = 0;                // jumlah permintaan berikutnya yang dijawab 503
   let hasilCek = 'ya';             // jawaban verifikasi ulang konfirmasi email ke Identity (URL utama)
