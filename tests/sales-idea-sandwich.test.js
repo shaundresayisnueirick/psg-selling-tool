@@ -517,6 +517,8 @@ function naskahDokumen(md) {
       }
       await putar(pg);
       await tunggu(pg, () => { const p = document.getElementById('sgwPilihan'); return p && !p.hidden; }, 60000);
+      /* ukur posisi akhir: panel masuk dengan translateY(12px) → 0 selama 0,28 s */
+      await tunggu(pg, () => { const p = document.getElementById('sgwPilihan'); return p.classList.contains('sil-tampil') && getComputedStyle(p).transform === 'none'; }, 5000);
       const p = await pg.evaluate(() => {
         const r = document.getElementById('sgwPilihan').getBoundingClientRect();
         const tombol = [...document.querySelectorAll('#sgwPilihan button')].map((b) => b.getBoundingClientRect()).filter((b) => b.width > 0);
