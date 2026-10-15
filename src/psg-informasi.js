@@ -126,17 +126,29 @@
   form.addEventListener('submit', function (e) {
     e.preventDefault(); if (!owner) { infoStatus('Hanya PSG Owner yang dapat mengelola informasi.', true); return; }
     var id = field('id').value;
+    var tombol = form.querySelector('button[type="submit"]');
+    var tombolTeks = tombol ? tombol.textContent : '';
+    if (tombol) { if (tombol.disabled) return; tombol.disabled = true; tombol.textContent = 'Menyimpan…'; }
+    infoStatus('Menyimpan informasi…');
     var body = { judul: field('judul').value, kategori: field('kategori').value, tanggal: field('tanggal').value, isi: field('isi').value, status: field('status').value };
     var url = id ? BASE + '/' + id : BASE;
+    var tersimpan = false;
     request(url, { method: id ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json', 'X-PSG-Request': '1' }, body: JSON.stringify(body) })
       .then(function (r) { return r.json(); }).then(function (result) {
-        id = result.informasi.id;
+        id = result.informasi.id; tersimpan = true;
         var file = field('file').files && field('file').files[0];
         if (!file) return null;
         var data = new FormData(); data.append('file', file);
         return request(BASE + '/' + id + '/lampiran', { method: 'POST', body: data });
       }).then(function () { infoStatus('Informasi berhasil disimpan.'); selected = null; resetForm(); loadItems(); })
-      .catch(function (err) { infoStatus(err.message, true); });
+      .catch(function (err) {
+        infoStatus((tersimpan ? 'Informasi tersimpan, tetapi lampiran gagal diunggah: ' : 'Informasi belum tersimpan: ') + (err && err.message || 'terjadi kesalahan.'), true);
+        if (tersimpan) loadItems();
+      })
+      .then(function () {
+        if (tombol) { tombol.disabled = false; tombol.textContent = tombolTeks; }
+        if (statusEl.scrollIntoView) statusEl.scrollIntoView({ block: 'nearest' });
+      });
   });
   dialog.addEventListener('close', function () { selected = null; });
   window.addEventListener('psg:identity-ready', function () { if (dialog.open) { refreshOwner(); loadItems(); } });

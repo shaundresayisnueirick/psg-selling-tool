@@ -145,6 +145,21 @@ async function main() {
     const r = await tanganiInformasi(req('/api/psg/informasi/' + info.id + '/lampiran/' + fileId, { method: 'DELETE' }), uploadFixture.deps);
     assert.equal(r.status, 200); assert.equal(uploadFixture.data.has('lampiran/' + info.id + '/' + fileId), false);
   });
+  await test('regresi 503: simpan draft + upload JPEG memakai pembuat UUID bawaan runtime (tanpa deps.uuid)', async () => {
+    const g = fixture(OWNER); delete g.deps.uuid;
+    const r = await tanganiInformasi(req('/api/psg/informasi', { method: 'POST', body: payload('draft') }), g.deps);
+    assert.equal(r.status, 201); const b = await r.json();
+    assert.match(b.informasi.id, /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/); assert.equal(b.informasi.status, 'draft');
+    const d = new FormData(); d.append('file', new File([new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 1, 2, 3])], 'flyer.jpg', { type: 'image/jpeg' }));
+    const u = await tanganiInformasi(new Request('https://psg.test/api/psg/informasi/' + b.informasi.id + '/lampiran', { method: 'POST', headers: { 'x-psg-request': '1', origin: 'https://psg.test' }, body: d }), g.deps);
+    assert.equal(u.status, 201); assert.equal((await u.json()).lampiran.tipe, 'image/jpeg');
+  });
+  await test('galat storage tak terduga: 503 generik tanpa membocorkan detail', async () => {
+    const g = fixture(OWNER); const toko = g.deps.toko(); g.deps.toko = () => ({ ...toko, setJSON: async () => { throw new Error('SECRET-TOKEN-xyz at /var/task/x.js'); } });
+    const orig = console.error; let log = ''; console.error = (...a) => { log += a.join(' '); };
+    const r = await tanganiInformasi(req('/api/psg/informasi', { method: 'POST', body: payload() }), g.deps); console.error = orig;
+    const t = await r.text(); assert.equal(r.status, 503); assert.ok(!/SECRET|var\/task/.test(t + log));
+  });
   console.log(`\n${checks} assertion PASS`);
 }
 main().catch((e) => { console.error(e); process.exitCode = 1; });

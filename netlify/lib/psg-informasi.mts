@@ -117,6 +117,9 @@ function validasiFile(bytes: Uint8Array, tipe: string) {
   if (!terdeteksi) throw new Galat(400, 'invalid_file_type', 'Lampiran harus PDF, PNG, JPEG, atau WebP yang valid.')
   return terdeteksi
 }
+/* crypto.randomUUID harus dipanggil pada objek crypto; memanggilnya terlepas
+   melempar ERR_INVALID_THIS di runtime Node (penyebab HTTP 503 saat Simpan). */
+const buatUuid = () => crypto.randomUUID()
 function namaFile(v: string) { return v.replace(/[\\/\u0000-\u001f\u007f]/g, '').trim().slice(0, 120) || 'lampiran' }
 async function dapatkan(toko: TokoInformasi, id: string): Promise<Item> {
   const item = bacaItem(await toko.get(kunciItem(id), { type: 'json' }))
@@ -141,7 +144,7 @@ export async function tanganiInformasi(req: Request, deps: DepsInformasi): Promi
     }
     if (rest === '' && method === 'POST') {
       periksaTulis(req); await sesi(deps, true)
-      const id = (deps.uuid || crypto.randomUUID)()
+      const id = (deps.uuid || buatUuid)()
       if (!ID.test(id)) throw new Galat(500, 'id_generation_failed', 'Informasi tidak dapat dibuat.')
       const item = validasi(await json(req), id, undefined, (deps.sekarang || (() => new Date()))())
       await deps.toko().setJSON(kunciItem(id), item)
@@ -163,7 +166,7 @@ export async function tanganiInformasi(req: Request, deps: DepsInformasi): Promi
       if (file.size > BATAS_FILE) throw new Galat(413, 'file_too_large', 'Ukuran lampiran maksimal 4 MB.')
       const bytes = new Uint8Array(await file.arrayBuffer())
       const tipe = validasiFile(bytes, file.type)
-      const fileId = (deps.uuid || crypto.randomUUID)()
+      const fileId = (deps.uuid || buatUuid)()
       if (!ID.test(fileId)) throw new Galat(500, 'id_generation_failed', 'Lampiran tidak dapat disimpan.')
       const meta: Attachment = { id: fileId, nama: namaFile(file.name), tipe, ukuran: bytes.byteLength }
       const buffer = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer
@@ -210,6 +213,8 @@ export async function tanganiInformasi(req: Request, deps: DepsInformasi): Promi
     return jawabJson(405, { error: 'method_not_allowed' }, { Allow: 'GET, POST, PUT, DELETE' })
   } catch (e) {
     if (e instanceof Galat) return gagal(e.status, e.kode, e.message)
+    /* Hanya nama/kode galat yang dicatat; tanpa pesan, data, token, atau stack. */
+    console.error('psg-informasi: galat tak terduga', (e as { code?: string; name?: string } | null)?.code || (e as Error | null)?.name || 'unknown')
     return gagal(503, 'storage_unavailable', 'Pusat informasi sedang tidak dapat diakses. Coba lagi.')
   }
 }
