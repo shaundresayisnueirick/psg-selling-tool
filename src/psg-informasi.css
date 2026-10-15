@@ -1,4 +1,7 @@
 .psg-informasi-bell{position:relative;display:inline-grid;place-items:center;flex:none;width:40px;height:40px;padding:0;border:1px solid var(--border);border-radius:var(--r-pill);background:var(--surface);color:var(--text-2);cursor:pointer}
+.psg-informasi-badge{position:absolute;top:-6px;right:-6px;min-width:18px;height:18px;padding:0 5px;box-sizing:border-box;border-radius:9px;background:var(--brand);color:#fff;font:700 11px/18px system-ui,sans-serif;text-align:center;pointer-events:none}
+.psg-informasi-badge[hidden]{display:none}
+.psg-informasi-item.belum-dibaca b{font-weight:800}
 .psg-informasi-bell:hover{background:var(--surface-2);border-color:var(--border-strong);color:var(--brand)}
 .psg-informasi-bell svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .psg-informasi-dialog{width:min(920px,calc(100vw - 28px));max-width:none;max-height:min(90dvh,900px);padding:0;border:1px solid var(--border);border-radius:var(--r-xl);background:var(--surface);color:var(--text);box-shadow:var(--shadow-lg)}

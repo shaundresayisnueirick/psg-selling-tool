@@ -21,6 +21,26 @@
       return r;
     });
   }
+  /* Badge angka pada lonceng: jumlah informasi Published yang belum dibaca akun
+     ini. Dihitung dan disimpan server per akun (GET /belum-dibaca, POST /:id/dibaca). */
+  var bell = $('btnPsgInformasi'), badgeEl = $('psgInformasiBadge'), unread = new Set();
+  function renderBadge() {
+    var n = unread.size;
+    if (badgeEl) { badgeEl.hidden = n === 0; badgeEl.textContent = n > 99 ? '99+' : String(n); }
+    if (bell) bell.setAttribute('aria-label', 'Buka Pusat Informasi PSG' + (n ? ', ' + n + ' belum dibaca' : ''));
+  }
+  function setUnread(data) { unread = new Set(data && Array.isArray(data.ids) ? data.ids : []); renderBadge(); }
+  function loadUnread() {
+    var identity = window.InsuranceHubIdentity;
+    if (!(identity && identity.source === 'server:/api/psg/me')) { setUnread(null); return; }
+    request(BASE + '/belum-dibaca').then(function (r) { return r.json(); }).then(setUnread).catch(function () {});
+  }
+  function markRead(item) {
+    if (!item || item.status !== 'published' || !unread.has(item.id)) return;
+    unread.delete(item.id); renderBadge(); renderList();
+    request(BASE + '/' + item.id + '/dibaca', { method: 'POST' }).then(function (r) { return r.json(); }).then(setUnread)
+      .catch(function () { unread.add(item.id); renderBadge(); renderList(); });
+  }
   function el(tag, cls, text) {
     var n = document.createElement(tag);
     if (cls) n.className = cls;
@@ -49,9 +69,11 @@
     if (!items.length) { listEl.appendChild(el('p', '', 'Belum ada informasi pada kategori ini.')); detailEl.hidden = true; return; }
     items.forEach(function (item) {
       var b = el('button', 'psg-informasi-item'); b.type = 'button'; b.setAttribute('aria-current', String(selected && selected.id === item.id));
-      b.appendChild(el('b', '', item.judul));
+      var baru = item.status === 'published' && unread.has(item.id);
+      if (baru) b.classList.add('belum-dibaca');
+      b.appendChild(el('b', '', (baru ? 'Baru · ' : '') + item.judul));
       b.appendChild(el('span', '', item.kategori + ' · ' + tanggal(item.tanggal) + (owner ? ' · ' + item.status : '')));
-      b.addEventListener('click', function () { showDetail(item); });
+      b.addEventListener('click', function () { showDetail(item); markRead(item); });
       listEl.appendChild(b);
     });
     if (!selected || !items.some(function (x) { return x.id === selected.id; })) showDetail(items[0]);
@@ -75,7 +97,7 @@
       var edit = el('button', 'pi-button pi-secondary', 'Edit informasi'); edit.type = 'button'; edit.style.marginTop = '16px';
       edit.addEventListener('click', function () { editItem(item); }); detailEl.appendChild(edit);
     }
-    Array.prototype.forEach.call(listEl.children, function (b) { b.setAttribute('aria-current', String(b.querySelector('b') && b.querySelector('b').textContent === item.judul)); });
+    Array.prototype.forEach.call(listEl.children, function (b) { b.setAttribute('aria-current', String(b.querySelector('b') && (b.querySelector('b').textContent.replace(/^Baru · /, '')) === item.judul)); });
   }
   function loadItems() {
     infoStatus('Memuat informasi…');
@@ -140,7 +162,7 @@
         if (!file) return null;
         var data = new FormData(); data.append('file', file);
         return request(BASE + '/' + id + '/lampiran', { method: 'POST', body: data });
-      }).then(function () { infoStatus('Informasi berhasil disimpan.'); selected = null; resetForm(); loadItems(); })
+      }).then(function () { infoStatus('Informasi berhasil disimpan.'); selected = null; resetForm(); loadItems(); loadUnread(); })
       .catch(function (err) {
         infoStatus((tersimpan ? 'Informasi tersimpan, tetapi lampiran gagal diunggah: ' : 'Informasi belum tersimpan: ') + (err && err.message || 'terjadi kesalahan.'), true);
         if (tersimpan) loadItems();
@@ -150,6 +172,8 @@
         if (statusEl.scrollIntoView) statusEl.scrollIntoView({ block: 'nearest' });
       });
   });
-  dialog.addEventListener('close', function () { selected = null; });
-  window.addEventListener('psg:identity-ready', function () { if (dialog.open) { refreshOwner(); loadItems(); } });
+  dialog.addEventListener('close', function () { selected = null; loadUnread(); });
+  window.addEventListener('psg:identity-ready', function () { loadUnread(); if (dialog.open) { refreshOwner(); loadItems(); } });
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) loadUnread(); });
+  loadUnread();
 })();

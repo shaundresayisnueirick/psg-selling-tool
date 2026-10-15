@@ -106,6 +106,21 @@ async function semua(toko: TokoInformasi): Promise<Item[]> {
   const nilai = await Promise.all(daftar.blobs.map((x) => toko.get(x.key, { type: 'json' })))
   return nilai.map(bacaItem).filter((x): x is Item => Boolean(x))
 }
+/* Status baca per anggota: dibaca/<user.id>.json = { ids: [id informasi] }.
+   user.id berasal dari sesi yang diverifikasi server, bukan dari permintaan.
+   Hanya informasi Published yang dihitung; id yang sudah tidak ada atau tidak
+   lagi Published dibuang saat penulisan berikutnya. */
+const kunciBaca = (uid: string) => `dibaca/${uid}.json`
+async function bacaSet(toko: TokoInformasi, uid: string): Promise<Set<string>> {
+  const raw = await toko.get(kunciBaca(uid), { type: 'json' }) as { ids?: unknown } | null
+  return new Set(Array.isArray(raw?.ids) ? (raw!.ids as unknown[]).filter((x): x is string => typeof x === 'string' && ID.test(x)) : [])
+}
+async function belumDibaca(toko: TokoInformasi, uid: string) {
+  const [items, dibaca] = await Promise.all([semua(toko), bacaSet(toko, uid)])
+  const terbit = items.filter((x) => x.status === 'published')
+  const ids = terbit.filter((x) => !dibaca.has(x.id)).map((x) => x.id)
+  return { jumlah: ids.length, ids }
+}
 const urutTerbaru = (a: Item, b: Item) => b.tanggal.localeCompare(a.tanggal) || b.diperbarui.localeCompare(a.diperbarui)
 function validasiFile(bytes: Uint8Array, tipe: string) {
   const awal = (n: number) => bytes[n]
@@ -150,9 +165,28 @@ export async function tanganiInformasi(req: Request, deps: DepsInformasi): Promi
       await deps.toko().setJSON(kunciItem(id), item)
       return jawabJson(201, { ok: true, penyimpanan: storeTag(deps), informasi: item })
     }
-    const match = rest.match(/^\/([0-9a-f-]+)(?:\/lampiran(?:\/([0-9a-f-]+))?)?$/i)
+    if (rest === '/belum-dibaca' && method === 'GET') {
+      const user = await sesi(deps)
+      return jawabJson(200, { ok: true, ...(await belumDibaca(deps.toko(), String(user.id))) })
+    }
+    const match = rest.match(/^\/([0-9a-f-]+)(?:\/dibaca|\/lampiran(?:\/([0-9a-f-]+))?)?$/i)
     if (!match || !ID.test(match[1])) return gagal(404, 'not_found', 'Alamat tidak dikenal.')
     const id = match[1], attachmentId = match[2], store = deps.toko()
+    if (rest.endsWith('/dibaca') && method === 'POST') {
+      periksaTulis(req)
+      const user = await sesi(deps)
+      const item = await dapatkan(store, id)
+      /* Draft/Archived tidak dihitung dan tidak bisa ditandai (tidak terlihat anggota). */
+      if (item.status !== 'published') throw new Galat(404, 'not_found', 'Informasi tidak ditemukan.')
+      const uid = String(user.id)
+      const dibaca = await bacaSet(store, uid)
+      if (!dibaca.has(id)) {
+        dibaca.add(id)
+        const terbit = new Set((await semua(store)).filter((x) => x.status === 'published').map((x) => x.id))
+        await store.setJSON(kunciBaca(uid), { ids: [...dibaca].filter((x) => terbit.has(x)) })
+      }
+      return jawabJson(200, { ok: true, ...(await belumDibaca(store, uid)) })
+    }
     if (rest.endsWith('/lampiran') && method === 'POST') {
       periksaTulis(req); await sesi(deps, true)
       const item = await dapatkan(store, id)

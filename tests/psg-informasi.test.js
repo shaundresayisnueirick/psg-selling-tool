@@ -160,6 +160,51 @@ async function main() {
     const r = await tanganiInformasi(req('/api/psg/informasi', { method: 'POST', body: payload() }), g.deps); console.error = orig;
     const t = await r.text(); assert.equal(r.status, 503); assert.ok(!/SECRET|var\/task/.test(t + log));
   });
+  /* ---------- Badge belum dibaca ---------- */
+  const MEMBER2 = { id: '33333333-3333-4333-8333-333333333333', email: 'member2@psg.test', confirmedAt: '2026-01-01', appMetadata: { roles: [], psg: { level: 'FC', status: 'aktif' } } };
+  const maps = new Map(); const u = (() => { let n = 0; return () => '1000000' + (n++) + '-0000-4000-8000-000000000000'; })();
+  const dep = (user) => { const g = fixture(user, 'psg-informasi-preview', maps); g.deps.uuid = u; return g.deps; };
+  const call = async (user, p, o) => { const r = await tanganiInformasi(req(p, o), dep(user)); return { status: r.status, body: await r.json() }; };
+  const buat = async (status) => (await call(OWNER, '/api/psg/informasi', { method: 'POST', body: payload(status) })).body.informasi.id;
+  const iD = await buat('draft'), iA = await buat('published'), iB = await buat('published'), iX = await buat('archived');
+  await test('badge: hanya Published yang dihitung (Draft/Archived tidak)', async () => {
+    const r = await call(MEMBER, '/api/psg/informasi/belum-dibaca'); assert.equal(r.status, 200);
+    assert.equal(r.body.jumlah, 2); assert.deepEqual([...r.body.ids].sort(), [iA, iB].sort());
+  });
+  await test('membuka daftar/panel tidak menandai dibaca', async () => {
+    await call(MEMBER, '/api/psg/informasi'); await call(MEMBER, '/api/psg/informasi');
+    assert.equal((await call(MEMBER, '/api/psg/informasi/belum-dibaca')).body.jumlah, 2);
+  });
+  await test('membaca satu per satu mengurangi badge; ulang tidak mengurangi dua kali', async () => {
+    let r = await call(MEMBER, '/api/psg/informasi/' + iA + '/dibaca', { method: 'POST' }); assert.equal(r.body.jumlah, 1);
+    r = await call(MEMBER, '/api/psg/informasi/' + iA + '/dibaca', { method: 'POST' }); assert.equal(r.body.jumlah, 1);
+    r = await call(MEMBER, '/api/psg/informasi/' + iB + '/dibaca', { method: 'POST' }); assert.equal(r.body.jumlah, 0);
+  });
+  await test('persisten (refresh/login ulang): yang sudah dibaca tidak muncul lagi', async () => {
+    const r = await call(MEMBER, '/api/psg/informasi/belum-dibaca'); assert.equal(r.body.jumlah, 0); assert.deepEqual(r.body.ids, []);
+  });
+  await test('status baca terpisah per anggota', async () => {
+    assert.equal((await call(MEMBER2, '/api/psg/informasi/belum-dibaca')).body.jumlah, 2);
+    await call(MEMBER2, '/api/psg/informasi/' + iA + '/dibaca', { method: 'POST' });
+    assert.equal((await call(MEMBER2, '/api/psg/informasi/belum-dibaca')).body.jumlah, 1);
+    assert.equal((await call(MEMBER, '/api/psg/informasi/belum-dibaca')).body.jumlah, 0);
+  });
+  await test('publikasi baru menambah badge; Draft yang dipublikasikan menghitung', async () => {
+    const iC = await buat('published'); assert.equal((await call(MEMBER, '/api/psg/informasi/belum-dibaca')).body.jumlah, 1);
+    await call(OWNER, '/api/psg/informasi/' + iD, { method: 'PUT', body: payload('published') });
+    const r = await call(MEMBER, '/api/psg/informasi/belum-dibaca'); assert.equal(r.body.jumlah, 2); assert.ok(r.body.ids.includes(iC) && r.body.ids.includes(iD));
+  });
+  await test('diarsipkan keluar dari hitungan; Draft/Archived tidak bisa ditandai', async () => {
+    const r = await call(MEMBER, '/api/psg/informasi/' + iX + '/dibaca', { method: 'POST' }); assert.equal(r.status, 404);
+    await call(OWNER, '/api/psg/informasi/' + iD, { method: 'PUT', body: payload('archived') });
+    assert.equal((await call(MEMBER, '/api/psg/informasi/belum-dibaca')).body.jumlah, 1);
+  });
+  await test('keamanan: tanpa sesi 401, tanpa header X-PSG-Request 403, id dari klien tidak dipakai', async () => {
+    assert.equal((await call(ANON, '/api/psg/informasi/belum-dibaca')).status, 401);
+    const bad = await tanganiInformasi(new Request('https://psg.test/api/psg/informasi/' + iB + '/dibaca', { method: 'POST', headers: { origin: 'https://psg.test' } }), dep(MEMBER)); assert.equal(bad.status, 403);
+    const g = fixture(MEMBER, 'psg-informasi-preview', maps); const raw = [...g.data.keys()].filter((k) => k.startsWith('dibaca/'));
+    assert.deepEqual(raw.sort(), ['dibaca/' + MEMBER.id + '.json', 'dibaca/' + MEMBER2.id + '.json'].sort());
+  });
   console.log(`\n${checks} assertion PASS`);
 }
 main().catch((e) => { console.error(e); process.exitCode = 1; });
