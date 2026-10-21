@@ -238,7 +238,7 @@
   PSGOffline.periksaKoneksi = function () { return periksaKoneksi(true); };
   window.addEventListener('offline', function () { setKoneksi('offline', 'internet'); jadwalUlang(); });
   window.addEventListener('online', function () { koneksi.jeda = 20000; periksaKoneksi(true); });
-  document.addEventListener('visibilitychange', function () { if (!document.hidden) periksaKoneksi(false); });
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) setTimeout(function () { periksaKoneksi(false); }, 1500); }); /* jeda: beri kesempatan verifikasi profil melapor lebih dulu */
   window.addEventListener('pageshow', function (e) { if (e.persisted) periksaKoneksi(false); });
   /* Awal: bila peramban melaporkan offline langsung Offline; bila tidak, tunggu hasil
      verifikasi boot (laporKoneksi). Probe mandiri hanya bila belum ada laporan

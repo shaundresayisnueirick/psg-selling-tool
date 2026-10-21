@@ -331,7 +331,7 @@ async function main() {
         // tanpa polling saat online
         const n0 = w.meN; await jeda(8000); cek(w.meN - n0 === 0, 'tidak ada polling /api/psg/me saat online (8 dtk idle)', w.meN - n0);
         // background lalu aktif lagi: satu pemeriksaan
-        const n1 = w.meN; await pg.evaluate(() => { Object.defineProperty(document, 'hidden', { configurable: true, get: () => false }); document.dispatchEvent(new Event('visibilitychange')); }); await jeda(1500);
+        const n1 = w.meN; await pg.evaluate(() => { Object.defineProperty(document, 'hidden', { configurable: true, get: () => false }); document.dispatchEvent(new Event('visibilitychange')); }); await jeda(4000);
         cek(w.meN - n1 <= 2, 'kembali dari background memicu pemeriksaan terbatas', w.meN - n1); await ctx.close();
       }
       { // notifikasi sementara saat PWA dibuka offline
