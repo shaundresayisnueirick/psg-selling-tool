@@ -121,6 +121,12 @@
      autentikasi yang sah (401 / authenticated:false → null). Hanya penolakan
      yang boleh mengakhiri sesi; galat jaringan membawa .jaringan = true. */
   function galatJaringan(pesan) { var e = new Error(pesan || 'jaringan'); e.jaringan = true; return e; }
+  /* Hasil pemeriksaan profil ikut memberi tahu indikator koneksi di header
+     (tanpa request tambahan). */
+  function laporKoneksi(ok, alasan) {
+    if (window.PSGOffline && typeof window.PSGOffline.laporKoneksi === 'function') window.PSGOffline.laporKoneksi(ok, alasan);
+  }
+
   async function profilServer() {
     var kendali = typeof AbortController === 'function' ? new AbortController() : null;
     var timer = kendali ? setTimeout(function () { kendali.abort(); }, 10000) : null;
@@ -137,10 +143,12 @@
       var fetchAsli = window.PSGOffline && window.PSGOffline.fetchAsli;
       response = await (fetchAsli ? fetchAsli('/api/psg/me', opsiMe) : fetch('/api/psg/me', opsiMe));
     } catch (_) {
+      laporKoneksi(false, navigator.onLine === false ? 'internet' : 'server');
       throw galatJaringan('server_unreachable');
     } finally {
       if (timer) clearTimeout(timer);
     }
+    laporKoneksi(response.status !== 502 && response.status !== 503 && response.status !== 504, 'server');
     var data = {};
     try { data = await response.json(); } catch (_) {}
     if (response.status === 401) return null;
@@ -393,9 +401,13 @@
      berlaku (<= 14 hari, jam tidak mundur). Catatan bukan bukti autentikasi. */
   function bukaOffline(gate) {
     var po = window.PSGOffline;
-    if (!po || !penggunaLokal) return false;
+    if (!po) return false;
     var p = po.periksa();
-    if (!p.ok || String(penggunaLokal.id) !== p.rekam.uid || !profileDiizinkan(p.rekam.profil)) return false;
+    if (!p.ok || !profileDiizinkan(p.rekam.profil)) return false;
+    /* Bila sesi lokal ada, akunnya harus sama dengan catatan. Sesi lokal yang
+       hilang (mis. dibersihkan perangkat) tidak menutup kalkulator offline:
+       fitur server tetap memerlukan sesi sah, dan sesi diperiksa saat online. */
+    if (penggunaLokal && penggunaLokal.id && String(penggunaLokal.id) !== p.rekam.uid) return false;
     bukaAplikasi(p.rekam.profil, { offline: true });
     return true;
   }
@@ -460,6 +472,13 @@
     tampilkanStatusPemulihan(gate, 'restoring', 'Memulihkan sesi dan memeriksa profil PSG…');
     var profile;
     try {
+      try { identityUser = await api.getUser(); } catch (_) { identityUser = null; }
+      /* Tanpa sesi lokal dan tanpa jaringan: catatan verifikasi yang masih berlaku
+         tetap membuka kalkulator offline (bukan login ulang yang mustahil dilakukan). */
+      if (!identityUser && window.PSGOffline && window.PSGOffline.periksa().ok) {
+        var hasil = navigator.onLine === false ? 'jaringan' : await window.PSGOffline.verifikasiOnline();
+        if (hasil === 'jaringan' && bukaOffline(gate)) return;
+      }
       profile = await validasiSesiAda(identityUser);
     } catch (err) {
       if (err && err.jaringan && bukaOffline(gate)) return;

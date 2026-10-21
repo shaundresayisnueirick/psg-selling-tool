@@ -45,7 +45,9 @@ dilihat), profil{id,email,nama,roles,level,kodeAgen,status,emailTerkonfirmasi}}`
 
 ## Perilaku mode offline
 
-- Kalkulator dan data lokal tetap berjalan; banner "Mode offline" tampil.
+- Kalkulator dan data lokal tetap berjalan. Pemberitahuan "Mode offline" tampil sementara
+  (hilang sendiri ±4,5 dtk, dapat ditutup, di bawah header sehingga tidak menutupi
+  navigasi bawah). Status menetap ditunjukkan kapsul Online/Offline di header.
 - `/api/psg/*` dan `/.netlify/*` dijawab 503 sintetis berisi pesan
   "Fitur ini memerlukan koneksi internet. Silakan sambungkan perangkat ke
   jaringan, lalu coba kembali." Pengecualian: `/.netlify/identity/*`
@@ -56,6 +58,34 @@ dilihat), profil{id,email,nama,roles,level,kodeAgen,status,emailTerkonfirmasi}}`
 - Saat koneksi kembali: verifikasi ulang; sukses → keluar dari mode offline
   dan catatan diperbarui; ditolak → catatan dihapus dan muat ulang ke login.
 
+## Membuka PWA kembali saat offline
+
+Bila `gotrue.user` (sesi lokal) tidak ada saat boot tetapi jaringan tidak tersedia
+dan catatan verifikasi masih berlaku (<= 14 hari, jam tidak mundur, tidak ada tanda
+logout), kalkulator dibuka offline; sebelumnya aplikasi langsung menampilkan form
+login. Bila sesi lokal ada, akunnya tetap harus sama dengan catatan. Saat koneksi
+kembali sesi diverifikasi ulang: tanpa sesi sah catatan dihapus dan login diminta.
+Penyebab pasti hilangnya sesi lokal di perangkat nyata belum dapat direproduksi
+dari sandbox (dugaan: pembersihan oleh perangkat/peramban atau rotasi refresh
+token); perbaikan ini membuat akses offline tidak bergantung padanya.
+
+## Indikator koneksi (header)
+
+Kapsul `#psgKoneksi` (hijau "Online" / merah "Offline"). Online = peramban
+melaporkan jaringan dan `GET /api/psg/me` (tidak mengubah data) dijawab server
+(selain 502/503/504). Offline = `navigator.onLine` salah, atau server tidak menjawab
+dalam 6 dtk dua kali berturut-turut (jeda 1,5 dtk; tooltip membedakan "Internet
+tidak tersedia" dan "server tidak dapat dijangkau"). Pemeriksaan hanya saat muat,
+event `online`/`offline`, kembali dari background, dan saat offline dengan jeda
+20→120 dtk; tidak ada polling saat online. Indikator hanya status koneksi: tidak
+menghapus sesi/catatan dan tidak memberi hak akses.
+
+## Pengumuman (ikon lonceng)
+
+Daftar ringkas (judul, kategori, tanggal) dan detail bergantian pada dialog yang
+sama; tombol "Kembali ke daftar pengumuman" mempertahankan filter kategori dan
+posisi scroll. Isi/ data pengumuman, API, dan hak akses tidak diubah.
+
 ## Logout
 
 - Logout menghapus catatan offline dan sesi lokal, lalu mengunci kalkulator.
@@ -65,7 +95,7 @@ dilihat), profil{id,email,nama,roles,level,kodeAgen,status,emailTerkonfirmasi}}`
 
 ## Service Worker
 
-- `VERSI = insurance-hub-v117.1.34`. Precache ditambah aset login
+- `VERSI = insurance-hub-v117.1.35`. Precache ditambah aset login
   (`netlify-identity.js`, `identity-callback.*`, `agent-management.css`,
   `psg-offline.js`, `sales-idea-video.js?v=123`).
 - Halaman dan `/src/` memakai network-first dengan batas 4 dtk lalu jatuh ke

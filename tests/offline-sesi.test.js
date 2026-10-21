@@ -272,6 +272,82 @@ async function main() {
         cek(st.formEmail && !st.gotrue && !st.rekam && !st.identitas, 'logout dari halaman ringkasan: tidak memulihkan sesi saat kembali ke index', st); await ctx.close();
       }
     }
+    if (ikut('G')) {
+      console.log('[G] PWA ditutup lalu dibuka kembali saat offline (token kedaluwarsa, cookie sesi hilang)');
+      for (const varian of ['token-kedaluwarsa', 'token-kedaluwarsa+cookie-hilang', 'tab-baru']) {
+        const { ctx, pg, w, err } = await konteks(br, { sw: true }); await login(pg, base); await siapOffline(pg);
+        await jeda(12000); // access token (70 dtk, margin 60 dtk) dianggap kedaluwarsa oleh klien
+        if (/cookie-hilang/.test(varian)) await ctx.clearCookies();
+        await putus(ctx, w, true);
+        let pg2 = pg; if (varian === 'tab-baru') { await pg.close(); pg2 = await ctx.newPage(); pg2.on('pageerror', (e) => err.push(String(e))); }
+        else await pg.close(), pg2 = await ctx.newPage();
+        await pg2.goto(base + 'index.html');
+        const buka = await tunggu(pg2, () => !document.getElementById('insuranceAccessGate') && window.InsuranceHubIdentity, 25000);
+        const st = await keadaan(pg2);
+        cek(buka && st.offlineMode && !st.formEmail, 'buka ulang offline (' + varian + '): masuk mode offline tanpa email/kata sandi', st);
+        await ctx.close();
+      }
+    }
+    if (ikut('G')) {
+      { // sesi lokal (gotrue.user) hilang tetapi catatan verifikasi masih berlaku
+        const { ctx, pg, w } = await konteks(br, { sw: true }); await login(pg, base); await siapOffline(pg);
+        await pg.evaluate(() => localStorage.removeItem('gotrue.user')); await ctx.clearCookies(); await putus(ctx, w, true); await pg.close();
+        const pg2 = await ctx.newPage(); await pg2.goto(base + 'index.html');
+        const buka = await tunggu(pg2, () => !document.getElementById('insuranceAccessGate') && window.InsuranceHubIdentity, 25000); const st = await keadaan(pg2);
+        cek(buka && st.offlineMode && !st.formEmail, 'sesi lokal hilang + offline + catatan sah: kalkulator terbuka offline', st);
+        await putus(ctx, w, false); await pg2.evaluate(() => window.dispatchEvent(new Event('online'))).catch(() => {}); // setOffline(false) sudah memicu 'online' dan muat ulang
+        const kunci = await tunggu(pg2, () => !!document.getElementById('psgIdentityEmail') && document.getElementById('psgIdentityEmail').offsetParent !== null, 25000); const st2 = await keadaan(pg2);
+        cek(kunci && !st2.rekam, 'koneksi kembali tanpa sesi sah: catatan dihapus dan login diminta', st2); await ctx.close();
+      }
+      { // sesi lokal hilang, offline, TANPA catatan: tetap terkunci
+        const { ctx, pg, w } = await konteks(br, { sw: true }); await login(pg, base); await siapOffline(pg);
+        await pg.evaluate(() => { localStorage.removeItem('gotrue.user'); localStorage.removeItem('psg.offline.v1'); }); await ctx.clearCookies(); await putus(ctx, w, true); await pg.close();
+        const pg2 = await ctx.newPage(); await pg2.goto(base + 'index.html'); await pg2.waitForSelector('#psgIdentityEmail', { state: 'visible', timeout: 25000 }); const st = await keadaan(pg2);
+        cek(!st.offlineMode && st.terkunci, 'sesi lokal hilang + offline + tanpa catatan: tetap terkunci', st); await ctx.close();
+      }
+    }
+    if (ikut('H')) {
+      console.log('[H] Indikator Online/Offline dan notifikasi sementara');
+      const pil = (pg) => pg.evaluate(() => { const e = document.getElementById('psgKoneksi'); if (!e) return null; const r = e.getBoundingClientRect(), b = document.getElementById('btnPsgInformasi').getBoundingClientRect(), h = document.getElementById('bilah');
+        return { teks: e.textContent, status: e.dataset.status, title: e.title, kiri: r.left, kanan: r.right, lebar: innerWidth, bell: [b.left, b.right], overflow: document.documentElement.scrollWidth > innerWidth + 1, hdrOver: h.scrollWidth > h.clientWidth + 1, warna: getComputedStyle(e).backgroundColor }; });
+      for (const lebar of [1280, 390]) {
+        const { ctx, pg, w } = await konteks(br); await pg.setViewportSize({ width: lebar, height: lebar === 390 ? 800 : 860 }); await login(pg, base);
+        await tunggu(pg, () => { const e = document.getElementById('psgKoneksi'); return e && e.dataset.status === 'online'; }, 15000);
+        let p = await pil(pg);
+        cek(p && p.status === 'online' && p.teks === 'Online' && /22, 163, 74/.test(p.warna), 'online (' + lebar + 'px): kapsul hijau "Online"', p);
+        cek(p && !p.overflow && !p.hdrOver && p.kanan <= p.lebar && (p.kanan <= p.bell[0] + 1 || p.kiri >= p.bell[1] - 1), 'kapsul tidak overflow dan tidak menimpa lonceng (' + lebar + 'px)', p);
+        await pg.screenshot({ path: process.env.SS_DIR ? process.env.SS_DIR + '/online-' + lebar + '.png' : '/dev/null' }).catch(() => {});
+        await ctx.setOffline(true); await pg.evaluate(() => window.dispatchEvent(new Event('offline')));
+        p = await pil(pg); cek(p.status === 'offline' && p.teks === 'Offline' && /220, 38, 38/.test(p.warna) && /Internet tidak tersedia/.test(p.title), 'offline (' + lebar + 'px): kapsul merah "Offline" (internet tidak tersedia)', p);
+        await pg.screenshot({ path: process.env.SS_DIR ? process.env.SS_DIR + '/offline-' + lebar + '.png' : '/dev/null' }).catch(() => {});
+        await ctx.setOffline(false); await tunggu(pg, () => document.getElementById('psgKoneksi').dataset.status === 'online', 15000);
+        p = await pil(pg); cek(p.status === 'online', 'koneksi kembali: kapsul berubah Online otomatis', p); await ctx.close();
+      }
+      { // internet ada, server tidak terjangkau
+        const { ctx, pg, w } = await konteks(br); await login(pg, base);
+        w.tolakMe = 'jaringan'; await pg.evaluate(() => window.PSGOffline.periksaKoneksi());
+        let p = await pil(pg); cek(p.status === 'offline' && /server tidak dapat dijangkau/.test(p.title), 'server tidak terjangkau tetapi internet ada: Offline dengan keterangan server', p);
+        w.tolakMe = null; await pg.evaluate(() => window.PSGOffline.periksaKoneksi()); p = await pil(pg); cek(p.status === 'online', 'server terjangkau lagi: Online', p);
+        // tanpa polling saat online
+        const n0 = w.meN; await jeda(8000); cek(w.meN - n0 === 0, 'tidak ada polling /api/psg/me saat online (8 dtk idle)', w.meN - n0);
+        // background lalu aktif lagi: satu pemeriksaan
+        const n1 = w.meN; await pg.evaluate(() => { Object.defineProperty(document, 'hidden', { configurable: true, get: () => false }); document.dispatchEvent(new Event('visibilitychange')); }); await jeda(1500);
+        cek(w.meN - n1 <= 2, 'kembali dari background memicu pemeriksaan terbatas', w.meN - n1); await ctx.close();
+      }
+      { // notifikasi sementara saat PWA dibuka offline
+        const { ctx, pg, w } = await konteks(br, { sw: true }); await pg.setViewportSize({ width: 390, height: 800 }); await login(pg, base); await siapOffline(pg);
+        await putus(ctx, w, true); await pg.close(); const pg2 = await ctx.newPage(); await pg2.goto(base + 'index.html');
+        await tunggu(pg2, () => window.PSGOffline && window.PSGOffline.aktif && document.getElementById('psgOfflineBanner'), 25000);
+        const info = await pg2.evaluate(() => { const b = document.getElementById('psgOfflineBanner'), r = b && b.getBoundingClientRect(), h = document.getElementById('bilah').getBoundingClientRect(); return { ada: !!b, atas: r && r.top, bawahHeader: h.bottom, bawah: r && r.bottom, tinggi: innerHeight }; });
+        cek(info.ada && info.atas >= info.bawahHeader - 1 && info.bawah < info.tinggi - 100, 'notifikasi offline tampil di bawah header, tidak menutupi navigasi bawah', info);
+        await pg2.screenshot({ path: process.env.SS_DIR ? process.env.SS_DIR + '/notif-390.png' : '/dev/null' }).catch(() => {});
+        const hilang = await tunggu(pg2, () => !document.getElementById('psgOfflineBanner'), 8000);
+        cek(hilang, 'notifikasi menghilang otomatis (±4,5 dtk)');
+        const p = await pg2.evaluate(() => ({ s: document.getElementById('psgKoneksi').dataset.status, offlineMode: window.PSGOffline.aktif }));
+        cek(p.s === 'offline' && p.offlineMode, 'indikator header tetap Offline dan mode offline tetap aktif setelah notifikasi hilang', p);
+        await jeda(2000); cek(!(await pg2.evaluate(() => !!document.getElementById('psgOfflineBanner'))), 'notifikasi tidak muncul berulang'); await ctx.close();
+      }
+    }
     if (ikut('F')) {
       console.log('[F] Service Worker');
       const { ctx, pg } = await konteks(br, { sw: true }); await login(pg, base); await siapOffline(pg);

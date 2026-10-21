@@ -10,6 +10,7 @@
   var listEl = $('psgInformasiList'), detailEl = $('psgInformasiDetail'), statusEl = $('psgInformasiStatus');
   var categoryEl = $('psgInformasiCategories'), adminEl = $('psgInformasiAdmin'), form = $('psgInformasiForm');
   var selectedCategory = '', items = [], selected = null, owner = false;
+  var view = 'list', listScroll = 0; /* 'list' = daftar judul ringkas, 'detail' = isi satu informasi */
   var field = function (name) { return form.elements.namedItem(name); };
   var esc = function (s) { return String(s == null ? '' : s); };
   function request(url, options) {
@@ -64,22 +65,42 @@
     var d = new Date(t + 'T00:00:00');
     return Number.isNaN(d.getTime()) ? t : new Intl.DateTimeFormat('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }).format(d);
   }
+  /* Daftar dan detail bergantian dalam dialog yang sama (tanpa modal bertumpuk). */
+  function setView(v) {
+    view = v;
+    listEl.hidden = v === 'detail'; categoryEl.hidden = v === 'detail';
+    detailEl.hidden = v !== 'detail';
+    var panel = dialog.querySelector('.psg-informasi-panel');
+    if (v === 'list') { listEl.scrollTop = listScroll; } else if (panel) { panel.scrollTop = 0; }
+  }
+  function kembaliKeDaftar() {
+    var id = selected && selected.id;
+    setView('list'); renderList();
+    listEl.scrollTop = listScroll;
+    var btn = id && Array.prototype.find.call(listEl.children, function (b) { return b.dataset && b.dataset.id === id; });
+    if (btn) btn.focus({ preventScroll: true });
+  }
   function renderList() {
     listEl.textContent = '';
-    if (!items.length) { listEl.appendChild(el('p', '', 'Belum ada informasi pada kategori ini.')); detailEl.hidden = true; return; }
+    if (!items.length) { listEl.appendChild(el('p', '', 'Belum ada informasi pada kategori ini.')); selected = null; setView('list'); return; }
     items.forEach(function (item) {
-      var b = el('button', 'psg-informasi-item'); b.type = 'button'; b.setAttribute('aria-current', String(selected && selected.id === item.id));
+      var b = el('button', 'psg-informasi-item'); b.type = 'button'; b.dataset.id = item.id; b.setAttribute('aria-current', String(selected && selected.id === item.id));
       var baru = item.status === 'published' && unread.has(item.id);
       if (baru) b.classList.add('belum-dibaca');
+      b.setAttribute('aria-label', 'Buka pengumuman: ' + item.judul);
       b.appendChild(el('b', '', (baru ? 'Baru · ' : '') + item.judul));
       b.appendChild(el('span', '', item.kategori + ' · ' + tanggal(item.tanggal) + (owner ? ' · ' + item.status : '')));
-      b.addEventListener('click', function () { showDetail(item); markRead(item); });
+      b.addEventListener('click', function () { listScroll = listEl.scrollTop; showDetail(item); markRead(item); });
       listEl.appendChild(b);
     });
-    if (!selected || !items.some(function (x) { return x.id === selected.id; })) showDetail(items[0]);
+    var saatIni = view === 'detail' && selected && items.find(function (x) { return x.id === selected.id; });
+    if (saatIni) { showDetail(saatIni); return; }
+    selected = null; setView('list');
   }
   function showDetail(item) {
-    selected = item; detailEl.textContent = ''; detailEl.hidden = false;
+    selected = item; detailEl.textContent = '';
+    var kembali = el('button', 'pi-button pi-secondary psg-informasi-back', '← Kembali ke daftar pengumuman'); kembali.type = 'button';
+    kembali.addEventListener('click', kembaliKeDaftar); detailEl.appendChild(kembali);
     detailEl.appendChild(el('h3', '', item.judul));
     detailEl.appendChild(el('p', 'pi-meta', item.kategori + ' · ' + tanggal(item.tanggal) + (owner ? ' · ' + item.status : '')));
     detailEl.appendChild(el('div', 'pi-body', item.isi));
@@ -97,7 +118,8 @@
       var edit = el('button', 'pi-button pi-secondary', 'Edit informasi'); edit.type = 'button'; edit.style.marginTop = '16px';
       edit.addEventListener('click', function () { editItem(item); }); detailEl.appendChild(edit);
     }
-    Array.prototype.forEach.call(listEl.children, function (b) { b.setAttribute('aria-current', String(b.querySelector('b') && (b.querySelector('b').textContent.replace(/^Baru · /, '')) === item.judul)); });
+    Array.prototype.forEach.call(listEl.children, function (b) { if (b.dataset) b.setAttribute('aria-current', String(b.dataset.id === item.id)); });
+    setView('detail');
   }
   function loadItems() {
     infoStatus('Memuat informasi…');
@@ -138,6 +160,7 @@
   }
   function openDialog() {
     if (!dialog.open) dialog.showModal();
+    selected = null; listScroll = 0; view = 'list';
     refreshOwner();
     buildCategories(); fillCategorySelect(); resetForm(); loadItems();
   }
@@ -172,7 +195,7 @@
         if (statusEl.scrollIntoView) statusEl.scrollIntoView({ block: 'nearest' });
       });
   });
-  dialog.addEventListener('close', function () { selected = null; loadUnread(); });
+  dialog.addEventListener('close', function () { selected = null; view = 'list'; listScroll = 0; loadUnread(); });
   window.addEventListener('psg:identity-ready', function () { loadUnread(); if (dialog.open) { refreshOwner(); loadItems(); } });
   document.addEventListener('visibilitychange', function () { if (!document.hidden) loadUnread(); });
   loadUnread();
