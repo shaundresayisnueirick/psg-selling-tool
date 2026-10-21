@@ -14,6 +14,7 @@
   var ID_FORGOT_FORM = 'psgIdentityForgotForm';
   var ID_RESTORE_STATUS = 'psgIdentityRestoreStatus';
   var bootSedangBerjalan = false;
+  var penggunaLokal = null;   // pengguna dari sesi lokal (bukan bukti autentikasi server)
 
   function lib() {
     var x = window.PSGNetlifyIdentity;
@@ -83,8 +84,15 @@
     };
   }
 
-  function bukaAplikasi(profile) {
+  function bukaAplikasi(profile, opsi) {
+    var offline = !!(opsi && opsi.offline);
     setIdentityMemory(profile);
+    window.InsuranceHubIdentity.offline = offline;
+    if (offline) { if (window.PSGOffline) window.PSGOffline.masuk(); }
+    else if (window.PSGOffline) {
+      /* verifikasi server berhasil: catat (14 hari baru) dan keluar dari mode offline */
+      window.PSGOffline.keluar(); window.PSGOffline.catat(profile); window.PSGOffline.bersihTandaKeluar();
+    }
     var gate = document.getElementById(ID_GATE);
     if (gate) gate.remove();
     document.documentElement.classList.remove('insurance-auth-locked');
@@ -109,20 +117,50 @@
     }
   }
 
+  /* Galat jaringan (fetch gagal, timeout, atau 5xx) dibedakan dari penolakan
+     autentikasi yang sah (401 / authenticated:false → null). Hanya penolakan
+     yang boleh mengakhiri sesi; galat jaringan membawa .jaringan = true. */
+  function galatJaringan(pesan) { var e = new Error(pesan || 'jaringan'); e.jaringan = true; return e; }
   async function profilServer() {
-    var response = await fetch('/api/psg/me', {
-      method: 'GET',
-      credentials: 'same-origin',
-      cache: 'no-store',
-      headers: { 'Accept': 'application/json' }
-    });
+    var kendali = typeof AbortController === 'function' ? new AbortController() : null;
+    var timer = kendali ? setTimeout(function () { kendali.abort(); }, 10000) : null;
+    var response;
+    try {
+      /* fetch asli: pembungkus mode offline tidak boleh menahan pemeriksaan ini */
+      var opsiMe = {
+        method: 'GET',
+        credentials: 'same-origin',
+        cache: 'no-store',
+        headers: { 'Accept': 'application/json' },
+        signal: kendali ? kendali.signal : undefined
+      };
+      var fetchAsli = window.PSGOffline && window.PSGOffline.fetchAsli;
+      response = await (fetchAsli ? fetchAsli('/api/psg/me', opsiMe) : fetch('/api/psg/me', opsiMe));
+    } catch (_) {
+      throw galatJaringan('server_unreachable');
+    } finally {
+      if (timer) clearTimeout(timer);
+    }
     var data = {};
     try { data = await response.json(); } catch (_) {}
     if (response.status === 401) return null;
-    if (!response.ok) throw new Error('server_profile_failed');
+    if (!response.ok) throw galatJaringan('server_profile_failed');
     if (!data.authenticated) return null;
-    if (!data.user) throw new Error('server_profile_failed');
+    if (!data.user) throw galatJaringan('server_profile_failed');
     return data.user;
+  }
+
+  /* Sesi lokal ada tetapi server menolak token di cookie (mis. kedaluwarsa):
+     perbarui lewat jalur refresh resmi lalu coba sekali lagi. Bila refresh gagal
+     karena jaringan, sesi TIDAK dihapus (galat jaringan dilempar). */
+  async function profilServerDenganPemulihan(api) {
+    var profile = await profilServer();
+    if (profile) return profile;
+    if (typeof api.refreshSession !== 'function') return null;
+    var r = await api.refreshSession(true);   // server menolak token: paksa refresh resmi
+    if (r.ok) return profilServer();
+    if (r.alasan === 'jaringan') throw galatJaringan('refresh_unreachable');
+    return null;
   }
 
   async function validasiSesiAda(identityUser) {
@@ -130,8 +168,11 @@
     if (!api) return null;
     if (!identityUser) identityUser = await api.getUser();
     if (!identityUser) return null;
+    penggunaLokal = identityUser;
 
-    var profile = await profilServer();
+    var profile = await profilServerDenganPemulihan(api);
+    /* Server menolak atau menonaktifkan akun: hak offline ikut dicabut. */
+    if (!profile || profile.status === 'nonaktif' || !profileDiizinkan(profile)) { if (window.PSGOffline) window.PSGOffline.hapus(); }
     if (!profile) {
       await api.logout().catch(function () {});
       return null;
@@ -342,6 +383,43 @@
     });
   }
 
+  function pesanOfflineTertutup() {
+    var po = window.PSGOffline;
+    return po ? po.pesanAlasan(po.periksa().alasan) : 'Sesi belum dapat diverifikasi. Periksa koneksi, lalu coba lagi.';
+  }
+
+  /* Server tidak terjangkau: buka kalkulator hanya bila (1) ada sesi lokal untuk
+     akun yang sama dengan catatan, dan (2) catatan verifikasi online masih
+     berlaku (<= 14 hari, jam tidak mundur). Catatan bukan bukti autentikasi. */
+  function bukaOffline(gate) {
+    var po = window.PSGOffline;
+    if (!po || !penggunaLokal) return false;
+    var p = po.periksa();
+    if (!p.ok || String(penggunaLokal.id) !== p.rekam.uid || !profileDiizinkan(p.rekam.profil)) return false;
+    bukaAplikasi(p.rekam.profil, { offline: true });
+    return true;
+  }
+
+  /* Sesi lokal diperbarui saat aplikasi aktif lagi / koneksi kembali, dan profil
+     diverifikasi ulang ke server. Keputusan server berlaku: penolakan pasti
+     (401 sesudah refresh) mengunci aplikasi; gangguan jaringan tidak. */
+  var sedangMemulihkan = false, terakhirPulih = 0;
+  async function pulihkanBerkala(paksa) {
+    var api = lib();
+    if (sedangMemulihkan || !api || !window.InsuranceHubIdentity) return;
+    if (!paksa && Date.now() - terakhirPulih < 60000) return;
+    sedangMemulihkan = true; terakhirPulih = Date.now();
+    try {
+      var profile = await validasiSesiAda(null);
+      if (profile) { if (window.InsuranceHubIdentity.offline) bukaAplikasi(profile); else if (window.PSGOffline) window.PSGOffline.catat(profile); }
+      else { if (window.PSGOffline) window.PSGOffline.hapus(); window.location.reload(); }
+    } catch (_) { /* jaringan: sesi dan mode saat ini dipertahankan */ }
+    finally { sedangMemulihkan = false; }
+  }
+  window.addEventListener('online', function () { pulihkanBerkala(true); });
+  window.addEventListener('pageshow', function (e) { if (e.persisted) pulihkanBerkala(false); });
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) pulihkanBerkala(false); });
+
   async function boot() {
     if (bootSedangBerjalan) return;
     bootSedangBerjalan = true;
@@ -367,12 +445,25 @@
     }
 
     pasangFormEmail(gate);
+    /* Logout yang belum selesai (dari halaman ringkasan, atau saat offline):
+       selesaikan sekarang dan jangan pernah memulihkan sesi itu. */
+    var tandaKeluar = window.PSGOffline && window.PSGOffline.bacaTandaKeluar();
+    if (tandaKeluar) {
+      try { await api.logout(); } catch (_) {}
+      if (window.PSGOffline) { window.PSGOffline.hapusSesiLokal(); window.PSGOffline.hapus(); window.PSGOffline.bersihTandaKeluar(); }
+      tampilkanStatusPemulihan(gate, 'login');
+      if (tandaKeluar.belumTerkonfirmasi) {
+        setError(document.getElementById('psgIdentityServerError'), 'Kamu keluar saat offline. Sesi di perangkat ini sudah dihapus, tetapi pencabutan di server belum dapat dikonfirmasi.');
+      }
+      return;
+    }
     tampilkanStatusPemulihan(gate, 'restoring', 'Memulihkan sesi dan memeriksa profil PSG…');
     var profile;
     try {
       profile = await validasiSesiAda(identityUser);
-    } catch (_) {
-      tampilkanStatusPemulihan(gate, 'error', 'Sesi belum dapat diverifikasi. Periksa koneksi, lalu coba lagi.');
+    } catch (err) {
+      if (err && err.jaringan && bukaOffline(gate)) return;
+      tampilkanStatusPemulihan(gate, 'error', err && err.jaringan ? pesanOfflineTertutup() : 'Sesi belum dapat diverifikasi. Periksa koneksi, lalu coba lagi.');
       return;
     }
     if (profile) {
@@ -390,9 +481,21 @@
 
   var previousLogout = window.insuranceHubLogout;
   window.insuranceHubLogout = async function () {
+    var po = window.PSGOffline;
+    /* Hak offline dicabut lebih dulu dan tanpa syarat. Saat offline, pencabutan di
+       server belum dapat dikonfirmasi; sesi lokal tetap dihapus. */
+    var belumTerkonfirmasi = !!(po && po.aktif) || navigator.onLine === false;
+    if (po) { po.hapus(); po.tandaiKeluar(belumTerkonfirmasi); }
     var api = lib();
+    var cabutDiServer = true;
     if (api) {
-      try { await api.logout(); } catch (_) {}
+      try { await api.logout(); } catch (_) { cabutDiServer = false; }
+    }
+    /* Logout selesai di sini: tanda hanya dipertahankan bila pencabutan di server
+       belum terkonfirmasi (offline / gagal), supaya boot berikutnya mengulanginya. */
+    if (po) {
+      if (cabutDiServer && !belumTerkonfirmasi) po.bersihTandaKeluar();
+      else po.tandaiKeluar(true);
     }
     if (typeof previousLogout === 'function') return previousLogout();
     document.documentElement.classList.add('insurance-auth-locked');
