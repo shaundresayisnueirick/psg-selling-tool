@@ -142,16 +142,12 @@
   }
 
   async function profilServer() {
-    /* Probe boot (GET /api/psg/me yang sama) dipakai ulang sekali bila sukses atau jaringan gagal. */
+    /* Probe boot (GET /api/psg/me yang sama) dipakai ulang HANYA bila sudah selesai dan sukses.
+       Probe yang masih berjalan, gagal, atau 401 tidak dijadikan keputusan: server yang lambat
+       (cold start) bukan server yang tidak terjangkau, dan cookie bisa baru diperbarui
+       getUser() sesudah probe dikirim. Verifikasi memakai permintaan normal (batas 10 dtk). */
     var pb = probeBoot; probeBoot = null;
-    if (pb && Date.now() - pb.t < 15000) {
-      var h = await pb.p;
-      if (h && h.user) { laporKoneksi(true); return h.user; }
-      if (h === 'jaringan') { laporKoneksi(false, navigator.onLine === false ? 'internet' : 'server'); throw galatJaringan('server_unreachable'); }
-      /* 401 sengaja TIDAK dipakai ulang: cookie bisa baru diperbarui getUser() sesudah probe
-         dikirim, jadi penolakan harus diperiksa ulang dengan permintaan baru. */
-      if (h === 'ditolak') laporKoneksi(true);
-    }
+    if (pb && pb.hasil && pb.hasil.user && Date.now() - pb.t < 15000) { laporKoneksi(true); return pb.hasil.user; }
     var kendali = typeof AbortController === 'function' ? new AbortController() : null;
     var timer = kendali ? setTimeout(function () { kendali.abort(); }, 10000) : null;
     var response;
@@ -507,7 +503,8 @@
          tidak termasuk "tidak terjangkau": jalur normal tetap berjalan. */
       var po = window.PSGOffline;
       var probe = po ? po.verifikasiOnline(WAKTU_PROBE_BOOT) : Promise.resolve('jaringan');
-      probeBoot = { p: probe, t: Date.now() };
+      probeBoot = { p: probe, t: Date.now(), hasil: null };
+      var pbSaya = probeBoot; probe.then(function (h) { pbSaya.hasil = h; });
       var getUserP = batasi(api.getUser(), BATAS_GETUSER).then(
         function (u) { return { u: u }; },
         function (e) { return { u: null, habis: !!(e && e.habis) }; });

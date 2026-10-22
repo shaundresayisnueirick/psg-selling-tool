@@ -48,7 +48,7 @@ const PROFIL = { id: 'uji-agen-0001', email: 'agen.uji@psg.test', nama: 'Agen Uj
 
 /* Satu "dunia" server tiruan per konteks. */
 function dunia() {
-  const st = { expDtk: 70, gantung: false, refreshValid: true, refreshN: 0, tokenN: 0, meN: 0, logoutN: 0, tolakMe: null, tolakIdentity: false, tokenSah: new Set() };
+  const st = { tundaMe: 0, expDtk: 70, gantung: false, refreshValid: true, refreshN: 0, tokenN: 0, meN: 0, logoutN: 0, tolakMe: null, tolakIdentity: false, tokenSah: new Set() };
   const buatToken = () => {
     const iat = Math.floor(Date.now() / 1000), t = b64({ alg: 'HS256', typ: 'JWT' }) + '.' + b64({ sub: PROFIL.id, email: PROFIL.email, iat, exp: iat + st.expDtk, jti: ++st.tokenN }) + '.sig';
     st.tokenSah.add(t); return t;
@@ -72,6 +72,7 @@ function dunia() {
     await ctx.route('**/api/psg/me', async (route) => {
       st.meN++;
       if (st.gantung) return new Promise(() => {});
+      if (st.tundaMe) await new Promise((r) => setTimeout(r, st.tundaMe));
       if (st.tolakMe === 'jaringan') return route.abort('internetdisconnected');
       if (st.tolakMe === '5xx') return route.fulfill({ status: 503, contentType: 'application/json', body: '{"error":"x"}' });
       const cookie = (await route.request().allHeaders()).cookie || '';
@@ -136,10 +137,10 @@ const SKENARIO = (opt('--skenario') || '').split(',').filter(Boolean);
 const mau = (k) => !SKENARIO.length || SKENARIO.includes(k);
 const BATAS_MS = Number(opt('--batas') || 60000);
 const hasil = [];
-async function ukur(nama, ctx, w, { gantung = false, putusCepat = false, pasca = 0 } = {}, dasar) {
+async function ukur(nama, ctx, w, { gantung = false, putusCepat = false, pasca = 0, tunda = 0 } = {}, dasar) {
   // atur jaringan
   MODE.server = gantung ? 'gantung' : (putusCepat ? 'putus' : 'normal');
-  w.gantung = gantung; w.tolakIdentity = putusCepat; w.tolakMe = putusCepat ? 'jaringan' : null;
+  w.gantung = gantung; w.tundaMe = tunda; w.tolakIdentity = putusCepat; w.tolakMe = putusCepat ? 'jaringan' : null;
   if (putusCepat) await ctx.setOffline(true);
   const pg = await ctx.newPage(); const err = []; pg.on('pageerror', (e) => err.push(String(e)));
   await pg.addInitScript(() => {
@@ -189,6 +190,7 @@ async function main() {
     if (mau('putus-valid')) { const { ctx, w, base } = await siapkan(br, { umur: 0, expDtk: 3600 }); await ukur('2b-offline putus cepat, token VALID 1 jam', ctx, w, { putusCepat: true }, base); await ctx.close(); }
     if (mau('gantung')) { const { ctx, w, base } = await siapkan(br); await ukur('3-offline GANTUNG (Wi-Fi tanpa internet, onLine=true), token kedaluwarsa', ctx, w, { gantung: true }, base); await ctx.close(); }
     if (mau('gantung-valid')) { const { ctx, w, base } = await siapkan(br, { umur: 0, expDtk: 3600 }); await ukur('3b-offline GANTUNG, token VALID 1 jam', ctx, w, { gantung: true }, base); await ctx.close(); }
+    if (mau('lambat')) { const { ctx, w, base } = await siapkan(br, { umur: 0, expDtk: 3600 }); await ukur('9-server LAMBAT tetapi terjangkau (/me 3,5 dtk): bukan mode offline', ctx, w, { tunda: 3500 }, base); await ctx.close(); }
     if (mau('gantung-ulang')) { const { ctx, w, base } = await siapkan(br, { umur: 0, expDtk: 3600 }); await ukur('3c-GANTUNG pembukaan pertama', ctx, w, { gantung: true }, base); await ukur('3d-GANTUNG pembukaan kedua (tanda jaringan buruk SW aktif)', ctx, w, { gantung: true }, base); await ctx.close(); }
     if (mau('logout-gantung')) { const { ctx, w, base } = await siapkan(br, { umur: 0, expDtk: 3600, sebelumTutup: () => { localStorage.removeItem('psg.offline.v1'); localStorage.setItem('psg.keluar.v1', JSON.stringify({ t: Date.now(), belumTerkonfirmasi: true })); } }); await ukur('4-offline GANTUNG setelah logout (tanda logout tertunda)', ctx, w, { gantung: true }, base); await ctx.close(); }
     if (mau('logout-putus')) { const { ctx, w, base } = await siapkan(br, { umur: 0, expDtk: 3600, sebelumTutup: () => { localStorage.removeItem('psg.offline.v1'); localStorage.setItem('psg.keluar.v1', JSON.stringify({ t: Date.now(), belumTerkonfirmasi: true })); } }); await ukur('4b-offline putus cepat setelah logout', ctx, w, { putusCepat: true }, base); await ctx.close(); }
@@ -215,6 +217,7 @@ async function main() {
     '5-': (r) => !r.dashboard && /^pesan-tertutup: Masa akses offline/.test(r.akhir) && r.ms < 14000,
     '5b': (r) => !r.dashboard && /^pesan-tertutup: Masa akses offline/.test(r.akhir) && r.ms < 4000,
     '6-': (r) => !r.dashboard && /^pesan-tertutup/.test(r.akhir) && r.ms < 14000,
+    '9-': (r) => r.dashboard && r.mode === 'normal' && r.ms < 10000,
     '7-': (r) => r.dashboard && r.mode === 'offline' && r.ms < 14000 && r.pulihMs !== null && r.pulihMs < 60000,
   };
   for (const r of hasil) { const f = aturan[r.skenario.slice(0, 2)]; if (f) cek(f(r), r.skenario + ' — ' + (r.ms / 1000).toFixed(1) + ' dtk', f(r) ? undefined : r); }
