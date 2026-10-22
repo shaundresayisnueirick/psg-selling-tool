@@ -61,6 +61,11 @@
     /* Sisa sesi lokal gotrue (kunci milik vendor) setelah logout yang tertunda. */
     hapusSesiLokal: function () { try { localStorage.removeItem('gotrue.user'); } catch (_) {} },
 
+    /* id akun pada sesi lokal (gotrue.user), tanpa jaringan; null bila tidak ada. */
+    idSesiLokal: function () {
+      try { var u = JSON.parse(localStorage.getItem('gotrue.user') || 'null'); return u && u.id ? String(u.id) : null; } catch (_) { return null; }
+    },
+
     /* {ok, alasan: 'tidak-ada'|'rusak'|'jam-mundur'|'kedaluwarsa', rekam, berlakuSampai} */
     periksa: function (sekarang) {
       var r = baca();
@@ -106,10 +111,12 @@
     },
 
     /* Cek ke server tanpa pembungkus offline: 'ok' | 'ditolak' | 'jaringan'. */
-    verifikasiOnline: function () {
+    /* batasMs: batas tunggu (default 10 dtk). Boot memakai batas pendek supaya server yang
+       menggantung (Wi-Fi tersambung tanpa internet) tidak menahan pembukaan aplikasi. */
+    verifikasiOnline: function (batasMs) {
       if (!fetchAsli) return Promise.resolve('jaringan');
       var kendali = typeof AbortController === 'function' ? new AbortController() : null;
-      var t = kendali ? setTimeout(function () { kendali.abort(); }, 10000) : null;
+      var t = kendali ? setTimeout(function () { kendali.abort(); }, batasMs || 10000) : null;
       return fetchAsli('/api/psg/me', { method: 'GET', credentials: 'same-origin', cache: 'no-store',
         headers: { Accept: 'application/json' }, signal: kendali ? kendali.signal : undefined })
         .then(function (r) {
@@ -176,8 +183,8 @@
      offline (itu catatan 14 hari) dan tidak menghapus sesi. Online = peramban
      melaporkan jaringan DAN server menjawab (status apa pun selain 502/503/504)
      pada GET /api/psg/me yang tidak mengubah data. Tanpa polling saat online;
-     saat offline dicoba ulang dengan jeda 20 → 120 dtk. */
-  var koneksi = { status: null, alasan: null, jalan: false, timer: null, jeda: 20000, terakhir: 0 };
+     saat offline dicoba ulang dengan jeda 15 → 45 dtk. */
+  var koneksi = { status: null, alasan: null, jalan: false, timer: null, jeda: 15000, terakhir: 0 };
   function cobaServer() {
     if (!fetchAsli) return Promise.resolve(false);
     var kendali = typeof AbortController === 'function' ? new AbortController() : null;
@@ -197,7 +204,13 @@
     return el;
   }
   function setKoneksi(status, alasan) {
+    var sebelum = koneksi.status;
     koneksi.status = status; koneksi.alasan = alasan || null;
+    /* Server terjangkau lagi saat aplikasi masih di mode offline (tanpa event 'online'
+       dari peramban, mis. Wi-Fi tanpa internet yang pulih): minta verifikasi ulang. */
+    if (sebelum === 'offline' && status === 'online' && PSGOffline.aktif) {
+      setTimeout(function () { window.dispatchEvent(new Event('psg:koneksi-pulih')); }, 0);
+    }
     var el = pasangKapsul(); if (!el) return;
     el.dataset.status = status;
     el.textContent = status === 'online' ? 'Online' : 'Offline';
@@ -208,7 +221,7 @@
     if (koneksi.timer) { clearTimeout(koneksi.timer); koneksi.timer = null; }
     if (koneksi.status !== 'offline' || navigator.onLine === false) return;
     koneksi.timer = setTimeout(function () { periksaKoneksi(true); }, koneksi.jeda);
-    koneksi.jeda = Math.min(koneksi.jeda * 2, 120000);
+    koneksi.jeda = Math.min(koneksi.jeda * 2, 45000);
   }
   function periksaKoneksi(paksa) {
     if (koneksi.jalan) return Promise.resolve(koneksi.status);
@@ -223,7 +236,7 @@
     });
     return hasil.then(function (h) {
       koneksi.jalan = false;
-      if (h.ok) { koneksi.jeda = 20000; setKoneksi('online'); } else setKoneksi('offline', h.alasan);
+      if (h.ok) { koneksi.jeda = 15000; setKoneksi('online'); } else setKoneksi('offline', h.alasan);
       jadwalUlang();
       return koneksi.status;
     }, function () { koneksi.jalan = false; return koneksi.status; });
@@ -231,13 +244,13 @@
   /* Hasil pemeriksaan server dari modul lain (mis. verifikasi profil saat boot). */
   PSGOffline.laporKoneksi = function (ok, alasan) {
     koneksi.terakhir = Date.now(); koneksi.dilaporkan = true;
-    if (ok) { koneksi.jeda = 20000; setKoneksi('online'); } else setKoneksi('offline', alasan || 'server');
+    if (ok) { koneksi.jeda = 15000; setKoneksi('online'); } else setKoneksi('offline', alasan || 'server');
     jadwalUlang();
   };
   PSGOffline.koneksi = function () { return { status: koneksi.status, alasan: koneksi.alasan }; };
   PSGOffline.periksaKoneksi = function () { return periksaKoneksi(true); };
   window.addEventListener('offline', function () { setKoneksi('offline', 'internet'); jadwalUlang(); });
-  window.addEventListener('online', function () { koneksi.jeda = 20000; periksaKoneksi(true); });
+  window.addEventListener('online', function () { koneksi.jeda = 15000; periksaKoneksi(true); });
   document.addEventListener('visibilitychange', function () { if (!document.hidden) setTimeout(function () { periksaKoneksi(false); }, 1500); }); /* jeda: beri kesempatan verifikasi profil melapor lebih dulu */
   window.addEventListener('pageshow', function (e) { if (e.persisted) periksaKoneksi(false); });
   /* Awal: bila peramban melaporkan offline langsung Offline; bila tidak, tunggu hasil

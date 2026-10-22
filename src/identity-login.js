@@ -16,6 +16,20 @@
   var bootSedangBerjalan = false;
   var penggunaLokal = null;   // pengguna dari sesi lokal (bukan bukti autentikasi server)
 
+  /* Batas tunggu jaringan di jalur boot. Tanpa ini, permintaan yang menggantung (Wi-Fi
+     tersambung tanpa internet, VPN mati) menahan layar "Memulihkan sesi…": gotrue-js
+     tidak memberi batas pada GET /user, dan refresh token baru menyerah sesudah 30 dtk. */
+  var WAKTU_PROBE_BOOT = 3000;   // keterjangkauan server saat boot (paralel dengan getUser)
+  var BATAS_GETUSER = 12000;     // getUser() (GET /user atau refresh token)
+  var BATAS_LOGOUT_BOOT = 4000;  // penyelesaian logout tertunda
+  var probeBoot = null;          // {p, t}: hasil probe boot, dipakai ulang oleh profilServer()
+  function batasi(janji, ms) {
+    return new Promise(function (selesai, gagal) {
+      var t = setTimeout(function () { gagal({ habis: true }); }, ms);
+      Promise.resolve(janji).then(function (v) { clearTimeout(t); selesai(v); }, function (e) { clearTimeout(t); gagal(e); });
+    });
+  }
+
   function lib() {
     var x = window.PSGNetlifyIdentity;
     return x && typeof x.login === 'function' && typeof x.getUser === 'function'
@@ -128,6 +142,14 @@
   }
 
   async function profilServer() {
+    /* Probe boot (GET /api/psg/me yang sama) dipakai ulang sekali: tidak ada permintaan ganda. */
+    var pb = probeBoot; probeBoot = null;
+    if (pb && Date.now() - pb.t < 15000) {
+      var h = await pb.p;
+      if (h && h.user) { laporKoneksi(true); return h.user; }
+      if (h === 'jaringan') { laporKoneksi(false, navigator.onLine === false ? 'internet' : 'server'); throw galatJaringan('server_unreachable'); }
+      if (h === 'ditolak') { laporKoneksi(true); return null; }
+    }
     var kendali = typeof AbortController === 'function' ? new AbortController() : null;
     var timer = kendali ? setTimeout(function () { kendali.abort(); }, 10000) : null;
     var response;
@@ -174,7 +196,10 @@
   async function validasiSesiAda(identityUser) {
     var api = lib();
     if (!api) return null;
-    if (!identityUser) identityUser = await api.getUser();
+    if (!identityUser) {
+      try { identityUser = await batasi(api.getUser(), BATAS_GETUSER); }
+      catch (e) { if (e && e.habis) throw galatJaringan('getuser_timeout'); throw e; }
+    }
     if (!identityUser) return null;
     penggunaLokal = identityUser;
 
@@ -429,6 +454,7 @@
     finally { sedangMemulihkan = false; }
   }
   window.addEventListener('online', function () { pulihkanBerkala(true); });
+  window.addEventListener('psg:koneksi-pulih', function () { pulihkanBerkala(true); });
   window.addEventListener('pageshow', function (e) { if (e.persisted) pulihkanBerkala(false); });
   document.addEventListener('visibilitychange', function () { if (!document.hidden) pulihkanBerkala(false); });
 
@@ -461,10 +487,11 @@
        selesaikan sekarang dan jangan pernah memulihkan sesi itu. */
     var tandaKeluar = window.PSGOffline && window.PSGOffline.bacaTandaKeluar();
     if (tandaKeluar) {
-      try { await api.logout(); } catch (_) {}
+      var logoutHabis = false;
+      try { await batasi(api.logout(), BATAS_LOGOUT_BOOT); } catch (e) { logoutHabis = !!(e && e.habis); }
       if (window.PSGOffline) { window.PSGOffline.hapusSesiLokal(); window.PSGOffline.hapus(); window.PSGOffline.bersihTandaKeluar(); }
       tampilkanStatusPemulihan(gate, 'login');
-      if (tandaKeluar.belumTerkonfirmasi) {
+      if (tandaKeluar.belumTerkonfirmasi || logoutHabis) {
         setError(document.getElementById('psgIdentityServerError'), 'Kamu keluar saat offline. Sesi di perangkat ini sudah dihapus, tetapi pencabutan di server belum dapat dikonfirmasi.');
       }
       return;
@@ -472,14 +499,34 @@
     tampilkanStatusPemulihan(gate, 'restoring', 'Memulihkan sesi dan memeriksa profil PSG…');
     var profile;
     try {
-      try { identityUser = await api.getUser(); } catch (_) { identityUser = null; }
-      /* Tanpa sesi lokal dan tanpa jaringan: catatan verifikasi yang masih berlaku
-         tetap membuka kalkulator offline (bukan login ulang yang mustahil dilakukan). */
-      if (!identityUser && window.PSGOffline && window.PSGOffline.periksa().ok) {
-        var hasil = navigator.onLine === false ? 'jaringan' : await window.PSGOffline.verifikasiOnline();
-        if (hasil === 'jaringan' && bukaOffline(gate)) return;
+      /* Keterjangkauan server diperiksa PARALEL dengan getUser(). Bila server jelas tidak
+         terjangkau (putus, atau tidak menjawab dalam WAKTU_PROBE_BOOT) dan akses offline
+         sah, kalkulator dibuka tanpa menunggu getUser()/refresh. Penolakan server (401)
+         tidak termasuk "tidak terjangkau": jalur normal tetap berjalan. */
+      var po = window.PSGOffline;
+      var probe = po ? po.verifikasiOnline(WAKTU_PROBE_BOOT) : Promise.resolve('jaringan');
+      probeBoot = { p: probe, t: Date.now() };
+      var getUserP = batasi(api.getUser(), BATAS_GETUSER).then(
+        function (u) { return { u: u }; },
+        function (e) { return { u: null, habis: !!(e && e.habis) }; });
+      var lebihDulu = await Promise.race([getUserP, probe.then(function (h) { return h === 'jaringan' ? { jaringan: true } : new Promise(function () {}); })]);
+      if (lebihDulu.jaringan) {
+        probeBoot = null;
+        laporKoneksi(false, navigator.onLine === false ? 'internet' : 'server');
+        var idLokal = po && po.idSesiLokal();
+        penggunaLokal = idLokal ? { id: idLokal } : null;
+        if (bukaOffline(gate)) return;
+        tampilkanStatusPemulihan(gate, 'error', pesanOfflineTertutup());
+        return;
       }
-      profile = await validasiSesiAda(identityUser);
+      if (lebihDulu.habis) throw galatJaringan('getuser_timeout');
+      identityUser = lebihDulu.u;
+      /* Tanpa sesi lokal: probe menentukan (tidak terjangkau + catatan sah -> offline). */
+      if (!identityUser) {
+        var hp = await probe;
+        if (hp === 'jaringan' && bukaOffline(gate)) return;
+      }
+      profile = identityUser ? await validasiSesiAda(identityUser) : null;
     } catch (err) {
       if (err && err.jaringan && bukaOffline(gate)) return;
       tampilkanStatusPemulihan(gate, 'error', err && err.jaringan ? pesanOfflineTertutup() : 'Sesi belum dapat diverifikasi. Periksa koneksi, lalu coba lagi.');

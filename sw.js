@@ -15,7 +15,7 @@
    - Hanya jawaban yang benar-benar berhasil (status 200) yang disimpan,
      sehingga halaman error tidak pernah ikut tersimpan. */
 
-const VERSI = 'insurance-hub-v117.1.35';
+const VERSI = 'insurance-hub-v117.1.36';
 
 /* Semua berkas inti ikut disimpan sejak pemasangan, supaya aplikasi tetap
    utuh walaupun kunjungan pertama terputus di tengah jalan.
@@ -326,15 +326,43 @@ self.addEventListener('activate', e => {
 });
 
 const JEDA_JARINGAN_MS = 4000;
+/* Bila jaringan baru saja terbukti tidak menjawab (menggantung, mis. Wi-Fi tersambung
+   tanpa internet), permintaan berikutnya hanya menunggu JEDA_JARINGAN_BURUK_MS sebelum
+   memakai cache. Tanda disimpan di cache sehingga berlaku juga pada pembukaan berikutnya
+   (service worker dapat dimatikan peramban di antara dua pembukaan). Kedaluwarsa sendiri. */
+const JEDA_JARINGAN_BURUK_MS = 400;
+const MASA_JARINGAN_BURUK_MS = 5 * 60 * 1000;
+const KUNCI_JARINGAN = './__jaringan-buruk';
+let burukSejak = 0, burukDibaca = false;
+
+function jaringanBuruk() {
+  if (Date.now() - burukSejak < MASA_JARINGAN_BURUK_MS) return Promise.resolve(true);
+  if (burukDibaca) return Promise.resolve(false);
+  burukDibaca = true;
+  return caches.match(KUNCI_JARINGAN)
+    .then(r => r ? r.json() : null)
+    .then(d => { if (d && typeof d.t === 'number') burukSejak = Math.max(burukSejak, d.t); return Date.now() - burukSejak < MASA_JARINGAN_BURUK_MS; })
+    .catch(() => false);
+}
+function tandaiBuruk() {
+  burukSejak = Date.now(); burukDibaca = true;
+  caches.open(VERSI).then(c => c.put(KUNCI_JARINGAN, new Response(JSON.stringify({ t: burukSejak }), { headers: { 'content-type': 'application/json' } }))).catch(() => {});
+}
+function tandaiBaik() {
+  if (!burukSejak) return;
+  burukSejak = 0;
+  caches.open(VERSI).then(c => c.delete(KUNCI_JARINGAN)).catch(() => {});
+}
 
 function jaringanDenganBatas(req) {
-  return new Promise((selesai, gagal) => {
+  return jaringanBuruk().then(buruk => new Promise((selesai, gagal) => {
     let sudah = false;
     const timer = setTimeout(() => {
-      caches.match(req).then(r => { if (r && !sudah) { sudah = true; selesai(r); } });
-    }, JEDA_JARINGAN_MS);
+      caches.match(req).then(r => { if (r && !sudah) { sudah = true; tandaiBuruk(); selesai(r); } });
+    }, buruk ? JEDA_JARINGAN_BURUK_MS : JEDA_JARINGAN_MS);
     fetch(req).then(res => {
       clearTimeout(timer);
+      if (!sudah) tandaiBaik();
       if (bolehDisimpan(res)) {
         const salinan = res.clone();
         caches.open(VERSI).then(c => c.put(req, salinan));
@@ -344,7 +372,7 @@ function jaringanDenganBatas(req) {
       clearTimeout(timer);
       if (!sudah) { sudah = true; gagal(err); }
     });
-  });
+  }));
 }
 
 function bypassCache(url) {
