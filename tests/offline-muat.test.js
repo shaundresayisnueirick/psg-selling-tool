@@ -134,7 +134,7 @@ const putus = async (ctx, w, ya) => { await ctx.setOffline(!!ya); w.tolakIdentit
 /* Pengukuran waktu pembukaan dashboard. Keluaran: JSON per skenario. */
 const SKENARIO = (opt('--skenario') || '').split(',').filter(Boolean);
 const mau = (k) => !SKENARIO.length || SKENARIO.includes(k);
-const BATAS_MS = Number(opt('--batas') || 240000);
+const BATAS_MS = Number(opt('--batas') || 60000);
 const hasil = [];
 async function ukur(nama, ctx, w, { gantung = false, putusCepat = false, pasca = 0 } = {}, dasar) {
   // atur jaringan
@@ -189,6 +189,7 @@ async function main() {
     if (mau('putus-valid')) { const { ctx, w, base } = await siapkan(br, { umur: 0, expDtk: 3600 }); await ukur('2b-offline putus cepat, token VALID 1 jam', ctx, w, { putusCepat: true }, base); await ctx.close(); }
     if (mau('gantung')) { const { ctx, w, base } = await siapkan(br); await ukur('3-offline GANTUNG (Wi-Fi tanpa internet, onLine=true), token kedaluwarsa', ctx, w, { gantung: true }, base); await ctx.close(); }
     if (mau('gantung-valid')) { const { ctx, w, base } = await siapkan(br, { umur: 0, expDtk: 3600 }); await ukur('3b-offline GANTUNG, token VALID 1 jam', ctx, w, { gantung: true }, base); await ctx.close(); }
+    if (mau('gantung-ulang')) { const { ctx, w, base } = await siapkan(br, { umur: 0, expDtk: 3600 }); await ukur('3c-GANTUNG pembukaan pertama', ctx, w, { gantung: true }, base); await ukur('3d-GANTUNG pembukaan kedua (tanda jaringan buruk SW aktif)', ctx, w, { gantung: true }, base); await ctx.close(); }
     if (mau('logout-gantung')) { const { ctx, w, base } = await siapkan(br, { umur: 0, expDtk: 3600, sebelumTutup: () => { localStorage.removeItem('psg.offline.v1'); localStorage.setItem('psg.keluar.v1', JSON.stringify({ t: Date.now(), belumTerkonfirmasi: true })); } }); await ukur('4-offline GANTUNG setelah logout (tanda logout tertunda)', ctx, w, { gantung: true }, base); await ctx.close(); }
     if (mau('logout-putus')) { const { ctx, w, base } = await siapkan(br, { umur: 0, expDtk: 3600, sebelumTutup: () => { localStorage.removeItem('psg.offline.v1'); localStorage.setItem('psg.keluar.v1', JSON.stringify({ t: Date.now(), belumTerkonfirmasi: true })); } }); await ukur('4b-offline putus cepat setelah logout', ctx, w, { putusCepat: true }, base); await ctx.close(); }
     if (mau('kedaluwarsa')) { const { ctx, w, base } = await siapkan(br, { umur: 0, expDtk: 3600, sebelumTutup: () => { const r = JSON.parse(localStorage.getItem('psg.offline.v1')); r.t -= 15 * 864e5; r.lihat = r.t; localStorage.setItem('psg.offline.v1', JSON.stringify(r)); } }); await ukur('5-offline GANTUNG, masa 14 hari habis', ctx, w, { gantung: true }, base); await ctx.close(); }
@@ -199,7 +200,26 @@ async function main() {
       const { ctx, w, base } = await siapkan(br, { umur: 0, expDtk: 3600, ctx: { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true } });
       await ukur('8-HP (emulasi) offline putus cepat', ctx, w, { putusCepat: true }, base); await ctx.close(); }
   } finally { await br.close(); for (const r of tertahan) try { r.destroy(); } catch (_) {} server.close(); }
+  /* Ambang batas (longgar, agar stabil di mesin lambat). Sebelum perbaikan: menggantung 52 dtk s/d >170 dtk. */
+  const aturan = {
+    '1-': (r) => r.dashboard && r.ms < 5000,
+    '2-': (r) => r.dashboard && r.mode === 'offline' && r.ms < 4000,
+    '2b': (r) => r.dashboard && r.mode === 'offline' && r.ms < 4000,
+    '8-': (r) => r.dashboard && r.mode === 'offline' && r.ms < 4000,
+    '3-': (r) => r.dashboard && r.mode === 'offline' && r.ms < 14000,
+    '3b': (r) => r.dashboard && r.mode === 'offline' && r.ms < 14000,
+    '3c': (r) => r.dashboard && r.mode === 'offline' && r.ms < 14000,
+    '3d': (r) => r.dashboard && r.mode === 'offline' && r.ms < 9000,
+    '4-': (r) => !r.dashboard && r.akhir === 'form-login' && r.ms < 12000,
+    '4b': (r) => !r.dashboard && r.akhir === 'form-login' && r.ms < 4000,
+    '5-': (r) => !r.dashboard && /^pesan-tertutup: Masa akses offline/.test(r.akhir) && r.ms < 14000,
+    '5b': (r) => !r.dashboard && /^pesan-tertutup: Masa akses offline/.test(r.akhir) && r.ms < 4000,
+    '6-': (r) => !r.dashboard && /^pesan-tertutup/.test(r.akhir) && r.ms < 14000,
+    '7-': (r) => r.dashboard && r.mode === 'offline' && r.ms < 14000 && r.pulihMs !== null && r.pulihMs < 60000,
+  };
+  for (const r of hasil) { const f = aturan[r.skenario.slice(0, 2)]; if (f) cek(f(r), r.skenario + ' — ' + (r.ms / 1000).toFixed(1) + ' dtk', f(r) ? undefined : r); }
+  console.log('\nHASIL: ' + (gagal ? 'GAGAL (' + gagal + ' dari ' + jumlah + ')' : 'LULUS (' + jumlah + ' pemeriksaan)'));
   console.log('\nRINGKASAN'); for (const r of hasil) console.log((r.ms / 1000).toFixed(1).padStart(7) + ' dtk  ' + (r.dashboard ? 'dashboard' : 'TIDAK BUKA') + '  ' + r.skenario + '  [' + r.mode + ', minta=' + r.minta + ']');
-  process.exit(0);
+  process.exit(gagal ? 1 : 0);
 }
 main().catch((e) => { console.error(e); process.exit(1); });

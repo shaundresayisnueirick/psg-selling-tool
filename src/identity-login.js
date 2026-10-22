@@ -19,7 +19,7 @@
   /* Batas tunggu jaringan di jalur boot. Tanpa ini, permintaan yang menggantung (Wi-Fi
      tersambung tanpa internet, VPN mati) menahan layar "Memulihkan sesi…": gotrue-js
      tidak memberi batas pada GET /user, dan refresh token baru menyerah sesudah 30 dtk. */
-  var WAKTU_PROBE_BOOT = 3000;   // keterjangkauan server saat boot (paralel dengan getUser)
+  var WAKTU_PROBE_BOOT = 2500;   // keterjangkauan server saat boot (paralel dengan getUser)
   var BATAS_GETUSER = 12000;     // getUser() (GET /user atau refresh token)
   var BATAS_LOGOUT_BOOT = 4000;  // penyelesaian logout tertunda
   var probeBoot = null;          // {p, t}: hasil probe boot, dipakai ulang oleh profilServer()
@@ -142,13 +142,15 @@
   }
 
   async function profilServer() {
-    /* Probe boot (GET /api/psg/me yang sama) dipakai ulang sekali: tidak ada permintaan ganda. */
+    /* Probe boot (GET /api/psg/me yang sama) dipakai ulang sekali bila sukses atau jaringan gagal. */
     var pb = probeBoot; probeBoot = null;
     if (pb && Date.now() - pb.t < 15000) {
       var h = await pb.p;
       if (h && h.user) { laporKoneksi(true); return h.user; }
       if (h === 'jaringan') { laporKoneksi(false, navigator.onLine === false ? 'internet' : 'server'); throw galatJaringan('server_unreachable'); }
-      if (h === 'ditolak') { laporKoneksi(true); return null; }
+      /* 401 sengaja TIDAK dipakai ulang: cookie bisa baru diperbarui getUser() sesudah probe
+         dikirim, jadi penolakan harus diperiksa ulang dengan permintaan baru. */
+      if (h === 'ditolak') laporKoneksi(true);
     }
     var kendali = typeof AbortController === 'function' ? new AbortController() : null;
     var timer = kendali ? setTimeout(function () { kendali.abort(); }, 10000) : null;

@@ -80,6 +80,30 @@ event `online`/`offline`, kembali dari background, dan saat offline dengan jeda
 20→120 dtk; tidak ada polling saat online. Indikator hanya status koneksi: tidak
 menghapus sesi/catatan dan tidak memberi hak akses.
 
+## Waktu buka offline saat jaringan menggantung (laptop/desktop)
+
+Gejala: layar "Memulihkan sesi dan memeriksa profil PSG…" bertahan 1–2 menit di laptop
+yang tersambung ke Wi-Fi/VPN tanpa internet (`navigator.onLine` tetap `true`, permintaan
+tidak ditolak melainkan menggantung). Di HP mode pesawat permintaan gagal seketika sehingga
+tidak terasa.
+
+Akar masalah (terukur dengan `tests/offline-muat.test.js`, server tiruan yang tidak menjawab):
+1. `getUser()` (gotrue-js) memanggil `GET /.netlify/identity/user` tanpa batas waktu; bila token
+   kedaluwarsa, refresh token baru menyerah sesudah 30 dtk. Boot menunggu itu lebih dulu.
+2. Dilanjutkan `GET /api/psg/me` dengan batas 10 dtk, lalu probe koneksi (6 dtk x 2).
+3. Service Worker menunggu 4 dtk per tahap (dokumen, lalu setiap gelombang berkas) sebelum
+   memakai cache.
+4. Saat server pulih tanpa event `online` peramban, tidak ada yang memicu verifikasi ulang.
+
+Perbaikan: probe keterjangkauan server (2,5 dtk) berjalan paralel dengan `getUser()`; bila server
+jelas tidak terjangkau dan akses offline sah, kalkulator dibuka tanpa menunggu `getUser()`.
+`getUser()`, logout tertunda, dan pemulihan dibatasi waktu. Hasil probe dipakai ulang oleh
+verifikasi profil bila sukses (tidak ada permintaan ganda); 401 selalu diperiksa ulang karena
+cookie dapat diperbarui `getUser()` sesudah probe dikirim. Service Worker menandai "jaringan
+buruk" selama 5 menit (disimpan di cache) sehingga permintaan berikutnya hanya menunggu 0,4 dtk.
+Saat indikator mendeteksi server terjangkau lagi, verifikasi ulang berjalan otomatis (jeda cek
+15 → 45 dtk). Aturan keamanan tidak berubah: 14 hari, logout memblokir, penolakan server menang.
+
 ## Pengumuman (ikon lonceng)
 
 Daftar ringkas (judul, kategori, tanggal) dan detail bergantian pada dialog yang
