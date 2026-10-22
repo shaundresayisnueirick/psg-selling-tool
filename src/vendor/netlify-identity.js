@@ -38,6 +38,7 @@ var PSGNetlifyIdentity = (() => {
     login: () => login,
     logout: () => logout,
     requestPasswordRecovery: () => requestPasswordRecovery,
+    refreshSession: () => refreshSession,
     updateUser: () => updateUser
   });
 
@@ -240,7 +241,10 @@ var PSGNetlifyIdentity = (() => {
         return this.token.access_token;
       }).catch((error) => {
         delete refreshPromises[refresh_token];
-        this.clearSession();
+        /* PSG-PATCH:refresh-tidak-hapus-sesi-karena-jaringan — sesi hanya dihapus
+           bila server menolak refresh token; jaringan/timeout tidak menghapusnya. */
+        const status = error && error.status;
+        if (status === 400 || status === 401 || status === 403) this.clearSession();
         throw error;
       });
       refreshPromises[refresh_token] = promise;
@@ -895,6 +899,15 @@ var PSGNetlifyIdentity = (() => {
     if (!currentUser2) return null;
     try {
       const freshUser = await currentUser2.getUserData();
+      /* PSG-PATCH:getuser-tulis-ulang-cookie — pulihkan cookie nf_jwt/nf_rf dan
+         timer refresh dari token yang baru saja terbukti valid/diperbarui. */
+      try {
+        const jwtBaru = await currentUser2.jwt();
+        const detail = currentUser2.tokenDetails();
+        setBrowserAuthCookies(jwtBaru, detail == null ? void 0 : detail.refresh_token);
+        startTokenRefresh();
+      } catch {
+      }
       return toUser(freshUser);
     } catch {
       return toUser(currentUser2);
@@ -913,6 +926,22 @@ var PSGNetlifyIdentity = (() => {
       stopTokenRefresh();
       deleteBrowserAuthCookies();
       emitAuthEvent(AUTH_EVENTS.LOGOUT, null);
+    }
+  };
+  /* PSG-PATCH:refreshsession */
+  var refreshSession = async (paksa) => {
+    const client = getGoTrueClient();
+    const user = client == null ? null : client.currentUser();
+    if (!user) return { ok: false, alasan: "tanpa-sesi" };
+    try {
+      const jwtBaru = await user.jwt(!!paksa);
+      const detail = user.tokenDetails();
+      setBrowserAuthCookies(jwtBaru, detail == null ? void 0 : detail.refresh_token);
+      startTokenRefresh();
+      return { ok: true, alasan: "" };
+    } catch {
+      const masihAda = client.currentUser();
+      return { ok: false, alasan: masihAda ? "jaringan" : "ditolak" };
     }
   };
   var requestPasswordRecovery = async (email) => {

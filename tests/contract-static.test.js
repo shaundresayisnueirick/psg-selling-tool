@@ -51,8 +51,8 @@ const INLINE_DIIZINKAN = {
 const JS_DIIZINKAN = {
   'src/access-gate.js': [{
     dari: '04535f79ce4ace7869df177ce7b1e3b989765f90a8b612839ca2ee7c545ef921',
-    ke: '3319a15ad1f7394997be0cddde574dcc12f3aa57826adebecc10f0df347f4f70',
-    alasan: 'Login kode akses lama dicabut atas permintaan pemilik (berlaku 15 Oktober 2026, PR #35): hash kode FC/BM/BD, formulir kode, dan buka-kunci lewat penanda perangkat (insuranceHub.access.v3 / access.remember.v3) dihapus; penanda itu dicabut saat dimuat tanpa menghapus data kerja. Layar hanya dibuka sesi Identity yang diakui server: index.html lewat identity-login.js, halaman ringkasan lewat GET /api/psg/me di gate ini. Logout, sambutan, dan bersihkanSesi tidak berubah. Termasuk perubahan sebelumnya di main (foto per akun Identity pada sambutan).',
+    ke: '7ff8509d2006cf8238fdd96cf1e1497df28efb1f21ef36ae463ee51b7b2bb68f',
+    alasan: 'Login kode akses lama dicabut atas permintaan pemilik (berlaku 15 Oktober 2026, PR #35): hash kode FC/BM/BD, formulir kode, dan buka-kunci lewat penanda perangkat (insuranceHub.access.v3 / access.remember.v3) dihapus; penanda itu dicabut saat dimuat tanpa menghapus data kerja. Layar hanya dibuka sesi Identity yang diakui server: index.html lewat identity-login.js, halaman ringkasan lewat GET /api/psg/me di gate ini. Logout, sambutan, dan bersihkanSesi tidak berubah. Termasuk perubahan sebelumnya di main (foto per akun Identity pada sambutan). Sesudah hash 3319a15a…: akses offline terbatas 14 hari (src/psg-offline.js): halaman ringkasan memverifikasi /api/psg/me dengan fetch asli, galat jaringan/5xx tidak mengunci bila catatan verifikasi online masih berlaku, penolakan 401 tetap mengunci dan menghapus catatan; logout mencabut catatan offline dan menandai logout yang belum diselesaikan Identity. Tidak ada kode akses lama.',
   }],
   'src/preview-cetak.js': [{
     dari: 'abe686a05ed724852a36ff89e964940514f9f719686b4e0fcd09e21fc3c92d29',

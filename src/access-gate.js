@@ -52,6 +52,13 @@
   }
 
   function logout(){
+    /* Hak akses offline dicabut; logout yang belum diselesaikan Identity (halaman
+       ringkasan tidak memuat Identity, atau logout offline) ditandai supaya
+       index.html menyelesaikannya dan tidak memulihkan sesi. */
+    if(window.PSGOffline){
+      window.PSGOffline.hapus();
+      if(!window.PSGNetlifyIdentity && !window.PSGOffline.bacaTandaKeluar()) window.PSGOffline.tandaiKeluar(false);
+    }
     cabutOtorisasi();
     bersihkanSesi();
     // Return to the main entry point; the access gate will appear again.
@@ -242,22 +249,32 @@
 
   function verifikasiSesiServer(){
     statusGate('Memeriksa sesi login…');
-    fetch('/api/psg/me',{method:'GET',credentials:'same-origin',cache:'no-store',
+    var po=window.PSGOffline;
+    var ambil=(po&&po.fetchAsli)||fetch;
+    /* Galat jaringan/5xx ≠ penolakan: hanya penolakan yang mengunci. Saat server
+       tidak terjangkau, catatan verifikasi online (<= 14 hari) boleh membuka
+       kalkulator offline; catatan itu bukan bukti autentikasi. */
+    var offlineAtauTutup=function(){
+      if(po && po.bukaJikaBerlaku()){ reveal(); return; }
+      statusGate(po ? po.pesanAlasan(po.periksa().alasan) : 'Sesi belum dapat diverifikasi. Periksa koneksi, lalu muat ulang halaman.', true);
+    };
+    ambil('/api/psg/me',{method:'GET',credentials:'same-origin',cache:'no-store',
       headers:{'Accept':'application/json'}})
       .then(function(r){
         return r.json().catch(function(){ return {}; })
-          .then(function(d){ return { ok:r.ok, data:d }; });
+          .then(function(d){ return { ok:r.ok, status:r.status, data:d }; });
       })
       .then(function(x){
         if(x.ok && x.data && x.data.authenticated && sesiServerDiizinkan(x.data.user)){
+          if(po){ po.keluar(); po.catat(x.data.user); }
           reveal();
           return;
         }
+        if(!x.ok && x.status!==401){ offlineAtauTutup(); return; }
+        if(po) po.hapus();
         statusGate('Sesi login tidak ditemukan atau sudah berakhir. Masuk kembali dengan email akun PSG.', true);
       })
-      .catch(function(){
-        statusGate('Sesi belum dapat diverifikasi. Periksa koneksi, lalu muat ulang halaman.', true);
-      });
+      .catch(offlineAtauTutup);
   }
 
   function identitasTersimpan(){
@@ -282,6 +299,15 @@
 
   window.addEventListener('psg:identity-ready',function(){
     if(document.getElementById('insuranceWelcome')) tampilkanSambutan();
+  });
+  /* Halaman ringkasan dalam mode offline: saat koneksi kembali, server memutuskan. */
+  window.addEventListener('online',function(){
+    var po=window.PSGOffline;
+    if(!po||!po.aktif||typeof window.InsuranceHubRefreshIdentityProfile==='function') return;
+    po.verifikasiOnline().then(function(h){
+      if(h&&h.user){ po.keluar(); po.catat(h.user); }
+      else if(h==='ditolak'){ po.hapus(); window.location.reload(); }
+    });
   });
 
   /* Selalu terkunci saat dimuat. Penanda kode akses lama yang masih

@@ -15,7 +15,7 @@
    - Hanya jawaban yang benar-benar berhasil (status 200) yang disimpan,
      sehingga halaman error tidak pernah ikut tersimpan. */
 
-const VERSI = 'insurance-hub-v117.1.33';
+const VERSI = 'insurance-hub-v117.1.35';
 
 /* Semua berkas inti ikut disimpan sejak pemasangan, supaya aplikasi tetap
    utuh walaupun kunjungan pertama terputus di tengah jalan.
@@ -51,9 +51,15 @@ const BERKAS = [
   './src/psg-informasi.css',
   './src/identity-login.css',
   './src/identity-login.js',
+  './src/agent-management.css',
   './src/agent-management.css?v=21.13',
+  './src/sales-idea-video.js?v=123',
   './src/agent-management.js?v=21.13',
+  './src/psg-offline.js',
   './src/access-gate.js',
+  './src/vendor/netlify-identity.js',
+  './src/identity-callback.js',
+  './src/identity-callback.css',
   './src/theme-switcher.js',
   './src/banding-genwealth.js',
   './src/kartu-konsultan.js',
@@ -277,13 +283,38 @@ const BERKAS = [
   './assets/narasi/kredit/kredit-S10-02.mp3'
 ];
 
+/* Status kesiapan offline disimpan di cache itu sendiri (./__status-offline)
+   supaya halaman dapat membacanya kapan saja: {versi, total, gagal:[url], waktu}. */
+const KUNCI_STATUS = './__status-offline';
+
+async function pasangBerkas(c, daftar) {
+  const gagal = [];
+  // Satu berkas yang gagal tidak boleh menggagalkan seluruh pemasangan.
+  await Promise.all(daftar.map(u => c.add(u).catch(() => { gagal.push(u); })));
+  return gagal;
+}
+
+async function tulisStatus(c, gagal) {
+  const isi = JSON.stringify({ versi: VERSI, total: BERKAS.length, gagal, waktu: Date.now() });
+  await c.put(KUNCI_STATUS, new Response(isi, { headers: { 'Content-Type': 'application/json' } }));
+}
+
 self.addEventListener('install', e => {
   e.waitUntil(
     caches.open(VERSI)
-      // Satu berkas yang gagal tidak boleh menggagalkan seluruh pemasangan.
-      .then(c => Promise.all(BERKAS.map(u => c.add(u).catch(() => null))))
+      .then(async c => { await tulisStatus(c, await pasangBerkas(c, BERKAS)); })
       .then(() => self.skipWaiting())
   );
+});
+
+/* Halaman meminta melengkapi berkas yang gagal diunduh saat pemasangan. */
+self.addEventListener('message', e => {
+  if (!e.data || e.data.tipe !== 'lengkapi') return;
+  e.waitUntil(caches.open(VERSI).then(async c => {
+    const sisa = [];
+    for (const u of BERKAS) { if (!(await c.match(u))) sisa.push(u); }
+    await tulisStatus(c, sisa.length ? await pasangBerkas(c, sisa) : []);
+  }));
 });
 
 self.addEventListener('activate', e => {
@@ -293,6 +324,28 @@ self.addEventListener('activate', e => {
       .then(() => self.clients.claim())
   );
 });
+
+const JEDA_JARINGAN_MS = 4000;
+
+function jaringanDenganBatas(req) {
+  return new Promise((selesai, gagal) => {
+    let sudah = false;
+    const timer = setTimeout(() => {
+      caches.match(req).then(r => { if (r && !sudah) { sudah = true; selesai(r); } });
+    }, JEDA_JARINGAN_MS);
+    fetch(req).then(res => {
+      clearTimeout(timer);
+      if (bolehDisimpan(res)) {
+        const salinan = res.clone();
+        caches.open(VERSI).then(c => c.put(req, salinan));
+      }
+      if (!sudah) { sudah = true; selesai(res); }
+    }, err => {
+      clearTimeout(timer);
+      if (!sudah) { sudah = true; gagal(err); }
+    });
+  });
+}
 
 function bypassCache(url) {
   const p = url.pathname;
@@ -323,16 +376,12 @@ self.addEventListener('fetch', e => {
   const kode = url.pathname.indexOf('/src/') !== -1;
 
   if (halaman || kode) {
-    // Jaringan dulu: versi baru langsung terpakai begitu diunggah.
+    // Jaringan dulu (versi baru langsung terpakai), tetapi bila jaringan tidak
+    // menjawab dalam JEDA_JARINGAN_MS dan salinan cache ada, pakai cache supaya
+    // sinyal lemah tidak membuat aplikasi menggantung. Jawaban yang datang
+    // belakangan tetap disimpan.
     e.respondWith(
-      fetch(req)
-        .then(res => {
-          if (bolehDisimpan(res)) {
-            const salinan = res.clone();
-            caches.open(VERSI).then(c => c.put(req, salinan));
-          }
-          return res;
-        })
+      jaringanDenganBatas(req)
         .catch(() => caches.match(req).then(r => {
           if (r) return r;
           /* Hanya permintaan halaman yang boleh jatuh ke index.html. Kalau

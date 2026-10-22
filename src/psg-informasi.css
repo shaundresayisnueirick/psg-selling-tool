@@ -15,9 +15,10 @@
 .psg-informasi-categories button{flex:none;min-height:36px;padding:0 13px;border:1px solid var(--border);border-radius:var(--r-pill);background:var(--surface-2);color:var(--text-2);font:inherit;font-size:13px;font-weight:650;cursor:pointer}
 .psg-informasi-categories button[aria-pressed="true"]{border-color:var(--brand-line);background:var(--brand-soft);color:var(--brand)}
 .psg-informasi-status{min-height:20px;margin:3px 0 12px;color:var(--text-2);font-size:13px}
-.psg-informasi-layout{display:grid;grid-template-columns:minmax(220px,.8fr) minmax(0,1.2fr);gap:16px;min-height:160px}
-.psg-informasi-list{display:grid;align-content:start;gap:8px;max-height:48dvh;overflow:auto}
-.psg-informasi-item{width:100%;padding:12px 13px;border:1px solid var(--border);border-radius:var(--r-md);background:var(--surface-2);color:var(--text);text-align:left;cursor:pointer}
+.psg-informasi-layout{display:grid;grid-template-columns:minmax(0,1fr);gap:16px;min-height:160px}
+.psg-informasi-list{display:grid;align-content:start;gap:8px;max-height:60dvh;overflow:auto}
+.psg-informasi-list[hidden],.psg-informasi-categories[hidden],.psg-informasi-detail[hidden]{display:none}
+.psg-informasi-item{position:relative;width:100%;padding:12px 38px 12px 13px;border:1px solid var(--border);border-radius:var(--r-md);background:var(--surface-2);color:var(--text);text-align:left;cursor:pointer}
 .psg-informasi-item[aria-current="true"]{border-color:var(--brand-line);box-shadow:0 0 0 2px var(--brand-soft)}
 .psg-informasi-item b,.psg-informasi-item span{display:block}.psg-informasi-item b{font-size:14px;line-height:1.35}.psg-informasi-item span{margin-top:5px;color:var(--text-3);font-size:12px}
 .psg-informasi-detail{padding:16px;border:1px solid var(--border);border-radius:var(--r-lg);background:var(--surface)}
@@ -31,4 +32,8 @@
 .psg-informasi-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.psg-informasi-admin-actions{display:flex;gap:8px}
 .pi-button{min-height:38px;padding:0 14px;border:1px solid var(--brand-line);border-radius:var(--r-pill);background:var(--brand);color:#fff;font:inherit;font-weight:700;cursor:pointer}.pi-button.pi-secondary{border-color:var(--border);background:var(--surface-2);color:var(--text)}
 .psg-informasi-attachments{display:grid;gap:6px}.psg-informasi-attachments a{color:var(--brand);font-size:13px}.psg-informasi-attachments button{margin-left:8px;border:0;background:none;color:var(--danger);cursor:pointer}
-@media(max-width:680px){.psg-informasi-bell{width:36px;height:36px}.psg-informasi-dialog{width:calc(100vw - 16px);max-height:calc(100dvh - 20px);border-radius:18px}.psg-informasi-panel{max-height:calc(100dvh - 20px);padding:16px}.psg-informasi-layout{grid-template-columns:1fr}.psg-informasi-list{max-height:25dvh}.psg-informasi-detail{min-height:80px}.psg-informasi-form-grid{grid-template-columns:1fr}}
+@media(max-width:680px){.psg-informasi-bell{width:36px;height:36px}.psg-informasi-dialog{width:calc(100vw - 16px);max-height:calc(100dvh - 20px);border-radius:18px}.psg-informasi-panel{max-height:calc(100dvh - 20px);padding:16px}.psg-informasi-layout{grid-template-columns:1fr}.psg-informasi-list{max-height:55dvh}.psg-informasi-detail{min-height:80px}.psg-informasi-form-grid{grid-template-columns:1fr}}
+
+.psg-informasi-item::after{content:"\203A";position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--text-3);font-size:22px;line-height:1}
+.psg-informasi-item:hover{border-color:var(--brand-line)}.psg-informasi-item:hover b{color:var(--brand);text-decoration:underline}
+.psg-informasi-back{margin:0 0 14px}
