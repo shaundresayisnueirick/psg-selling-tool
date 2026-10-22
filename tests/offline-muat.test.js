@@ -69,8 +69,8 @@ function dunia() {
       if (p === '/logout') { st.logoutN++; return route.fulfill({ status: 204, body: '' }); }
       return json(404, { msg: 'tidak ada' });
     });
-    await ctx.route('**/api/psg/me', async (route) => {
-      st.meN++;
+    await ctx.route('**/api/psg/me', async (route) => { try {
+      st.meN++; const tiba = Date.now();
       if (st.gantung) return new Promise(() => {});
       if (st.tundaMe) await new Promise((r) => setTimeout(r, st.tundaMe));
       if (st.tolakMe === 'jaringan') return route.abort('internetdisconnected');
@@ -79,11 +79,11 @@ function dunia() {
       const m = /(?:^|;\s*)nf_jwt=([^;]*)/.exec(cookie);
       let ok = false;
       if (m && st.tolakMe !== '401') {
-        try { const c = JSON.parse(Buffer.from(decodeURIComponent(m[1]).split('.')[1], 'base64url').toString()); ok = Date.now() - c.iat * 1000 <= UMUR_TOKEN_MS && c.exp * 1000 > Date.now(); } catch (_) {}
+        try { const c = JSON.parse(Buffer.from(decodeURIComponent(m[1]).split('.')[1], 'base64url').toString()); ok = tiba - c.iat * 1000 <= UMUR_TOKEN_MS && c.exp * 1000 > Date.now(); } catch (_) {}
       }
       return ok ? route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ authenticated: true, user: PROFIL }) })
         : route.fulfill({ status: 401, contentType: 'application/json', body: '{"authenticated":false,"error":"unauthenticated"}' });
-    });
+    } catch (_) { /* konteks sudah ditutup */ } });
     await ctx.route('**/api/psg/pribadi**', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '{"ok":true,"penyimpanan":"preview","pesan":null,"polis":[]}' }));
   };
   return st;
